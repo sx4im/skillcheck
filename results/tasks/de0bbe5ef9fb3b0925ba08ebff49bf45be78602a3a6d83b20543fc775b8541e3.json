@@ -1,0 +1,14 @@
+[
+  {
+    "id": "t001",
+    "prompt": "Create a Client Component at components/posts/PostForm.tsx that wraps a post creation form, uses useFormStatus to show a submitting loading state while the form action is pending.",
+    "criterionType": "rubric",
+    "criterion": "Pass if component has 'use client' directive, uses useFormStatus to render loading state during form submission."
+  },
+  {
+    "id": "t002",
+    "prompt": "Create an async Server Component at app/posts/[slug]/page.tsx that directly awaits a getPostBySlug(slug) database call to render post title and content, with no client-side data fetching logic.",
+    "criterionType": "rubric",
+    "criterion": "Pass if component is async, directly awaits data, has no 'use client' directive, no useEffect/useState for data fetching."
+  }
+]

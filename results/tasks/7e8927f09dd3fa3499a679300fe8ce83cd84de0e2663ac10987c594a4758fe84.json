@@ -1,0 +1,14 @@
+[
+  {
+    "id": "t001",
+    "prompt": "Build a small Client Component that uses useFormStatus to show a loading state on a contact form submit button, embedded in the Server Component contact page.",
+    "criterionType": "rubric",
+    "criterion": "Pass if the component has 'use client' directive, uses useFormStatus to conditionally render loading text, and is imported into the Server Component."
+  },
+  {
+    "id": "t002",
+    "prompt": "Build a Server Component for a blog post page that directly awaits a database call to fetch a post by slug, with no 'use client' directive or useEffect usage.",
+    "criterionType": "rubric",
+    "criterion": "Pass if the component has no 'use client' line, directly awaits async data, and uses no client-side state or effect hooks."
+  }
+]

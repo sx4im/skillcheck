@@ -1,0 +1,13 @@
+[nim] retry 1/5 after connection; waiting 805 ms
+[eval] run t001 trial 1/3 with_skill
+[eval] run t001 trial 1/3 no_skill
+[eval] run t001 trial 2/3 with_skill
+[eval] run t001 trial 2/3 no_skill
+[eval] run t001 trial 3/3 with_skill
+[eval] run t001 trial 3/3 no_skill
+[eval] grade t001 trial 1
+[nim] retry 1/5 after connection; waiting 584 ms
+[nim] retry 2/5 after connection; waiting 1150 ms
+[nim] retry 3/5 after connection; waiting 2364 ms
+[nim] retry 4/5 after connection; waiting 4062 ms
+NVIDIA NIM response did not include text content

@@ -270,3 +270,65 @@
   - `npm test`: passed, 1 test file, 2 tests.
   - `npm audit`: passed, 0 vulnerabilities.
   - `npm pack --dry-run`: passed, 22 files, package size 9.3 kB, unpacked size 32.6 kB.
+
+### M1 - Initial Implementation Smoke
+
+- Implemented:
+  - Normalizer for `SKILL.md`, `AGENTS.md`, and `.cursorrules`.
+  - Domain-only task generator API.
+  - A/B runner with `K` trials.
+  - Blind shuffled grader with JSON-object mode.
+  - On-disk JSON cache under `.cache/skillcheck`.
+  - JSON result output.
+  - `skillcheck eval` command.
+- Local verification:
+  - `npm run typecheck`: passed.
+  - `npm test`: passed, 2 test files, 5 tests.
+- Smoke eval:
+  - Command: `./node_modules/.bin/tsx packages/cli/bin/skillcheck.ts eval /tmp/skillcheck-smoke-skill --tasks 1 --trials 3 --output results/m1/smoke-eval-4.json`
+  - Exit code: 0.
+  - Runner: `mistralai/mistral-small-4-119b-2603`.
+  - Generator: `stepfun-ai/step-3.7-flash`.
+  - Grader: `stepfun-ai/step-3.7-flash`.
+  - Tasks: 1.
+  - Trials: 3.
+  - Effect: `0 pp`.
+  - CI: `[0, 0]`.
+  - Verdict: `placebo`.
+- Gate result:
+  - Smoke only, not the M1 gate. M1 still requires eval on 5 real `awesome-claude-md` skills and rerun stability within CIs.
+
+### M1 - Gate
+
+- Corpus source:
+  - Requested source: `awesome-claude-md`.
+  - `sx4im/awesome-claude-md` clone attempt failed with GitHub 404/auth.
+  - Used accessible public repo: `jnMetaCode/awesome-claude-md`.
+  - Commit: `fe38fcd8f245460b989879c9155a16404e77cffa`.
+- M1 gate command shape:
+  - `skillcheck eval <path> --tasks 2 --trials 3 --output results/m1/gate/<skill>-run<N>.json`.
+  - Runner: `mistralai/mistral-small-4-119b-2603`.
+  - Generator: `stepfun-ai/step-3.7-flash`.
+  - Grader: `stepfun-ai/step-3.7-flash`.
+  - Trial count: 3.
+  - Task count: 2 via supported CLI override.
+- Source skills:
+  - `by-framework/nextjs/CLAUDE.md`.
+  - `by-framework/react/CLAUDE.md`.
+  - `by-framework/fastapi/CLAUDE.md`.
+  - `by-language/typescript/CLAUDE.md`.
+  - `by-language/python/CLAUDE.md`.
+- Stability results:
+  - `nextjs`: run 1 effect `50 pp`, CI `[16.67, 83.33]`, verdict `helps`; run 2 effect `50 pp`, CI `[16.67, 83.33]`, verdict `helps`; run 2 effect inside run 1 CI: yes.
+  - `react`: run 1 effect `0 pp`, CI `[0, 0]`, verdict `placebo`; run 2 effect `0 pp`, CI `[0, 0]`, verdict `placebo`; run 2 effect inside run 1 CI: yes.
+  - `fastapi`: run 1 effect `0 pp`, CI `[0, 0]`, verdict `placebo`; run 2 effect `0 pp`, CI `[0, 0]`, verdict `placebo`; run 2 effect inside run 1 CI: yes.
+  - `typescript`: run 1 effect `-50 pp`, CI `[-83.33, -16.67]`, verdict `harms`; run 2 effect `-50 pp`, CI `[-83.33, -16.67]`, verdict `harms`; run 2 effect inside run 1 CI: yes.
+  - `python`: run 1 effect `0 pp`, CI `[0, 0]`, verdict `placebo`; run 2 effect `0 pp`, CI `[0, 0]`, verdict `placebo`; run 2 effect inside run 1 CI: yes.
+- Gate result:
+  - Passed. All 5 scores were stable across reruns within CIs.
+- Post-gate local verification:
+  - `npm run typecheck`: passed.
+  - `npm run build`: passed.
+  - `npm test`: passed, 2 test files, 6 tests.
+  - `npm audit`: passed, 0 vulnerabilities.
+  - `npm pack --dry-run`: passed, 46 files, package size 20.0 kB, unpacked size 82.6 kB.

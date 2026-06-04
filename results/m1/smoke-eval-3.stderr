@@ -1,0 +1,10 @@
+[eval] run t001 trial 1/3 with_skill
+[eval] run t001 trial 1/3 no_skill
+[eval] run t001 trial 2/3 with_skill
+[eval] run t001 trial 2/3 no_skill
+[eval] run t001 trial 3/3 with_skill
+[eval] run t001 trial 3/3 no_skill
+[eval] grade t001 trial 1
+Grader did not return JSON: Got it, let's check each criterion one by one.
+First, 1: No internal jargon or unreleased beta refs. Yep, all terms are user-facing, no backend stuff here.
+2: Exactly 3 labeled sections: New Features,

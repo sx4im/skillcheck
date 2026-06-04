@@ -1,0 +1,76 @@
+{
+  "skill": {
+    "name": "React 19 + Vite SPA 项目",
+    "source": ".cache/sources/awesome-claude-md/by-framework/react/CLAUDE.md",
+    "format": "CLAUDE.md",
+    "commit_hash": "e58a181a31738f927fe0e5aaccbe3473471628832c5b3958231a75667745d979",
+    "domain": "# React 19 + Vite SPA 项目 ## 技术栈 - React 19 + TypeScript，Vite 6 构建 - React Router v7 路由管理 - Zustand 状态管理（轻量场景用 Jotai） - Tailwind CSS 4 样式方案 - Vitest + React Testing Library 测试 ## 项目结构 ``` src/ components/ # 可复用 UI 组件（纯展示，无业务逻辑） pages/ # 页面级组件，对应路由 hooks/ # 自定义 hooks stores/ # Zustand store 定义 lib/ # 工具函数、API 客户端 types/ # TypeScript 类型定义 ``` ## 开发规范 - 组件使用函数式写法 + TypeScript，Props 用 interface 定义 - 优先使用 React 19 新特性：`use()` hook 处理 Promise/Context，`useOptimistic` 管理乐观更新 - 了解 Server Components 概念，但本项目为纯 SPA，所有组件均为 Client Components - 使用 `React.lazy()` + `Suspense` 做路由级代码分割 - 状态管理原则：组件本地状态用 `useState`，跨组件共享用 Zustand，服务端状态用 TanStack Query ## 路由 - React Router v7 使用 `createBrowserRouter` + `RouterProvider` 模式 - 数据加载用 `loader`，表单提交用 `action` - 路由定义集中在 `src/router.tsx` ## 样式 - Tailwind CSS utility class 优先，组件变体用 `clsx` 或 `cva` 管理条件样式 ## 测试 - 运行测试：`npx vitest` 或 `npx vitest run` - 单个文件：`npx vitest src/components/Button.test.tsx` - 组件测试用 `render` + `screen` + `userEvent`，优先按角色/文本查询 DOM - 异步断言使用 `waitFor` 或 `findBy*` 查询 ## 常用命令 ```bash npm run dev # 启动开发服务器（默认 5173 端口） npm run build # 生产构建，输出到 dist/ npm run preview # 预览生产构建 npm run lint # ESLint 检查 npm run test # 运行测试 ``` ## 常见陷阱 - Tailwind v4"
+  },
+  "config": {
+    "runner_model": "mistralai/mistral-small-4-119b-2603",
+    "runner_version": "mistralai/mistral-small-4-119b-2603",
+    "grader_model": "stepfun-ai/step-3.7-flash",
+    "grader_version": "stepfun-ai/step-3.7-flash",
+    "generator_model": "stepfun-ai/step-3.7-flash",
+    "trials": 3,
+    "tasks": 2,
+    "temperature": 0.7,
+    "mode": "forced-injection"
+  },
+  "result": {
+    "effect_pp": 0,
+    "ci_pp": [
+      0,
+      0
+    ],
+    "verdict": "placebo",
+    "with_skill_pass": 0.5,
+    "no_skill_pass": 0.5,
+    "token_overhead": 645,
+    "value_per_1k_tokens": 0
+  },
+  "tasks": [
+    {
+      "id": "t001",
+      "prompt": "Write a Vitest test for the Alert component that verifies it renders the correct message text, applies the 'error' variant class when the type prop is 'error', and calls the onClose handler when the close button is clicked.",
+      "criterion_type": "rubric",
+      "criterion": "Passes if all three test cases pass: correct message renders, error variant class is applied, close button triggers the onClose callback.",
+      "arm_a_pass_rate": 1,
+      "arm_b_pass_rate": 1
+    },
+    {
+      "id": "t002",
+      "prompt": "Build a LikeButton component for a post that uses React 19's useOptimistic hook to immediately update the like count and button state when clicked, before the API like request completes.",
+      "criterion_type": "rubric",
+      "criterion": "Passes if the like count increments instantly on click, reverts to the original value if the API call fails, and matches server state on successful request.",
+      "arm_a_pass_rate": 0,
+      "arm_b_pass_rate": 0
+    }
+  ],
+  "reproducibility": {
+    "task_suite_path": "results/tasks/612008a5bfb3442efaf352eeb9e097e8e2a41368bab14a15f5c7c3f6cdb2f097.json",
+    "transcript_hashes": [
+      "sha256:d42eccdd318241edd991d146d4297cf096175b2f7ae199cc1ca5f9404f6daea3",
+      "sha256:8e9ce01cf1723575c28d6ffefb9347409601509fac6807a04f051ae669e34c55",
+      "sha256:24c9d799f6cbc74ef123f91f4cf2138c8eed33f5ade5601ca6bf19369b68813b",
+      "sha256:c38310c9b127588acfe36c00e5491198c2cf65d6b7c6d09711e7767179cbc141",
+      "sha256:b9ac2d874692b999c1e53370088aaa3ea3064ee80e5570faffe10b57fd2f9533",
+      "sha256:b5e4acfa09acec7f9faf68de286f3c4dc47eaa95ace77550a1cb53a7c84f7a06",
+      "sha256:1bf263b522323188f550a9e4e0e3a30d182d68994b6e720c550dfcf5cd31e00a",
+      "sha256:e5a3bf30e11379be1f49bb6f620a5d0ae5b7d85f184454978dcd62f9da40f98b",
+      "sha256:471588d99de8ab01f9834b2543e52d75b9048d7ec9e61e8fcd02ad59c7353320",
+      "sha256:8ff01bdcf984215a4661a990738027b9f0ad3a70c87ff22057f09f019f89712a",
+      "sha256:7039c7a4d15eb99258923f0534a3ae29cea43ad4ee9e908482f671527f817f0b",
+      "sha256:6cf8ad135bc4fe5f33b2167cb88b826fef1352a188ce5ee658e5ebda746be231"
+    ]
+  },
+  "history": [
+    {
+      "runner_version": "mistralai/mistral-small-4-119b-2603",
+      "run_date": "2026-06-04",
+      "effect_pp": 0,
+      "verdict": "placebo"
+    }
+  ],
+  "run_date": "2026-06-04"
+}

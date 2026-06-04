@@ -1,0 +1,8 @@
+[
+  {
+    "id": "t001",
+    "prompt": "Edit the following 280-word verbose internal draft release note for a public consumer note-taking app v3.1 launch into a concise, customer-facing release note. The draft contains internal engineering jargon, redundant feature descriptions, and references to unreleased beta features. Your edited release note must: remove all internal jargon and unreleased feature references, group changes into 3 clear labeled sections (New Features, Improvements, Bug Fixes), be no longer than 110 words, lead with the most impactful user-facing change (cross-device real-time note syncing), and only include changes visible/actionable to end users.",
+    "criterionType": "rubric",
+    "criterion": "Pass requires ALL of the following: 1. No internal engineering jargon (e.g. 'backend refactor', 'API endpoint migration') or references to unreleased beta features are present; 2. Changes are grouped into exactly 3 labeled sections: New Features, Improvements, Bug Fixes; 3. Total word count is ≤ 110 words; 4. The first listed change is the addition of cross-device real-time note syncing; 5. All listed changes are directly actionable/visible to end users, with no backend-only changes included. Fail if any of the above requirements are not met."
+  }
+]

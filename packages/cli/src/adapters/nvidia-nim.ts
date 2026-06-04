@@ -1,5 +1,5 @@
 import OpenAI from 'openai';
-import type { ChatCompletionMessageParam } from 'openai/resources/chat/completions';
+import type { ChatCompletion, ChatCompletionMessageParam } from 'openai/resources/chat/completions';
 import type { NvidiaConfig } from '../env.js';
 
 export interface CompletionRequest {
@@ -7,6 +7,8 @@ export interface CompletionRequest {
   messages: ChatCompletionMessageParam[];
   temperature: number;
   maxTokens: number;
+  responseFormat?: 'json_object';
+  chatTemplateKwargs?: Record<string, unknown>;
 }
 
 export interface CompletionResponse {
@@ -20,6 +22,43 @@ export interface CompletionResponse {
 }
 
 const RETRYABLE_STATUSES = new Set([408, 409, 429, 500, 502, 503, 504]);
+
+function extractTextContent(content: unknown): string | undefined {
+  if (typeof content === 'string') {
+    return content;
+  }
+
+  if (Array.isArray(content)) {
+    const parts = content
+      .map((part) => {
+        if (typeof part === 'string') {
+          return part;
+        }
+        if (typeof part === 'object' && part !== null && 'text' in part) {
+          const text = (part as { text?: unknown }).text;
+          return typeof text === 'string' ? text : '';
+        }
+        return '';
+      })
+      .join('');
+    return parts || undefined;
+  }
+
+  return undefined;
+}
+
+function extractMessageText(message: unknown): string | undefined {
+  if (typeof message !== 'object' || message === null) {
+    return undefined;
+  }
+
+  const record = message as { content?: unknown; reasoning_content?: unknown; refusal?: unknown };
+  return (
+    extractTextContent(record.content) ??
+    extractTextContent(record.reasoning_content) ??
+    extractTextContent(record.refusal)
+  );
+}
 
 function sleep(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
@@ -103,17 +142,28 @@ export class NvidiaNimClient {
     for (let attempt = 0; attempt < 5; attempt += 1) {
       try {
         await this.waitForRateLimitTurn();
-        const response = await this.client.chat.completions.create({
+        const extraBody = request.chatTemplateKwargs
+          ? {
+              chat_template_kwargs: request.chatTemplateKwargs
+            }
+          : undefined;
+        const requestBody = {
           model: request.model,
           messages: request.messages,
           temperature: request.temperature,
           max_tokens: request.maxTokens,
+          response_format: request.responseFormat ? { type: request.responseFormat } : undefined,
+          chat_template_kwargs: request.chatTemplateKwargs,
+          extra_body: extraBody,
           stream: false
-        });
+        };
+        const response = (await this.client.chat.completions.create(requestBody)) as ChatCompletion;
 
-        const content = response.choices[0]?.message?.content;
-        if (typeof content !== 'string') {
-          throw new Error('NVIDIA NIM response did not include text content');
+        const message = response.choices[0]?.message;
+        const content = extractMessageText(message);
+        if (content === undefined) {
+          const keys = message ? Object.keys(message).sort().join(',') : 'none';
+          throw new Error(`NVIDIA NIM response did not include text content; message keys: ${keys}`);
         }
 
         return {

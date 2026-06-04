@@ -1,0 +1,14 @@
+[
+  {
+    "id": "t001",
+    "prompt": "Write unit tests for src/app/services/payment.py following the project's test mirroring rule, place tests in tests/services/test_payment.py, use shared fixtures from conftest.py, ensure payment service coverage >=90%.",
+    "criterionType": "rubric",
+    "criterion": "Test file exists at the correct mirrored path, uses project pytest config, payment service coverage meets the >=90% threshold."
+  },
+  {
+    "id": "t002",
+    "prompt": "Run ruff format and ruff check --fix on src/ and tests/ directories, resolve all remaining linting issues, verify pre-commit checks (ruff check, ruff format --check, mypy --strict src/) all pass.",
+    "criterionType": "rubric",
+    "criterion": "All ruff linting issues are resolved, formatting matches ruff rules, mypy --strict src/ returns zero errors."
+  }
+]

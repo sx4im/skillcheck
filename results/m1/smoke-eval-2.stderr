@@ -1,0 +1,12 @@
+[eval] run t001 trial 1/3 with_skill
+[eval] run t001 trial 1/3 no_skill
+[eval] run t001 trial 2/3 with_skill
+[eval] run t001 trial 2/3 no_skill
+[eval] run t001 trial 3/3 with_skill
+[eval] run t001 trial 3/3 no_skill
+[eval] grade t001 trial 1
+[nim] retry 1/5 after connection; waiting 809 ms
+[nim] retry 2/5 after connection; waiting 1252 ms
+[nim] retry 3/5 after connection; waiting 2472 ms
+[nim] retry 4/5 after connection; waiting 4287 ms
+NVIDIA NIM response did not include text content; message keys: annotations,audio,content,function_call,reasoning,reasoning_content,refusal,role,tool_calls

@@ -1,0 +1,26 @@
+[eval] run t001 trial 1/3 with_skill
+[eval] run t001 trial 1/3 no_skill
+[eval] run t001 trial 2/3 with_skill
+[eval] run t001 trial 2/3 no_skill
+[eval] run t001 trial 3/3 with_skill
+[eval] run t001 trial 3/3 no_skill
+[eval] run t002 trial 1/3 with_skill
+[eval] run t002 trial 1/3 no_skill
+[eval] run t002 trial 2/3 with_skill
+[eval] run t002 trial 2/3 no_skill
+[eval] run t002 trial 3/3 with_skill
+[eval] run t002 trial 3/3 no_skill
+[eval] grade t001 trial 1
+[nim] retry 1/5 after status 429; waiting 5101 ms
+[eval] grade t002 trial 1
+[nim] retry 1/5 after status 429; waiting 5081 ms
+[eval] grade t002 trial 3
+[eval] grade t001 trial 2
+[eval] grade t002 trial 2
+[eval] grade t001 trial 2
+[eval] grade t001 trial 1
+[eval] grade t002 trial 2
+[eval] grade t001 trial 3
+[eval] grade t001 trial 3
+[eval] grade t002 trial 1
+[eval] grade t002 trial 3
