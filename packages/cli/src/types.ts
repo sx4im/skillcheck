@@ -1,5 +1,5 @@
 export type SkillFormat = 'SKILL.md' | 'AGENTS.md' | '.cursorrules' | 'CLAUDE.md';
-export type CriterionType = 'rubric';
+export type CriterionType = 'rubric' | 'deterministic';
 
 export interface NormalizedSkill {
   name: string;

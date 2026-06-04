@@ -1,0 +1,15 @@
+{
+  "passed": true,
+  "sample": 2,
+  "published_effect_pp": 100,
+  "published_ci_pp": [
+    100,
+    100
+  ],
+  "verify_effect_pp": 100,
+  "verify_ci_pp": [
+    100,
+    100
+  ],
+  "verify_verdict": "helps"
+}

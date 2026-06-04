@@ -1,6 +1,7 @@
 import type { NvidiaNimClient } from './adapters/nvidia-nim.js';
 import type { JsonCache } from './cache.js';
 import type { NvidiaConfig } from './env.js';
+import { gradeDeterministically } from './deterministic.js';
 import { hashJson } from './hash.js';
 import type { GeneratedTask, GradedOutput, TrialOutput } from './types.js';
 
@@ -63,6 +64,15 @@ export async function gradeOutputs(
     if (!task) {
       throw new Error(`Missing task for output ${output.taskId}`);
     }
+    if (task.criterionType === 'deterministic') {
+      const grade = gradeDeterministically(task, output.output);
+      graded.set(output.transcriptHash, {
+        ...output,
+        ...grade
+      });
+      continue;
+    }
+
     console.error(`[eval] grade ${output.taskId} trial ${output.trial}`);
     const response = await cache.getOrSet(
       'grader',

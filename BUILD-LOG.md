@@ -332,3 +332,44 @@
   - `npm test`: passed, 2 test files, 6 tests.
   - `npm audit`: passed, 0 vulnerabilities.
   - `npm pack --dry-run`: passed, 46 files, package size 20.0 kB, unpacked size 82.6 kB.
+
+### M2 - Gate
+
+- Implemented:
+  - Deterministic assertion support for `regex:` and `includes:` criteria.
+  - Deterministic-first grading path that skips the LLM grader.
+  - `skillcheck verify <result.json> [--sample n]`.
+  - Token overhead and value-per-1k metric were already emitted in M1 result JSON and retained.
+- Local verification before gate:
+  - `npm run typecheck`: passed.
+  - `npm test`: passed, 3 test files, 8 tests.
+- Strong skill gate:
+  - Command: `skillcheck eval fixtures/m2/strong-skill --task-suite fixtures/m2/deterministic-tasks.json --tasks 2 --trials 3 --output results/m2/strong.json`.
+  - Effect: `100 pp`.
+  - CI: `[100, 100]`.
+  - Verdict: `helps`.
+  - With-skill pass: `1`.
+  - No-skill pass: `0`.
+  - Gate result: passed.
+- Empty skill gate:
+  - Command: `skillcheck eval fixtures/m2/empty-skill --task-suite fixtures/m2/deterministic-tasks.json --tasks 2 --trials 3 --output results/m2/empty.json`.
+  - Effect: `0 pp`.
+  - CI: `[0, 0]`.
+  - Verdict: `placebo`.
+  - With-skill pass: `0`.
+  - No-skill pass: `0`.
+  - Gate result: passed.
+- Verify gate:
+  - Command: `skillcheck verify results/m2/strong.json --sample 2`.
+  - Published effect: `100 pp`.
+  - Published CI: `[100, 100]`.
+  - Verify effect: `100 pp`.
+  - Verify CI: `[100, 100]`.
+  - Verify verdict: `helps`.
+  - Gate result: passed, verify effect landed inside the published CI.
+- Post-gate local verification:
+  - `npm run typecheck`: passed.
+  - `npm run build`: passed.
+  - `npm test`: passed, 3 test files, 8 tests.
+  - `npm audit`: passed, 0 vulnerabilities.
+  - `npm pack --dry-run`: passed, 52 files, package size 22.5 kB, unpacked size 95.4 kB.

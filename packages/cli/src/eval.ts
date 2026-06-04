@@ -1,4 +1,4 @@
-import { mkdir, writeFile } from 'node:fs/promises';
+import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { NvidiaNimClient } from './adapters/nvidia-nim.js';
 import { JsonCache } from './cache.js';
@@ -20,6 +20,7 @@ export interface EvalOptions {
   runner?: string;
   grader?: string;
   generator?: string;
+  taskSuite?: string;
 }
 
 function applyModelOverrides(config: NvidiaConfig, options: EvalOptions): NvidiaConfig {
@@ -77,6 +78,32 @@ async function writeJson(filePath: string, value: unknown): Promise<void> {
   await writeFile(filePath, `${JSON.stringify(value, null, 2)}\n`);
 }
 
+function parseTaskSuite(text: string): GeneratedTask[] {
+  const value = JSON.parse(text) as unknown;
+  const tasks = Array.isArray(value)
+    ? value
+    : typeof value === 'object' && value !== null && Array.isArray((value as { tasks?: unknown }).tasks)
+      ? (value as { tasks: unknown[] }).tasks
+      : undefined;
+  if (!tasks) {
+    throw new Error('Task suite must be an array or an object with a tasks array');
+  }
+
+  return tasks.map((task, index) => {
+    const item = task as Record<string, unknown>;
+    const criterionType = item.criterionType ?? item.criterion_type ?? 'rubric';
+    if (criterionType !== 'rubric' && criterionType !== 'deterministic') {
+      throw new Error(`Unsupported criterion type in task ${index + 1}`);
+    }
+    return {
+      id: String(item.id ?? `t${String(index + 1).padStart(3, '0')}`),
+      prompt: String(item.prompt ?? ''),
+      criterionType,
+      criterion: String(item.criterion ?? '')
+    };
+  });
+}
+
 export async function evalSkill(options: EvalOptions): Promise<unknown> {
   const baseConfig = loadNvidiaConfig();
   const config = applyModelOverrides(baseConfig, options);
@@ -84,9 +111,11 @@ export async function evalSkill(options: EvalOptions): Promise<unknown> {
   const cache = new JsonCache();
   const skill = await normalizeSkill(options.inputPath);
 
-  const tasks = await generateTasks({ domain: skill.domain, count: options.tasks }, config, client, cache);
+  const tasks = options.taskSuite
+    ? parseTaskSuite(await readFile(options.taskSuite, 'utf8')).slice(0, options.tasks)
+    : await generateTasks({ domain: skill.domain, count: options.tasks }, config, client, cache);
   const taskSuiteHash = hashJson({ skill: skill.versionHash, tasks });
-  const taskSuitePath = `results/tasks/${taskSuiteHash}.json`;
+  const taskSuitePath = options.taskSuite ?? `results/tasks/${taskSuiteHash}.json`;
   await writeJson(taskSuitePath, tasks);
 
   const outputs = await runTrials(skill, tasks, options.trials, config, client, cache);
