@@ -5,7 +5,7 @@ export default async function HomePage() {
   const results = await loadResults();
   const helps = results.filter((result) => result.result.verdict === 'helps').length;
   const placebo = results.filter((result) => result.result.verdict === 'placebo').length;
-  const harms = results.filter((result) => result.result.verdict === 'harms').length;
+  const rot = new Set(results.filter((result) => result.rot?.status === 'rot').map((result) => result.rot?.key)).size;
 
   return (
     <main className="shell">
@@ -21,7 +21,7 @@ export default async function HomePage() {
         <div className="stat"><strong>{results.length}</strong>results</div>
         <div className="stat"><strong>{helps}</strong>helps</div>
         <div className="stat"><strong>{placebo}</strong>placebo</div>
-        <div className="stat"><strong>{harms}</strong>harms</div>
+        <div className="stat"><strong>{rot}</strong>rot flags</div>
       </section>
       <LeaderboardTable results={results} />
     </main>

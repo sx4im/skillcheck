@@ -1,6 +1,7 @@
 import { NvidiaNimClient } from './adapters/nvidia-nim.js';
 import { evalSkill, type EvalOptions } from './eval.js';
 import { runM0Gate } from './m0/run.js';
+import { runRot, type RotOptions } from './rot.js';
 import { verifyResult } from './verify.js';
 
 function printHelp(): void {
@@ -11,6 +12,8 @@ Usage:
   skillcheck eval <path> [--tasks N] [--trials K] [--output file.json] [--task-suite file.json]
     [--runner model] [--grader model] [--generator model]
   skillcheck verify <result.json> [--sample n]
+  skillcheck rot [--results dir] [--output file.json] [--model model] [--corpus corpus.yaml]
+    [--tasks N] [--trials K]
 
 M0 is the hardcoded spike. eval is the M1 forced-injection evaluator.`);
 }
@@ -63,6 +66,17 @@ function parseEvalOptions(argv: string[]): EvalOptions {
   };
 }
 
+function parseRotOptions(argv: string[]): RotOptions {
+  return {
+    resultsDir: readOption(argv, '--results') ?? 'results',
+    output: readOption(argv, '--output') ?? 'results/rot/report.json',
+    model: readOption(argv, '--model'),
+    corpus: readOption(argv, '--corpus'),
+    tasks: readNumberOption(argv, '--tasks', 10),
+    trials: readNumberOption(argv, '--trials', 3)
+  };
+}
+
 export async function main(argv: string[]): Promise<void> {
   const command = argv[2];
 
@@ -93,6 +107,12 @@ export async function main(argv: string[]): Promise<void> {
       resultPath,
       sample: readNumberOption(argv, '--sample', 3)
     });
+    console.log(JSON.stringify(result, null, 2));
+    return;
+  }
+
+  if (command === 'rot') {
+    const result = await runRot(parseRotOptions(argv));
     console.log(JSON.stringify(result, null, 2));
     return;
   }

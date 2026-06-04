@@ -61,6 +61,38 @@ export default async function SkillDetailPage({ params }: { params: Promise<{ id
         </table>
       </section>
       <section className="panel">
+        <h2>Rot Timeline</h2>
+        {result.rot ? (
+          <table>
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Runner</th>
+                <th>Effect</th>
+                <th>Verdict</th>
+                <th>Result</th>
+              </tr>
+            </thead>
+            <tbody>
+              {result.rot.history.map((entry) => (
+                <tr key={`${entry.file_path}:${entry.runner_model}`}>
+                  <td>{entry.run_date}</td>
+                  <td>{entry.runner_model}</td>
+                  <td>{entry.effect_pp} pp [{entry.ci_pp.join(', ')}]</td>
+                  <td><span className={`badge ${entry.verdict}`}>{entry.verdict}</span></td>
+                  <td><code>{entry.file_path}</code></td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        ) : (
+          <p>No rot report is available for this skill version.</p>
+        )}
+        {result.rot?.status === 'rot' ? (
+          <p className="rot-alert">Rot flagged: this skill previously helped and the latest run is {result.rot.latest.verdict}.</p>
+        ) : null}
+      </section>
+      <section className="panel">
         <h2>Transcript Hashes</h2>
         <pre>{result.reproducibility.transcript_hashes.join('\n')}</pre>
       </section>

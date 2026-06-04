@@ -4,6 +4,7 @@ import path from 'node:path';
 export interface LeaderboardResult {
   id: string;
   filePath: string;
+  rot?: RotSkillReport;
   skill: {
     name: string;
     source: string;
@@ -44,6 +45,29 @@ export interface LeaderboardResult {
   run_date: string;
 }
 
+export interface RotHistoryEntry {
+  result_id: string;
+  file_path: string;
+  runner_model: string;
+  runner_version: string;
+  run_date: string;
+  effect_pp: number;
+  ci_pp: [number, number];
+  verdict: 'helps' | 'placebo' | 'harms';
+}
+
+export interface RotSkillReport {
+  key: string;
+  status: 'new' | 'stable' | 'rot';
+  latest: RotHistoryEntry;
+  changed_from?: RotHistoryEntry;
+  history: RotHistoryEntry[];
+}
+
+interface RotReport {
+  skills: RotSkillReport[];
+}
+
 function repoRoot(): string {
   const cwd = path.resolve(/* turbopackIgnore: true */ process.cwd());
   return cwd.endsWith(path.join('packages', 'site')) ? path.resolve(cwd, '..', '..') : cwd;
@@ -54,6 +78,22 @@ function slugify(value: string): string {
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/^-|-$/g, '');
+}
+
+function configuredPath(root: string, value: string): string {
+  return path.isAbsolute(value) ? value : path.join(root, value);
+}
+
+function resultsDir(root: string): string {
+  return configuredPath(root, process.env.SKILLCHECK_RESULTS_DIR ?? 'results');
+}
+
+function rotReportPath(root: string): string {
+  return configuredPath(root, process.env.SKILLCHECK_ROT_REPORT ?? 'results/rot/report.json');
+}
+
+function resultKey(result: Omit<LeaderboardResult, 'id' | 'filePath' | 'rot'>): string {
+  return `${slugify(result.skill.name)}:${result.skill.commit_hash}`;
 }
 
 async function listJsonFiles(dir: string): Promise<string[]> {
@@ -75,9 +115,26 @@ function isLeaderboardResult(value: unknown): value is Omit<LeaderboardResult, '
   return Boolean(candidate.skill?.name && candidate.result?.ci_pp && candidate.reproducibility?.task_suite_path);
 }
 
+function isRotReport(value: unknown): value is RotReport {
+  return Array.isArray((value as RotReport).skills);
+}
+
+async function loadRotByKey(root: string): Promise<Map<string, RotSkillReport>> {
+  try {
+    const parsed = JSON.parse(await readFile(rotReportPath(root), 'utf8')) as unknown;
+    if (!isRotReport(parsed)) {
+      return new Map();
+    }
+    return new Map(parsed.skills.map((skill) => [skill.key, skill]));
+  } catch {
+    return new Map();
+  }
+}
+
 export async function loadResults(): Promise<LeaderboardResult[]> {
   const root = repoRoot();
-  const files = await listJsonFiles(path.join(root, 'results'));
+  const files = await listJsonFiles(resultsDir(root));
+  const rotByKey = await loadRotByKey(root);
   const results: LeaderboardResult[] = [];
 
   for (const file of files) {
@@ -94,7 +151,8 @@ export async function loadResults(): Promise<LeaderboardResult[]> {
     results.push({
       ...parsed,
       id: `${slugify(parsed.skill.name)}-${slugify(path.dirname(relative))}-${slugify(path.basename(relative, '.json'))}`,
-      filePath: relative
+      filePath: relative,
+      rot: rotByKey.get(resultKey(parsed))
     });
   }
 

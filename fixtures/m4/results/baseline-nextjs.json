@@ -1,0 +1,52 @@
+{
+  "skill": {
+    "name": "M4 Rot Canary",
+    "source": "fixtures/m4/rot-canary/SKILL.md",
+    "format": "SKILL.md",
+    "commit_hash": "m4-rot-canary-skill-hash",
+    "domain": "rot detection canary"
+  },
+  "config": {
+    "runner_model": "mistralai/mistral-small-4-119b-2603",
+    "runner_version": "mistralai/mistral-small-4-119b-2603",
+    "grader_model": "stepfun-ai/step-3.7-flash",
+    "grader_version": "stepfun-ai/step-3.7-flash",
+    "generator_model": "stepfun-ai/step-3.7-flash",
+    "trials": 3,
+    "tasks": 1,
+    "temperature": 0.7,
+    "mode": "forced-injection"
+  },
+  "result": {
+    "effect_pp": 50,
+    "ci_pp": [16.67, 83.33],
+    "verdict": "helps",
+    "with_skill_pass": 1,
+    "no_skill_pass": 0.5,
+    "token_overhead": 120,
+    "value_per_1k_tokens": 416.67
+  },
+  "tasks": [
+    {
+      "id": "m4-rot-canary",
+      "prompt": "Return the canary token.",
+      "criterion_type": "deterministic",
+      "criterion": "includes:ROT-CANARY",
+      "arm_a_pass_rate": 1,
+      "arm_b_pass_rate": 0.5
+    }
+  ],
+  "reproducibility": {
+    "task_suite_path": "fixtures/m4/tasks.json",
+    "transcript_hashes": ["m4-baseline-with", "m4-baseline-without"]
+  },
+  "history": [
+    {
+      "runner_version": "mistralai/mistral-small-4-119b-2603",
+      "run_date": "2026-06-03",
+      "effect_pp": 50,
+      "verdict": "helps"
+    }
+  ],
+  "run_date": "2026-06-03"
+}

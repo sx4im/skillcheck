@@ -133,6 +133,38 @@ th button {
   padding: 4px 9px;
 }
 
+.rot-status {
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  display: inline-block;
+  font-family: "Courier New", monospace;
+  font-size: 12px;
+  padding: 4px 9px;
+}
+
+.status-rot {
+  background: rgba(156, 47, 37, 0.13);
+  color: var(--bad);
+}
+
+.status-stable {
+  background: rgba(23, 107, 69, 0.11);
+  color: var(--good);
+}
+
+.status-new,
+.status-untracked {
+  background: rgba(155, 106, 16, 0.11);
+  color: var(--warn);
+}
+
+.rot-alert {
+  border-left: 4px solid var(--bad);
+  color: var(--bad);
+  font-weight: 700;
+  padding-left: 12px;
+}
+
 .helps {
   background: rgba(23, 107, 69, 0.12);
   color: var(--good);
@@ -166,7 +198,9 @@ pre {
   th:nth-child(3),
   td:nth-child(3),
   th:nth-child(5),
-  td:nth-child(5) {
+  td:nth-child(5),
+  th:nth-child(8),
+  td:nth-child(8) {
     display: none;
   }
 }

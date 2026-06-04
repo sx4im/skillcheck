@@ -406,3 +406,55 @@
   - `npm pack --dry-run`: passed, 52 files, package size 22.6 kB, unpacked size 95.7 kB.
 - Gate result:
   - Passed. The leaderboard builds from the real M1 seed corpus run and every generated detail page exists.
+
+### M4 - Implementation / Gate Blocked
+
+- Implemented:
+  - `skillcheck rot [--results dir] [--output file.json] [--model model] [--corpus corpus.yaml] [--tasks N] [--trials K]`.
+  - Version-keyed rot report grouped by skill name and `skill.commit_hash`.
+  - Rot rule: flag a skill only when a prior verdict was `helps` and the latest verdict is `placebo` or `harms`.
+  - Optional corpus rerun support from `corpus/corpus.yaml`, pinned to the same `jnMetaCode/awesome-claude-md` commit used in M1.
+  - Next.js leaderboard rot status column and per-skill rot timeline.
+  - GitHub Action `.github/workflows/rot.yml` with schedule and `workflow_dispatch`; it runs install, build, tests, `skillcheck rot`, site build, and opens a PR for changed `results/`.
+- Real results rot report:
+  - Command: `skillcheck rot --results results --output results/rot/report.json`.
+  - Summary: `8` skills, `3` new, `5` stable, `0` rot.
+- Simulated model-swap gate:
+  - Fixture inputs: `fixtures/m4/results/baseline-nextjs.json` and `fixtures/m4/results/new-model-nextjs.json`.
+  - Command: `skillcheck rot --results fixtures/m4/results --output fixtures/m4/rot-report.json --model simulated/new-runner-model`.
+  - Summary: `1` skill, `0` new, `0` stable, `1` rot.
+  - Site command: `SKILLCHECK_RESULTS_DIR=fixtures/m4/results SKILLCHECK_ROT_REPORT=fixtures/m4/rot-report.json npm run site:build`.
+  - Site result: passed, generated 5 static pages and 2 detail pages.
+  - Export evidence: generated detail page contains `Rot flagged`, `Rot Timeline`, baseline runner `mistralai/mistral-small-4-119b-2603`, and latest runner `simulated/new-runner-model`.
+- Default leaderboard:
+  - Command: `npm run site:build`.
+  - Result: passed, generated 16 static pages and 13 detail pages from real committed results.
+- Local verification:
+  - `npm run typecheck`: passed.
+  - `npm test`: passed, 4 test files, 11 tests.
+  - `npm run build`: passed.
+  - `npm audit`: passed, 0 vulnerabilities.
+  - `npm pack --dry-run`: passed, 55 files, package size 27.1 kB, unpacked size 117.6 kB.
+  - `npx --yes github-actionlint .github/workflows/rot.yml`: passed.
+- Gate status:
+  - Blocked, not passed. The required actual GitHub manual dispatch cannot be run from this workspace because there is no Git remote, no `gh` CLI, and no local Actions runner (`act`). Do not commit M4 as a passed milestone until the workflow is manually dispatched in GitHub or an equivalent Actions runner is provided.
+- Continuation revalidation on 2026-06-04:
+  - `git remote -v`: no remotes configured.
+  - `command -v gh`: not installed.
+  - `command -v act`: not installed.
+  - `npm run typecheck`: passed.
+  - `npm test`: passed, 4 test files, 11 tests.
+  - `npm run build`: passed.
+  - `npm audit`: passed, 0 vulnerabilities.
+  - `npx --yes github-actionlint .github/workflows/rot.yml`: passed.
+  - `npm run site:build`: passed against real results, generated 16 static pages and 13 detail pages.
+  - `SKILLCHECK_RESULTS_DIR=fixtures/m4/results SKILLCHECK_ROT_REPORT=fixtures/m4/rot-report.json npm run site:build`: passed, generated 5 static pages and 2 detail pages.
+  - Fixture export still contains `Rot flagged`, `Rot Timeline`, baseline runner `mistralai/mistral-small-4-119b-2603`, and latest runner `simulated/new-runner-model`.
+  - `npm pack --dry-run`: passed, 55 files, package size 27.1 kB, unpacked size 117.6 kB.
+  - Gate status remains blocked, not passed, for the same manual-dispatch reason.
+- Remote bootstrap:
+  - User provided GitHub remote `git@github.com:sx4im/skillcheck.git`.
+  - SSH authentication succeeded as `sx4im`.
+  - Remote default branch is `main` and contains an initial `LICENSE` commit.
+  - No `GITHUB_TOKEN`, `GH_TOKEN`, or `gh` CLI is available locally, so this shell can push the workflow but still cannot dispatch it through the GitHub API.
+  - Commit the M4 implementation as a bootstrap commit so the workflow exists on GitHub. This does not mark the M4 gate passed; manual dispatch evidence is still required.
