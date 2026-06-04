@@ -373,3 +373,36 @@
   - `npm test`: passed, 3 test files, 8 tests.
   - `npm audit`: passed, 0 vulnerabilities.
   - `npm pack --dry-run`: passed, 52 files, package size 22.5 kB, unpacked size 95.4 kB.
+
+### M3 - Gate
+
+- Implemented:
+  - Next.js static export under `packages/site`.
+  - Static leaderboard table reading committed result JSON from `results/`.
+  - Sortable and filterable columns for skill, domain, effect + CI, verdict, token overhead, value per 1k tokens, and last-tested model.
+  - Per-skill detail pages with task suite, transcript hashes, model config, result path, task suite path, and `skillcheck verify <result.json>` command.
+  - Loader skips invalid or non-result JSON so failed attempt artifacts stay committed without breaking the static export.
+- Dependency audit fix:
+  - Initial full `npm audit` failed because `next@16.2.7` depended on vulnerable nested `postcss@8.4.31`.
+  - Added npm override for `next -> postcss@8.5.10`.
+  - Confirmed installed graph: `next@16.2.7 postcss=8.5.10`.
+- Gate input:
+  - Real seed corpus evidence: `results/m1/gate/*.json`.
+  - M1 gate result count included in leaderboard: 10.
+  - Total leaderboard result-shaped JSON files: 13.
+- Static export gate:
+  - Command: `npm run site:build`.
+  - Exit code: 0.
+  - Next.js: `16.2.7`.
+  - Static pages generated: 16.
+  - Detail pages rendered: 13.
+  - Missing detail pages: none.
+  - Output directory: `packages/site/out`.
+- Post-gate local verification:
+  - `npm run typecheck`: passed.
+  - `npm run build`: passed.
+  - `npm test`: passed, 3 test files, 8 tests.
+  - `npm audit`: passed, 0 vulnerabilities.
+  - `npm pack --dry-run`: passed, 52 files, package size 22.6 kB, unpacked size 95.7 kB.
+- Gate result:
+  - Passed. The leaderboard builds from the real M1 seed corpus run and every generated detail page exists.

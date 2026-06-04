@@ -6,4 +6,7 @@ dist/
 site/.next/
 site/out/
 site/node_modules/
+packages/site/.next/
+packages/site/out/
+packages/site/node_modules/
 .DS_Store
