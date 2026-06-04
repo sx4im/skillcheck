@@ -113,16 +113,24 @@ jobs:
             echo "No result changes to publish"
             exit 0
           fi
-          branch="skillcheck/rot-${GITHUB_RUN_ID}"
+          branch="skillcheck/rot-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           runner_label="${DISPATCH_RUNNER_MODEL:-${NVIDIA_RUNNER_MODEL:-simulated/manual-dispatch}}"
           git checkout -b "$branch"
           git add results
           git commit -m "Update skillcheck rot results"
-          git push origin "$branch"
-          gh pr create \
+          git push --set-upstream origin "$branch"
+          if ! command -v gh >/dev/null 2>&1; then
+            echo "::error::GitHub CLI (gh) is not available on this runner"
+            exit 1
+          fi
+          if ! gh pr create \
             --title "Update skillcheck rot results" \
             --body "Automated skillcheck rot rerun for runner model ${runner_label}." \
             --base "$GITHUB_REF_NAME" \
-            --head "$branch"
+            --head "${GITHUB_REPOSITORY_OWNER}:$branch"
+          then
+            echo "::error::Failed to create pull request. If the branch push succeeded, enable Settings > Actions > General > Workflow permissions > Allow GitHub Actions to create and approve pull requests."
+            exit 1
+          fi
