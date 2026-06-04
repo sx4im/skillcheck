@@ -2,7 +2,8 @@ import { mkdtemp, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { describe, expect, it } from 'vitest';
-import { buildRotReport, parseCorpusManifest } from '../src/rot.js';
+import { parseCorpusManifest } from '../src/corpus.js';
+import { buildRotReport } from '../src/rot.js';
 
 function result(verdict: 'helps' | 'placebo' | 'harms', runner: string, runDate: string) {
   return {
@@ -73,5 +74,21 @@ describe('parseCorpusManifest', () => {
     expect(manifest.name).toBe('seed');
     expect(manifest.repo).toBe('https://example.test/repo.git');
     expect(manifest.skills).toEqual([{ id: 'nextjs', path: 'by-framework/nextjs/CLAUDE.md' }]);
+  });
+
+  it('parses per-skill source pins for a launch corpus', () => {
+    const manifest = parseCorpusManifest(
+      `name: launch\nskills:\n  - id: tdd\n    source: mattpocock/skills\n    repo: https://github.com/mattpocock/skills.git\n    commit: aaf2453\n    path: skills/engineering/tdd/SKILL.md\n`
+    );
+
+    expect(manifest.skills).toEqual([
+      {
+        id: 'tdd',
+        source: 'mattpocock/skills',
+        repo: 'https://github.com/mattpocock/skills.git',
+        commit: 'aaf2453',
+        path: 'skills/engineering/tdd/SKILL.md'
+      }
+    ]);
   });
 });

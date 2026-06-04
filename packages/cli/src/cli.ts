@@ -1,4 +1,5 @@
 import { NvidiaNimClient } from './adapters/nvidia-nim.js';
+import { runCorpus, type CorpusRunOptions } from './corpus.js';
 import { evalSkill, type EvalOptions } from './eval.js';
 import { runM0Gate } from './m0/run.js';
 import { runRot, type RotOptions } from './rot.js';
@@ -12,6 +13,8 @@ Usage:
   skillcheck eval <path> [--tasks N] [--trials K] [--output file.json] [--task-suite file.json]
     [--runner model] [--grader model] [--generator model]
   skillcheck verify <result.json> [--sample n]
+  skillcheck corpus run --corpus corpus.json [--results dir] [--tasks N] [--trials K]
+    [--runner model] [--limit N]
   skillcheck rot [--results dir] [--output file.json] [--model model] [--corpus corpus.yaml]
     [--tasks N] [--trials K]
 
@@ -34,6 +37,18 @@ function readNumberOption(argv: string[], name: string, fallback: number): numbe
   const value = readOption(argv, name);
   if (value === undefined) {
     return fallback;
+  }
+  const parsed = Number(value);
+  if (!Number.isInteger(parsed) || parsed <= 0) {
+    throw new Error(`${name} must be a positive integer`);
+  }
+  return parsed;
+}
+
+function readOptionalNumberOption(argv: string[], name: string): number | undefined {
+  const value = readOption(argv, name);
+  if (value === undefined) {
+    return undefined;
   }
   const parsed = Number(value);
   if (!Number.isInteger(parsed) || parsed <= 0) {
@@ -77,6 +92,22 @@ function parseRotOptions(argv: string[]): RotOptions {
   };
 }
 
+function parseCorpusRunOptions(argv: string[]): CorpusRunOptions {
+  const corpus = readOption(argv, '--corpus');
+  if (!corpus) {
+    throw new Error('Usage: skillcheck corpus run --corpus corpus.json [--results dir]');
+  }
+
+  return {
+    corpus,
+    outputDir: readOption(argv, '--results') ?? 'results/corpus',
+    tasks: readNumberOption(argv, '--tasks', 10),
+    trials: readNumberOption(argv, '--trials', 3),
+    runner: readOption(argv, '--runner'),
+    limit: readOptionalNumberOption(argv, '--limit')
+  };
+}
+
 export async function main(argv: string[]): Promise<void> {
   const command = argv[2];
 
@@ -107,6 +138,16 @@ export async function main(argv: string[]): Promise<void> {
       resultPath,
       sample: readNumberOption(argv, '--sample', 3)
     });
+    console.log(JSON.stringify(result, null, 2));
+    return;
+  }
+
+  if (command === 'corpus') {
+    const subcommand = argv[3];
+    if (subcommand !== 'run') {
+      throw new Error('Usage: skillcheck corpus run --corpus corpus.json [--results dir]');
+    }
+    const result = await runCorpus(parseCorpusRunOptions(argv));
     console.log(JSON.stringify(result, null, 2));
     return;
   }

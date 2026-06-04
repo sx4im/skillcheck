@@ -21,6 +21,7 @@ export interface EvalOptions {
   grader?: string;
   generator?: string;
   taskSuite?: string;
+  sourceLabel?: string;
 }
 
 function applyModelOverrides(config: NvidiaConfig, options: EvalOptions): NvidiaConfig {
@@ -131,7 +132,7 @@ export async function evalSkill(options: EvalOptions): Promise<unknown> {
   const result = {
     skill: {
       name: skill.name,
-      source: skill.sourcePath,
+      source: options.sourceLabel ?? skill.sourcePath,
       format: skill.format,
       commit_hash: skill.versionHash,
       domain: skill.domain

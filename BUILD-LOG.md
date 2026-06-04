@@ -488,3 +488,50 @@
   - Body runner label: `simulated/manual-dispatch`.
 - Gate result:
   - Passed. The actual GitHub workflow completed the simulated M4 model-swap gate, rebuilt the site, pushed changed `results/`, and opened a pull request.
+
+### M5 - Launch Prep / Live Corpus Blocked
+
+- Implemented:
+  - `skillcheck corpus run --corpus <manifest> --results <dir> [--tasks N] [--trials K] [--runner model] [--limit N]`.
+  - Shared corpus runner used by both the launch command and `skillcheck rot --corpus`.
+  - Per-skill `source`, `repo`, `commit`, and `path` pins in corpus manifests.
+  - Sparse Git checkout for pinned seed repo paths.
+  - Result `skill.source` can now record the pinned GitHub blob URL instead of only the local cache path.
+- Launch corpus:
+  - Manifest: `corpus/launch-20.json`.
+  - Count: 20 skills.
+  - Sources:
+    - `jnMetaCode/awesome-claude-md@fe38fcd8f245460b989879c9155a16404e77cffa` (fallback for inaccessible `sx4im/awesome-claude-md`).
+    - `mattpocock/skills@aaf2453fbdfe7a15c07f11d861224f34ab4b53cb`.
+    - `sickn33/antigravity-awesome-skills@b806b97a9a48063f7bdbee5611caf40edd17e305`.
+- Launch prep docs:
+  - `README.md`: created.
+  - `METHODOLOGY.md`: created and documents forced-injection mode plus untested trigger behavior.
+  - `RELEASE-CHECKLIST.md`: created with exact preflight, corpus, verification, and publish steps.
+  - `FINDINGS-DRAFT.md`: created and marked unverified because the 20-skill launch corpus has not completed.
+- Local verification before live sample:
+  - `npm run typecheck`: passed.
+  - `npm test`: passed, 4 test files, 12 tests.
+  - `npm run build`: passed.
+- M5 cache-warm sample attempt:
+  - Sample manifest: first new `mattpocock/skills` seed skill, `matt-tdd`.
+  - Command: `node dist/bin/skillcheck.js corpus run --corpus /tmp/skillcheck-m5-sample.json --results /tmp/skillcheck-m5-cache-warm --tasks 2 --trials 3`.
+  - Result: failed before producing a result JSON.
+  - Failure point: first runner call, task `t001`, trial 1/3, `with_skill`.
+  - Retry diagnostics: NVIDIA adapter retried connection failures 4 times, then exited with `Connection error.`
+  - Skill size check: `skills/engineering/tdd/SKILL.md` is 4395 bytes, so the failure is not caused by an unusually large skill prompt.
+- Provider health recheck:
+  - `getent hosts integrate.api.nvidia.com`: resolved `75.2.113.119` and `99.83.136.103`.
+  - `curl -I --max-time 15 https://integrate.api.nvidia.com/v1`: reached the endpoint and returned HTTP 404 from NVIDIA.
+  - Minimal runner chat completion command with prompt `Reply with OK.` and `maxTokens=4`: failed after retries with `APIConnectionError`, cause `read ETIMEDOUT`.
+- Post-blocker local verification:
+  - `npm run typecheck`: passed.
+  - `npm test`: passed, 4 test files, 12 tests.
+  - Skipped-test scan `rg "\.skip|describe\.skip|it\.skip|test\.skip|skip\(" packages/cli/test packages`: no matches.
+  - `npm run build`: passed.
+  - `npm run site:build`: passed, generated 16 static pages and 13 detail pages.
+  - `npm audit`: passed, 0 vulnerabilities.
+  - `npx --yes github-actionlint .github/workflows/rot.yml`: passed.
+  - `npm pack --dry-run`: passed, 61 files, package size 32.4 kB, unpacked size 137.9 kB.
+- Gate status:
+  - Blocked, not passed. M5 requires a real 20-skill corpus run from the three seed sources. That run was not started because the provider could not complete a one-line runner health check.

@@ -1,10 +1,6 @@
-import { execFile as execFileCallback } from 'node:child_process';
-import { mkdir, readdir, readFile, stat, writeFile } from 'node:fs/promises';
+import { mkdir, readdir, readFile, writeFile } from 'node:fs/promises';
 import path from 'node:path';
-import { promisify } from 'node:util';
-import { evalSkill } from './eval.js';
-
-const execFile = promisify(execFileCallback);
+import { runCorpus } from './corpus.js';
 
 type Verdict = 'helps' | 'placebo' | 'harms';
 type RotStatus = 'new' | 'stable' | 'rot';
@@ -69,18 +65,6 @@ export interface RotOptions {
   corpus?: string;
   tasks: number;
   trials: number;
-}
-
-interface CorpusSkill {
-  id: string;
-  path: string;
-}
-
-interface CorpusManifest {
-  name: string;
-  repo?: string;
-  commit?: string;
-  skills: CorpusSkill[];
 }
 
 function slugify(value: string): string {
@@ -228,108 +212,19 @@ export async function buildRotReport(resultsDir: string, model?: string): Promis
   };
 }
 
-function unquote(value: string): string {
-  return value.trim().replace(/^["']|["']$/g, '');
-}
-
-export function parseCorpusManifest(text: string): CorpusManifest {
-  const trimmed = text.trim();
-  if (trimmed.startsWith('{')) {
-    const parsed = JSON.parse(trimmed) as CorpusManifest;
-    if (!parsed.name || !Array.isArray(parsed.skills)) {
-      throw new Error('Corpus manifest JSON must include name and skills');
-    }
-    return parsed;
-  }
-
-  const manifest: CorpusManifest = { name: '', skills: [] };
-  let currentSkill: Partial<CorpusSkill> | undefined;
-
-  for (const rawLine of text.split('\n')) {
-    const withoutComment = rawLine.replace(/\s+#.*$/, '');
-    if (!withoutComment.trim()) {
-      continue;
-    }
-
-    const topLevel = /^([A-Za-z_]+):\s*(.*)$/.exec(withoutComment);
-    if (topLevel && !rawLine.startsWith(' ')) {
-      const [, key, value = ''] = topLevel;
-      if (key === 'name') manifest.name = unquote(value);
-      if (key === 'repo') manifest.repo = unquote(value);
-      if (key === 'commit') manifest.commit = unquote(value);
-      continue;
-    }
-
-    const skillStart = /^\s*-\s*id:\s*(.+)$/.exec(withoutComment);
-    if (skillStart) {
-      currentSkill = { id: unquote(skillStart[1]!) };
-      manifest.skills.push(currentSkill as CorpusSkill);
-      continue;
-    }
-
-    const skillField = /^\s+([A-Za-z_]+):\s*(.+)$/.exec(withoutComment);
-    if (skillField && currentSkill) {
-      const [, key, value] = skillField;
-      if (key === 'path') currentSkill.path = unquote(value!);
-      if (key === 'id') currentSkill.id = unquote(value!);
-    }
-  }
-
-  if (!manifest.name || manifest.skills.some((skill) => !skill.id || !skill.path)) {
-    throw new Error('Corpus manifest YAML must include name and skills with id/path');
-  }
-  return manifest;
-}
-
-async function pathExists(filePath: string): Promise<boolean> {
-  try {
-    await stat(filePath);
-    return true;
-  } catch (error) {
-    if ((error as NodeJS.ErrnoException).code === 'ENOENT') {
-      return false;
-    }
-    throw error;
-  }
-}
-
-async function prepareCorpus(corpusPath: string, manifest: CorpusManifest): Promise<string> {
-  if (!manifest.repo) {
-    return path.dirname(path.resolve(corpusPath));
-  }
-
-  const checkoutDir = path.join('.cache', 'sources', slugify(manifest.name));
-  if (!(await pathExists(path.join(checkoutDir, '.git')))) {
-    await mkdir(path.dirname(checkoutDir), { recursive: true });
-    await execFile('git', ['clone', manifest.repo, checkoutDir]);
-  }
-  if (manifest.commit) {
-    await execFile('git', ['-C', checkoutDir, 'fetch', '--tags', '--quiet']);
-    await execFile('git', ['-C', checkoutDir, 'checkout', '--quiet', manifest.commit]);
-  }
-  return checkoutDir;
-}
-
 async function rerunCorpus(options: RotOptions): Promise<void> {
   if (!options.corpus) {
     return;
   }
 
-  const manifest = parseCorpusManifest(await readFile(options.corpus, 'utf8'));
-  const baseDir = await prepareCorpus(options.corpus, manifest);
   const runId = `${new Date().toISOString().replace(/[:.]/g, '-')}-${slugify(options.model ?? 'env-runner')}`;
-  const outputDir = path.join(options.resultsDir, 'rot-runs', runId);
-
-  for (const skill of manifest.skills) {
-    await evalSkill({
-      inputPath: path.join(baseDir, skill.path),
-      output: path.join(outputDir, `${slugify(skill.id)}.json`),
-      tasks: options.tasks,
-      trials: options.trials,
-      mode: 'forced',
-      runner: options.model
-    });
-  }
+  await runCorpus({
+    corpus: options.corpus,
+    outputDir: path.join(options.resultsDir, 'rot-runs', runId),
+    tasks: options.tasks,
+    trials: options.trials,
+    runner: options.model
+  });
 }
 
 async function writeJson(filePath: string, value: unknown): Promise<void> {
