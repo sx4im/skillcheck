@@ -492,7 +492,7 @@
 ### M5 - Launch Prep / Live Corpus Blocked
 
 - Implemented:
-  - `skillcheck corpus run --corpus <manifest> --results <dir> [--tasks N] [--trials K] [--runner model] [--limit N]`.
+  - `skillcheck corpus run --corpus <manifest> --results <dir> [--tasks N] [--trials K] [--concurrency N] [--runner model] [--limit N]`.
   - Shared corpus runner used by both the launch command and `skillcheck rot --corpus`.
   - Per-skill `source`, `repo`, `commit`, and `path` pins in corpus manifests.
   - Sparse Git checkout for pinned seed repo paths.
@@ -535,3 +535,39 @@
   - `npm pack --dry-run`: passed, 61 files, package size 32.4 kB, unpacked size 137.9 kB.
 - Gate status:
   - Blocked, not passed. M5 requires a real 20-skill corpus run from the three seed sources. That run was not started because the provider could not complete a one-line runner health check.
+
+### M5 - Corpus Runner Continuation
+
+- Corpus command fix:
+  - Added `--concurrency N` to `skillcheck corpus run`.
+  - Default concurrency: `2`, matching the PRD cost guardrail.
+  - `skillcheck rot --corpus` now uses the shared corpus runner with concurrency `2`.
+  - Cache-warm samples use `--concurrency 1` in `RELEASE-CHECKLIST.md` to isolate provider health before the full run.
+- Current env model slugs before live retry:
+  - `NVIDIA_GENERATOR_MODEL=stepfun-ai/step-3.7-flash`.
+  - `NVIDIA_GRADER_MODEL=stepfun-ai/step-3.7-flash`.
+  - `NVIDIA_RUNNER_MODEL=mistralai/mistral-small-4-119b-2603`.
+  - `NVIDIA_REQUEST_DELAY_MS=1500`.
+- Model slug verification on 2026-06-04:
+  - `https://build.nvidia.com/stepfun-ai/step-3.7-flash`: slug `stepfun-ai/step-3.7-flash`, free endpoint available.
+  - `https://build.nvidia.com/mistralai/mistral-small-4-119b-2603`: slug `mistralai/mistral-small-4-119b-2603`, free endpoint available.
+- Local verification:
+  - `npm run typecheck`: passed.
+  - `npm test`: passed, 4 test files, 12 tests.
+  - `npm run build`: passed.
+  - `node dist/bin/skillcheck.js --help`: passed and shows `--concurrency N`.
+- Provider health retry:
+  - Minimal runner chat completion command with prompt `Reply with OK.` and `maxTokens=4`: passed.
+  - Requested model: `mistralai/mistral-small-4-119b-2603`.
+  - Response model: `mistralai/mistral-small-4-119b-2603`.
+  - Content: `OK`.
+  - Usage: prompt tokens 19, completion tokens 2, total tokens 21.
+- Cache-warm sample retry:
+  - Sample manifest: `/tmp/skillcheck-m5-sample.json`, one skill (`mattpocock/skills` `matt-tdd`).
+  - Command: `node dist/bin/skillcheck.js corpus run --corpus /tmp/skillcheck-m5-sample.json --results /tmp/skillcheck-m5-cache-warm --tasks 2 --trials 3 --concurrency 1`.
+  - Exit code: 0.
+  - Result file: `/tmp/skillcheck-m5-cache-warm/mattpocock-skills-matt-tdd.json`.
+  - Sample verdict: `placebo`, effect `0`, CI `[0, 0]`.
+  - Sample runner: `mistralai/mistral-small-4-119b-2603`.
+- Gate status:
+  - Still not passed. The cache-warm sample now passes, but M5 still requires the full 20-skill launch corpus run and updated launch findings from those real numbers.

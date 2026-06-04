@@ -14,7 +14,7 @@ Usage:
     [--runner model] [--grader model] [--generator model]
   skillcheck verify <result.json> [--sample n]
   skillcheck corpus run --corpus corpus.json [--results dir] [--tasks N] [--trials K]
-    [--runner model] [--limit N]
+    [--concurrency N] [--runner model] [--limit N]
   skillcheck rot [--results dir] [--output file.json] [--model model] [--corpus corpus.yaml]
     [--tasks N] [--trials K]
 
@@ -103,6 +103,7 @@ function parseCorpusRunOptions(argv: string[]): CorpusRunOptions {
     outputDir: readOption(argv, '--results') ?? 'results/corpus',
     tasks: readNumberOption(argv, '--tasks', 10),
     trials: readNumberOption(argv, '--trials', 3),
+    concurrency: readNumberOption(argv, '--concurrency', 2),
     runner: readOption(argv, '--runner'),
     limit: readOptionalNumberOption(argv, '--limit')
   };

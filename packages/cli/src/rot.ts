@@ -223,6 +223,7 @@ async function rerunCorpus(options: RotOptions): Promise<void> {
     outputDir: path.join(options.resultsDir, 'rot-runs', runId),
     tasks: options.tasks,
     trials: options.trials,
+    concurrency: 2,
     runner: options.model
   });
 }

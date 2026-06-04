@@ -22,13 +22,13 @@ Do not publish to npm until every item below is complete.
 
    ```bash
    jq '.skills = [.skills[7]]' corpus/launch-20.json > /tmp/skillcheck-m5-sample.json
-   node dist/bin/skillcheck.js corpus run --corpus /tmp/skillcheck-m5-sample.json --results /tmp/skillcheck-m5-cache-warm --tasks 2 --trials 3
+   node dist/bin/skillcheck.js corpus run --corpus /tmp/skillcheck-m5-sample.json --results /tmp/skillcheck-m5-cache-warm --tasks 2 --trials 3 --concurrency 1
    ```
 
 3. Run the capped 20-skill corpus:
 
    ```bash
-   node dist/bin/skillcheck.js corpus run --corpus corpus/launch-20.json --results results/launch/$(date -u +%Y%m%dT%H%M%SZ) --tasks 10 --trials 3
+   node dist/bin/skillcheck.js corpus run --corpus corpus/launch-20.json --results results/launch/$(date -u +%Y%m%dT%H%M%SZ) --tasks 10 --trials 3 --concurrency 2
    ```
 
 4. Regenerate rot report:

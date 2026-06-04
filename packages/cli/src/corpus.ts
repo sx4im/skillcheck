@@ -26,6 +26,7 @@ export interface CorpusRunOptions {
   outputDir: string;
   tasks: number;
   trials: number;
+  concurrency: number;
   runner?: string;
   limit?: number;
 }
@@ -45,6 +46,7 @@ export interface CorpusRunReport {
   output_dir: string;
   tasks: number;
   trials: number;
+  concurrency: number;
   runner?: string;
   skills: CorpusRunEntry[];
 }
@@ -218,9 +220,9 @@ export async function runCorpus(options: CorpusRunOptions): Promise<CorpusRunRep
   const manifest = parseCorpusManifest(await readFile(options.corpus, 'utf8'));
   const skills = manifest.skills.slice(0, options.limit ?? manifest.skills.length);
   const roots = await prepareSources(options.corpus, manifest, skills);
-  const entries: CorpusRunEntry[] = [];
+  const entries: CorpusRunEntry[] = new Array(skills.length);
 
-  for (const skill of skills) {
+  async function runOne(skill: CorpusSkill, index: number): Promise<void> {
     const repo = skill.repo ?? manifest.repo;
     const commit = skill.commit ?? manifest.commit;
     const source = sourceName(manifest, skill);
@@ -243,7 +245,7 @@ export async function runCorpus(options: CorpusRunOptions): Promise<CorpusRunRep
       sourceLabel: sourceLabel(manifest, skill)
     });
 
-    entries.push({
+    entries[index] = {
       id: skill.id,
       source,
       ...(repo ? { repo } : {}),
@@ -251,7 +253,23 @@ export async function runCorpus(options: CorpusRunOptions): Promise<CorpusRunRep
       path: skill.path,
       input_path: inputPath,
       output_path: outputPath
-    });
+    };
+  }
+
+  let nextIndex = 0;
+  const workerCount = Math.min(options.concurrency, skills.length);
+  await Promise.all(
+    Array.from({ length: workerCount }, async () => {
+      while (nextIndex < skills.length) {
+        const index = nextIndex;
+        nextIndex += 1;
+        await runOne(skills[index]!, index);
+      }
+    })
+  );
+
+  if (entries.some((entry) => !entry)) {
+    throw new Error('Corpus run completed without producing all result entries');
   }
 
   const report: CorpusRunReport = {
@@ -259,8 +277,9 @@ export async function runCorpus(options: CorpusRunOptions): Promise<CorpusRunRep
     output_dir: options.outputDir,
     tasks: options.tasks,
     trials: options.trials,
+    concurrency: options.concurrency,
     ...(options.runner ? { runner: options.runner } : {}),
-    skills: entries
+    skills: entries as CorpusRunEntry[]
   };
   await writeJson(path.join(options.outputDir, 'summary.json'), report);
   return report;
