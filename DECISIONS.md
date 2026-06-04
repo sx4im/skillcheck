@@ -24,3 +24,4 @@
 - M3 keeps `next@16.2.7` for the PRD-required Next.js static export and uses an npm override to force Next's nested `postcss` to `8.5.10`. This avoids the current PostCSS audit finding without moving the whole site to a canary framework release.
 - M4 rot status groups results by normalized skill name plus `skill.commit_hash`, then flags rot only when a previous run for that skill version had verdict `helps` and the latest run is `placebo` or `harms`.
 - M4 model-swap proof uses fixture results under `fixtures/m4/` and builds the site with `SKILLCHECK_RESULTS_DIR` / `SKILLCHECK_ROT_REPORT`. This proves leaderboard rendering without publishing simulated results into the real `results/` leaderboard.
+- M4 workflow manual dispatch defaults to a no-NVIDIA simulation path so the gate can run without repository secrets. Scheduled runs and manual dispatches with `simulate_only=false` still use the real corpus rerun path and require NVIDIA secrets/vars.

@@ -458,3 +458,7 @@
   - Remote default branch is `main` and contains an initial `LICENSE` commit.
   - No `GITHUB_TOKEN`, `GH_TOKEN`, or `gh` CLI is available locally, so this shell can push the workflow but still cannot dispatch it through the GitHub API.
   - Commit the M4 implementation as a bootstrap commit so the workflow exists on GitHub. This does not mark the M4 gate passed; manual dispatch evidence is still required.
+- Workflow dispatch adjustment:
+  - Manual dispatch now defaults to `simulate_only=true`.
+  - The simulation path runs the M4 fixture rot report, builds the fixture site, greps for `Rot flagged`, `Rot Timeline`, and `simulated/new-runner-model`, then regenerates `results/rot/report.json` and opens a PR through the existing PR step.
+  - Scheduled runs and manual dispatches with `simulate_only=false` still run the real corpus rerun path and require NVIDIA secrets/vars.
