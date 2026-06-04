@@ -462,3 +462,29 @@
   - Manual dispatch now defaults to `simulate_only=true`.
   - The simulation path runs the M4 fixture rot report, builds the fixture site, greps for `Rot flagged`, `Rot Timeline`, and `simulated/new-runner-model`, then regenerates `results/rot/report.json` and opens a PR through the existing PR step.
   - Scheduled runs and manual dispatches with `simulate_only=false` still run the real corpus rerun path and require NVIDIA secrets/vars.
+
+### M4 - GitHub Workflow Gate Passed
+
+- Workflow hardening:
+  - Commit: `5909ce8` (`Harden rot workflow PR creation`).
+  - Change: use per-attempt branch names, push with upstream tracking, qualify PR head as `sx4im:<branch>`, and emit a clear error if GitHub Actions cannot create PRs.
+  - `npx --yes github-actionlint .github/workflows/rot.yml`: passed.
+- Manual GitHub dispatch:
+  - Run: `https://github.com/sx4im/skillcheck/actions/runs/26959201329`.
+  - Event: `workflow_dispatch`.
+  - Head SHA: `5909ce87080b19765d57bcfc4dcad11c00d1fc9a`.
+  - Status: completed.
+  - Conclusion: success.
+  - Job: `rot`.
+  - Passed steps: checkout, setup-node, `npm ci`, `npm run build`, `npm test`, simulated M4 gate, `npm run site:build`, and `Open pull request`.
+  - Skipped step: real `Run rot rerun`, because this dispatch used the default `simulate_only=true` M4 gate path.
+- Pull request evidence:
+  - PR: `https://github.com/sx4im/skillcheck/pull/1`.
+  - Number: `#1`.
+  - Title: `Update skillcheck rot results`.
+  - Author: `github-actions[bot]`.
+  - Head branch: `skillcheck/rot-26959201329-1`.
+  - Head SHA: `37c95dcb14ea844b575fbacb6a8c89f14e139159`.
+  - Body runner label: `simulated/manual-dispatch`.
+- Gate result:
+  - Passed. The actual GitHub workflow completed the simulated M4 model-swap gate, rebuilt the site, pushed changed `results/`, and opened a pull request.
