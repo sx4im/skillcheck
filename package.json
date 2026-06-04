@@ -1,0 +1,33 @@
+{
+  "name": "skillcheck",
+  "version": "0.0.0",
+  "description": "Measure whether agent skills improve task performance.",
+  "type": "module",
+  "bin": {
+    "skillcheck": "./dist/bin/skillcheck.js"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "METHODOLOGY.md"
+  ],
+  "scripts": {
+    "build": "rm -rf dist && tsc -p tsconfig.json",
+    "m0": "tsx packages/cli/bin/skillcheck.ts m0",
+    "test": "vitest run",
+    "typecheck": "tsc -p tsconfig.json --noEmit && tsc -p tsconfig.test.json --noEmit"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.7",
+    "openai": "^4.77.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.2",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.2",
+    "vitest": "^4.1.8"
+  }
+}

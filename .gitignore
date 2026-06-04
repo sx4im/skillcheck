@@ -1,0 +1,9 @@
+node_modules/
+dist/
+.cache/
+.env
+*.log
+site/.next/
+site/out/
+site/node_modules/
+.DS_Store

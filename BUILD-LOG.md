@@ -1,0 +1,272 @@
+# Build Log
+
+## 2026-06-03
+
+### M0 - Spike
+
+- Status: in progress.
+- PRD read: `skillcheck-PRD.md` is the available v2 PRD.
+- Model slug verification:
+  - `stepfun-ai/step-3.7-flash` verified on build.nvidia.com for generator/grader.
+  - `deepseek-ai/deepseek-v4-flash` verified on build.nvidia.com for runner.
+- Environment check:
+  - `NVIDIA_API_KEY`: missing from shell and `.env`.
+  - `.env`: missing at start of work.
+- M0 harness implemented:
+  - Hardcoded canary SKU skill.
+  - 8 hardcoded tasks.
+  - A/B runner with `K=3`, for 24 paired observations per skill run.
+  - Deterministic pass/fail checks.
+  - 1000-iteration paired bootstrap CI.
+  - NVIDIA NIM runner adapter using the OpenAI SDK with `baseURL` override and retry/backoff on 429/retryable statuses.
+- Local verification:
+  - `npm run typecheck`: passed.
+  - `npm run build`: passed.
+  - `npm test`: passed, 1 test file, 2 tests.
+  - `npm audit`: passed, 0 vulnerabilities.
+  - `find dist -maxdepth 4 -type f`: emitted runtime files only; no compiled test files.
+  - `node dist/bin/skillcheck.js --help`: passed.
+  - `npm pack --dry-run`: passed, 22 files, package size 7.9 kB, unpacked size 27.1 kB.
+- Live M0 command:
+  - Command: `npm run m0`
+  - Exit code: 1.
+  - Result: `Missing required environment variable: NVIDIA_API_KEY`.
+- Gate result: not run yet. A live NVIDIA API key is required before the M0 repeatability and empty-control gates can be honestly measured.
+
+### M0 - Continuation Check
+
+- Environment check:
+  - Shell `NVIDIA_API_KEY`: missing.
+  - `.env`: present.
+  - `.env` `NVIDIA_API_KEY`: empty.
+  - `.env` model/base URL vars: present.
+- Local verification re-run:
+  - `npm run typecheck`: passed.
+  - `npm test`: passed, 1 test file, 2 tests.
+- Live M0 command:
+  - Command: `npm run m0`
+  - Exit code: 1.
+  - Result: `Missing required environment variable: NVIDIA_API_KEY`.
+- Gate result: still not run. No M0 numeric repeatability/control evidence exists yet because the NVIDIA API key is missing.
+
+### M0 - Third Blocker Check
+
+- Environment check:
+  - `.env` `NVIDIA_API_KEY`: empty.
+  - `.env` `NVIDIA_BASE_URL`: present.
+  - `.env` `NVIDIA_GENERATOR_MODEL`: present.
+  - `.env` `NVIDIA_GRADER_MODEL`: present.
+  - `.env` `NVIDIA_RUNNER_MODEL`: present.
+- Live M0 command:
+  - Command: `npm run m0`
+  - Exit code: 1.
+  - Result: `Missing required environment variable: NVIDIA_API_KEY`.
+- Gate result: still not run. This is the third consecutive goal turn blocked by the same missing NVIDIA secret, and M1 cannot start until M0 has live numeric gate evidence.
+
+### M0 - Live Attempt After Key Added
+
+- Environment check:
+  - `.env` `NVIDIA_API_KEY`: present.
+  - `.env` `NVIDIA_BASE_URL`: present.
+  - `.env` `NVIDIA_GENERATOR_MODEL`: present.
+  - `.env` `NVIDIA_GRADER_MODEL`: present.
+  - `.env` `NVIDIA_RUNNER_MODEL`: present.
+- Live M0 command:
+  - Command: `./node_modules/.bin/tsx packages/cli/bin/skillcheck.ts m0 > results/m0/20260603T170635Z-m0.json 2> results/m0/20260603T170635Z-m0.err`
+  - Result: stopped manually after more than 8 minutes because both captured files were still 0 bytes and no gate summary had been produced.
+  - Gate result: not counted. No numeric evidence was produced.
+- Follow-up implementation change:
+  - Added a default 120000 ms NVIDIA request timeout.
+  - Added M0 stderr progress markers so future live attempts show the last attempted task/trial without changing the gate math.
+
+### M0 - Live Retry With Timeout
+
+- Live M0 command:
+  - Command: `./node_modules/.bin/tsx packages/cli/bin/skillcheck.ts m0 > results/m0/20260603T171556Z-m0.json 2> results/m0/20260603T171556Z-m0.err`
+  - Exit code: 1.
+  - Last progress marker: repeatability run 1, task `m0-002`, trial 3/3, with-skill arm.
+  - Result: `Connection error.`
+  - Gate result: not counted. No result JSON or numeric repeatability/control evidence was produced.
+- Follow-up implementation change:
+  - Treat connection/timeout errors without an HTTP status as retryable in the NVIDIA adapter. HTTP statuses remain retryable only for 408, 409, 429, 500, 502, 503, and 504.
+
+### M0 - Live Retry With Connection Retries
+
+- Live M0 command:
+  - Command: `./node_modules/.bin/tsx packages/cli/bin/skillcheck.ts m0 > results/m0/20260603T171840Z-m0.json 2> results/m0/20260603T171840Z-m0.err`
+  - Exit code: 1.
+  - Last progress marker: repeatability run 1, task `m0-004`, trial 1/3, no-skill arm.
+  - Result: `429 status code (no body)`.
+  - Gate result: not counted. No result JSON or numeric repeatability/control evidence was produced.
+- Follow-up implementation change:
+  - Added `retry-after` parsing and longer exponential backoff for HTTP 429 responses.
+
+### M0 - Live Retry With Longer 429 Backoff
+
+- Cool-down before run:
+  - Waited 60 seconds after the previous 429.
+- Live M0 command:
+  - Command: `./node_modules/.bin/tsx packages/cli/bin/skillcheck.ts m0 > results/m0/20260603T172659Z-m0.json 2> results/m0/20260603T172659Z-m0.err`
+  - Exit code: 1.
+  - Last progress marker: repeatability run 1, task `m0-001`, trial 1/3, with-skill arm.
+  - Result: `429 status code (no body)`.
+  - Gate result: not counted. No result JSON or numeric repeatability/control evidence was produced.
+- Current blocker:
+  - `NVIDIA_API_KEY` is present, but NVIDIA NIM is returning persistent 429 responses before M0 can complete.
+  - M1 is still blocked because M0 has no passing live numeric evidence.
+
+### M0 - Resumed After 429 Blocker
+
+- Environment check:
+  - `.env` `NVIDIA_API_KEY`: present.
+  - `.env` `NVIDIA_BASE_URL`: present.
+  - `.env` `NVIDIA_GENERATOR_MODEL`: present.
+  - `.env` `NVIDIA_GRADER_MODEL`: present.
+  - `.env` `NVIDIA_RUNNER_MODEL`: present.
+  - `.env` `NVIDIA_REQUEST_DELAY_MS`: absent, using code default.
+- Follow-up implementation change:
+  - Added `NVIDIA_REQUEST_DELAY_MS` support with a default 5000 ms minimum delay between NVIDIA requests from one client.
+  - This preserves M0 `K=3`, 8 tasks, deterministic checks, paired bootstrap CI, and gate thresholds.
+- Local verification:
+  - `npm run typecheck`: passed.
+  - `npm test`: passed, 1 test file, 2 tests.
+  - `npm audit`: passed, 0 vulnerabilities.
+
+### M0 - Live Retry With Request Pacing
+
+- Cool-down before run:
+  - Waited 120 seconds after the previous 429.
+- Live M0 command:
+  - Command: `./node_modules/.bin/tsx packages/cli/bin/skillcheck.ts m0 > results/m0/20260603T173224Z-m0.json 2> results/m0/20260603T173224Z-m0.err`
+  - Exit code: 1.
+  - Last progress marker: repeatability run 1, task `m0-001`, trial 1/3, with-skill arm.
+  - Result: `429 status code (no body)`.
+  - Gate result: not counted. No result JSON or numeric repeatability/control evidence was produced.
+- Follow-up implementation change:
+  - Added retry diagnostics to stderr showing retry attempt, status category, and wait duration.
+
+### M0 - Diagnostic Retry After 429
+
+- Local verification:
+  - `npm run typecheck`: passed.
+  - `npm test`: passed, 1 test file, 2 tests.
+- Cool-down before run:
+  - Waited 60 seconds.
+- Live M0 command:
+  - Command: `./node_modules/.bin/tsx packages/cli/bin/skillcheck.ts m0 > results/m0/20260603T173529Z-m0.json 2> results/m0/20260603T173529Z-m0.err`
+  - Exit code: 1.
+  - Last progress marker: repeatability run 1, task `m0-001`, trial 1/3, with-skill arm.
+  - Retry diagnostics:
+    - Retry 1/5 after status 429; waited 5420 ms.
+    - Retry 2/5 after status 429; waited 10253 ms.
+    - Retry 3/5 after status 429; waited 20226 ms.
+    - Retry 4/5 after status 429; waited 40235 ms.
+  - Result: `429 status code (no body)`.
+  - Gate result: not counted. No result JSON or numeric repeatability/control evidence was produced.
+- Current blocker:
+  - The NVIDIA API key is present, but the provider is refusing even the first M0 runner call with repeated 429 responses.
+  - M1 remains blocked by the PRD ordering rule.
+
+### M0 - Runner Health Check After Resume
+
+- Environment check:
+  - `.env` `NVIDIA_API_KEY`: present.
+  - `.env` `NVIDIA_BASE_URL`: present.
+  - `.env` `NVIDIA_GENERATOR_MODEL`: present.
+  - `.env` `NVIDIA_GRADER_MODEL`: present.
+  - `.env` `NVIDIA_RUNNER_MODEL`: present.
+  - `.env` `NVIDIA_REQUEST_DELAY_MS`: absent, using code default.
+- Health-check command:
+  - Command: one `NvidiaNimClient.complete` call to `NVIDIA_RUNNER_MODEL` with prompt `Reply with OK.`, `temperature=0`, and `maxTokens=2`.
+  - Output path: `results/m0/20260603T173815Z-nim-health.json`.
+  - Error path: `results/m0/20260603T173815Z-nim-health.err`.
+  - Exit code: 1.
+  - Retry diagnostics:
+    - Retry 1/5 after status 429; waited 5034 ms.
+    - Retry 2/5 after status 429; waited 10317 ms.
+    - Retry 3/5 after status 429; waited 20066 ms.
+    - Retry 4/5 after status 429; waited 40169 ms.
+  - Result: `RateLimitError: 429 status code (no body)`.
+- Gate result:
+  - Full M0 was not rerun because the runner health check proves NVIDIA NIM is still refusing even a minimal runner call.
+  - No M0 numeric repeatability/control evidence exists.
+  - M1 remains blocked by the PRD ordering rule.
+
+### M0 - Runner Model Swap
+
+- Environment check:
+  - `.env` `NVIDIA_API_KEY`: present.
+  - `.env` `NVIDIA_BASE_URL`: `https://integrate.api.nvidia.com/v1`.
+  - `.env` `NVIDIA_GENERATOR_MODEL`: `stepfun-ai/step-3.7-flash`.
+  - `.env` `NVIDIA_GRADER_MODEL`: `stepfun-ai/step-3.7-flash`.
+  - `.env` `NVIDIA_RUNNER_MODEL`: `mistralai/mistral-small-4-119b-2603`.
+  - `.env` `NVIDIA_REQUEST_DELAY_MS`: `1500`.
+- Model slug verification:
+  - `mistralai/mistral-small-4-119b-2603` verified on build.nvidia.com on 2026-06-03.
+- Decision:
+  - Treat this as an env-driven M0 runner model swap after `deepseek-ai/deepseek-v4-flash` repeatedly returned 429 before M0 could produce numeric evidence.
+  - The M0 gate math is unchanged: 8 hardcoded tasks, `K=3`, three repeatability runs, empty-control run, deterministic checks, and paired bootstrap CI.
+
+### M0 - Mistral Runner Health Check
+
+- Health-check command:
+  - Command: one `NvidiaNimClient.complete` call to `NVIDIA_RUNNER_MODEL` with prompt `Reply with OK.`, `temperature=0`, and `maxTokens=4`.
+  - Output path: `results/m0/20260603T181156Z-mistral-health.json`.
+  - Error path: `results/m0/20260603T181156Z-mistral-health.err`.
+  - Exit code: 0.
+- Result:
+  - Requested model: `mistralai/mistral-small-4-119b-2603`.
+  - Response model: `mistralai/mistral-small-4-119b-2603`.
+  - Content: `OK`.
+  - Usage: prompt tokens 19, completion tokens 2, total tokens 21.
+- Gate result:
+  - Health check passed. Proceeding to full M0 gate with unchanged M0 settings.
+
+### M0 - Interrupted Full Mistral Run
+
+- Full M0 command:
+  - Command: `./node_modules/.bin/tsx packages/cli/bin/skillcheck.ts m0 > results/m0/20260603T181239Z-m0-mistral.json 2> results/m0/20260603T181239Z-m0-mistral.err`
+  - Output path: `results/m0/20260603T181239Z-m0-mistral.json`.
+  - Error path: `results/m0/20260603T181239Z-m0-mistral.err`.
+- Observed artifact state after turn interruption:
+  - No M0 process still running.
+  - JSON output size: 0 bytes.
+  - Stderr size: 7679 bytes.
+  - Last progress marker: repeatability run 2, task `m0-005`, trial 2/3, with-skill arm.
+  - Last diagnostics: 429 retries with waits 5220 ms, 10497 ms, and 20319 ms.
+- Gate result:
+  - Not counted. The run was interrupted before producing a result JSON or complete numeric evidence.
+
+### M0 - Passing Full Mistral Run
+
+- Full M0 command:
+  - Command: `./node_modules/.bin/tsx packages/cli/bin/skillcheck.ts m0 > results/m0/20260604T042409Z-m0-mistral.json 2> results/m0/20260604T042409Z-m0-mistral.err`
+  - Exit code: 0.
+  - Output path: `results/m0/20260604T042409Z-m0-mistral.json`.
+  - Error/progress path: `results/m0/20260604T042409Z-m0-mistral.err`.
+- Run config:
+  - Runner model: `mistralai/mistral-small-4-119b-2603`.
+  - Tasks: 8.
+  - Trials per arm: 3.
+  - Temperature: 0.7.
+  - With-skill attempts logged: 96.
+  - No-skill attempts logged: 96.
+  - NVIDIA retry events logged: 143.
+- Repeatability gate:
+  - Run 1: effect `0 pp`, CI `[-20.94, 25]`, verdict `placebo`, with-skill pass `0.75`, no-skill pass `0.75`, effect inside CI: yes.
+  - Run 2: effect `25 pp`, CI `[0, 45.94]`, verdict `placebo`, with-skill pass `0.7083`, no-skill pass `0.4583`, effect inside CI: yes.
+  - Run 3: effect `33.33 pp`, CI `[12.5, 54.17]`, verdict `helps`, with-skill pass `0.7083`, no-skill pass `0.375`, effect inside CI: yes.
+  - Gate result: passed, all 3 effects landed inside their CIs.
+- Empty-control gate:
+  - Effect `0 pp`, CI `[-29.17, 29.17]`, verdict `placebo`, with-skill pass `0.5417`, no-skill pass `0.5417`.
+  - CI overlaps zero: yes.
+  - Gate result: passed.
+- M0 result:
+  - Passed.
+  - M1 may start after the M0 commit.
+- Post-gate local verification:
+  - `npm run typecheck`: passed.
+  - `npm run build`: passed.
+  - `npm test`: passed, 1 test file, 2 tests.
+  - `npm audit`: passed, 0 vulnerabilities.
+  - `npm pack --dry-run`: passed, 22 files, package size 9.3 kB, unpacked size 32.6 kB.

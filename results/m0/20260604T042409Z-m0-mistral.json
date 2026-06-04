@@ -1,0 +1,2009 @@
+{
+  "config": {
+    "runnerModel": "mistralai/mistral-small-4-119b-2603",
+    "trials": 3,
+    "tasks": 8,
+    "temperature": 0.7
+  },
+  "repeatability": {
+    "passed": true,
+    "runs": [
+      {
+        "runId": "2026-06-04T04:24:09.846Z-repeat-1",
+        "skillLabel": "canary-sku-skill",
+        "score": {
+          "effectPp": 0,
+          "ciPp": [
+            -20.94,
+            25
+          ],
+          "verdict": "placebo",
+          "withSkillPass": 0.75,
+          "noSkillPass": 0.75
+        },
+        "observations": [
+          {
+            "withSkillPass": true,
+            "noSkillPass": true
+          },
+          {
+            "withSkillPass": true,
+            "noSkillPass": true
+          },
+          {
+            "withSkillPass": true,
+            "noSkillPass": true
+          },
+          {
+            "withSkillPass": true,
+            "noSkillPass": true
+          },
+          {
+            "withSkillPass": true,
+            "noSkillPass": true
+          },
+          {
+            "withSkillPass": true,
+            "noSkillPass": true
+          },
+          {
+            "withSkillPass": true,
+            "noSkillPass": true
+          },
+          {
+            "withSkillPass": true,
+            "noSkillPass": false
+          },
+          {
+            "withSkillPass": true,
+            "noSkillPass": true
+          },
+          {
+            "withSkillPass": true,
+            "noSkillPass": true
+          },
+          {
+            "withSkillPass": true,
+            "noSkillPass": true
+          },
+          {
+            "withSkillPass": true,
+            "noSkillPass": true
+          },
+          {
+            "withSkillPass": false,
+            "noSkillPass": true
+          },
+          {
+            "withSkillPass": false,
+            "noSkillPass": false
+          },
+          {
+            "withSkillPass": false,
+            "noSkillPass": true
+          },
+          {
+            "withSkillPass": false,
+            "noSkillPass": true
+          },
+          {
+            "withSkillPass": false,
+            "noSkillPass": true
+          },
+          {
+            "withSkillPass": false,
+            "noSkillPass": false
+          },
+          {
+            "withSkillPass": true,
+            "noSkillPass": false
+          },
+          {
+            "withSkillPass": true,
+            "noSkillPass": false
+          },
+          {
+            "withSkillPass": true,
+            "noSkillPass": false
+          },
+          {
+            "withSkillPass": true,
+            "noSkillPass": true
+          },
+          {
+            "withSkillPass": true,
+            "noSkillPass": true
+          },
+          {
+            "withSkillPass": true,
+            "noSkillPass": true
+          }
+        ],
+        "armResults": [
+          {
+            "taskId": "m0-001",
+            "trial": 1,
+            "arm": "with_skill",
+            "expected": "VALID",
+            "output": "VALID",
+            "pass": true
+          },
+          {
+            "taskId": "m0-001",
+            "trial": 1,
+            "arm": "no_skill",
+            "expected": "VALID",
+            "output": "VALID",
+            "pass": true
+          },
+          {
+            "taskId": "m0-001",
+            "trial": 2,
+            "arm": "with_skill",
+            "expected": "VALID",
+            "output": "VALID",
+            "pass": true
+          },
+          {
+            "taskId": "m0-001",
+            "trial": 2,
+            "arm": "no_skill",
+            "expected": "VALID",
+            "output": "VALID",
+            "pass": true
+          },
+          {
+            "taskId": "m0-001",
+            "trial": 3,
+            "arm": "with_skill",
+            "expected": "VALID",
+            "output": "VALID",
+            "pass": true
+          },
+          {
+            "taskId": "m0-001",
+            "trial": 3,
+            "arm": "no_skill",
+            "expected": "VALID",
+            "output": "VALID",
+            "pass": true
+          },
+          {
+            "taskId": "m0-002",
+            "trial": 1,
+            "arm": "with_skill",
+            "expected": "VALID",
+            "output": "VALID",
+            "pass": true
+          },
+          {
+            "taskId": "m0-002",
+            "trial": 1,
+            "arm": "no_skill",
+            "expected": "VALID",
+            "output": "VALID",
+            "pass": true
+          },
+          {
+            "taskId": "m0-002",
+            "trial": 2,
+            "arm": "with_skill",
+            "expected": "VALID",
+            "output": "VALID",
+            "pass": true
+          },
+          {
+            "taskId": "m0-002",
+            "trial": 2,
+            "arm": "no_skill",
+            "expected": "VALID",
+            "output": "VALID",
+            "pass": true
+          },
+          {
+            "taskId": "m0-002",
+            "trial": 3,
+            "arm": "with_skill",
+            "expected": "VALID",
+            "output": "VALID",
+            "pass": true
+          },
+          {
+            "taskId": "m0-002",
+            "trial": 3,
+            "arm": "no_skill",
+            "expected": "VALID",
+            "output": "VALID",
+            "pass": true
+          },
+          {
+            "taskId": "m0-003",
+            "trial": 1,
+            "arm": "with_skill",
+            "expected": "VALID",
+            "output": "VALID",
+            "pass": true
+          },
+          {
+            "taskId": "m0-003",
+            "trial": 1,
+            "arm": "no_skill",
+            "expected": "VALID",
+            "output": "VALID",
+            "pass": true
+          },
+          {
+            "taskId": "m0-003",
+            "trial": 2,
+            "arm": "with_skill",
+            "expected": "VALID",
+            "output": "VALID",
+            "pass": true
+          },
+          {
+            "taskId": "m0-003",
+            "trial": 2,
+            "arm": "no_skill",
+            "expected": "VALID",
+            "output": "INVALID",
+            "pass": false
+          },
+          {
+            "taskId": "m0-003",
+            "trial": 3,
+            "arm": "with_skill",
+            "expected": "VALID",
+            "output": "VALID",
+            "pass": true
+          },
+          {
+            "taskId": "m0-003",
+            "trial": 3,
+            "arm": "no_skill",
+            "expected": "VALID",
+            "output": "VALID",
+            "pass": true
+          },
+          {
+            "taskId": "m0-004",
+            "trial": 1,
+            "arm": "with_skill",
+            "expected": "VALID",
+            "output": "VALID",
+            "pass": true
+          },
+          {
+            "taskId": "m0-004",
+            "trial": 1,
+            "arm": "no_skill",
+            "expected": "VALID",
+            "output": "VALID",
+            "pass": true
+          },
+          {
+            "taskId": "m0-004",
+            "trial": 2,
+            "arm": "with_skill",
+            "expected": "VALID",
+            "output": "VALID",
+            "pass": true
+          },
+          {
+            "taskId": "m0-004",
+            "trial": 2,
+            "arm": "no_skill",
+            "expected": "VALID",
+            "output": "VALID",
+            "pass": true
+          },
+          {
+            "taskId": "m0-004",
+            "trial": 3,
+            "arm": "with_skill",
+            "expected": "VALID",
+            "output": "VALID",
+            "pass": true
+          },
+          {
+            "taskId": "m0-004",
+            "trial": 3,
+            "arm": "no_skill",
+            "expected": "VALID",
+            "output": "VALID",
+            "pass": true
+          },
+          {
+            "taskId": "m0-005",
+            "trial": 1,
+            "arm": "with_skill",
+            "expected": "INVALID",
+            "output": "VALID",
+            "pass": false
+          },
+          {
+            "taskId": "m0-005",
+            "trial": 1,
+            "arm": "no_skill",
+            "expected": "INVALID",
+            "output": "INVALID",
+            "pass": true
+          },
+          {
+            "taskId": "m0-005",
+            "trial": 2,
+            "arm": "with_skill",
+            "expected": "INVALID",
+            "output": "VALID",
+            "pass": false
+          },
+          {
+            "taskId": "m0-005",
+            "trial": 2,
+            "arm": "no_skill",
+            "expected": "INVALID",
+            "output": "VALID",
+            "pass": false
+          },
+          {
+            "taskId": "m0-005",
+            "trial": 3,
+            "arm": "with_skill",
+            "expected": "INVALID",
+            "output": "VALID",
+            "pass": false
+          },
+          {
+            "taskId": "m0-005",
+            "trial": 3,
+            "arm": "no_skill",
+            "expected": "INVALID",
+            "output": "INVALID",
+            "pass": true
+          },
+          {
+            "taskId": "m0-006",
+            "trial": 1,
+            "arm": "with_skill",
+            "expected": "INVALID",
+            "output": "VALID",
+            "pass": false
+          },
+          {
+            "taskId": "m0-006",
+            "trial": 1,
+            "arm": "no_skill",
+            "expected": "INVALID",
+            "output": "INVALID",
+            "pass": true
+          },
+          {
+            "taskId": "m0-006",
+            "trial": 2,
+            "arm": "with_skill",
+            "expected": "INVALID",
+            "output": "VALID",
+            "pass": false
+          },
+          {
+            "taskId": "m0-006",
+            "trial": 2,
+            "arm": "no_skill",
+            "expected": "INVALID",
+            "output": "INVALID",
+            "pass": true
+          },
+          {
+            "taskId": "m0-006",
+            "trial": 3,
+            "arm": "with_skill",
+            "expected": "INVALID",
+            "output": "VALID",
+            "pass": false
+          },
+          {
+            "taskId": "m0-006",
+            "trial": 3,
+            "arm": "no_skill",
+            "expected": "INVALID",
+            "output": "VALID",
+            "pass": false
+          },
+          {
+            "taskId": "m0-007",
+            "trial": 1,
+            "arm": "with_skill",
+            "expected": "INVALID",
+            "output": "INVALID",
+            "pass": true
+          },
+          {
+            "taskId": "m0-007",
+            "trial": 1,
+            "arm": "no_skill",
+            "expected": "INVALID",
+            "output": "VALID",
+            "pass": false
+          },
+          {
+            "taskId": "m0-007",
+            "trial": 2,
+            "arm": "with_skill",
+            "expected": "INVALID",
+            "output": "INVALID",
+            "pass": true
+          },
+          {
+            "taskId": "m0-007",
+            "trial": 2,
+            "arm": "no_skill",
+            "expected": "INVALID",
+            "output": "VALID",
+            "pass": false
+          },
+          {
+            "taskId": "m0-007",
+            "trial": 3,
+            "arm": "with_skill",
+            "expected": "INVALID",
+            "output": "INVALID",
+            "pass": true
+          },
+          {
+            "taskId": "m0-007",
+            "trial": 3,
+            "arm": "no_skill",
+            "expected": "INVALID",
+            "output": "VALID",
+            "pass": false
+          },
+          {
+            "taskId": "m0-008",
+            "trial": 1,
+            "arm": "with_skill",
+            "expected": "VALID",
+            "output": "VALID",
+            "pass": true
+          },
+          {
+            "taskId": "m0-008",
+            "trial": 1,
+            "arm": "no_skill",
+            "expected": "VALID",
+            "output": "VALID",
+            "pass": true
+          },
+          {
+            "taskId": "m0-008",
+            "trial": 2,
+            "arm": "with_skill",
+            "expected": "VALID",
+            "output": "VALID",
+            "pass": true
+          },
+          {
+            "taskId": "m0-008",
+            "trial": 2,
+            "arm": "no_skill",
+            "expected": "VALID",
+            "output": "VALID",
+            "pass": true
+          },
+          {
+            "taskId": "m0-008",
+            "trial": 3,
+            "arm": "with_skill",
+            "expected": "VALID",
+            "output": "VALID",
+            "pass": true
+          },
+          {
+            "taskId": "m0-008",
+            "trial": 3,
+            "arm": "no_skill",
+            "expected": "VALID",
+            "output": "VALID",
+            "pass": true
+          }
+        ]
+      },
+      {
+        "runId": "2026-06-04T04:24:09.846Z-repeat-2",
+        "skillLabel": "canary-sku-skill",
+        "score": {
+          "effectPp": 25,
+          "ciPp": [
+            0,
+            45.94
+          ],
+          "verdict": "placebo",
+          "withSkillPass": 0.7083,
+          "noSkillPass": 0.4583
+        },
+        "observations": [
+          {
+            "withSkillPass": true,
+            "noSkillPass": false
+          },
+          {
+            "withSkillPass": true,
+            "noSkillPass": true
+          },
+          {
+            "withSkillPass": true,
+            "noSkillPass": false
+          },
+          {
+            "withSkillPass": true,
+            "noSkillPass": true
+          },
+          {
+            "withSkillPass": true,
+            "noSkillPass": true
+          },
+          {
+            "withSkillPass": true,
+            "noSkillPass": true
+          },
+          {
+            "withSkillPass": true,
+            "noSkillPass": true
+          },
+          {
+            "withSkillPass": false,
+            "noSkillPass": false
+          },
+          {
+            "withSkillPass": true,
+            "noSkillPass": true
+          },
+          {
+            "withSkillPass": true,
+            "noSkillPass": true
+          },
+          {
+            "withSkillPass": true,
+            "noSkillPass": false
+          },
+          {
+            "withSkillPass": true,
+            "noSkillPass": false
+          },
+          {
+            "withSkillPass": false,
+            "noSkillPass": false
+          },
+          {
+            "withSkillPass": false,
+            "noSkillPass": false
+          },
+          {
+            "withSkillPass": true,
+            "noSkillPass": true
+          },
+          {
+            "withSkillPass": false,
+            "noSkillPass": true
+          },
+          {
+            "withSkillPass": false,
+            "noSkillPass": false
+          },
+          {
+            "withSkillPass": false,
+            "noSkillPass": true
+          },
+          {
+            "withSkillPass": true,
+            "noSkillPass": false
+          },
+          {
+            "withSkillPass": true,
+            "noSkillPass": false
+          },
+          {
+            "withSkillPass": true,
+            "noSkillPass": false
+          },
+          {
+            "withSkillPass": false,
+            "noSkillPass": false
+          },
+          {
+            "withSkillPass": true,
+            "noSkillPass": true
+          },
+          {
+            "withSkillPass": true,
+            "noSkillPass": false
+          }
+        ],
+        "armResults": [
+          {
+            "taskId": "m0-001",
+            "trial": 1,
+            "arm": "with_skill",
+            "expected": "VALID",
+            "output": "VALID",
+            "pass": true
+          },
+          {
+            "taskId": "m0-001",
+            "trial": 1,
+            "arm": "no_skill",
+            "expected": "VALID",
+            "output": "INVALID",
+            "pass": false
+          },
+          {
+            "taskId": "m0-001",
+            "trial": 2,
+            "arm": "with_skill",
+            "expected": "VALID",
+            "output": "VALID",
+            "pass": true
+          },
+          {
+            "taskId": "m0-001",
+            "trial": 2,
+            "arm": "no_skill",
+            "expected": "VALID",
+            "output": "VALID",
+            "pass": true
+          },
+          {
+            "taskId": "m0-001",
+            "trial": 3,
+            "arm": "with_skill",
+            "expected": "VALID",
+            "output": "VALID",
+            "pass": true
+          },
+          {
+            "taskId": "m0-001",
+            "trial": 3,
+            "arm": "no_skill",
+            "expected": "VALID",
+            "output": "INVALID",
+            "pass": false
+          },
+          {
+            "taskId": "m0-002",
+            "trial": 1,
+            "arm": "with_skill",
+            "expected": "VALID",
+            "output": "VALID",
+            "pass": true
+          },
+          {
+            "taskId": "m0-002",
+            "trial": 1,
+            "arm": "no_skill",
+            "expected": "VALID",
+            "output": "VALID",
+            "pass": true
+          },
+          {
+            "taskId": "m0-002",
+            "trial": 2,
+            "arm": "with_skill",
+            "expected": "VALID",
+            "output": "VALID",
+            "pass": true
+          },
+          {
+            "taskId": "m0-002",
+            "trial": 2,
+            "arm": "no_skill",
+            "expected": "VALID",
+            "output": "VALID",
+            "pass": true
+          },
+          {
+            "taskId": "m0-002",
+            "trial": 3,
+            "arm": "with_skill",
+            "expected": "VALID",
+            "output": "VALID",
+            "pass": true
+          },
+          {
+            "taskId": "m0-002",
+            "trial": 3,
+            "arm": "no_skill",
+            "expected": "VALID",
+            "output": "VALID",
+            "pass": true
+          },
+          {
+            "taskId": "m0-003",
+            "trial": 1,
+            "arm": "with_skill",
+            "expected": "VALID",
+            "output": "VALID",
+            "pass": true
+          },
+          {
+            "taskId": "m0-003",
+            "trial": 1,
+            "arm": "no_skill",
+            "expected": "VALID",
+            "output": "VALID",
+            "pass": true
+          },
+          {
+            "taskId": "m0-003",
+            "trial": 2,
+            "arm": "with_skill",
+            "expected": "VALID",
+            "output": "INVALID",
+            "pass": false
+          },
+          {
+            "taskId": "m0-003",
+            "trial": 2,
+            "arm": "no_skill",
+            "expected": "VALID",
+            "output": "INVALID",
+            "pass": false
+          },
+          {
+            "taskId": "m0-003",
+            "trial": 3,
+            "arm": "with_skill",
+            "expected": "VALID",
+            "output": "VALID",
+            "pass": true
+          },
+          {
+            "taskId": "m0-003",
+            "trial": 3,
+            "arm": "no_skill",
+            "expected": "VALID",
+            "output": "VALID",
+            "pass": true
+          },
+          {
+            "taskId": "m0-004",
+            "trial": 1,
+            "arm": "with_skill",
+            "expected": "VALID",
+            "output": "VALID",
+            "pass": true
+          },
+          {
+            "taskId": "m0-004",
+            "trial": 1,
+            "arm": "no_skill",
+            "expected": "VALID",
+            "output": "VALID",
+            "pass": true
+          },
+          {
+            "taskId": "m0-004",
+            "trial": 2,
+            "arm": "with_skill",
+            "expected": "VALID",
+            "output": "VALID",
+            "pass": true
+          },
+          {
+            "taskId": "m0-004",
+            "trial": 2,
+            "arm": "no_skill",
+            "expected": "VALID",
+            "output": "INVALID",
+            "pass": false
+          },
+          {
+            "taskId": "m0-004",
+            "trial": 3,
+            "arm": "with_skill",
+            "expected": "VALID",
+            "output": "VALID",
+            "pass": true
+          },
+          {
+            "taskId": "m0-004",
+            "trial": 3,
+            "arm": "no_skill",
+            "expected": "VALID",
+            "output": "INVALID",
+            "pass": false
+          },
+          {
+            "taskId": "m0-005",
+            "trial": 1,
+            "arm": "with_skill",
+            "expected": "INVALID",
+            "output": "VALID",
+            "pass": false
+          },
+          {
+            "taskId": "m0-005",
+            "trial": 1,
+            "arm": "no_skill",
+            "expected": "INVALID",
+            "output": "VALID",
+            "pass": false
+          },
+          {
+            "taskId": "m0-005",
+            "trial": 2,
+            "arm": "with_skill",
+            "expected": "INVALID",
+            "output": "VALID",
+            "pass": false
+          },
+          {
+            "taskId": "m0-005",
+            "trial": 2,
+            "arm": "no_skill",
+            "expected": "INVALID",
+            "output": "VALID",
+            "pass": false
+          },
+          {
+            "taskId": "m0-005",
+            "trial": 3,
+            "arm": "with_skill",
+            "expected": "INVALID",
+            "output": "INVALID",
+            "pass": true
+          },
+          {
+            "taskId": "m0-005",
+            "trial": 3,
+            "arm": "no_skill",
+            "expected": "INVALID",
+            "output": "INVALID",
+            "pass": true
+          },
+          {
+            "taskId": "m0-006",
+            "trial": 1,
+            "arm": "with_skill",
+            "expected": "INVALID",
+            "output": "VALID",
+            "pass": false
+          },
+          {
+            "taskId": "m0-006",
+            "trial": 1,
+            "arm": "no_skill",
+            "expected": "INVALID",
+            "output": "INVALID",
+            "pass": true
+          },
+          {
+            "taskId": "m0-006",
+            "trial": 2,
+            "arm": "with_skill",
+            "expected": "INVALID",
+            "output": "VALID",
+            "pass": false
+          },
+          {
+            "taskId": "m0-006",
+            "trial": 2,
+            "arm": "no_skill",
+            "expected": "INVALID",
+            "output": "VALID",
+            "pass": false
+          },
+          {
+            "taskId": "m0-006",
+            "trial": 3,
+            "arm": "with_skill",
+            "expected": "INVALID",
+            "output": "VALID",
+            "pass": false
+          },
+          {
+            "taskId": "m0-006",
+            "trial": 3,
+            "arm": "no_skill",
+            "expected": "INVALID",
+            "output": "INVALID",
+            "pass": true
+          },
+          {
+            "taskId": "m0-007",
+            "trial": 1,
+            "arm": "with_skill",
+            "expected": "INVALID",
+            "output": "INVALID",
+            "pass": true
+          },
+          {
+            "taskId": "m0-007",
+            "trial": 1,
+            "arm": "no_skill",
+            "expected": "INVALID",
+            "output": "VALID",
+            "pass": false
+          },
+          {
+            "taskId": "m0-007",
+            "trial": 2,
+            "arm": "with_skill",
+            "expected": "INVALID",
+            "output": "INVALID",
+            "pass": true
+          },
+          {
+            "taskId": "m0-007",
+            "trial": 2,
+            "arm": "no_skill",
+            "expected": "INVALID",
+            "output": "VALID",
+            "pass": false
+          },
+          {
+            "taskId": "m0-007",
+            "trial": 3,
+            "arm": "with_skill",
+            "expected": "INVALID",
+            "output": "INVALID",
+            "pass": true
+          },
+          {
+            "taskId": "m0-007",
+            "trial": 3,
+            "arm": "no_skill",
+            "expected": "INVALID",
+            "output": "VALID",
+            "pass": false
+          },
+          {
+            "taskId": "m0-008",
+            "trial": 1,
+            "arm": "with_skill",
+            "expected": "VALID",
+            "output": "INVALID",
+            "pass": false
+          },
+          {
+            "taskId": "m0-008",
+            "trial": 1,
+            "arm": "no_skill",
+            "expected": "VALID",
+            "output": "INVALID",
+            "pass": false
+          },
+          {
+            "taskId": "m0-008",
+            "trial": 2,
+            "arm": "with_skill",
+            "expected": "VALID",
+            "output": "VALID",
+            "pass": true
+          },
+          {
+            "taskId": "m0-008",
+            "trial": 2,
+            "arm": "no_skill",
+            "expected": "VALID",
+            "output": "VALID",
+            "pass": true
+          },
+          {
+            "taskId": "m0-008",
+            "trial": 3,
+            "arm": "with_skill",
+            "expected": "VALID",
+            "output": "VALID",
+            "pass": true
+          },
+          {
+            "taskId": "m0-008",
+            "trial": 3,
+            "arm": "no_skill",
+            "expected": "VALID",
+            "output": "INVALID",
+            "pass": false
+          }
+        ]
+      },
+      {
+        "runId": "2026-06-04T04:24:09.846Z-repeat-3",
+        "skillLabel": "canary-sku-skill",
+        "score": {
+          "effectPp": 33.33,
+          "ciPp": [
+            12.5,
+            54.17
+          ],
+          "verdict": "helps",
+          "withSkillPass": 0.7083,
+          "noSkillPass": 0.375
+        },
+        "observations": [
+          {
+            "withSkillPass": true,
+            "noSkillPass": false
+          },
+          {
+            "withSkillPass": true,
+            "noSkillPass": false
+          },
+          {
+            "withSkillPass": true,
+            "noSkillPass": true
+          },
+          {
+            "withSkillPass": true,
+            "noSkillPass": false
+          },
+          {
+            "withSkillPass": true,
+            "noSkillPass": true
+          },
+          {
+            "withSkillPass": false,
+            "noSkillPass": false
+          },
+          {
+            "withSkillPass": true,
+            "noSkillPass": true
+          },
+          {
+            "withSkillPass": true,
+            "noSkillPass": true
+          },
+          {
+            "withSkillPass": true,
+            "noSkillPass": false
+          },
+          {
+            "withSkillPass": true,
+            "noSkillPass": true
+          },
+          {
+            "withSkillPass": true,
+            "noSkillPass": true
+          },
+          {
+            "withSkillPass": true,
+            "noSkillPass": true
+          },
+          {
+            "withSkillPass": false,
+            "noSkillPass": false
+          },
+          {
+            "withSkillPass": false,
+            "noSkillPass": false
+          },
+          {
+            "withSkillPass": true,
+            "noSkillPass": false
+          },
+          {
+            "withSkillPass": false,
+            "noSkillPass": false
+          },
+          {
+            "withSkillPass": false,
+            "noSkillPass": false
+          },
+          {
+            "withSkillPass": false,
+            "noSkillPass": false
+          },
+          {
+            "withSkillPass": true,
+            "noSkillPass": false
+          },
+          {
+            "withSkillPass": true,
+            "noSkillPass": false
+          },
+          {
+            "withSkillPass": true,
+            "noSkillPass": false
+          },
+          {
+            "withSkillPass": false,
+            "noSkillPass": true
+          },
+          {
+            "withSkillPass": true,
+            "noSkillPass": true
+          },
+          {
+            "withSkillPass": true,
+            "noSkillPass": false
+          }
+        ],
+        "armResults": [
+          {
+            "taskId": "m0-001",
+            "trial": 1,
+            "arm": "with_skill",
+            "expected": "VALID",
+            "output": "VALID",
+            "pass": true
+          },
+          {
+            "taskId": "m0-001",
+            "trial": 1,
+            "arm": "no_skill",
+            "expected": "VALID",
+            "output": "INVALID",
+            "pass": false
+          },
+          {
+            "taskId": "m0-001",
+            "trial": 2,
+            "arm": "with_skill",
+            "expected": "VALID",
+            "output": "VALID",
+            "pass": true
+          },
+          {
+            "taskId": "m0-001",
+            "trial": 2,
+            "arm": "no_skill",
+            "expected": "VALID",
+            "output": "INVALID",
+            "pass": false
+          },
+          {
+            "taskId": "m0-001",
+            "trial": 3,
+            "arm": "with_skill",
+            "expected": "VALID",
+            "output": "VALID",
+            "pass": true
+          },
+          {
+            "taskId": "m0-001",
+            "trial": 3,
+            "arm": "no_skill",
+            "expected": "VALID",
+            "output": "VALID",
+            "pass": true
+          },
+          {
+            "taskId": "m0-002",
+            "trial": 1,
+            "arm": "with_skill",
+            "expected": "VALID",
+            "output": "VALID",
+            "pass": true
+          },
+          {
+            "taskId": "m0-002",
+            "trial": 1,
+            "arm": "no_skill",
+            "expected": "VALID",
+            "output": "INVALID",
+            "pass": false
+          },
+          {
+            "taskId": "m0-002",
+            "trial": 2,
+            "arm": "with_skill",
+            "expected": "VALID",
+            "output": "VALID",
+            "pass": true
+          },
+          {
+            "taskId": "m0-002",
+            "trial": 2,
+            "arm": "no_skill",
+            "expected": "VALID",
+            "output": "VALID",
+            "pass": true
+          },
+          {
+            "taskId": "m0-002",
+            "trial": 3,
+            "arm": "with_skill",
+            "expected": "VALID",
+            "output": "INVALID",
+            "pass": false
+          },
+          {
+            "taskId": "m0-002",
+            "trial": 3,
+            "arm": "no_skill",
+            "expected": "VALID",
+            "output": "INVALID",
+            "pass": false
+          },
+          {
+            "taskId": "m0-003",
+            "trial": 1,
+            "arm": "with_skill",
+            "expected": "VALID",
+            "output": "VALID",
+            "pass": true
+          },
+          {
+            "taskId": "m0-003",
+            "trial": 1,
+            "arm": "no_skill",
+            "expected": "VALID",
+            "output": "VALID",
+            "pass": true
+          },
+          {
+            "taskId": "m0-003",
+            "trial": 2,
+            "arm": "with_skill",
+            "expected": "VALID",
+            "output": "VALID",
+            "pass": true
+          },
+          {
+            "taskId": "m0-003",
+            "trial": 2,
+            "arm": "no_skill",
+            "expected": "VALID",
+            "output": "VALID",
+            "pass": true
+          },
+          {
+            "taskId": "m0-003",
+            "trial": 3,
+            "arm": "with_skill",
+            "expected": "VALID",
+            "output": "VALID",
+            "pass": true
+          },
+          {
+            "taskId": "m0-003",
+            "trial": 3,
+            "arm": "no_skill",
+            "expected": "VALID",
+            "output": "INVALID",
+            "pass": false
+          },
+          {
+            "taskId": "m0-004",
+            "trial": 1,
+            "arm": "with_skill",
+            "expected": "VALID",
+            "output": "VALID",
+            "pass": true
+          },
+          {
+            "taskId": "m0-004",
+            "trial": 1,
+            "arm": "no_skill",
+            "expected": "VALID",
+            "output": "VALID",
+            "pass": true
+          },
+          {
+            "taskId": "m0-004",
+            "trial": 2,
+            "arm": "with_skill",
+            "expected": "VALID",
+            "output": "VALID",
+            "pass": true
+          },
+          {
+            "taskId": "m0-004",
+            "trial": 2,
+            "arm": "no_skill",
+            "expected": "VALID",
+            "output": "VALID",
+            "pass": true
+          },
+          {
+            "taskId": "m0-004",
+            "trial": 3,
+            "arm": "with_skill",
+            "expected": "VALID",
+            "output": "VALID",
+            "pass": true
+          },
+          {
+            "taskId": "m0-004",
+            "trial": 3,
+            "arm": "no_skill",
+            "expected": "VALID",
+            "output": "VALID",
+            "pass": true
+          },
+          {
+            "taskId": "m0-005",
+            "trial": 1,
+            "arm": "with_skill",
+            "expected": "INVALID",
+            "output": "VALID",
+            "pass": false
+          },
+          {
+            "taskId": "m0-005",
+            "trial": 1,
+            "arm": "no_skill",
+            "expected": "INVALID",
+            "output": "VALID",
+            "pass": false
+          },
+          {
+            "taskId": "m0-005",
+            "trial": 2,
+            "arm": "with_skill",
+            "expected": "INVALID",
+            "output": "VALID",
+            "pass": false
+          },
+          {
+            "taskId": "m0-005",
+            "trial": 2,
+            "arm": "no_skill",
+            "expected": "INVALID",
+            "output": "VALID",
+            "pass": false
+          },
+          {
+            "taskId": "m0-005",
+            "trial": 3,
+            "arm": "with_skill",
+            "expected": "INVALID",
+            "output": "INVALID",
+            "pass": true
+          },
+          {
+            "taskId": "m0-005",
+            "trial": 3,
+            "arm": "no_skill",
+            "expected": "INVALID",
+            "output": "VALID",
+            "pass": false
+          },
+          {
+            "taskId": "m0-006",
+            "trial": 1,
+            "arm": "with_skill",
+            "expected": "INVALID",
+            "output": "VALID",
+            "pass": false
+          },
+          {
+            "taskId": "m0-006",
+            "trial": 1,
+            "arm": "no_skill",
+            "expected": "INVALID",
+            "output": "VALID",
+            "pass": false
+          },
+          {
+            "taskId": "m0-006",
+            "trial": 2,
+            "arm": "with_skill",
+            "expected": "INVALID",
+            "output": "VALID",
+            "pass": false
+          },
+          {
+            "taskId": "m0-006",
+            "trial": 2,
+            "arm": "no_skill",
+            "expected": "INVALID",
+            "output": "VALID",
+            "pass": false
+          },
+          {
+            "taskId": "m0-006",
+            "trial": 3,
+            "arm": "with_skill",
+            "expected": "INVALID",
+            "output": "VALID",
+            "pass": false
+          },
+          {
+            "taskId": "m0-006",
+            "trial": 3,
+            "arm": "no_skill",
+            "expected": "INVALID",
+            "output": "VALID",
+            "pass": false
+          },
+          {
+            "taskId": "m0-007",
+            "trial": 1,
+            "arm": "with_skill",
+            "expected": "INVALID",
+            "output": "INVALID",
+            "pass": true
+          },
+          {
+            "taskId": "m0-007",
+            "trial": 1,
+            "arm": "no_skill",
+            "expected": "INVALID",
+            "output": "VALID",
+            "pass": false
+          },
+          {
+            "taskId": "m0-007",
+            "trial": 2,
+            "arm": "with_skill",
+            "expected": "INVALID",
+            "output": "INVALID",
+            "pass": true
+          },
+          {
+            "taskId": "m0-007",
+            "trial": 2,
+            "arm": "no_skill",
+            "expected": "INVALID",
+            "output": "VALID",
+            "pass": false
+          },
+          {
+            "taskId": "m0-007",
+            "trial": 3,
+            "arm": "with_skill",
+            "expected": "INVALID",
+            "output": "INVALID",
+            "pass": true
+          },
+          {
+            "taskId": "m0-007",
+            "trial": 3,
+            "arm": "no_skill",
+            "expected": "INVALID",
+            "output": "VALID",
+            "pass": false
+          },
+          {
+            "taskId": "m0-008",
+            "trial": 1,
+            "arm": "with_skill",
+            "expected": "VALID",
+            "output": "INVALID",
+            "pass": false
+          },
+          {
+            "taskId": "m0-008",
+            "trial": 1,
+            "arm": "no_skill",
+            "expected": "VALID",
+            "output": "VALID",
+            "pass": true
+          },
+          {
+            "taskId": "m0-008",
+            "trial": 2,
+            "arm": "with_skill",
+            "expected": "VALID",
+            "output": "VALID",
+            "pass": true
+          },
+          {
+            "taskId": "m0-008",
+            "trial": 2,
+            "arm": "no_skill",
+            "expected": "VALID",
+            "output": "VALID",
+            "pass": true
+          },
+          {
+            "taskId": "m0-008",
+            "trial": 3,
+            "arm": "with_skill",
+            "expected": "VALID",
+            "output": "VALID",
+            "pass": true
+          },
+          {
+            "taskId": "m0-008",
+            "trial": 3,
+            "arm": "no_skill",
+            "expected": "VALID",
+            "output": "INVALID",
+            "pass": false
+          }
+        ]
+      }
+    ]
+  },
+  "emptyControl": {
+    "passed": true,
+    "run": {
+      "runId": "2026-06-04T04:24:09.846Z-empty-control",
+      "skillLabel": "empty-skill",
+      "score": {
+        "effectPp": 0,
+        "ciPp": [
+          -29.17,
+          29.17
+        ],
+        "verdict": "placebo",
+        "withSkillPass": 0.5417,
+        "noSkillPass": 0.5417
+      },
+      "observations": [
+        {
+          "withSkillPass": false,
+          "noSkillPass": false
+        },
+        {
+          "withSkillPass": true,
+          "noSkillPass": false
+        },
+        {
+          "withSkillPass": false,
+          "noSkillPass": false
+        },
+        {
+          "withSkillPass": false,
+          "noSkillPass": true
+        },
+        {
+          "withSkillPass": true,
+          "noSkillPass": false
+        },
+        {
+          "withSkillPass": true,
+          "noSkillPass": true
+        },
+        {
+          "withSkillPass": false,
+          "noSkillPass": true
+        },
+        {
+          "withSkillPass": true,
+          "noSkillPass": false
+        },
+        {
+          "withSkillPass": true,
+          "noSkillPass": true
+        },
+        {
+          "withSkillPass": true,
+          "noSkillPass": true
+        },
+        {
+          "withSkillPass": false,
+          "noSkillPass": true
+        },
+        {
+          "withSkillPass": false,
+          "noSkillPass": true
+        },
+        {
+          "withSkillPass": true,
+          "noSkillPass": false
+        },
+        {
+          "withSkillPass": false,
+          "noSkillPass": true
+        },
+        {
+          "withSkillPass": false,
+          "noSkillPass": false
+        },
+        {
+          "withSkillPass": true,
+          "noSkillPass": false
+        },
+        {
+          "withSkillPass": false,
+          "noSkillPass": false
+        },
+        {
+          "withSkillPass": true,
+          "noSkillPass": true
+        },
+        {
+          "withSkillPass": false,
+          "noSkillPass": false
+        },
+        {
+          "withSkillPass": true,
+          "noSkillPass": false
+        },
+        {
+          "withSkillPass": false,
+          "noSkillPass": true
+        },
+        {
+          "withSkillPass": true,
+          "noSkillPass": true
+        },
+        {
+          "withSkillPass": true,
+          "noSkillPass": true
+        },
+        {
+          "withSkillPass": true,
+          "noSkillPass": true
+        }
+      ],
+      "armResults": [
+        {
+          "taskId": "m0-001",
+          "trial": 1,
+          "arm": "with_skill",
+          "expected": "VALID",
+          "output": "INVALID",
+          "pass": false
+        },
+        {
+          "taskId": "m0-001",
+          "trial": 1,
+          "arm": "no_skill",
+          "expected": "VALID",
+          "output": "INVALID",
+          "pass": false
+        },
+        {
+          "taskId": "m0-001",
+          "trial": 2,
+          "arm": "with_skill",
+          "expected": "VALID",
+          "output": "VALID",
+          "pass": true
+        },
+        {
+          "taskId": "m0-001",
+          "trial": 2,
+          "arm": "no_skill",
+          "expected": "VALID",
+          "output": "INVALID",
+          "pass": false
+        },
+        {
+          "taskId": "m0-001",
+          "trial": 3,
+          "arm": "with_skill",
+          "expected": "VALID",
+          "output": "INVALID",
+          "pass": false
+        },
+        {
+          "taskId": "m0-001",
+          "trial": 3,
+          "arm": "no_skill",
+          "expected": "VALID",
+          "output": "INVALID",
+          "pass": false
+        },
+        {
+          "taskId": "m0-002",
+          "trial": 1,
+          "arm": "with_skill",
+          "expected": "VALID",
+          "output": "INVALID",
+          "pass": false
+        },
+        {
+          "taskId": "m0-002",
+          "trial": 1,
+          "arm": "no_skill",
+          "expected": "VALID",
+          "output": "VALID",
+          "pass": true
+        },
+        {
+          "taskId": "m0-002",
+          "trial": 2,
+          "arm": "with_skill",
+          "expected": "VALID",
+          "output": "VALID",
+          "pass": true
+        },
+        {
+          "taskId": "m0-002",
+          "trial": 2,
+          "arm": "no_skill",
+          "expected": "VALID",
+          "output": "INVALID",
+          "pass": false
+        },
+        {
+          "taskId": "m0-002",
+          "trial": 3,
+          "arm": "with_skill",
+          "expected": "VALID",
+          "output": "VALID",
+          "pass": true
+        },
+        {
+          "taskId": "m0-002",
+          "trial": 3,
+          "arm": "no_skill",
+          "expected": "VALID",
+          "output": "VALID",
+          "pass": true
+        },
+        {
+          "taskId": "m0-003",
+          "trial": 1,
+          "arm": "with_skill",
+          "expected": "VALID",
+          "output": "INVALID",
+          "pass": false
+        },
+        {
+          "taskId": "m0-003",
+          "trial": 1,
+          "arm": "no_skill",
+          "expected": "VALID",
+          "output": "VALID",
+          "pass": true
+        },
+        {
+          "taskId": "m0-003",
+          "trial": 2,
+          "arm": "with_skill",
+          "expected": "VALID",
+          "output": "VALID",
+          "pass": true
+        },
+        {
+          "taskId": "m0-003",
+          "trial": 2,
+          "arm": "no_skill",
+          "expected": "VALID",
+          "output": "INVALID",
+          "pass": false
+        },
+        {
+          "taskId": "m0-003",
+          "trial": 3,
+          "arm": "with_skill",
+          "expected": "VALID",
+          "output": "VALID",
+          "pass": true
+        },
+        {
+          "taskId": "m0-003",
+          "trial": 3,
+          "arm": "no_skill",
+          "expected": "VALID",
+          "output": "VALID",
+          "pass": true
+        },
+        {
+          "taskId": "m0-004",
+          "trial": 1,
+          "arm": "with_skill",
+          "expected": "VALID",
+          "output": "VALID",
+          "pass": true
+        },
+        {
+          "taskId": "m0-004",
+          "trial": 1,
+          "arm": "no_skill",
+          "expected": "VALID",
+          "output": "VALID",
+          "pass": true
+        },
+        {
+          "taskId": "m0-004",
+          "trial": 2,
+          "arm": "with_skill",
+          "expected": "VALID",
+          "output": "INVALID",
+          "pass": false
+        },
+        {
+          "taskId": "m0-004",
+          "trial": 2,
+          "arm": "no_skill",
+          "expected": "VALID",
+          "output": "VALID",
+          "pass": true
+        },
+        {
+          "taskId": "m0-004",
+          "trial": 3,
+          "arm": "with_skill",
+          "expected": "VALID",
+          "output": "INVALID",
+          "pass": false
+        },
+        {
+          "taskId": "m0-004",
+          "trial": 3,
+          "arm": "no_skill",
+          "expected": "VALID",
+          "output": "VALID",
+          "pass": true
+        },
+        {
+          "taskId": "m0-005",
+          "trial": 1,
+          "arm": "with_skill",
+          "expected": "INVALID",
+          "output": "INVALID",
+          "pass": true
+        },
+        {
+          "taskId": "m0-005",
+          "trial": 1,
+          "arm": "no_skill",
+          "expected": "INVALID",
+          "output": "VALID",
+          "pass": false
+        },
+        {
+          "taskId": "m0-005",
+          "trial": 2,
+          "arm": "with_skill",
+          "expected": "INVALID",
+          "output": "VALID",
+          "pass": false
+        },
+        {
+          "taskId": "m0-005",
+          "trial": 2,
+          "arm": "no_skill",
+          "expected": "INVALID",
+          "output": "INVALID",
+          "pass": true
+        },
+        {
+          "taskId": "m0-005",
+          "trial": 3,
+          "arm": "with_skill",
+          "expected": "INVALID",
+          "output": "VALID",
+          "pass": false
+        },
+        {
+          "taskId": "m0-005",
+          "trial": 3,
+          "arm": "no_skill",
+          "expected": "INVALID",
+          "output": "VALID",
+          "pass": false
+        },
+        {
+          "taskId": "m0-006",
+          "trial": 1,
+          "arm": "with_skill",
+          "expected": "INVALID",
+          "output": "INVALID",
+          "pass": true
+        },
+        {
+          "taskId": "m0-006",
+          "trial": 1,
+          "arm": "no_skill",
+          "expected": "INVALID",
+          "output": "VALID",
+          "pass": false
+        },
+        {
+          "taskId": "m0-006",
+          "trial": 2,
+          "arm": "with_skill",
+          "expected": "INVALID",
+          "output": "VALID",
+          "pass": false
+        },
+        {
+          "taskId": "m0-006",
+          "trial": 2,
+          "arm": "no_skill",
+          "expected": "INVALID",
+          "output": "VALID",
+          "pass": false
+        },
+        {
+          "taskId": "m0-006",
+          "trial": 3,
+          "arm": "with_skill",
+          "expected": "INVALID",
+          "output": "INVALID",
+          "pass": true
+        },
+        {
+          "taskId": "m0-006",
+          "trial": 3,
+          "arm": "no_skill",
+          "expected": "INVALID",
+          "output": "INVALID",
+          "pass": true
+        },
+        {
+          "taskId": "m0-007",
+          "trial": 1,
+          "arm": "with_skill",
+          "expected": "INVALID",
+          "output": "VALID",
+          "pass": false
+        },
+        {
+          "taskId": "m0-007",
+          "trial": 1,
+          "arm": "no_skill",
+          "expected": "INVALID",
+          "output": "VALID",
+          "pass": false
+        },
+        {
+          "taskId": "m0-007",
+          "trial": 2,
+          "arm": "with_skill",
+          "expected": "INVALID",
+          "output": "INVALID",
+          "pass": true
+        },
+        {
+          "taskId": "m0-007",
+          "trial": 2,
+          "arm": "no_skill",
+          "expected": "INVALID",
+          "output": "VALID",
+          "pass": false
+        },
+        {
+          "taskId": "m0-007",
+          "trial": 3,
+          "arm": "with_skill",
+          "expected": "INVALID",
+          "output": "VALID",
+          "pass": false
+        },
+        {
+          "taskId": "m0-007",
+          "trial": 3,
+          "arm": "no_skill",
+          "expected": "INVALID",
+          "output": "INVALID",
+          "pass": true
+        },
+        {
+          "taskId": "m0-008",
+          "trial": 1,
+          "arm": "with_skill",
+          "expected": "VALID",
+          "output": "VALID",
+          "pass": true
+        },
+        {
+          "taskId": "m0-008",
+          "trial": 1,
+          "arm": "no_skill",
+          "expected": "VALID",
+          "output": "VALID",
+          "pass": true
+        },
+        {
+          "taskId": "m0-008",
+          "trial": 2,
+          "arm": "with_skill",
+          "expected": "VALID",
+          "output": "VALID",
+          "pass": true
+        },
+        {
+          "taskId": "m0-008",
+          "trial": 2,
+          "arm": "no_skill",
+          "expected": "VALID",
+          "output": "VALID",
+          "pass": true
+        },
+        {
+          "taskId": "m0-008",
+          "trial": 3,
+          "arm": "with_skill",
+          "expected": "VALID",
+          "output": "VALID",
+          "pass": true
+        },
+        {
+          "taskId": "m0-008",
+          "trial": 3,
+          "arm": "no_skill",
+          "expected": "VALID",
+          "output": "VALID",
+          "pass": true
+        }
+      ]
+    }
+  },
+  "passed": true
+}

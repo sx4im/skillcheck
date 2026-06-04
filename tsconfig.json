@@ -1,0 +1,25 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "strict": true,
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "skipLibCheck": true,
+    "rootDir": "packages/cli",
+    "outDir": "dist",
+    "types": [
+      "node"
+    ],
+    "declaration": true,
+    "sourceMap": true
+  },
+  "include": [
+    "packages/cli/src/**/*.ts",
+    "packages/cli/bin/**/*.ts"
+  ],
+  "exclude": [
+    "packages/cli/test/**/*.ts"
+  ]
+}

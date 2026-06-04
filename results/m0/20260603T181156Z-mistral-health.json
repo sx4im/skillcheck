@@ -1,0 +1,11 @@
+{
+  "ok": true,
+  "requestedModel": "mistralai/mistral-small-4-119b-2603",
+  "responseModel": "mistralai/mistral-small-4-119b-2603",
+  "content": "OK",
+  "usage": {
+    "promptTokens": 19,
+    "completionTokens": 2,
+    "totalTokens": 21
+  }
+}

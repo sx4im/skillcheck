@@ -1,0 +1,147 @@
+import OpenAI from 'openai';
+import type { ChatCompletionMessageParam } from 'openai/resources/chat/completions';
+import type { NvidiaConfig } from '../env.js';
+
+export interface CompletionRequest {
+  model: string;
+  messages: ChatCompletionMessageParam[];
+  temperature: number;
+  maxTokens: number;
+}
+
+export interface CompletionResponse {
+  content: string;
+  model: string;
+  usage?: {
+    promptTokens?: number;
+    completionTokens?: number;
+    totalTokens?: number;
+  };
+}
+
+const RETRYABLE_STATUSES = new Set([408, 409, 429, 500, 502, 503, 504]);
+
+function sleep(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+function getStatus(error: unknown): number | undefined {
+  if (typeof error === 'object' && error !== null && 'status' in error) {
+    const status = (error as { status?: unknown }).status;
+    return typeof status === 'number' ? status : undefined;
+  }
+  return undefined;
+}
+
+function getRetryAfterMs(error: unknown): number | undefined {
+  if (typeof error !== 'object' || error === null || !('headers' in error)) {
+    return undefined;
+  }
+
+  const headers = (error as { headers?: unknown }).headers;
+  const retryAfter =
+    headers instanceof Headers
+      ? headers.get('retry-after')
+      : typeof headers === 'object' && headers !== null && 'retry-after' in headers
+        ? (headers as { 'retry-after'?: unknown })['retry-after']
+        : undefined;
+
+  if (typeof retryAfter !== 'string') {
+    return undefined;
+  }
+
+  const seconds = Number(retryAfter);
+  if (Number.isFinite(seconds) && seconds > 0) {
+    return seconds * 1000;
+  }
+
+  const dateMs = Date.parse(retryAfter);
+  if (Number.isFinite(dateMs)) {
+    return Math.max(0, dateMs - Date.now());
+  }
+
+  return undefined;
+}
+
+function describeRetry(error: unknown, attempt: number, waitMs: number): void {
+  const status = getStatus(error);
+  const label = status === undefined ? 'connection' : `status ${status}`;
+  console.error(`[nim] retry ${attempt + 1}/5 after ${label}; waiting ${waitMs} ms`);
+}
+
+export class NvidiaNimClient {
+  private readonly client: OpenAI;
+  private readonly requestDelayMs: number;
+  private lastRequestAt = 0;
+
+  constructor(config: NvidiaConfig) {
+    this.requestDelayMs = config.requestDelayMs;
+    this.client = new OpenAI({
+      apiKey: config.apiKey,
+      baseURL: config.baseUrl,
+      maxRetries: 0,
+      timeout: config.timeoutMs
+    });
+  }
+
+  private async waitForRateLimitTurn(): Promise<void> {
+    if (this.requestDelayMs === 0) {
+      return;
+    }
+
+    const elapsedMs = Date.now() - this.lastRequestAt;
+    const waitMs = Math.max(0, this.requestDelayMs - elapsedMs);
+    if (waitMs > 0) {
+      await sleep(waitMs);
+    }
+    this.lastRequestAt = Date.now();
+  }
+
+  async complete(request: CompletionRequest): Promise<CompletionResponse> {
+    let lastError: unknown;
+
+    for (let attempt = 0; attempt < 5; attempt += 1) {
+      try {
+        await this.waitForRateLimitTurn();
+        const response = await this.client.chat.completions.create({
+          model: request.model,
+          messages: request.messages,
+          temperature: request.temperature,
+          max_tokens: request.maxTokens,
+          stream: false
+        });
+
+        const content = response.choices[0]?.message?.content;
+        if (typeof content !== 'string') {
+          throw new Error('NVIDIA NIM response did not include text content');
+        }
+
+        return {
+          content,
+          model: response.model,
+          usage: {
+            promptTokens: response.usage?.prompt_tokens,
+            completionTokens: response.usage?.completion_tokens,
+            totalTokens: response.usage?.total_tokens
+          }
+        };
+      } catch (error) {
+        lastError = error;
+        const status = getStatus(error);
+        const retryable = status === undefined || RETRYABLE_STATUSES.has(status);
+        if (!retryable || attempt === 4) {
+          break;
+        }
+
+        const retryAfterMs = getRetryAfterMs(error);
+        const baseDelayMs = status === 429 ? 5000 : 500;
+        const jitter = Math.floor(Math.random() * 500);
+        const waitMs = retryAfterMs ?? baseDelayMs * 2 ** attempt + jitter;
+        describeRetry(error, attempt, waitMs);
+        await sleep(waitMs);
+      }
+    }
+
+    throw lastError instanceof Error ? lastError : new Error(String(lastError));
+  }
+}

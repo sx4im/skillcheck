@@ -1,0 +1,7 @@
+[m0] starting repeatability run 1/3
+[m0] 2026-06-03T17:35:29.476Z-repeat-1 m0-001 trial 1/3 with_skill
+[nim] retry 1/5 after status 429; waiting 5420 ms
+[nim] retry 2/5 after status 429; waiting 10253 ms
+[nim] retry 3/5 after status 429; waiting 20226 ms
+[nim] retry 4/5 after status 429; waiting 40235 ms
+429 status code (no body)
