@@ -683,3 +683,26 @@
   - This changes only call pacing; M5 task count, trial count, scoring, and thresholds remain unchanged.
 - Gate status:
   - Still not passed. The full 20-skill corpus run must be retried at the 5000ms pace after a cooldown.
+
+### M5 - 5000ms Pace Hit Connection Error
+
+- Serialized retry command:
+  - Run directory: `results/launch/20260605T041138Z`.
+  - Command: `NVIDIA_REQUEST_DELAY_MS=5000 node dist/bin/skillcheck.js corpus run --corpus corpus/launch-20.json --results results/launch/20260605T041138Z --tasks 10 --trials 3 --concurrency 1`.
+  - Exit code: 1.
+- Evidence:
+  - Reused cached `awesome-nextjs` and `awesome-react` work and wrote two result JSON files.
+  - Next.js result: verdict `placebo`, effect `20`, CI `[-3.33, 46.67]`.
+  - React result: verdict `placebo`, effect `-10`, CI `[-33.33, 16.67]`.
+  - The third skill, `awesome-fastapi`, failed on task `t001` trial 1/3 `with_skill` after NVIDIA connection retries through retry `4/5`.
+  - Final error: `Connection error.`
+- Follow-up implementation change:
+  - Increased NVIDIA retryable failure attempts from 5 to 8.
+  - `skillcheck corpus run` now resumes within a target results directory by skipping existing valid result JSON files and re-evaluating missing or invalid outputs.
+  - This changes only provider retry/resume behavior; M5 still uses 20 skills, 10 tasks, 3 trials, blind grading, and unchanged verdict thresholds.
+- Local verification:
+  - `npm run typecheck`: passed.
+  - `npm test`: passed, 6 test files, 15 tests.
+  - `npm run build`: passed.
+- Gate status:
+  - Still not passed. The same run directory can now be retried and should continue from the first missing skill while preserving the two completed results.

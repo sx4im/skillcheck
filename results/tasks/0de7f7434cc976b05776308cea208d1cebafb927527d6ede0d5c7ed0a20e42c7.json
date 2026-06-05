@@ -1,0 +1,62 @@
+[
+  {
+    "id": "t001",
+    "prompt": "Create Pydantic v2 schemas UserCreate (strict mode, email/password fields) and UserResponse (from_attributes=True, excludes password) in app/schemas/user.py.",
+    "criterionType": "rubric",
+    "criterion": "Pass if UserCreate rejects extra fields, UserResponse serializes ORM objects and omits password."
+  },
+  {
+    "id": "t002",
+    "prompt": "Implement an async DELETE /users/{user_id} endpoint that only allows admin users to delete users, using get_current_user.",
+    "criterionType": "rubric",
+    "criterion": "Pass if non-admin users get 403, admin users can delete the target user, and the endpoint uses async def."
+  },
+  {
+    "id": "t003",
+    "prompt": "Write an Alembic migration that adds a created_at column to the users table, with non-empty upgrade() and downgrade() functions.",
+    "criterionType": "rubric",
+    "criterion": "Pass if alembic upgrade adds the column, downgrade removes it, and alembic check reports no missing migrations."
+  },
+  {
+    "id": "t004",
+    "prompt": "Create a background task in app/tasks.py for async user data processing, trigger it from the POST /users/ endpoint.",
+    "criterionType": "rubric",
+    "criterion": "Pass if the task runs in the background after user creation, does not delay the API response, and completes successfully."
+  },
+  {
+    "id": "t005",
+    "prompt": "Refactor a CPU-bound user data processing function to use asyncio.run_in_executor to avoid blocking the event loop.",
+    "criterionType": "rubric",
+    "criterion": "Pass if the function runs in a thread pool, and does not block other async requests during execution."
+  },
+  {
+    "id": "t006",
+    "prompt": "Add an async POST /users/ endpoint that uses BackgroundTasks to send a welcome email after user creation.",
+    "criterionType": "rubric",
+    "criterion": "Pass if the endpoint returns 201, the email task is queued, and no blocking I/O runs in the handler."
+  },
+  {
+    "id": "t007",
+    "prompt": "Write a test for POST /users/ that uses app.dependency_overrides to mock the get_db dependency.",
+    "criterionType": "rubric",
+    "criterion": "Pass if the test runs without a real database, and correctly asserts the endpoint's response status and body."
+  },
+  {
+    "id": "t008",
+    "prompt": "Create a reusable TimestampMixin class with created_at and updated_at columns, inherit it in the User ORM model.",
+    "criterionType": "rubric",
+    "criterion": "Pass if the mixin works for the User model, and can be reused for other ORM models without duplication."
+  },
+  {
+    "id": "t009",
+    "prompt": "Create a pagination dependency in app/dependencies.py that returns limit (default 10) and offset (default 0) query parameters.",
+    "criterionType": "rubric",
+    "criterion": "Pass if the dependency parses query params correctly, applies defaults, and works with route injection."
+  },
+  {
+    "id": "t010",
+    "prompt": "Configure ruff in pyproject.toml for 88 character line length, and add a pre-commit hook for ruff check and format.",
+    "criterionType": "rubric",
+    "criterion": "Pass if ruff check . and ruff format --check . run without errors on project code."
+  }
+]

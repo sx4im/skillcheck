@@ -135,6 +135,21 @@ async function pathExists(filePath: string): Promise<boolean> {
   }
 }
 
+async function hasValidJsonFile(filePath: string): Promise<boolean> {
+  try {
+    JSON.parse(await readFile(filePath, 'utf8'));
+    return true;
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code === 'ENOENT') {
+      return false;
+    }
+    if (error instanceof SyntaxError) {
+      return false;
+    }
+    throw error;
+  }
+}
+
 function repoSlug(repo: string): string {
   return slugify(repo.replace(/^https:\/\/github\.com\//, '').replace(/\.git$/, ''));
 }
@@ -234,6 +249,22 @@ export async function runCorpus(options: CorpusRunOptions): Promise<CorpusRunRep
 
     const outputPath = path.join(options.outputDir, `${slugify(source)}-${slugify(skill.id)}.json`);
     const inputPath = path.join(root, skill.path);
+    const entry: CorpusRunEntry = {
+      id: skill.id,
+      source,
+      ...(repo ? { repo } : {}),
+      ...(commit ? { commit } : {}),
+      path: skill.path,
+      input_path: inputPath,
+      output_path: outputPath
+    };
+
+    if (await hasValidJsonFile(outputPath)) {
+      console.error(`[corpus] skip ${source}/${skill.id}; existing result`);
+      entries[index] = entry;
+      return;
+    }
+
     console.error(`[corpus] eval ${source}/${skill.id}`);
     await evalSkill({
       inputPath,
@@ -245,15 +276,7 @@ export async function runCorpus(options: CorpusRunOptions): Promise<CorpusRunRep
       sourceLabel: sourceLabel(manifest, skill)
     });
 
-    entries[index] = {
-      id: skill.id,
-      source,
-      ...(repo ? { repo } : {}),
-      ...(commit ? { commit } : {}),
-      path: skill.path,
-      input_path: inputPath,
-      output_path: outputPath
-    };
+    entries[index] = entry;
   }
 
   let nextIndex = 0;
