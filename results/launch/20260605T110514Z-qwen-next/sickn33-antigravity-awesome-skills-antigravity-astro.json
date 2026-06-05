@@ -1,0 +1,188 @@
+{
+  "skill": {
+    "name": "Astro Web Framework",
+    "source": "https://github.com/sickn33/antigravity-awesome-skills/blob/b806b97a9a48063f7bdbee5611caf40edd17e305/plugins/antigravity-awesome-skills-claude/skills/astro/SKILL.md",
+    "format": "SKILL.md",
+    "commit_hash": "6229a3c98861a28d8f1c48b048e21f17b3b8ab61a9f8cf35bf8fc9f87aac9b53",
+    "domain": "Build content-focused websites with Astro — zero JS by default, islands architecture, multi-framework components, and Markdown/MDX support."
+  },
+  "config": {
+    "runner_model": "qwen/qwen3-next-80b-a3b-instruct",
+    "runner_version": "qwen/qwen3-next-80b-a3b-instruct",
+    "grader_model": "qwen/qwen3-next-80b-a3b-instruct",
+    "grader_version": "qwen/qwen3-next-80b-a3b-instruct",
+    "generator_model": "qwen/qwen3-next-80b-a3b-instruct",
+    "trials": 3,
+    "tasks": 10,
+    "temperature": 0.7,
+    "mode": "forced-injection"
+  },
+  "result": {
+    "effect_pp": 0,
+    "ci_pp": [
+      -20,
+      20
+    ],
+    "verdict": "placebo",
+    "with_skill_pass": 0.2,
+    "no_skill_pass": 0.2,
+    "token_overhead": 2425,
+    "value_per_1k_tokens": 0
+  },
+  "tasks": [
+    {
+      "id": "t001",
+      "prompt": "Render a table of statistics from a JSON file using Astro’s data fetching, styled with CSS modules.",
+      "criterion_type": "rubric",
+      "criterion": "Table renders data from JSON file correctly with CSS modules applied; no client-side JavaScript used.",
+      "arm_a_pass_rate": 0,
+      "arm_b_pass_rate": 1
+    },
+    {
+      "id": "t002",
+      "prompt": "Build a product catalog page using Astro and Markdown files, each with price, image, and description in frontmatter.",
+      "criterion_type": "rubric",
+      "criterion": "Catalog renders all products with correct frontmatter data; no JavaScript used for rendering or filtering.",
+      "arm_a_pass_rate": 1,
+      "arm_b_pass_rate": 0
+    },
+    {
+      "id": "t003",
+      "prompt": "Use Astro’s partial hydration to render a live clock island that updates every second, while the rest of the page remains static.",
+      "criterion_type": "rubric",
+      "criterion": "Clock updates every second in the island; page loads without JS and other content remains static.",
+      "arm_a_pass_rate": 0,
+      "arm_b_pass_rate": 0
+    },
+    {
+      "id": "t004",
+      "prompt": "Build a pagination component for a blog listing that loads 5 posts per page using Astro’s page context.",
+      "criterion_type": "rubric",
+      "criterion": "Pagination correctly displays 5 posts per page with functional prev/next links and no client-side JS.",
+      "arm_a_pass_rate": 0,
+      "arm_b_pass_rate": 1
+    },
+    {
+      "id": "t005",
+      "prompt": "Create an Astro site with a homepage displaying three blog previews from Markdown files, using frontmatter for titles and dates, and link each to its full page.",
+      "criterion_type": "rubric",
+      "criterion": "Homepage correctly renders three blog previews with titles, dates, and functional links to individual Markdown pages.",
+      "arm_a_pass_rate": 0,
+      "arm_b_pass_rate": 0
+    },
+    {
+      "id": "t006",
+      "prompt": "Create a 404 page in Astro that uses a custom layout imported from a shared component and includes a link back to the homepage.",
+      "criterion_type": "rubric",
+      "criterion": "404 page renders with correct layout and functional homepage link; no client-side JavaScript used.",
+      "arm_a_pass_rate": 1,
+      "arm_b_pass_rate": 0
+    },
+    {
+      "id": "t007",
+      "prompt": "Integrate a React component into an Astro page that renders a modal dialog, ensuring it only hydrates on user interaction.",
+      "criterion_type": "rubric",
+      "criterion": "Modal component renders and hydrates only after user interaction; page loads without React JS initially.",
+      "arm_a_pass_rate": 0,
+      "arm_b_pass_rate": 0
+    },
+    {
+      "id": "t008",
+      "prompt": "Implement a navigation bar in Astro that dynamically lists all pages from the /pages directory using Astro’s content collections.",
+      "criterion_type": "rubric",
+      "criterion": "Navigation bar automatically populates with all page titles and correct hrefs without hardcoded links.",
+      "arm_a_pass_rate": 0,
+      "arm_b_pass_rate": 0
+    },
+    {
+      "id": "t009",
+      "prompt": "Create a site-wide footer component in Astro that includes social links pulled from a global config file.",
+      "criterion_type": "rubric",
+      "criterion": "Footer renders social links from config file correctly; no client-side logic or hydration used.",
+      "arm_a_pass_rate": 0,
+      "arm_b_pass_rate": 0
+    },
+    {
+      "id": "t010",
+      "prompt": "Use Astro’s islands to add a counter component that increments on click, while keeping the rest of the page static.",
+      "criterion_type": "rubric",
+      "criterion": "Counter increments on click with no rehydration or JS on other page elements; page loads without JS by default.",
+      "arm_a_pass_rate": 0,
+      "arm_b_pass_rate": 0
+    }
+  ],
+  "reproducibility": {
+    "task_suite_path": "results/tasks/a1ded749932a934e92f4c7d1c8ad345954fd5eea0571922c150e7c354c20c056.json",
+    "transcript_hashes": [
+      "sha256:da5f7489c8b4c2afcac52c8b0da3263d53fafe5c2556244f71d98cb6dc1444d8",
+      "sha256:e6801ffc585d6f7361660f72fc64084641db6453329122436af90b5332da1d54",
+      "sha256:1ccfba88a138aea046ee639ebf19323582fd8edd34d91a37706c2821146b07fd",
+      "sha256:4dee3061250a761ccb6412d112cc57ee5a78067b18be297b81e134de4cccc93d",
+      "sha256:e03975356ee8afe2ea88a4aa7811f8b0f0fe84ad9b802453622b1c6705f37b13",
+      "sha256:11e1c51a8cef313c6e1392a6db29ef197a66a455ab1e4afed4fa00b320186aa6",
+      "sha256:66f25d76465883f0b677d01c1d2a911f49304e839da6fd3c4405f17bd4bc689f",
+      "sha256:e2c9ed1e650db5fce15e5918614bd46070e41e42c908749b852c1751d62c2a14",
+      "sha256:fff3ded610a83ed61d109dd86f553cd6bad446f1e147fe61b4b3603ba482d0e3",
+      "sha256:1d7624ac5c1c1c9c61401d2cc5f12cf6f6010dc8785a9bf0da8fb1df162436fe",
+      "sha256:3a98ec6a778c192ce7f9091defe7851ad490ad3b48ba4fd72e3744e0383642fd",
+      "sha256:37700499e2d800346f1185876f68abece0506b24785d6b772ce8ac2c287b2478",
+      "sha256:11579c0b1c032b56fe37679ac345243f867cc8f631d0dd150bcd054516185793",
+      "sha256:e0f6de38db2ea878a859eae501b251c218af6b5b8c67a8fa4307ec91fd195546",
+      "sha256:64b3a77d3074c83c801762ef09f31f364bfb4e93379e25a54cc7725031e0ae28",
+      "sha256:52a65efadbaf2f51204472f0cdec52c769e6ce19a57515e3ff91205fac9d0d74",
+      "sha256:71cf407c75ddc1b1cdefc53410a654a27ec10bd4cca30714de470c3a19a52075",
+      "sha256:8b5ae272e51a72ac3529389516e16d11edb58cc9ed4179711a3f7de5509c39af",
+      "sha256:e8952956ceee10077ba3a6ed9316211868863eb59f0f8721c30e5386da3e85bd",
+      "sha256:fa7d5a79b003569eadd452f000f230960c6262fdfb14a29201f3eabee4c0f59c",
+      "sha256:433150b24dfc4be78080f4cb68fe713cde56b21300aa65b9d28d92cfd255cb03",
+      "sha256:526c7cf7d32917dcdb5a3f1e4d82ba2bda7e2275df6f14e021247a5aece07ce6",
+      "sha256:c3c7cb555916853cb9120e3642d32882fe146d630fa345fde1b18bd8663a92ce",
+      "sha256:e5d1951314c9312dc858774857188f7965fbfe86a682b53153ca7e5e9ddfb1d8",
+      "sha256:6550877da0d3321cdb4f11b3b3800bb6adc7733ae2f9e290539f93d80d889958",
+      "sha256:6f5bd212d66727259d69a896ac03f63055fa5e92dc0c0b378995f18aeb916e05",
+      "sha256:f2334d1eaa4294ee79e6b882899f39f9ec98e5c882d6f507a2c328f6b6cee60b",
+      "sha256:f5fa64ac45b747c10a2109ce9a56b94309295c23ef84bd52a8f6f8b875f49d27",
+      "sha256:602fed3db88286f5495f448d7d6fcd4cb8d6db36dacdbe3f2d752e041d2abd5b",
+      "sha256:0294044134406801c135ef8d806aa30e9f7aef2c07d781eb88e880d1fa024a2a",
+      "sha256:e9246f0ff1cfa04c99c31e5f293b5d23eb546c8789febfb06cb82ad729b3a67f",
+      "sha256:658ecf29dae6bcd512b56e7c7f47b689e69aaea0669fff93bbc2ee0e6f2d9fd6",
+      "sha256:03251f14fff7a47e06d9b9abd60d69c262aff812b1861b5959ff04e0959af61f",
+      "sha256:5c66b475fe2911c3ce3dc5797dfeea01a64f9f4fc73d210231a3179810e86d47",
+      "sha256:d08c4fe38f3631ef427cd0032cc1876e56df7fd5acf2fb479e2554aa6068426b",
+      "sha256:2f243ab3a5c7e7aaa0b3248ed0b1af651490f43a85c8a7a0d94b858cc39bdea2",
+      "sha256:cdb2996d715ded84c4c92ccfe8b5503257da4f83aa7b029950f1e0cfbda26edc",
+      "sha256:dc5ab34be70e76cd55f30db2651dcd961161f6148a3a107c302d3ac538b6d9a4",
+      "sha256:a33ef32636054db41293aba5215f85ed6d8c5ce1c4cb9f55ef77ecc0ad4dfa6a",
+      "sha256:841ba48fc0397193a4437295d2a107247a16c502c8a71835edb6ddc7b66e188c",
+      "sha256:c2677b4ab999cfd416c12a60e158e9dc6dfb2e27bbd17377d287cf23e846d6c7",
+      "sha256:f491d93606ec4fad3c75cbbed95668880578d1de83b15690c9701b7e13536b69",
+      "sha256:575abd5be640ceda945f3e2c877b850547d49f09d53b8e3c83fd84e0b23259a7",
+      "sha256:43b984a4cba82338923a7d74d12d87f296caa9b212d497ccbb36af9d93e79a1d",
+      "sha256:52b462a60fc022382648cdd34cc0d7a49789df27ea134ed161bd8bc36d3fbab6",
+      "sha256:95697fd7fdaa61117691789070092e0065f20dbb28568de9bbfa5fc3901967ad",
+      "sha256:dfac95ea988b6b07ad0be10b865269c30f57699ace90fc4770ad03f6447d3f47",
+      "sha256:366efea4d24fe0002204b05dbb4d27dbaeda1050a64b148219ba6d30d6494106",
+      "sha256:cac37506ca9de68f4cbe63b5f6a920d896d7be75eb4c4ee8df2d96fad01111ba",
+      "sha256:06ec0379ba6f8bf4c4fae31d40adf0d2d38422c3981060a0a5c065f5092e583d",
+      "sha256:dbb3ebf1b47275fe072e2779a7504644a766f1733045d8d581566367e8bab8ee",
+      "sha256:da11d861ca490ee3e1eb998cdcd8b9b92d2e42c98fa901ae0fe080be297646ee",
+      "sha256:6f6f84aa1caa410696fb635cbd3bc61abb4be6ac7669b9f1faf471a79fd906df",
+      "sha256:cc671acfe01353ab317eb5aac91852d2877a9c5f5859cdb2b31cfa3d8d3ed1ef",
+      "sha256:e277794462a0babcb11a1c7b9d523c63f4d709cf71d25d44839dfa9a7d829b49",
+      "sha256:2f494b5e529e753d402d631e395c842d5684c1ab72d9db8621d565ee859bdb24",
+      "sha256:3c5cf4c1694e61e08b33c9c40d11935397eeff5531ed3e0bbdb31d31782c0717",
+      "sha256:fffb571244af59c9e404708f311d35f84935345b6a81f36e0efe320c791e675f",
+      "sha256:982fbe4590c2e1291104e985e1b9612b3b394a26de0e08b5e235dea2675fb476",
+      "sha256:c020f86505cc2025e5159501f1a2f7f38709f61019657cb594aa057855f6e39d"
+    ]
+  },
+  "history": [
+    {
+      "runner_version": "qwen/qwen3-next-80b-a3b-instruct",
+      "run_date": "2026-06-05",
+      "effect_pp": 0,
+      "verdict": "placebo"
+    }
+  ],
+  "run_date": "2026-06-05"
+}

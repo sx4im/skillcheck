@@ -1,0 +1,62 @@
+[
+  {
+    "id": "t001",
+    "prompt": "Render a table of statistics from a JSON file using Astro’s data fetching, styled with CSS modules.",
+    "criterionType": "rubric",
+    "criterion": "Table renders data from JSON file correctly with CSS modules applied; no client-side JavaScript used."
+  },
+  {
+    "id": "t002",
+    "prompt": "Build a product catalog page using Astro and Markdown files, each with price, image, and description in frontmatter.",
+    "criterionType": "rubric",
+    "criterion": "Catalog renders all products with correct frontmatter data; no JavaScript used for rendering or filtering."
+  },
+  {
+    "id": "t003",
+    "prompt": "Use Astro’s partial hydration to render a live clock island that updates every second, while the rest of the page remains static.",
+    "criterionType": "rubric",
+    "criterion": "Clock updates every second in the island; page loads without JS and other content remains static."
+  },
+  {
+    "id": "t004",
+    "prompt": "Build a pagination component for a blog listing that loads 5 posts per page using Astro’s page context.",
+    "criterionType": "rubric",
+    "criterion": "Pagination correctly displays 5 posts per page with functional prev/next links and no client-side JS."
+  },
+  {
+    "id": "t005",
+    "prompt": "Create an Astro site with a homepage displaying three blog previews from Markdown files, using frontmatter for titles and dates, and link each to its full page.",
+    "criterionType": "rubric",
+    "criterion": "Homepage correctly renders three blog previews with titles, dates, and functional links to individual Markdown pages."
+  },
+  {
+    "id": "t006",
+    "prompt": "Create a 404 page in Astro that uses a custom layout imported from a shared component and includes a link back to the homepage.",
+    "criterionType": "rubric",
+    "criterion": "404 page renders with correct layout and functional homepage link; no client-side JavaScript used."
+  },
+  {
+    "id": "t007",
+    "prompt": "Integrate a React component into an Astro page that renders a modal dialog, ensuring it only hydrates on user interaction.",
+    "criterionType": "rubric",
+    "criterion": "Modal component renders and hydrates only after user interaction; page loads without React JS initially."
+  },
+  {
+    "id": "t008",
+    "prompt": "Implement a navigation bar in Astro that dynamically lists all pages from the /pages directory using Astro’s content collections.",
+    "criterionType": "rubric",
+    "criterion": "Navigation bar automatically populates with all page titles and correct hrefs without hardcoded links."
+  },
+  {
+    "id": "t009",
+    "prompt": "Create a site-wide footer component in Astro that includes social links pulled from a global config file.",
+    "criterionType": "rubric",
+    "criterion": "Footer renders social links from config file correctly; no client-side logic or hydration used."
+  },
+  {
+    "id": "t010",
+    "prompt": "Use Astro’s islands to add a counter component that increments on click, while keeping the rest of the page static.",
+    "criterionType": "rubric",
+    "criterion": "Counter increments on click with no rehydration or JS on other page elements; page loads without JS by default."
+  }
+]
