@@ -1063,3 +1063,15 @@
   - Thirty-four transient NVIDIA connection retry lines have appeared in the fresh run log so far; no 429 lines have appeared.
 - Gate status:
   - Still not passed. The fresh Qwen Next launch is active and incomplete.
+
+### M5 - Fresh Qwen Next Launch Sixteenth Result
+
+- Checkpoint evidence:
+  - The fresh launch directory remains `results/launch/20260605T110514Z-qwen-next`.
+  - `antigravity-api-design`: verdict `placebo`, effect `-20`, CI `[-40, 3.33]`.
+  - The result uses 10 generated tasks and 3 paired trials per task.
+  - The generated task suite is `results/tasks/d55c130ea7d1a2618a99c56f1321b060c6a085198d779627d39d42c23a98730d.json`.
+  - The fresh launch has 16 of 20 result JSON files completed.
+  - Fifty-seven transient NVIDIA connection retry lines have appeared in the fresh run log so far; no 429 lines have appeared.
+- Gate status:
+  - Still not passed. The fresh Qwen Next launch is active and incomplete.
