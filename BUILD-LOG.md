@@ -1022,7 +1022,7 @@
 - Reason for new directory:
   - Model config changed, so the final M5 launch cannot honestly mix with the six old-model partial results from `results/launch/20260605T041138Z`.
 - Current evidence:
-  - 11 of 20 result JSON files completed so far.
+  - 12 of 20 result JSON files completed so far.
   - `awesome-nextjs`: verdict `placebo`, effect `10`, CI `[-6.75, 26.75]`.
   - `awesome-react`: verdict `harms`, effect `-20`, CI `[-36.67, -6.67]`.
   - `awesome-fastapi`: verdict `placebo`, effect `-10`, CI `[-26.67, 10]`.
@@ -1034,6 +1034,7 @@
   - `matt-architecture`: verdict `placebo`, effect `0`, CI `[-16.67, 16.67]`.
   - `matt-prototype`: verdict `helps`, effect `20`, CI `[6.67, 33.33]`.
   - `matt-to-prd`: verdict `harms`, effect `-30`, CI `[-46.67, -13.33]`.
-  - Six transient NVIDIA connection retries have appeared and recovered on retry `1/8`; no 429 lines have appeared in the fresh run log so far.
+  - `matt-to-issues`: verdict `harms`, effect `-20`, CI `[-36.67, -6.67]`.
+  - Eleven transient NVIDIA connection retry lines have appeared, including one call that recovered on retry `2/8`; no 429 lines have appeared in the fresh run log so far.
 - Gate status:
   - Still not passed. The fresh Qwen Next launch is active and incomplete.

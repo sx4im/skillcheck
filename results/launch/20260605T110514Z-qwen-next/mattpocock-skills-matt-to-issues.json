@@ -1,0 +1,188 @@
+{
+  "skill": {
+    "name": "To Issues",
+    "source": "https://github.com/mattpocock/skills/blob/aaf2453fbdfe7a15c07f11d861224f34ab4b53cb/skills/engineering/to-issues/SKILL.md",
+    "format": "SKILL.md",
+    "commit_hash": "0e6a2973fa5bdf32570227c578f7e474d945dd9281615d31439664c3ef016fce",
+    "domain": "Break a plan, spec, or PRD into independently-grabbable issues on the project issue tracker using tracer-bullet vertical slices. Use when user wants to convert a plan into issues, create implementation tickets, or break down work into issues."
+  },
+  "config": {
+    "runner_model": "qwen/qwen3-next-80b-a3b-instruct",
+    "runner_version": "qwen/qwen3-next-80b-a3b-instruct",
+    "grader_model": "qwen/qwen3-next-80b-a3b-instruct",
+    "grader_version": "qwen/qwen3-next-80b-a3b-instruct",
+    "generator_model": "qwen/qwen3-next-80b-a3b-instruct",
+    "trials": 3,
+    "tasks": 10,
+    "temperature": 0.7,
+    "mode": "forced-injection"
+  },
+  "result": {
+    "effect_pp": -20,
+    "ci_pp": [
+      -36.67,
+      -6.67
+    ],
+    "verdict": "harms",
+    "with_skill_pass": 0,
+    "no_skill_pass": 0.2,
+    "token_overhead": 783,
+    "value_per_1k_tokens": -25.54
+  },
+  "tasks": [
+    {
+      "id": "t001",
+      "prompt": "Design and implement logout endpoint that deletes refresh token cookie and invalidates JWT on server.",
+      "criterion_type": "rubric",
+      "criterion": "Logout returns 200 and cookie is removed from browser; token is rejected on subsequent use.",
+      "arm_a_pass_rate": 0,
+      "arm_b_pass_rate": 0
+    },
+    {
+      "id": "t002",
+      "prompt": "Ensure all sensitive headers (e.g., Set-Cookie) are not exposed to client-side JavaScript.",
+      "criterion_type": "rubric",
+      "criterion": "HTTP-only flag is set on refresh token cookie and document.cookie cannot read it.",
+      "arm_a_pass_rate": 0,
+      "arm_b_pass_rate": 0
+    },
+    {
+      "id": "t003",
+      "prompt": "Build user profile endpoint that returns email and created_at when authenticated with valid token.",
+      "criterion_type": "rubric",
+      "criterion": "Endpoint returns 200 with correct user data only when valid token is provided; 401 otherwise.",
+      "arm_a_pass_rate": 0,
+      "arm_b_pass_rate": 1
+    },
+    {
+      "id": "t004",
+      "prompt": "Add health check endpoint that returns 200 OK without authentication.",
+      "criterion_type": "rubric",
+      "criterion": "Endpoint responds with 200 and {\"status\":\"ok\"} regardless of auth state.",
+      "arm_a_pass_rate": 0,
+      "arm_b_pass_rate": 0
+    },
+    {
+      "id": "t005",
+      "prompt": "Add logging for all auth events (login, logout, token refresh) with timestamp and IP.",
+      "criterion_type": "rubric",
+      "criterion": "Logs contain required fields and are written to file or stdout in JSON format.",
+      "arm_a_pass_rate": 0,
+      "arm_b_pass_rate": 0
+    },
+    {
+      "id": "t006",
+      "prompt": "Create a database migration to add users table with email, hashed_password, and created_at fields.",
+      "criterion_type": "rubric",
+      "criterion": "Migration runs without errors and creates table with exact schema specified, no extra or missing columns.",
+      "arm_a_pass_rate": 0,
+      "arm_b_pass_rate": 0
+    },
+    {
+      "id": "t007",
+      "prompt": "Build a frontend login form with email, password, and submit button that sends data to the auth endpoint.",
+      "criterion_type": "rubric",
+      "criterion": "Form submits valid JSON to auth endpoint on button click and displays error on 401 response.",
+      "arm_a_pass_rate": 0,
+      "arm_b_pass_rate": 0
+    },
+    {
+      "id": "t008",
+      "prompt": "Add input validation to reject malformed email addresses before hashing or DB insertion.",
+      "criterion_type": "rubric",
+      "criterion": "Invalid emails (e.g., no @) return 400; valid emails proceed to hashing and storage.",
+      "arm_a_pass_rate": 0,
+      "arm_b_pass_rate": 0
+    },
+    {
+      "id": "t009",
+      "prompt": "Create a test user seed script to populate DB with 10 dummy users for QA.",
+      "criterion_type": "rubric",
+      "criterion": "Script runs without errors and inserts exactly 10 users with unique emails and valid hashes.",
+      "arm_a_pass_rate": 0,
+      "arm_b_pass_rate": 0
+    },
+    {
+      "id": "t010",
+      "prompt": "Implement user authentication endpoint using JWT tokens with email and password input, returning 200 OK on success and 401 on failure.",
+      "criterion_type": "rubric",
+      "criterion": "Endpoint accepts valid credentials and returns 200 with token, or 401 with error message for invalid credentials.",
+      "arm_a_pass_rate": 0,
+      "arm_b_pass_rate": 1
+    }
+  ],
+  "reproducibility": {
+    "task_suite_path": "results/tasks/9a1c1db49ddbf171ce6d90bfa2f99b983fff026c96561c1da624ea0f2aa34f3f.json",
+    "transcript_hashes": [
+      "sha256:64a5ccbbc29c8c75ed216a038ae03a7619eed2a86e142b0e26b4f06da76611c0",
+      "sha256:006e42f39d4d058367e086610670bbed353638094db8775c0a0fd3c819c4a60d",
+      "sha256:1335aede1f5db6e0900083b680c5ae1e356ff61bb0f4896f128389b55bd45dae",
+      "sha256:d0318b24dde527f57f7e0d632d533337197a950455af60ea6e42e593f652d6f9",
+      "sha256:c2a4bfb8fd713ce8ee1ab20a19c27db19eb4ac26e200d1b051c1988393835f49",
+      "sha256:ecfdcca0d542df252b94a0bbb511758a83b06955f3063ec3bce3bb859260beaa",
+      "sha256:54dd6cb70fe26606f7c5451882b23ed0487712131b706ae4de3c4f0d0f256946",
+      "sha256:ebaf942c290ff322c9cba743024fa8a9480ce9f088b3a932ce9dcea02ddecae1",
+      "sha256:429c2fc658f89ff75bd163e3580fe7b0f19ef56b378fd002aefcdf792f1bf7bb",
+      "sha256:72140e9434a75c649ba9e9e989babff1aaea172260ff56b6eebb2f5471a93fd8",
+      "sha256:efa0668a55e576348db96e789db2ff9d8b7595ea46aeef3299ea82d733a73cf5",
+      "sha256:d8055312ec9b2de6b3e086a0d4e767cb2b47f6e8ba3ea41ec06de8def020ad64",
+      "sha256:3a9406756bcbadfb1733b6b7fa6133272a31662db330c942eb89bafdd5222fb1",
+      "sha256:97f091df5b274b5f3a462f759b03abda09fbd45c268f7ed86081020846ca672b",
+      "sha256:aae5f1750d439d6f0752882a5e0b97eeee6c7dc839e2787cad7027134bd0e8e7",
+      "sha256:557be9ba3b36b9a399f48a4a7e634b75c3ec89afb60006ad13c6fc26c7b49bca",
+      "sha256:49e1a341d91be1a261bf96c930bedcc0ce6c60164219829578269cc1f22a0faa",
+      "sha256:b4711cd54ccd199f98103a704a93710b2530a62891a7f91c24ff3e59671bedcd",
+      "sha256:c1b4fc4da3cba43efa982cbc9640f84404760263ba9c1ae72d2970833dc5fa6e",
+      "sha256:b07d7e6b1966302cd99a72f26d6138fbf41774536571e7a3f18a30fa349eec23",
+      "sha256:cf48cda621da7ca611a907aef8e7260e65e4c5ab69d08f14d8994b1275d46888",
+      "sha256:dc3344fb838f7ad0d0902f40f098b5179b80f763ac5fc9ae58622d8c5c1f9b72",
+      "sha256:2595ce80f3f2ff62978bbea35bb2b4eb97b662947a63481f0a5033fd95772b2b",
+      "sha256:832b8eb144ef0bf6ae1e13d62199175317487e73fd40267c80040d33c18e122d",
+      "sha256:4206122b038b44d1c06000463d8190b10c83d5b1e8880481f85561b658a84e7b",
+      "sha256:d4dcd3c922201fad3b7d6181088a8b3e24abe96629264f0c81dcc786696e01ab",
+      "sha256:e9111d1c01551268ec49cc85653035b9cf3c0ce202fe1a6fa4aa0af38af86cd7",
+      "sha256:c3b72680afe9554a5623a197b974fe4eb6a4c3d0cef4a2ac5e48f0915682612d",
+      "sha256:0d21cc4d06e7aed49d81335b2697a6928e85db8ca16d6a01f4e46923204eb3c1",
+      "sha256:2eb74cf79b7ec723336db3793aa5a60529a9396e62cf5d9f6a1d8a6ba393afce",
+      "sha256:7ed3c2514f87e066255f2435930210a2a528b586aa5574673e05b33c78ea2259",
+      "sha256:0823c1e81585a8fb8873c44bd875fbe1017f93a84dc58605a95f923b596b1a41",
+      "sha256:ceefe5f80a76392d84e5d2ae76f9b38459e8330d78c2b609d976360118b10d8c",
+      "sha256:3e6470405238144899b909c92a7e0294f31628187a72d2ad83a28e5567a36e0d",
+      "sha256:dbcd6e91ca2325d5a158cdd53075b86538adc69f81dd72a7ca9cec3d018b8812",
+      "sha256:ecd76a923116bedb2121f7ef25cff4a9a0294b8ac71a1c3a3f7bdb7e7799403a",
+      "sha256:357dada4c7d08759b232689c15b4ad7da33b2508defc27fcdf58d226f98933dd",
+      "sha256:49d37a9e8cffbda964aa1cef0380cba5d1b35552990b963e697c2f2ad9fd9ed9",
+      "sha256:56f479f82db9aea6cddef1849118cca1b543bb37a4f115cfa1a64f07e63faa11",
+      "sha256:302126af21811ea6c36956f6291b87dcd57b53e8a3df46e8945e4276110fb3f1",
+      "sha256:5544d5eca98d5627e0a8fb22f8f454108a3fe43f3913fd411cd8b175ad84857f",
+      "sha256:c77f214b0a0db149fb201995852433a5e46474986fb618e2c8a608f14d91d325",
+      "sha256:7eeb2b6fe70ac9e57afc751d9ba1355d40d6b432f3b1fe1c0bbd18d880c08526",
+      "sha256:4817265b01f8b0ca9f938dbc1297917df401c4b5bf3b8a3a04737b25f77a3b94",
+      "sha256:855002480b42b11f16a9644400d5ce20bbeec4aa05e6f1f94e34fdecdda2bda1",
+      "sha256:2410ceebbfa989b5b291fc7ff7270b1ea6b937378bf5516e218e70fdbe68e616",
+      "sha256:a619db4ac2d5f1bf68e14ebcc22049181694c38921b42df466b71a90a5a26128",
+      "sha256:c8bcd5ee447987b5d0538f757fea71b056ae2b27f48e991056af778ff42aaa7f",
+      "sha256:a04b54095a2f17b0f580e9f53028008add67776e22b4bad7f2f603b91fda0ba0",
+      "sha256:e339f3e202b5f1993dd15125e65d7097f76ec6d5f02cd108a8671315889e092d",
+      "sha256:9402baa2dba166bd7e73c888e40f7bcb985476529d8544f02695e72be067fde4",
+      "sha256:54e5b152992b777aeb5dac9ad3f2ceded1b57f6733b6d16db6c19ea133cc6fd9",
+      "sha256:bcfa1dbb0e6463092cdfbce6eceb12edff88a2f1d7e8595e9afe6737f4f11985",
+      "sha256:945e5f7d4bdaff46dace75385447ca3527cadf80df8c2cabb9dfb47ade563f78",
+      "sha256:4fd943eb1c8b641274752d6780d51e72052bab3da722de308b66edbfa20b4d6a",
+      "sha256:e1744f6b364c2ae92ec74597d5654c09bf1ec7fbddbcb6e3f13f67df4ef78ddc",
+      "sha256:80289f126af0e9ec7dff0bb9a273173507c20de8b52f1530bd820c8c723e5544",
+      "sha256:e09cb834593c7247470fbdc9df8782a0bee075ba8b4778dbb8c9f50a8ab12078",
+      "sha256:7c11aeffd93f9eb3de83589ab4ebde8a9e446049b1547e0711a9f7d91fa0b2bf",
+      "sha256:3017218d9387f31676f77b397badd3da86e3a80b557875c02b2cf6ae4c815669"
+    ]
+  },
+  "history": [
+    {
+      "runner_version": "qwen/qwen3-next-80b-a3b-instruct",
+      "run_date": "2026-06-05",
+      "effect_pp": -20,
+      "verdict": "harms"
+    }
+  ],
+  "run_date": "2026-06-05"
+}

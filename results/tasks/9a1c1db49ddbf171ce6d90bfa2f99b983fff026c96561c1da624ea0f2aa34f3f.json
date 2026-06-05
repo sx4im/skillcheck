@@ -1,0 +1,62 @@
+[
+  {
+    "id": "t001",
+    "prompt": "Design and implement logout endpoint that deletes refresh token cookie and invalidates JWT on server.",
+    "criterionType": "rubric",
+    "criterion": "Logout returns 200 and cookie is removed from browser; token is rejected on subsequent use."
+  },
+  {
+    "id": "t002",
+    "prompt": "Ensure all sensitive headers (e.g., Set-Cookie) are not exposed to client-side JavaScript.",
+    "criterionType": "rubric",
+    "criterion": "HTTP-only flag is set on refresh token cookie and document.cookie cannot read it."
+  },
+  {
+    "id": "t003",
+    "prompt": "Build user profile endpoint that returns email and created_at when authenticated with valid token.",
+    "criterionType": "rubric",
+    "criterion": "Endpoint returns 200 with correct user data only when valid token is provided; 401 otherwise."
+  },
+  {
+    "id": "t004",
+    "prompt": "Add health check endpoint that returns 200 OK without authentication.",
+    "criterionType": "rubric",
+    "criterion": "Endpoint responds with 200 and {\"status\":\"ok\"} regardless of auth state."
+  },
+  {
+    "id": "t005",
+    "prompt": "Add logging for all auth events (login, logout, token refresh) with timestamp and IP.",
+    "criterionType": "rubric",
+    "criterion": "Logs contain required fields and are written to file or stdout in JSON format."
+  },
+  {
+    "id": "t006",
+    "prompt": "Create a database migration to add users table with email, hashed_password, and created_at fields.",
+    "criterionType": "rubric",
+    "criterion": "Migration runs without errors and creates table with exact schema specified, no extra or missing columns."
+  },
+  {
+    "id": "t007",
+    "prompt": "Build a frontend login form with email, password, and submit button that sends data to the auth endpoint.",
+    "criterionType": "rubric",
+    "criterion": "Form submits valid JSON to auth endpoint on button click and displays error on 401 response."
+  },
+  {
+    "id": "t008",
+    "prompt": "Add input validation to reject malformed email addresses before hashing or DB insertion.",
+    "criterionType": "rubric",
+    "criterion": "Invalid emails (e.g., no @) return 400; valid emails proceed to hashing and storage."
+  },
+  {
+    "id": "t009",
+    "prompt": "Create a test user seed script to populate DB with 10 dummy users for QA.",
+    "criterionType": "rubric",
+    "criterion": "Script runs without errors and inserts exactly 10 users with unique emails and valid hashes."
+  },
+  {
+    "id": "t010",
+    "prompt": "Implement user authentication endpoint using JWT tokens with email and password input, returning 200 OK on success and 401 on failure.",
+    "criterionType": "rubric",
+    "criterion": "Endpoint accepts valid credentials and returns 200 with token, or 401 with error message for invalid credentials."
+  }
+]
