@@ -12,10 +12,12 @@ interface GradePayload {
 
 function parseGrade(text: string): GradePayload {
   const trimmed = text.trim();
-  const start = trimmed.indexOf('{');
-  const end = trimmed.lastIndexOf('}');
-  if (start !== -1 && end !== -1 && end > start) {
-    const parsed = JSON.parse(trimmed.slice(start, end + 1)) as Record<string, unknown>;
+  if (trimmed.startsWith('{')) {
+    const end = trimmed.lastIndexOf('}');
+    if (end === -1) {
+      throw new Error('Grader JSON object was not closed');
+    }
+    const parsed = JSON.parse(trimmed.slice(0, end + 1)) as Record<string, unknown>;
     const score = Number(parsed.score);
     if (!Number.isFinite(score)) {
       throw new Error('Grader JSON missing numeric score');

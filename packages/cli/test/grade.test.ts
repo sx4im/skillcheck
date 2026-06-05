@@ -58,4 +58,50 @@ describe('gradeOutputs', () => {
     expect(calls).toBe(2);
     expect(graded[0]?.pass).toBe(true);
   });
+
+  it('falls back for reasoning text that contains code braces', async () => {
+    const cacheDir = await mkdtemp(path.join(tmpdir(), 'skillcheck-grade-cache-'));
+    const client = {
+      complete: async () => ({
+        content: 'The output meets the criterion. Example code contains braces: function x() { return true; }',
+        model: 'grader',
+        usage: { promptTokens: 1, completionTokens: 1, totalTokens: 2 }
+      })
+    } as unknown as NvidiaNimClient;
+    const config = {
+      baseUrl: 'https://example.test',
+      apiKey: 'test',
+      timeoutMs: 1000,
+      requestDelayMs: 0,
+      generatorModel: 'generator',
+      graderModel: 'grader',
+      runnerModel: 'runner'
+    } satisfies NvidiaConfig;
+    const tasks: GeneratedTask[] = [
+      {
+        id: 't001',
+        prompt: 'Do the task',
+        criterionType: 'rubric',
+        criterion: 'Output must satisfy the task.'
+      }
+    ];
+    const outputs: TrialOutput[] = [
+      {
+        taskId: 't001',
+        trial: 1,
+        arm: 'with_skill',
+        output: 'The task is satisfied.',
+        model: 'runner',
+        promptTokens: 1,
+        completionTokens: 1,
+        totalTokens: 2,
+        transcriptHash: 'sha256:test'
+      }
+    ];
+
+    const graded = await gradeOutputs(tasks, outputs, config, client, new JsonCache(cacheDir));
+
+    expect(graded[0]?.pass).toBe(true);
+    expect(graded[0]?.reason).toContain('non-json grader response');
+  });
 });

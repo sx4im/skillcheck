@@ -625,3 +625,25 @@
   - Added a unit test proving malformed grader JSON is retried.
 - Gate status:
   - Still not passed. The full 20-skill corpus run must be retried after the grader retry fix.
+
+### M5 - Grader Parser Fix
+
+- Serialized retry command:
+  - Run directory: `results/launch/20260605T034622Z`.
+  - Command: `node dist/bin/skillcheck.js corpus run --corpus corpus/launch-20.json --results results/launch/20260605T034622Z --tasks 10 --trials 3 --concurrency 1`.
+  - Exit code: 1.
+- Failure evidence:
+  - Cached runner outputs allowed the run to reach grading quickly for `awesome-nextjs`.
+  - `gradeOutputs` retried malformed grader JSON 3 times for one output.
+  - All 3 grader responses were Step 3.7 reasoning text containing code braces rather than a leading JSON object.
+  - Existing parser attempted to parse an internal code brace and failed with `Expected property name or '}' in JSON at position 1`.
+- Follow-up implementation change:
+  - `parseGrade` now parses JSON only when the response begins with a JSON object.
+  - Reasoning text that contains code braces now uses the existing non-JSON pass/fail fallback instead of crashing.
+  - Added a regression test for reasoning text containing code braces.
+- Local verification:
+  - `npm run typecheck`: passed.
+  - `npm test`: passed, 6 test files, 15 tests.
+  - `npm run build`: passed.
+- Gate status:
+  - Still not passed. The full 20-skill corpus run must be retried after the grader parser fix.
