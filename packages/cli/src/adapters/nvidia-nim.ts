@@ -109,9 +109,11 @@ function describeRetry(error: unknown, attempt: number, waitMs: number): void {
 }
 
 export class NvidiaNimClient {
+  private static requestQueue: Promise<void> = Promise.resolve();
+  private static lastRequestAt = 0;
+
   private readonly client: OpenAI;
   private readonly requestDelayMs: number;
-  private lastRequestAt = 0;
 
   constructor(config: NvidiaConfig) {
     this.requestDelayMs = config.requestDelayMs;
@@ -123,17 +125,27 @@ export class NvidiaNimClient {
     });
   }
 
-  private async waitForRateLimitTurn(): Promise<void> {
-    if (this.requestDelayMs === 0) {
-      return;
-    }
+  private async runSerializedRequest<T>(operation: () => Promise<T>): Promise<T> {
+    const previousRequest = NvidiaNimClient.requestQueue;
+    let releaseCurrentRequest: () => void = () => undefined;
+    NvidiaNimClient.requestQueue = new Promise<void>((resolve) => {
+      releaseCurrentRequest = resolve;
+    });
 
-    const elapsedMs = Date.now() - this.lastRequestAt;
-    const waitMs = Math.max(0, this.requestDelayMs - elapsedMs);
-    if (waitMs > 0) {
-      await sleep(waitMs);
+    await previousRequest;
+    try {
+      if (this.requestDelayMs > 0) {
+        const elapsedMs = Date.now() - NvidiaNimClient.lastRequestAt;
+        const waitMs = Math.max(0, this.requestDelayMs - elapsedMs);
+        if (waitMs > 0) {
+          await sleep(waitMs);
+        }
+      }
+      NvidiaNimClient.lastRequestAt = Date.now();
+      return await operation();
+    } finally {
+      releaseCurrentRequest();
     }
-    this.lastRequestAt = Date.now();
   }
 
   async complete(request: CompletionRequest): Promise<CompletionResponse> {
@@ -141,7 +153,6 @@ export class NvidiaNimClient {
 
     for (let attempt = 0; attempt < 5; attempt += 1) {
       try {
-        await this.waitForRateLimitTurn();
         const extraBody = request.chatTemplateKwargs
           ? {
               chat_template_kwargs: request.chatTemplateKwargs
@@ -157,7 +168,9 @@ export class NvidiaNimClient {
           extra_body: extraBody,
           stream: false
         };
-        const response = (await this.client.chat.completions.create(requestBody)) as ChatCompletion;
+        const response = (await this.runSerializedRequest(() =>
+          this.client.chat.completions.create(requestBody)
+        )) as ChatCompletion;
 
         const message = response.choices[0]?.message;
         const content = extractMessageText(message);

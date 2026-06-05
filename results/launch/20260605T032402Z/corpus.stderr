@@ -1,0 +1,64 @@
+[corpus] eval jnMetaCode/awesome-claude-md/awesome-nextjs
+[corpus] eval jnMetaCode/awesome-claude-md/awesome-react
+[nim] retry 1/5 after connection; waiting 891 ms
+[eval] run t001 trial 1/3 with_skill
+[nim] retry 2/5 after connection; waiting 1199 ms
+[nim] retry 1/5 after connection; waiting 660 ms
+[eval] run t001 trial 1/3 with_skill
+[nim] retry 2/5 after connection; waiting 1069 ms
+[nim] retry 1/5 after connection; waiting 535 ms
+[eval] run t001 trial 1/3 no_skill
+[eval] run t001 trial 1/3 no_skill
+[nim] retry 1/5 after connection; waiting 952 ms
+[eval] run t001 trial 2/3 with_skill
+[eval] run t001 trial 2/3 no_skill
+[eval] run t001 trial 3/3 with_skill
+[eval] run t001 trial 3/3 no_skill
+[eval] run t002 trial 1/3 with_skill
+[eval] run t002 trial 1/3 no_skill
+[eval] run t001 trial 2/3 with_skill
+[eval] run t001 trial 2/3 no_skill
+[eval] run t001 trial 3/3 with_skill
+[eval] run t001 trial 3/3 no_skill
+[eval] run t002 trial 1/3 with_skill
+[nim] retry 1/5 after connection; waiting 656 ms
+[nim] retry 1/5 after connection; waiting 991 ms
+[nim] retry 2/5 after status 502; waiting 1268 ms
+[eval] run t002 trial 2/3 with_skill
+[eval] run t002 trial 2/3 no_skill
+[eval] run t002 trial 3/3 with_skill
+[eval] run t002 trial 3/3 no_skill
+[eval] run t003 trial 1/3 with_skill
+[eval] run t003 trial 1/3 no_skill
+[eval] run t002 trial 1/3 no_skill
+[eval] run t003 trial 2/3 with_skill
+[eval] run t003 trial 2/3 no_skill
+[eval] run t003 trial 3/3 with_skill
+[eval] run t003 trial 3/3 no_skill
+[eval] run t004 trial 1/3 with_skill
+[eval] run t002 trial 2/3 with_skill
+[eval] run t002 trial 2/3 no_skill
+[eval] run t002 trial 3/3 with_skill
+[eval] run t002 trial 3/3 no_skill
+[eval] run t003 trial 1/3 with_skill
+[eval] run t004 trial 1/3 no_skill
+[eval] run t003 trial 1/3 no_skill
+[eval] run t004 trial 2/3 with_skill
+[eval] run t004 trial 2/3 no_skill
+[eval] run t004 trial 3/3 with_skill
+[eval] run t004 trial 3/3 no_skill
+[eval] run t005 trial 1/3 with_skill
+[eval] run t003 trial 2/3 with_skill
+[eval] run t003 trial 2/3 no_skill
+[eval] run t003 trial 3/3 with_skill
+[eval] run t003 trial 3/3 no_skill
+[eval] run t004 trial 1/3 with_skill
+[eval] run t005 trial 1/3 no_skill
+[nim] retry 1/5 after connection; waiting 868 ms
+[eval] run t005 trial 2/3 with_skill
+[eval] run t005 trial 2/3 no_skill
+[eval] run t005 trial 3/3 with_skill
+[eval] run t005 trial 3/3 no_skill
+[eval] run t006 trial 1/3 with_skill
+[nim] retry 1/5 after connection; waiting 529 ms
+[eval] run t004 trial 1/3 no_skill

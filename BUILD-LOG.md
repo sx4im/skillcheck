@@ -589,3 +589,21 @@
   - Added a unit test proving malformed generator JSON is retried.
 - Gate status:
   - Still not passed. The full 20-skill corpus run produced no result JSON and must be rerun after the generator retry fix.
+
+### M5 - Serialized NVIDIA Request Policy
+
+- User-provided rate-limit context:
+  - The build.nvidia.com dashboard reports up to `40 RPM` for the NVIDIA NIM key.
+  - Concurrent corpus execution can issue multiple requests against the same key/model at once and increase 429/connection/502 risk.
+- Interrupted concurrency-2 retry:
+  - Run directory: `results/launch/20260605T032402Z`.
+  - Command: `node dist/bin/skillcheck.js corpus run --corpus corpus/launch-20.json --results results/launch/20260605T032402Z --tasks 10 --trials 3 --concurrency 2`.
+  - Exit marker: `130`, intentionally stopped after deciding to serialize requests.
+  - Progress before stop: `awesome-nextjs` and `awesome-react` were both in progress; no result JSON files had been produced.
+  - Two task suites were generated and left under `results/tasks/` for reuse by the serialized retry.
+- Follow-up implementation change:
+  - `NvidiaNimClient` now uses a process-wide serialized request queue, so separate client instances cannot make simultaneous NVIDIA calls.
+  - Existing `NVIDIA_REQUEST_DELAY_MS=1500` remains the inter-request pacing value, matching the user's stated 40 RPM capacity.
+  - `README.md` and `RELEASE-CHECKLIST.md` now show the M5 launch corpus command with `--concurrency 1`.
+- Gate status:
+  - Still not passed. The full 20-skill corpus run must be retried with serialized NVIDIA calls.
