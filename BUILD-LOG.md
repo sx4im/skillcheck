@@ -957,3 +957,18 @@
   - No `awesome-rust` result JSON was written.
 - Gate status:
   - Still not passed. The launch corpus remains at 5 of 20 completed result JSON files, with additional Rust runner calls cached for the next resume.
+
+### M5 - Rust Runner Checkpoint Advanced Within Task 9
+
+- Resumed command:
+  - Run directory: `results/launch/20260605T041138Z`.
+  - Command: `NVIDIA_TIMEOUT_MS=45000 NVIDIA_REQUEST_DELAY_MS=5000 NVIDIA_MAX_ATTEMPTS=14 NVIDIA_MAX_RETRY_DELAY_MS=30000 node dist/bin/skillcheck.js corpus run --corpus corpus/launch-20.json --results results/launch/20260605T041138Z --tasks 10 --trials 3 --concurrency 1`.
+  - Exit code: 1.
+- Evidence:
+  - The run skipped the five existing completed results and reused cached Rust generated tasks plus cached Rust runner outputs.
+  - Rust runner execution advanced past the prior failure at task `t009` trial 1/3 `with_skill`.
+  - The failure occurred on task `t009` trial 1/3 `no_skill` after NVIDIA connection retries through retry `13/14`.
+  - Final error: `Connection error.`
+  - No `awesome-rust` result JSON was written.
+- Gate status:
+  - Still not passed. The launch corpus remains at 5 of 20 completed result JSON files, with one additional Rust runner call cached for the next resume.
