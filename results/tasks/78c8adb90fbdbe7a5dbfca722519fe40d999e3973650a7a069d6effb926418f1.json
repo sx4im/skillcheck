@@ -1,0 +1,62 @@
+[
+  {
+    "id": "t001",
+    "prompt": "Build a UI with a toggle to switch between light and dark mode, showing how text and button colors adapt instantly.",
+    "criterionType": "rubric",
+    "criterion": "Color scheme fully inverts between modes with no residual styles or broken elements."
+  },
+  {
+    "id": "t002",
+    "prompt": "Create a single-page UI that toggles between three data visualization styles: bar chart, pie chart, and table for the same dataset.",
+    "criterionType": "rubric",
+    "criterion": "All three visualizations render the same data accurately and switch without data loss or lag."
+  },
+  {
+    "id": "t003",
+    "prompt": "Make a UI with toggles to switch between three animation styles for a loading spinner: circular, linear, and pulse.",
+    "criterionType": "rubric",
+    "criterion": "Animations play smoothly and independently, with no visual artifacts when switching."
+  },
+  {
+    "id": "t004",
+    "prompt": "Design a UI with toggles to switch between three notification styles: toast, banner, and modal.",
+    "criterionType": "rubric",
+    "criterion": "Notifications appear correctly in their respective styles and can be dismissed without UI corruption."
+  },
+  {
+    "id": "t005",
+    "prompt": "Create a UI with three toggleable navigation structures: tab bar, sidebar, and bottom nav — all displaying the same content.",
+    "criterionType": "rubric",
+    "criterion": "Content remains consistent and fully functional across all three navigation styles."
+  },
+  {
+    "id": "t006",
+    "prompt": "Design a terminal app that simulates user login attempts with three auth strategies: password, OTP, biometric — toggleable on demand.",
+    "criterionType": "rubric",
+    "criterion": "Each auth method responds correctly to simulated inputs and shows distinct feedback per method."
+  },
+  {
+    "id": "t007",
+    "prompt": "Create a UI with toggles to switch between three button styles: outlined, filled, and ghost — applied to all primary actions.",
+    "criterionType": "rubric",
+    "criterion": "All buttons update instantly and consistently across the interface with no style leakage."
+  },
+  {
+    "id": "t008",
+    "prompt": "Build a UI that toggles between three form layouts: single-column, two-column, and modal step-by-step.",
+    "criterionType": "rubric",
+    "criterion": "All three form layouts accept the same inputs and submit without layout-breaking errors."
+  },
+  {
+    "id": "t009",
+    "prompt": "Build a terminal app that lets users toggle between three user roles (admin, editor, viewer) and see how permissions change in real-time.",
+    "criterionType": "rubric",
+    "criterion": "The app correctly updates displayed permissions when the user selects a new role without requiring restart."
+  },
+  {
+    "id": "t010",
+    "prompt": "Prototype a terminal app that simulates a multi-step approval workflow with three approval paths: sequential, parallel, or hybrid.",
+    "criterionType": "rubric",
+    "criterion": "Each path correctly reflects its logic in step progression and final outcome display."
+  }
+]

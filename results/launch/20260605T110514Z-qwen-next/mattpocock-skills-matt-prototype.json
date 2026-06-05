@@ -1,0 +1,188 @@
+{
+  "skill": {
+    "name": "Prototype",
+    "source": "https://github.com/mattpocock/skills/blob/aaf2453fbdfe7a15c07f11d861224f34ab4b53cb/skills/engineering/prototype/SKILL.md",
+    "format": "SKILL.md",
+    "commit_hash": "a653deb65afa2ee8f45c68f6ef4f593147171b386e994c8cccf89292d9ea9d75",
+    "domain": "Build a throwaway prototype to flesh out a design before committing to it. Routes between two branches — a runnable terminal app for state/business-logic questions, or several radically different UI variations toggleable from one route. Use when the user wants to prototype, sanity-check a data model or state machine, mock up a UI, explore design options, or says \"prototype this\", \"let me play with it\", \"try a few designs\"."
+  },
+  "config": {
+    "runner_model": "qwen/qwen3-next-80b-a3b-instruct",
+    "runner_version": "qwen/qwen3-next-80b-a3b-instruct",
+    "grader_model": "qwen/qwen3-next-80b-a3b-instruct",
+    "grader_version": "qwen/qwen3-next-80b-a3b-instruct",
+    "generator_model": "qwen/qwen3-next-80b-a3b-instruct",
+    "trials": 3,
+    "tasks": 10,
+    "temperature": 0.7,
+    "mode": "forced-injection"
+  },
+  "result": {
+    "effect_pp": 20,
+    "ci_pp": [
+      6.67,
+      33.33
+    ],
+    "verdict": "helps",
+    "with_skill_pass": 0.3,
+    "no_skill_pass": 0.1,
+    "token_overhead": 732,
+    "value_per_1k_tokens": 27.32
+  },
+  "tasks": [
+    {
+      "id": "t001",
+      "prompt": "Build a UI with a toggle to switch between light and dark mode, showing how text and button colors adapt instantly.",
+      "criterion_type": "rubric",
+      "criterion": "Color scheme fully inverts between modes with no residual styles or broken elements.",
+      "arm_a_pass_rate": 1,
+      "arm_b_pass_rate": 1
+    },
+    {
+      "id": "t002",
+      "prompt": "Create a single-page UI that toggles between three data visualization styles: bar chart, pie chart, and table for the same dataset.",
+      "criterion_type": "rubric",
+      "criterion": "All three visualizations render the same data accurately and switch without data loss or lag.",
+      "arm_a_pass_rate": 0,
+      "arm_b_pass_rate": 0
+    },
+    {
+      "id": "t003",
+      "prompt": "Make a UI with toggles to switch between three animation styles for a loading spinner: circular, linear, and pulse.",
+      "criterion_type": "rubric",
+      "criterion": "Animations play smoothly and independently, with no visual artifacts when switching.",
+      "arm_a_pass_rate": 0,
+      "arm_b_pass_rate": 0
+    },
+    {
+      "id": "t004",
+      "prompt": "Design a UI with toggles to switch between three notification styles: toast, banner, and modal.",
+      "criterion_type": "rubric",
+      "criterion": "Notifications appear correctly in their respective styles and can be dismissed without UI corruption.",
+      "arm_a_pass_rate": 0,
+      "arm_b_pass_rate": 0
+    },
+    {
+      "id": "t005",
+      "prompt": "Create a UI with three toggleable navigation structures: tab bar, sidebar, and bottom nav — all displaying the same content.",
+      "criterion_type": "rubric",
+      "criterion": "Content remains consistent and fully functional across all three navigation styles.",
+      "arm_a_pass_rate": 0,
+      "arm_b_pass_rate": 0
+    },
+    {
+      "id": "t006",
+      "prompt": "Design a terminal app that simulates user login attempts with three auth strategies: password, OTP, biometric — toggleable on demand.",
+      "criterion_type": "rubric",
+      "criterion": "Each auth method responds correctly to simulated inputs and shows distinct feedback per method.",
+      "arm_a_pass_rate": 0,
+      "arm_b_pass_rate": 0
+    },
+    {
+      "id": "t007",
+      "prompt": "Create a UI with toggles to switch between three button styles: outlined, filled, and ghost — applied to all primary actions.",
+      "criterion_type": "rubric",
+      "criterion": "All buttons update instantly and consistently across the interface with no style leakage.",
+      "arm_a_pass_rate": 0,
+      "arm_b_pass_rate": 0
+    },
+    {
+      "id": "t008",
+      "prompt": "Build a UI that toggles between three form layouts: single-column, two-column, and modal step-by-step.",
+      "criterion_type": "rubric",
+      "criterion": "All three form layouts accept the same inputs and submit without layout-breaking errors.",
+      "arm_a_pass_rate": 0,
+      "arm_b_pass_rate": 0
+    },
+    {
+      "id": "t009",
+      "prompt": "Build a terminal app that lets users toggle between three user roles (admin, editor, viewer) and see how permissions change in real-time.",
+      "criterion_type": "rubric",
+      "criterion": "The app correctly updates displayed permissions when the user selects a new role without requiring restart.",
+      "arm_a_pass_rate": 1,
+      "arm_b_pass_rate": 0
+    },
+    {
+      "id": "t010",
+      "prompt": "Prototype a terminal app that simulates a multi-step approval workflow with three approval paths: sequential, parallel, or hybrid.",
+      "criterion_type": "rubric",
+      "criterion": "Each path correctly reflects its logic in step progression and final outcome display.",
+      "arm_a_pass_rate": 1,
+      "arm_b_pass_rate": 0
+    }
+  ],
+  "reproducibility": {
+    "task_suite_path": "results/tasks/78c8adb90fbdbe7a5dbfca722519fe40d999e3973650a7a069d6effb926418f1.json",
+    "transcript_hashes": [
+      "sha256:75f4e896d3b2be06878892aae43c01116dca9598cb8acc736addc58a4f5d554f",
+      "sha256:66c9aa505557e2e1b8b37312fcfcc7c59767158d65a5a6bd3d3263beb11faeec",
+      "sha256:783150e0ce21cb99c784d751e0d20dd832f043275613ce6c897666836700c3bf",
+      "sha256:bbe68318a9dd714f4b526c4297965174da344d4a05834b051748c466126eb391",
+      "sha256:0c5847b6f52d070e5f81f43fa38fe58ffa81021d130dbf49e939c800002c8463",
+      "sha256:5842eac9d1481d7a54256105289d93204fca5483a120b15eee906b5e181f12dc",
+      "sha256:39501ac7047b47e6a59d3d540d51701510541fc33af311d7cfe279986f80cd9e",
+      "sha256:14805123fe948d16166e52916c82f89b6629a699f3e73ce72d9a476a07783305",
+      "sha256:54f270a0c6916bcac36bf6e7029e8665be69f517caae52e6e3061d55f74c17b7",
+      "sha256:0619b4dd0cf47a09fee5ce3461f150a61b59d694037e398689f38455ce78998c",
+      "sha256:d1d63dca44e7852f32e48925c7c4c916ef6c42b5c91174a9f16842ca915334ec",
+      "sha256:8b7c37df1fab7174da39bb7d3566d8afc7342419d80ff5faec05c8eea362e921",
+      "sha256:b44001c01c937ae136e9870aeea8a6281152a19884f30c4ea44495298ee2cb30",
+      "sha256:9b40ff4519dc8f21f6c0ad088193a1f03ee36dc664c485cec9c99ae36165aee7",
+      "sha256:077cf6e03326b8d4ee0e9b5522a4d1124e278e29bfa0bd748f028e6235e81fca",
+      "sha256:a38cb21aa9ce518ce9eb5c781ec3b0cf6103e8e75201bc3625b40984a7c14b94",
+      "sha256:b551b541884564130c9a7fa7f7be7a171ad01be210c267a07a68f6d8118a7c42",
+      "sha256:b0b1e1c78d7987fdf6e556bb6806b119c0ab640aeecedfaadbf79bb01361838c",
+      "sha256:e35d1d73c06ea927c5784abc9524f77377134d469640d64884b2494bd37b19cf",
+      "sha256:ea230c8865d3de09b8c36a77873326374d3f4f094f798f3cb8f93f802b002c5d",
+      "sha256:53e6be3091d678526551ff11430daa2c1cfa34fb46176db4757a775e507a7559",
+      "sha256:118eb8e0e9c7f79f13c10f703a9b95042fbbed254a8d66c3cc6f47e63f0c8c7a",
+      "sha256:e4504891bdadfdf8336a156ad60cd318e2e1170acf498e36d6d9f68809f15e29",
+      "sha256:b4c78f02d013ebea8bcb83e65e8fc94d6703c7e652b8263a82b6bdfd3c734abf",
+      "sha256:bc953536cfb98cd3ca4318a274506fc3582d3ccc55a593c46d8fd7651dd23022",
+      "sha256:80f3691d32c5a91fc7903dea4b486a0f99447de8156210e7ca6380a8d7720e33",
+      "sha256:3db36c9451a3071630648eb9043083e5c8235525c71eeb30ae65b03fce429f24",
+      "sha256:89bea14e086692e04a05ccefa1dce2e994b8876c6c9951d7fd46b117bdcad2ea",
+      "sha256:8e1821712340307e6a02701acfc1e27a2428d5f3ff175ac97103717617f22771",
+      "sha256:efd2bf3606751ef3cbe756312db9012c0da71faf4fd5bdf1d496703cb17e80fc",
+      "sha256:619a41f5e6270a7d8c42f521f6e01ebbd4ac51c5d2b2d0fced9d4087c5c7c3ef",
+      "sha256:21276e160d67af8cf4dcb2bf652cf2149a13db32c75c3ca0706f33cdd24c9d8e",
+      "sha256:9f139f7614c0e194a0f6e0261368ad0f9bed76f1af73917b1b69efd7a0d8c8f2",
+      "sha256:f12bf41e473db1aa3202689e9539bee3aa88f7c7a6732f241a4906c59bcd9940",
+      "sha256:634beb7eb9269712701583fa46aef120560cb60a2ecdaa04b7016c8d4f8c0d0f",
+      "sha256:a7d729133bed5213b06efdb0bc7f053fd2ea28903b39e4862b675784a48600c2",
+      "sha256:dbb8e73c7daf11fe4dbf771d9e34deb7b3415ac846befdafa616cb938f938717",
+      "sha256:512771b27e59395a631ebade28ba3da9015272b7c37e49e5410bd5837d5ed000",
+      "sha256:e44a8cd3bfa5801c5a926a461ac50ebb2391ed2fb86ac71231d8584e1fdae8f4",
+      "sha256:adde865e9b749df94fef7047f9d872b711fce9d4a9eefc7c0b20c85784cd0a0c",
+      "sha256:032886f971ec2ebf4627dff6bd27f24c7fe994be0c22e005032583d3aa9ca294",
+      "sha256:498cf4f283c31c1fbed7bce9664631b2595977f423bcbcd25846267b0e7559b9",
+      "sha256:ec18890e9e80d021a308789c29c67401376afd1ce6fe8dadb6c9141b1e5a5a2e",
+      "sha256:99d8076c28f02f1a18f94ea5ef1b8dbae4b706bcb477f8dac85676efdde1f722",
+      "sha256:43370aac6a3f5ff0171b0c604978f84578b37c371e1cdbdbc8f690af6f8df753",
+      "sha256:2684f054512573b87c102deb5359b55cbf0a5340a90436839c21b8c4fe0fd712",
+      "sha256:98a76c633e0abc0c6a6800bf0be8088561feef0172dc4d5b1aa9b68beb6260a4",
+      "sha256:6999e9e044ab3ef0f357da7461574d6245af0b30bfc6fc3470141490b0761a2d",
+      "sha256:0b3127e38daf5efab61a533c059d9257fd70193f5d20b46e46e7e5da1f4b4093",
+      "sha256:f76fc176cce96806a5c50d5b39d2a24a501b4604e79d0192c58624e8b026b5de",
+      "sha256:6010599a5e35001c8a86cc7de182439e0cd912644a3628291aec3f237296c9c0",
+      "sha256:68438aea532e02415bbe228fd99414c447916867341bf20385779e47d9680b9f",
+      "sha256:3408236c179871b70859e61e19d1d85c3ed2a198279a24da0d110491cc9f611b",
+      "sha256:e9e4fd1825bd90723d31fe1ffec0b7c66459e06672f72e60d336e01f0ec27dae",
+      "sha256:85e425ccf4848ddeea198e683b0eb9bdb881bba1ade7b9f9f168de78620af392",
+      "sha256:0415e4b6cbd09dd4c600c10fb6a1cd90bff1becf67fb97508d159ae116ff02e9",
+      "sha256:f7d11b32e15e83158af1b63933de00142168ee80abed41fff60e07b934203397",
+      "sha256:a40d8a399ca3d1a6e0ba9f0b338ad05893511aca11f1853dec97e055e5375766",
+      "sha256:538c0f8900ed8db578764cae8a5bf385312afd84b0af8fd85a8d7dbfc6d80166",
+      "sha256:e92b3204e097ffc63700c01d329d5ac938fe2244bdc22b0cff1230e650518563"
+    ]
+  },
+  "history": [
+    {
+      "runner_version": "qwen/qwen3-next-80b-a3b-instruct",
+      "run_date": "2026-06-05",
+      "effect_pp": 20,
+      "verdict": "helps"
+    }
+  ],
+  "run_date": "2026-06-05"
+}
