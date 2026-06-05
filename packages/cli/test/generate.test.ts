@@ -30,6 +30,7 @@ describe('generateTasks', () => {
       timeoutMs: 1000,
       requestDelayMs: 0,
       maxAttempts: 8,
+      maxRetryDelayMs: 60000,
       generatorModel: 'generator',
       graderModel: 'grader',
       runnerModel: 'runner'

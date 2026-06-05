@@ -115,10 +115,12 @@ export class NvidiaNimClient {
   private readonly client: OpenAI;
   private readonly requestDelayMs: number;
   private readonly maxAttempts: number;
+  private readonly maxRetryDelayMs: number;
 
   constructor(config: NvidiaConfig) {
     this.requestDelayMs = config.requestDelayMs;
     this.maxAttempts = config.maxAttempts;
+    this.maxRetryDelayMs = config.maxRetryDelayMs;
     this.client = new OpenAI({
       apiKey: config.apiKey,
       baseURL: config.baseUrl,
@@ -201,7 +203,7 @@ export class NvidiaNimClient {
         const retryAfterMs = getRetryAfterMs(error);
         const baseDelayMs = status === 429 ? 5000 : 500;
         const jitter = Math.floor(Math.random() * 500);
-        const waitMs = retryAfterMs ?? baseDelayMs * 2 ** attempt + jitter;
+        const waitMs = retryAfterMs ?? Math.min(this.maxRetryDelayMs, baseDelayMs * 2 ** attempt + jitter);
         describeRetry(error, attempt, waitMs, this.maxAttempts);
         await sleep(waitMs);
       }

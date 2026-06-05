@@ -778,3 +778,26 @@
   - This changes only provider retry handling; M5 still uses 20 skills, 10 tasks, 3 trials, blind grading, and unchanged verdict thresholds.
 - Gate status:
   - Still not passed. The launch corpus remains at 5 of 20 completed result JSON files.
+
+### M5 - 14-Attempt Resume Interrupted For Backoff Cap
+
+- Resumed command:
+  - Run directory: `results/launch/20260605T041138Z`.
+  - Command: `NVIDIA_TIMEOUT_MS=45000 NVIDIA_REQUEST_DELAY_MS=5000 NVIDIA_MAX_ATTEMPTS=14 node dist/bin/skillcheck.js corpus run --corpus corpus/launch-20.json --results results/launch/20260605T041138Z --tasks 10 --trials 3 --concurrency 1`.
+  - Exit marker: `130`, intentionally interrupted.
+- Evidence:
+  - The run skipped the five existing completed results and retried `awesome-go`.
+  - It again reached task `t002` trial 1/3 `with_skill`.
+  - NVIDIA connection retries reached retry `9/14`.
+  - Fallback exponential backoff had grown to `128000 ms`, with larger waits still ahead.
+  - No `awesome-go` result JSON was written before interruption.
+- Follow-up implementation change:
+  - Added `NVIDIA_MAX_RETRY_DELAY_MS` with default `60000` to cap fallback exponential waits.
+  - Future resumes can combine `NVIDIA_TIMEOUT_MS=45000`, `NVIDIA_REQUEST_DELAY_MS=5000`, `NVIDIA_MAX_ATTEMPTS=14`, and `NVIDIA_MAX_RETRY_DELAY_MS=30000` to give repeated transport failures more attempts without multi-minute sleeps.
+  - This changes only provider scheduling; M5 still uses 20 skills, 10 tasks, 3 trials, blind grading, and unchanged verdict thresholds.
+- Local verification:
+  - `npm run typecheck`: passed.
+  - `npm test`: passed, 6 test files, 15 tests.
+  - `npm run build`: passed.
+- Gate status:
+  - Still not passed. The launch corpus remains at 5 of 20 completed result JSON files.
