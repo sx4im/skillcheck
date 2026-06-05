@@ -1,0 +1,20 @@
+[corpus] skip jnMetaCode/awesome-claude-md/awesome-nextjs; existing result
+[corpus] skip jnMetaCode/awesome-claude-md/awesome-react; existing result
+[corpus] skip jnMetaCode/awesome-claude-md/awesome-fastapi; existing result
+[corpus] skip jnMetaCode/awesome-claude-md/awesome-typescript; existing result
+[corpus] skip jnMetaCode/awesome-claude-md/awesome-python; existing result
+[corpus] eval jnMetaCode/awesome-claude-md/awesome-rust
+[nim] retry 1/14 after connection; waiting 737 ms
+[nim] retry 2/14 after connection; waiting 1361 ms
+[nim] retry 3/14 after connection; waiting 2379 ms
+[nim] retry 4/14 after connection; waiting 4450 ms
+[nim] retry 5/14 after connection; waiting 8414 ms
+[nim] retry 6/14 after connection; waiting 16290 ms
+[nim] retry 7/14 after connection; waiting 30000 ms
+[nim] retry 8/14 after connection; waiting 30000 ms
+[nim] retry 9/14 after connection; waiting 30000 ms
+[nim] retry 10/14 after connection; waiting 30000 ms
+[nim] retry 11/14 after connection; waiting 30000 ms
+[nim] retry 12/14 after connection; waiting 30000 ms
+[nim] retry 13/14 after connection; waiting 30000 ms
+Connection error.

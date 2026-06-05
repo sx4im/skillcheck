@@ -818,3 +818,17 @@
   - This changes only corpus order; the 20 pinned skills, 10 tasks, 3 trials, blind grading, and verdict thresholds are unchanged.
 - Gate status:
   - Still not passed. The launch corpus remains at 5 of 20 completed result JSON files.
+
+### M5 - Rust Resume Failed On Provider Connection
+
+- Resumed command:
+  - Run directory: `results/launch/20260605T041138Z`.
+  - Command: `NVIDIA_TIMEOUT_MS=45000 NVIDIA_REQUEST_DELAY_MS=5000 NVIDIA_MAX_ATTEMPTS=14 NVIDIA_MAX_RETRY_DELAY_MS=30000 node dist/bin/skillcheck.js corpus run --corpus corpus/launch-20.json --results results/launch/20260605T041138Z --tasks 10 --trials 3 --concurrency 1`.
+  - Exit code: 1.
+- Failure evidence:
+  - The run skipped the five existing completed results and, with `awesome-go` deferred to the end of the manifest, started `awesome-rust`.
+  - The failure occurred during the initial NVIDIA call for `awesome-rust`, before any Rust runner progress marker or Rust result JSON.
+  - NVIDIA retried connection failures through retry `13/14` with fallback waits capped at `30000 ms`, then returned `Connection error.`
+  - No `awesome-rust` result JSON was written.
+- Gate status:
+  - Still not passed. The launch corpus remains at 5 of 20 completed result JSON files.
