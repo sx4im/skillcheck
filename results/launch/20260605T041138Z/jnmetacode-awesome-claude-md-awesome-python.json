@@ -1,0 +1,188 @@
+{
+  "skill": {
+    "name": "Python 项目规范",
+    "source": "https://github.com/jnMetaCode/awesome-claude-md/blob/fe38fcd8f245460b989879c9155a16404e77cffa/by-language/python/CLAUDE.md",
+    "format": "CLAUDE.md",
+    "commit_hash": "0b4d651677f053f77f949d9905af6e59b9b1baf9d26d2ca530f6eb316ad29ce6",
+    "domain": "# Python 项目规范 ## 环境与依赖 - Python >= 3.11，使用 `uv` 管理虚拟环境和依赖（优先），备选 poetry - 激活环境：`uv venv && source .venv/bin/activate` - 安装依赖：`uv pip install -e \".[dev]\"`，不要用裸 `pip install` - 锁文件 `uv.lock` 必须提交，手动修改 pyproject.toml 后执行 `uv lock` ## 类型标注（严格模式） - 所有公开函数必须有完整的参数和返回值类型标注 - 禁止使用 `Any`，除非有注释说明原因 - 容器类型用 `list[str]` 而非 `List[str]`（Python 3.9+ 内置泛型） - 可选参数用 `str | None = None`，不用 `Optional[str]` - 运行 `mypy --strict src/` 零错误 ## 测试 - 框架：pytest，配置写在 pyproject.toml 的 `[tool.pytest.ini_options]` - 运行全部测试：`pytest -x -q`，单文件：`pytest tests/test_xxx.py -v` - 测试文件与源码目录镜像：`src/app/services/user.py` -> `tests/services/test_user.py` - fixture 放 `tests/conftest.py`，按模块拆分避免单文件过大 - 覆盖率：`pytest --cov=src --cov-report=term-missing`，目标 >= 80% ## Linting 与格式化 - 唯一工具：ruff（替代 flake8 + isort + black） - 格式化：`ruff format src/ tests/` - 检查：`ruff check src/ tests/ --fix` - 提交前必须通过：`ruff check && ruff format --check && mypy --strict src/` ## 项目结构 ``` src/ app/ __init__.py models/ # 数据模型（dataclass / Pydantic） services/ # 业务逻辑，不依赖框架 utils/ # 纯工具函数，无副作用 tests/ pyproject.toml ``` ## 常见陷阱 - 默认可变参数：写 `def f(items: list[int] | None = None)` 而非 `def f(items: list[int] = [])` - 循环导入：services 层不要导入 routes/views，用依赖注入解耦 - 路径处理：用 `pathlib.Path`，不要拼接字符串 - 异常处理：捕获具体异常类型，禁止裸 `except:` 或 `except Exception` - 字符串拼接：f-string 优先，多行用 `textwrap.dedent` 或括号续行"
+  },
+  "config": {
+    "runner_model": "mistralai/mistral-small-4-119b-2603",
+    "runner_version": "mistralai/mistral-small-4-119b-2603",
+    "grader_model": "stepfun-ai/step-3.7-flash",
+    "grader_version": "stepfun-ai/step-3.7-flash",
+    "generator_model": "stepfun-ai/step-3.7-flash",
+    "trials": 3,
+    "tasks": 10,
+    "temperature": 0.7,
+    "mode": "forced-injection"
+  },
+  "result": {
+    "effect_pp": -20,
+    "ci_pp": [
+      -40,
+      3.33
+    ],
+    "verdict": "placebo",
+    "with_skill_pass": 0.6,
+    "no_skill_pass": 0.8,
+    "token_overhead": 711,
+    "value_per_1k_tokens": -28.13
+  },
+  "tasks": [
+    {
+      "id": "t001",
+      "prompt": "Resolve any circular imports between services and routes/views layers using dependency injection if needed.",
+      "criterion_type": "rubric",
+      "criterion": "Passes if services layer does not import routes/views modules, mypy --strict reports no circular import errors.",
+      "arm_a_pass_rate": 1,
+      "arm_b_pass_rate": 1
+    },
+    {
+      "id": "t002",
+      "prompt": "Fix all bare except: or except Exception blocks in the codebase to catch specific exception types.",
+      "criterion_type": "rubric",
+      "criterion": "Passes if no bare except or generic except Exception blocks remain, all exception handlers catch specific exception types.",
+      "arm_a_pass_rate": 1,
+      "arm_b_pass_rate": 1
+    },
+    {
+      "id": "t003",
+      "prompt": "Initialize project virtual environment with uv, activate it, and install dev dependencies following the spec.",
+      "criterion_type": "rubric",
+      "criterion": "Passes if .venv is present, dev dependencies are installed, no bare pip install command was used.",
+      "arm_a_pass_rate": 1,
+      "arm_b_pass_rate": 1
+    },
+    {
+      "id": "t004",
+      "prompt": "Run ruff format on src/ and tests/ directories to fix all formatting issues.",
+      "criterion_type": "rubric",
+      "criterion": "Passes if ruff format --check src/ tests/ returns zero errors.",
+      "arm_a_pass_rate": 1,
+      "arm_b_pass_rate": 0
+    },
+    {
+      "id": "t005",
+      "prompt": "Configure pytest settings in pyproject.toml under [tool.pytest.ini_options] as required by the spec.",
+      "criterion_type": "rubric",
+      "criterion": "Passes if pytest config is correctly placed in pyproject.toml, pytest -x -q runs all tests successfully.",
+      "arm_a_pass_rate": 0,
+      "arm_b_pass_rate": 1
+    },
+    {
+      "id": "t006",
+      "prompt": "Run mypy --strict on src/ and fix all reported type errors.",
+      "criterion_type": "rubric",
+      "criterion": "Passes if mypy --strict src/ exits with zero errors, no uncommented Any types are present.",
+      "arm_a_pass_rate": 0,
+      "arm_b_pass_rate": 0
+    },
+    {
+      "id": "t007",
+      "prompt": "Update all public function type hints to use Python 3.9+ built-in generic container types.",
+      "criterion_type": "rubric",
+      "criterion": "Passes if no typing module generic aliases (List, Dict, etc.) are used in public function type hints, mypy --strict reports no errors.",
+      "arm_a_pass_rate": 0,
+      "arm_b_pass_rate": 1
+    },
+    {
+      "id": "t008",
+      "prompt": "Refactor all multi-line string concatenation in the codebase to use f-strings or allowed line continuation methods.",
+      "criterion_type": "rubric",
+      "criterion": "Passes if no string concatenation is used for multi-line strings, all multi-line strings use f-strings, textwrap.dedent or bracket continuation.",
+      "arm_a_pass_rate": 1,
+      "arm_b_pass_rate": 1
+    },
+    {
+      "id": "t009",
+      "prompt": "Replace all Optional[X] type hints with the X | None syntax as required by the spec.",
+      "criterion_type": "rubric",
+      "criterion": "Passes if no Optional type hints are used in the codebase, all optional parameters use X | None = None syntax.",
+      "arm_a_pass_rate": 1,
+      "arm_b_pass_rate": 1
+    },
+    {
+      "id": "t010",
+      "prompt": "Add a pure side-effect-free utility function to src/app/utils/ with full type annotations.",
+      "criterion_type": "rubric",
+      "criterion": "Passes if function is in src/app/utils/, has no external side effects, has complete type hints, mypy --strict reports no errors.",
+      "arm_a_pass_rate": 0,
+      "arm_b_pass_rate": 1
+    }
+  ],
+  "reproducibility": {
+    "task_suite_path": "results/tasks/471a3daac135d79b6ac35d326183737822087a75acd2e31d34c876750876bf11.json",
+    "transcript_hashes": [
+      "sha256:e314d6aec0df25b99c0d5f4a41c47459158a1460dece03b9a77c31f2a7d4e42d",
+      "sha256:408e2e9588d6de649624b3e353d2fd1efe6f7e8585777b8ea3cfee42193447c0",
+      "sha256:fe62d1cdbaa81924c3b42a9ec9ee13a06431286a8875d321b8f8bf1359762393",
+      "sha256:9b250d075b88187f2e9d74c5b074cfa071a17154ae1103ec55f02a15d1ecd59f",
+      "sha256:dbc776ee0c0e38d1901c312f7535a2d11797798d7cd4e538055e5d0e3354083f",
+      "sha256:3715c746376c07ee465d0abeb5353eee010fa3501f16d0c2fc3345752714be3e",
+      "sha256:7b3bf02f2ec473cd4660aeb3d091be3cf9851c20f75b04dce00171dbee302d91",
+      "sha256:81b21283c875d1dae37e88fca5f0d1afa47542f6eecda97e1d4d2e236dcb376a",
+      "sha256:50fd7d85e81c570da9d1e8ff411a02095e8c0abe6703508d7ca5492070795f7a",
+      "sha256:100c43e39c1f60552230d81c7dd05b195c29b1f2ce5d30c1a15eb5dbb9c43cfb",
+      "sha256:894fc94f5eb90428c7c77bf9df2166a18999b72b80caa7d1f553d43385baa059",
+      "sha256:a6f0d486e2947d69732ed75c72f6d4bca4dd44060f04f8ea2d0626ba0886d08e",
+      "sha256:0367a4a2d4cb933e7f2baf1b428def6a25e6cda711c3fb582213aca94343a56d",
+      "sha256:92734b470f117f5aacbeaa0169df88300729fce19af8968c52c5a2c0cb3a406c",
+      "sha256:e3d2b7e63f453a675d22d3a8a7cb1170a57c5ded52804f252772491aae6b62c9",
+      "sha256:c00f659608929c86a872cc1dce14a4bd31af05b257cb33e4b311fe796c0cf88c",
+      "sha256:23e28d6b5096a78617787f8d3d0aeb9612e55b32c789859ea073eab3462c0614",
+      "sha256:1f28214a31a8e064e038056f7caefd992a261e5892dfb6903058c596ae889a90",
+      "sha256:7e26dbf3ed39266d1f67815ee0b55221be6be63f15784db6ac484400ad3a8161",
+      "sha256:ddbf2d0a27a7522954449168560f3975d4d38576d862f8c7290f70a3c2923ec0",
+      "sha256:561a4d7c4a3e0b4c3f01a2aa48bef959b55ec6e15a65541de162242717fbc5ca",
+      "sha256:c1638ddffb3ff38590a671b45469348ffffe8abb364aa4be41c08d154187841b",
+      "sha256:1f0b6ec94125da205024649ea73ca44b1008f660791158529d314a6e412739c5",
+      "sha256:e1482390e849146091fed3be0b41d8906da9627c9b4fa6e348db8d21165b7c49",
+      "sha256:7ac6b9e4e3194855a795953460068777311a4b40431f3dae44954da4d046a7d8",
+      "sha256:a7b719b9d2c54fe249c86f003a1a9460463bc9464d477276051f3cd3fd46956e",
+      "sha256:7bf03d48d25cee83886b1d22d20521753bc6909b6d5dfef8e252f9f765fba898",
+      "sha256:b7e267db93d2bfa263cf6f6ead219a2ef94206461a8a7994ae7abf4f338de411",
+      "sha256:9e941248763ff6171945753da5a36afec5a9b9218ef5b12727e61b18f30e72f8",
+      "sha256:d9ce159eed1a31f99b8085a6a6ea0f6e623d869b07f641cd78f571d4c43f67fe",
+      "sha256:efb2ce0f938ea6a2d755215eb0eeda95e4e26ef483ddefd200b9f09d8f7a2558",
+      "sha256:ec6c28d07aa7f3d6c2e1cb57c855790ef3f9ecbaa2fb3811f4b884a15edfb6d8",
+      "sha256:b68cb52323171f5252f716efeb81ba0ff6f98abfcce4e3b826ead349ed40e87c",
+      "sha256:9ee115291525b7b5109a6d6bf21770969fae6accdfdac64bc911fa33f3c2464b",
+      "sha256:c43c984c9231c7a55b8705285052570a3d6d774c4e29306d6017751f9327f8b3",
+      "sha256:25d5bc3dc448ed4d5988938475ddc79cffb1217b7613400854472f53c1566c88",
+      "sha256:030d5ffc457e7268da37b3adfe457335df143a38d4b4b83b1c2f5175c4a07510",
+      "sha256:e82805fa83989f4f25ec4aedd81a6c161bddf3820d54c70434246dee71b17c8d",
+      "sha256:0b5ef1665159ed2e5a313b5044e9758b8120aa819ba76bba215375a60463f016",
+      "sha256:358b5f09cd3abf8511da16993a1bc52b5f6290f23c2b376d9708a7ecf9d259af",
+      "sha256:c05ea053b6ddcefb4dd7432105168196ab7f56fd9b3efd41cc76b25d942a0662",
+      "sha256:9ea25a4d1f716a431ffeb12b5b062f01f3435a0fe2e4b06e9e6fb3ed1e4789c5",
+      "sha256:1d384cfea199c6f42807e8c7569f87ca5b12d715fa2afa2716c158c8abd45670",
+      "sha256:00b8a87242ce57e4ca9de8a80fdd068dfbef4c591d02a7720462002e78e3c3a5",
+      "sha256:33f3330c166e86c0d788f6e1918f0af1db587df67e3e64e88fdf7ef5ac452363",
+      "sha256:d0a60aed496b624c2f2d517a4c3a9f412ddb1e83925a9c1ac514150ebea168de",
+      "sha256:4ed80ebd1069abdb4163c8219cff394a962850f27e3914085641c1e25594ad18",
+      "sha256:66616e6f88b33336af19f73eda62df6365ed9ca4f722d5f4438a36119fba60c4",
+      "sha256:ad05cff524481a835e14fc79b36638a72261ab6df71d9154fce94f9e570ec130",
+      "sha256:ad5d26a85adf824c2d8abdae257aac1b2fedd357acac6849cf9a44601c6df722",
+      "sha256:46b1d181f82e134fa00d6fe2bace23fd4015243af19880a1d5446bfc53322f71",
+      "sha256:d7d6806584f2c4017211bc5c32dcb5996576336b85ad2a01bc37bad66d96635f",
+      "sha256:36068bef6414101e018b7a058f5005e9096888ccfcfeda10626956fe10756712",
+      "sha256:79a6ce312264ac46f740561240e752ede10811ef38505ec6107e81e7f61f9511",
+      "sha256:79ba30d4502074f12957793aa6584e79d814d414a12ed0f14fdddeb2c0cbd2ee",
+      "sha256:fb6aba8082e3d8efd19eebb4e3ae6f5ab9c59e51190c4e148ea5095173daf989",
+      "sha256:0f23af14e4d581daeb06b39fe3d3a2cbc771a8bec685ab9ef75875ecd6bcdc4f",
+      "sha256:c86d4f27064123754d84fdfed623295879d5a96d7334d225d4f5e304495b2f7e",
+      "sha256:c1309f0da10359d87a3f296199e02f2b9038cd958838ffa5ae85bbb1a7dd2792",
+      "sha256:42c2575b1fc71ef5b29a8a910db7eb484ec0341dbb735f31713285b986b86000"
+    ]
+  },
+  "history": [
+    {
+      "runner_version": "mistralai/mistral-small-4-119b-2603",
+      "run_date": "2026-06-05",
+      "effect_pp": -20,
+      "verdict": "placebo"
+    }
+  ],
+  "run_date": "2026-06-05"
+}

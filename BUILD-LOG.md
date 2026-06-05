@@ -706,3 +706,20 @@
   - `npm run build`: passed.
 - Gate status:
   - Still not passed. The same run directory can now be retried and should continue from the first missing skill while preserving the two completed results.
+
+### M5 - Resumed 5000ms Run Checkpoint
+
+- Resumed command:
+  - Run directory: `results/launch/20260605T041138Z`.
+  - Command: `NVIDIA_REQUEST_DELAY_MS=5000 node dist/bin/skillcheck.js corpus run --corpus corpus/launch-20.json --results results/launch/20260605T041138Z --tasks 10 --trials 3 --concurrency 1`.
+  - Status at checkpoint: still running.
+- Evidence at checkpoint:
+  - Completed result JSON files: 5 of 20.
+  - Next.js result: verdict `placebo`, effect `20`, CI `[-3.33, 46.67]`.
+  - React result: verdict `placebo`, effect `-10`, CI `[-33.33, 16.67]`.
+  - FastAPI result: verdict `placebo`, effect `0`, CI `[-23.33, 20.08]`.
+  - TypeScript result: verdict `harms`, effect `-20`, CI `[-33.33, -6.67]`.
+  - Python result: verdict `placebo`, effect `-20`, CI `[-40, 3.33]`.
+  - Current live skill after checkpoint: `awesome-go`.
+- Gate status:
+  - Still not passed. The launch corpus needs all 20 result JSON files plus the final verification and findings update.

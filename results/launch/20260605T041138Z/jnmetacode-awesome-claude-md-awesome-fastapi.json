@@ -1,0 +1,188 @@
+{
+  "skill": {
+    "name": "CLAUDE.md - FastAPI 项目规范",
+    "source": "https://github.com/jnMetaCode/awesome-claude-md/blob/fe38fcd8f245460b989879c9155a16404e77cffa/by-framework/fastapi/CLAUDE.md",
+    "format": "CLAUDE.md",
+    "commit_hash": "e256728fda4827e12524eaed2677fc0f93a6f29840f0c9a7f9987991f1b817bf",
+    "domain": "# CLAUDE.md - FastAPI 项目规范 ## 构建与运行 - 依赖管理：`uv` 或 `poetry`，锁文件必须提交到仓库 - 启动开发服务器：`uvicorn app.main:app --reload --port 8000` - 运行测试：`pytest -xvs`，Lint 检查：`ruff check . && ruff format --check .` - Python 版本：3.11+，充分利用类型标注 ## 项目结构 - `app/main.py` - 入口，注册 router 和 middleware - `app/routers/` - 按业务域拆分路由（如 `users.py`、`orders.py`） - `app/models/` - SQLAlchemy ORM 模型，`app/schemas/` - Pydantic v2 模型 - `app/services/` - 业务逻辑层，`app/dependencies.py` - 公共依赖注入 - `alembic/` - 数据库迁移脚本 ## 异步模式 - 路由函数默认 `async def`，仅调用同步阻塞库时用 `def` - CPU 密集型任务用 `run_in_executor` 推到线程池，不要阻塞事件循环 - 数据库用 `sqlalchemy[asyncio]` + `asyncpg`，禁止 async 中调同步阻塞 I/O - HTTP 客户端用 `httpx.AsyncClient`，在 lifespan 中创建共享实例： ```python async def lifespan(app: FastAPI): app.state.http = httpx.AsyncClient() yield await app.state.http.aclose() ``` - 后台任务用 `BackgroundTasks` 或 Celery/ARQ，禁止在请求中做耗时操作 ## Pydantic v2 规范 - 请求体和响应体必须定义 Pydantic model，禁止裸 `dict` 返回 - 请求/响应模型分开定义：`UserCreate`（入参）、`UserResponse`（出参）、`UserInDB`（内部） - 使用 `ConfigDict(from_attributes=True)` 替代旧版 `orm_mode`，入参 model 启用 `ConfigDict(strict=True)` - 敏感字段（password）只出现在入参 model，响应 model 用 `model_fields` 显式列出 - 字段校验用 `Field(ge=0, max_length=100)` 和 `@field_validator` - 复用字段用 mixin 或基类，不要复制粘贴 - 枚举值用 `StrEnum`，自动序列化为字符串 ## 数据库与迁移 - SQLAlchemy 2.0 风格：使用 `Mapped[]` 类型标注和 `mapped_column()` - 数据库会话通过依赖注入：`async def get_db() -> AsyncGenerator[AsyncSession]` - 表结构变更必须通过 Alembic：`alembic revision --autogenerate -m \"描述\"` - 每个迁移文件必须有 `upgrade()` 和 `downgrade()`，downgrade 不能为空 - 迁移文件提交到 git，CI 中执行 `alembic check` 确保无遗漏 ## 依赖注入 - 公共依赖（认证、分页、DB 会话）定义在 `dependencies.py` - 使用 `Annotated[User, Depends(get_current_user)]` 简化类型声明 - yield 模式管理资源生命周期，测试中用 `app.dependency_overrides` 替换 -"
+  },
+  "config": {
+    "runner_model": "mistralai/mistral-small-4-119b-2603",
+    "runner_version": "mistralai/mistral-small-4-119b-2603",
+    "grader_model": "stepfun-ai/step-3.7-flash",
+    "grader_version": "stepfun-ai/step-3.7-flash",
+    "generator_model": "stepfun-ai/step-3.7-flash",
+    "trials": 3,
+    "tasks": 10,
+    "temperature": 0.7,
+    "mode": "forced-injection"
+  },
+  "result": {
+    "effect_pp": 0,
+    "ci_pp": [
+      -23.33,
+      20.08
+    ],
+    "verdict": "placebo",
+    "with_skill_pass": 0.5,
+    "no_skill_pass": 0.5,
+    "token_overhead": 1197,
+    "value_per_1k_tokens": 0
+  },
+  "tasks": [
+    {
+      "id": "t001",
+      "prompt": "Create Pydantic v2 schemas UserCreate (strict mode, email/password fields) and UserResponse (from_attributes=True, excludes password) in app/schemas/user.py.",
+      "criterion_type": "rubric",
+      "criterion": "Pass if UserCreate rejects extra fields, UserResponse serializes ORM objects and omits password.",
+      "arm_a_pass_rate": 1,
+      "arm_b_pass_rate": 0
+    },
+    {
+      "id": "t002",
+      "prompt": "Implement an async DELETE /users/{user_id} endpoint that only allows admin users to delete users, using get_current_user.",
+      "criterion_type": "rubric",
+      "criterion": "Pass if non-admin users get 403, admin users can delete the target user, and the endpoint uses async def.",
+      "arm_a_pass_rate": 1,
+      "arm_b_pass_rate": 0
+    },
+    {
+      "id": "t003",
+      "prompt": "Write an Alembic migration that adds a created_at column to the users table, with non-empty upgrade() and downgrade() functions.",
+      "criterion_type": "rubric",
+      "criterion": "Pass if alembic upgrade adds the column, downgrade removes it, and alembic check reports no missing migrations.",
+      "arm_a_pass_rate": 1,
+      "arm_b_pass_rate": 1
+    },
+    {
+      "id": "t004",
+      "prompt": "Create a background task in app/tasks.py for async user data processing, trigger it from the POST /users/ endpoint.",
+      "criterion_type": "rubric",
+      "criterion": "Pass if the task runs in the background after user creation, does not delay the API response, and completes successfully.",
+      "arm_a_pass_rate": 0,
+      "arm_b_pass_rate": 0
+    },
+    {
+      "id": "t005",
+      "prompt": "Refactor a CPU-bound user data processing function to use asyncio.run_in_executor to avoid blocking the event loop.",
+      "criterion_type": "rubric",
+      "criterion": "Pass if the function runs in a thread pool, and does not block other async requests during execution.",
+      "arm_a_pass_rate": 1,
+      "arm_b_pass_rate": 1
+    },
+    {
+      "id": "t006",
+      "prompt": "Add an async POST /users/ endpoint that uses BackgroundTasks to send a welcome email after user creation.",
+      "criterion_type": "rubric",
+      "criterion": "Pass if the endpoint returns 201, the email task is queued, and no blocking I/O runs in the handler.",
+      "arm_a_pass_rate": 0,
+      "arm_b_pass_rate": 0
+    },
+    {
+      "id": "t007",
+      "prompt": "Write a test for POST /users/ that uses app.dependency_overrides to mock the get_db dependency.",
+      "criterion_type": "rubric",
+      "criterion": "Pass if the test runs without a real database, and correctly asserts the endpoint's response status and body.",
+      "arm_a_pass_rate": 0,
+      "arm_b_pass_rate": 1
+    },
+    {
+      "id": "t008",
+      "prompt": "Create a reusable TimestampMixin class with created_at and updated_at columns, inherit it in the User ORM model.",
+      "criterion_type": "rubric",
+      "criterion": "Pass if the mixin works for the User model, and can be reused for other ORM models without duplication.",
+      "arm_a_pass_rate": 1,
+      "arm_b_pass_rate": 1
+    },
+    {
+      "id": "t009",
+      "prompt": "Create a pagination dependency in app/dependencies.py that returns limit (default 10) and offset (default 0) query parameters.",
+      "criterion_type": "rubric",
+      "criterion": "Pass if the dependency parses query params correctly, applies defaults, and works with route injection.",
+      "arm_a_pass_rate": 0,
+      "arm_b_pass_rate": 1
+    },
+    {
+      "id": "t010",
+      "prompt": "Configure ruff in pyproject.toml for 88 character line length, and add a pre-commit hook for ruff check and format.",
+      "criterion_type": "rubric",
+      "criterion": "Pass if ruff check . and ruff format --check . run without errors on project code.",
+      "arm_a_pass_rate": 0,
+      "arm_b_pass_rate": 0
+    }
+  ],
+  "reproducibility": {
+    "task_suite_path": "results/tasks/0de7f7434cc976b05776308cea208d1cebafb927527d6ede0d5c7ed0a20e42c7.json",
+    "transcript_hashes": [
+      "sha256:59ae754e5269b0355145442b0ace38416889638a32fca85ea4b7d1f121d5d1a1",
+      "sha256:079e859d5df6cff2f17c8987143f56b5c783a466ec2796325e28a65ff5994383",
+      "sha256:2f1db3cd014be60e76e9d05b1c17c4f90420be761d6629145d0f7251c33ef110",
+      "sha256:f87881148547419bee8ffb16170f546449222f20267bba7449778e3f6d2d26c2",
+      "sha256:c67b67d8b54e5aab4449f22a1b5658142ad5f8a9d87994e4e28db7c87da29e93",
+      "sha256:ffe0dd5e8f8851e0672c457bd9bf8f3d05616c98c8c9e6285442174ed69a833d",
+      "sha256:d599c61234c92ad25d6daadc07317a5252f144438f5e3548e32a627a5731c94e",
+      "sha256:3fff96105be611124f13d9905ccf8c3fec138423a1556372282a458ea94bb91e",
+      "sha256:b6e253abdce78f9f8ba3441fa15ad3fdd04ccad3ca340d96a15e7634919262f1",
+      "sha256:842b2a68dd87a11791e300f95cf3c9083a9d1b8e19664af3a043e02b37494037",
+      "sha256:4c0ef99d87e2b404188c1a344ffab530ffa39b4a433c0ba84b52b848329f72b5",
+      "sha256:506b20670f8f27a85c382a701ff7bd547220da79c870de5c426acb985a332ca2",
+      "sha256:99136c7d2622e9765329b941f11af06f5ee06dfaa2b44c904a123ba2110f2de8",
+      "sha256:ed8d1cebaf0570f5f7b1d44bf739ac4584a9493c4f80bb758dfbf733f74f11f4",
+      "sha256:0fd8eed1c57e6963320ec570861d5cb75e4a2dfcbee338994c4cf614382da30e",
+      "sha256:47f198bf8a4e2cdb468f43ddd8c78190a34eae920cc8310f25f49cf468d219c6",
+      "sha256:2389d18c6bf95e7bb5eea9e03c1b5b6b1550dec139898917891baa7ff2ad79ab",
+      "sha256:74b5ef35ae4c537beb904bbcac347bc97486cc8a7c55489f743eadb2b31604ed",
+      "sha256:d461235da265b57c3bb36f7dfbcfc0da0b84ce65ad2a5eda8e3eecbe1ab3634f",
+      "sha256:7ad8c9c28048457983d60da98fe2cd62db5794080aac0b1a6c9c8b8ce972ff51",
+      "sha256:f12c643af3cc298c9d111111160c202880a1af5e109cc6eb635c03d848aa6291",
+      "sha256:d79e9133a05ba6f7660f37a38b9ef7a53a88024c73fc4059dd47b22cac1b99fd",
+      "sha256:87b4a2dc2ad1a0c7da1521f4d1bb0bb0fa3678754877a384918e73a99d881c0b",
+      "sha256:6ddbc2e302330d60a47aebe52ffb34d0cde1672291605c64a9f1bce21f31a598",
+      "sha256:29df47ba6d0c1928ed65b0ae61d0a6689a77475240b59193d32db391f911ed30",
+      "sha256:be8cd4118181d60aa11583497eea5885cea052730b2eec998ccc41b74ccde464",
+      "sha256:045f87251a6fc44919e3ca977431f0d8af70ff44f19888b47fe71d7ccb1be4e4",
+      "sha256:d091b8138dde41b7ce38624a9c90c0250d1dcdca8bad6fb6750c351702fa2395",
+      "sha256:836d43225fbf48cc8736afc65bd35f56495ced2c902ae4a8fda57bde9ba59207",
+      "sha256:0b7095c74d0e0f5dd4c434ba69543422599db65ac380e84d5d452e9a3ea9fb3d",
+      "sha256:97f2a3f35fe9e5b747bd7e0c0620f5f3121b3ef6aeada9ef8ab9ce8e8296c5b4",
+      "sha256:ba205c134e7c7f21905f0714b3da381e5b073b5fcc4cfecca99911e0c9989cde",
+      "sha256:47ec94567826358c07469e1de55b503739de3d5f3f6d819d4a8189422183d87d",
+      "sha256:b5dd5fcf245e1318ae749654b70336ab3fd2507a13f040e1a9f15c79f5ffacc9",
+      "sha256:ca1785a7098f0e5eb2f468931f0062139dfb5dacccbf8448f3de32c0207058f8",
+      "sha256:e0c79ac9ad6a59eafa1d0d02bef07f0a8b92b3e259057c5fcd02a6b71aeb9ab1",
+      "sha256:38a420004af73f4b345a73f0aeb98bdddd24f2d9530e4766737d44f634a506fd",
+      "sha256:4c9448e47ab0c71c410cc6592a68f67d9ee8492e10c94ac04fcbc7668d10ed1f",
+      "sha256:86b86367ed9c8d7b5e1462695bbbe2db5c0ae800433607c34bc10add29c0730c",
+      "sha256:2e7907e54a5cfd4c318feb819753666f765d8ee1f55986315284dc4082f1bc47",
+      "sha256:41c6c2676116c0c971faad6d3b7cbc4f30ad62c8ca8a382720b7318aadebdd86",
+      "sha256:d04920bcab0406fa0df76ba8b23fecbd13ed088d43b309beb72007630dddca0b",
+      "sha256:0c01fecd9075c6bacbfb1b1241345d0d84153d0c77d0435d559e6f2d47e42077",
+      "sha256:41f440b26d1cd66aee924d575b30048159c289909a97771b3468913ea5a2b71d",
+      "sha256:f255641bb25a956e077d14a178ea98b3916643ebbb47cc8b70a4835d268cedc9",
+      "sha256:c2c1e30d23d62d3c69d69aa2bd9ad7ffe3333ac928db6f3314ca295cdcaec9d2",
+      "sha256:eadb3b54db0ee83907cd759897a5ab72a0970657e3958dff675c12cceca423de",
+      "sha256:7e6dbdb27d6fc514594e7fc2382854a9da759f3fb770347cfb1cdbb426ebf8b5",
+      "sha256:f1c6a319fb6b92bc32875be216c3c914163ab5a6ecb03efb240f2eb2d5598862",
+      "sha256:35dbaa1bd6bbd9c03613877874068a8f5dc9e36a744a5e1192ee17c8a32b473b",
+      "sha256:f44d050294dafba6f5ba6476755c35d8008513dd0412d795393de5d2fc82c0f5",
+      "sha256:ea4cd4190d0ec2e1fab48fb081b3c4b8c7e5aa4da32fecfbb8748771c2751fbf",
+      "sha256:3014e86032a0c6548b988a0bcf060a54aa7ce8d7849dd2e93c18bcbe5e21b540",
+      "sha256:f9ad8a128454aa67a5b0703bd7fc5f7541aa1ae31004815113eb5051e921175e",
+      "sha256:e629da3bcb2ff12e8146523a2fdadd894dfe55a40f6816609392366919488f5f",
+      "sha256:99937860a52c34a89133108ff0e6d6e37163b10723ac92bcad7d889c96f00b2a",
+      "sha256:a3c3cae15ba9b6e03ad8ec6571a4dd6c14b5f0a6743479395bac443183d610a3",
+      "sha256:8785a32434e08373c48f53080aa0ef413f765d9c699c54dacbad8b5a1daccc27",
+      "sha256:98506ed5cd7e5cfb877a4f3c61846d2ce08aada86c08b3e69320bbc9dac5d29a",
+      "sha256:79bfb7dbe1dea0152a8b320e41c45434bc00714b205d42fc67af07aea838abef"
+    ]
+  },
+  "history": [
+    {
+      "runner_version": "mistralai/mistral-small-4-119b-2603",
+      "run_date": "2026-06-05",
+      "effect_pp": 0,
+      "verdict": "placebo"
+    }
+  ],
+  "run_date": "2026-06-05"
+}

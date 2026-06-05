@@ -1,0 +1,62 @@
+[
+  {
+    "id": "t001",
+    "prompt": "Add explicit return type annotations to all public exported functions in the src/ directory, per the project's type writing rules.",
+    "criterionType": "rubric",
+    "criterion": "All exported functions have explicit return type annotations, no public function relies on inferred return types."
+  },
+  {
+    "id": "t002",
+    "prompt": "Update all test cases to use vi.fn() and vi.spyOn() for mocks instead of mocking entire modules, per the project's testing rules.",
+    "criterionType": "rubric",
+    "criterion": "No test mocks entire modules, all mocks use vi.fn() or vi.spyOn(), test suite passes with the new mock setup."
+  },
+  {
+    "id": "t003",
+    "prompt": "If the project uses ESLint instead of Biome, install and configure @typescript-eslint/recommended-type-checked to work with the project's TypeScript setup.",
+    "criterionType": "rubric",
+    "criterion": "ESLint is configured with @typescript-eslint/recommended-type-checked, running pnpm lint catches type-related lint errors correctly."
+  },
+  {
+    "id": "t004",
+    "prompt": "Rename all incorrectly named TypeScript files in src/ that use camelCase or PascalCase to kebab-case, per the project naming convention.",
+    "criterionType": "rubric",
+    "criterion": "All .ts files in src/ use kebab-case naming, no camelCase or PascalCase source file names remain."
+  },
+  {
+    "id": "t005",
+    "prompt": "Replace all enum declarations in the codebase with as const object + typeof patterns, removing runtime enum overhead.",
+    "criterionType": "rubric",
+    "criterion": "No enum keywords remain in the codebase, all former enum usages work with the new as const object pattern."
+  },
+  {
+    "id": "t006",
+    "prompt": "Add a pnpm build script to package.json that compiles the TypeScript project to the correct output directory, using the configured ES2022 target and ESM module settings.",
+    "criterionType": "rubric",
+    "criterion": "pnpm build runs successfully, output files are valid ESM modules targeting ES2022, no build errors are present."
+  },
+  {
+    "id": "t007",
+    "prompt": "Configure Biome as the project's lint and formatter, set it to use 2-space indentation, no semicolons, single quotes, and trailing commas set to all.",
+    "criterionType": "rubric",
+    "criterion": "biome.json has all required formatting rules configured, running pnpm lint and pnpm format produce no changes to compliant files."
+  },
+  {
+    "id": "t008",
+    "prompt": "Replace all object structure type definitions with interface, and use type only for union, intersection, and utility types as per the project rules.",
+    "criterionType": "rubric",
+    "criterion": "All object structure definitions use interface, type is only used for union, intersection, and utility types, no misused type/interface declarations."
+  },
+  {
+    "id": "t009",
+    "prompt": "Set the TypeScript target in tsconfig.json to ES2022, enabling use of modern APIs like structuredClone and Array.at() in the codebase.",
+    "criterionType": "rubric",
+    "criterion": "tsconfig target is set to ES2022, build script runs successfully, modern APIs are available in the build output."
+  },
+  {
+    "id": "t010",
+    "prompt": "Configure package.json to use ESM by adding \"type\": \"module\", and update tsconfig.json to set module to ESNext and moduleResolution to bundler.",
+    "criterionType": "rubric",
+    "criterion": "package.json has \"type\": \"module\", tsconfig has correct module and moduleResolution values, project runs without module errors."
+  }
+]
