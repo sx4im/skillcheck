@@ -1,0 +1,103 @@
+{
+  "results": [
+    {
+      "model": "qwen/qwen3-next-80b-a3b-instruct",
+      "ok": true,
+      "httpOk": true,
+      "status": 200,
+      "elapsedMs": 2523,
+      "content": "{\"ok\":true,\"model_check\":\"pass\"}",
+      "parsedContent": {
+        "ok": true,
+        "model_check": "pass"
+      }
+    },
+    {
+      "model": "qwen/qwen3-coder-480b-a35b-instruct",
+      "ok": false,
+      "httpOk": false,
+      "status": 400,
+      "elapsedMs": 514,
+      "content": "",
+      "error": "{\"message\":\"Validation: Unsupported parameter(s): `extra_body`\",\"type\":\"Bad Request\",\"code\":400}"
+    },
+    {
+      "model": "meta/llama-4-maverick-17b-128e-instruct",
+      "ok": true,
+      "httpOk": true,
+      "status": 200,
+      "elapsedMs": 2875,
+      "content": "{\"ok\":true,\"model_check\":\"pass\"}",
+      "parsedContent": {
+        "ok": true,
+        "model_check": "pass"
+      }
+    },
+    {
+      "model": "meta/llama-3.3-70b-instruct",
+      "ok": true,
+      "httpOk": true,
+      "status": 200,
+      "elapsedMs": 707,
+      "content": "{\"ok\":true,\"model_check\":\"pass\"}",
+      "parsedContent": {
+        "ok": true,
+        "model_check": "pass"
+      }
+    },
+    {
+      "model": "deepseek-ai/deepseek-v4-pro",
+      "ok": true,
+      "httpOk": true,
+      "status": 200,
+      "elapsedMs": 4079,
+      "content": "{\"ok\":true,\"model_check\":\"pass\"}",
+      "parsedContent": {
+        "ok": true,
+        "model_check": "pass"
+      }
+    },
+    {
+      "model": "moonshotai/kimi-k2.6",
+      "ok": false,
+      "httpOk": true,
+      "status": 200,
+      "elapsedMs": 762,
+      "content": "{}",
+      "parsedContent": {}
+    },
+    {
+      "model": "bytedance/seed-oss-36b-instruct",
+      "ok": true,
+      "httpOk": true,
+      "status": 200,
+      "elapsedMs": 8237,
+      "content": "{\"ok\":true,\"model_check\":\"pass\"}",
+      "parsedContent": {
+        "ok": true,
+        "model_check": "pass"
+      }
+    },
+    {
+      "model": "minimaxai/minimax-m2.7",
+      "ok": false,
+      "httpOk": false,
+      "status": 400,
+      "elapsedMs": 445,
+      "content": "",
+      "error": "Validation: Unsupported parameter(s): `extra_body`"
+    },
+    {
+      "model": "stepfun-ai/step-3.7-flash",
+      "ok": true,
+      "httpOk": true,
+      "status": 200,
+      "elapsedMs": 1590,
+      "content": "{\"ok\":true,\"model_check\":\"pass\"}",
+      "parsedContent": {
+        "ok": true,
+        "model_check": "pass"
+      }
+    }
+  ]
+}

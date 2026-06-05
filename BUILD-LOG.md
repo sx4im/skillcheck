@@ -972,3 +972,28 @@
   - No `awesome-rust` result JSON was written.
 - Gate status:
   - Still not passed. The launch corpus remains at 5 of 20 completed result JSON files, with one additional Rust runner call cached for the next resume.
+
+### M5 - Provider Root-Cause Diagnostics And Model Swap
+
+- Resume evidence:
+  - Resume 14 command: `NVIDIA_TIMEOUT_MS=45000 NVIDIA_REQUEST_DELAY_MS=5000 NVIDIA_MAX_ATTEMPTS=14 NVIDIA_MAX_RETRY_DELAY_MS=30000 node dist/bin/skillcheck.js corpus run --corpus corpus/launch-20.json --results results/launch/20260605T041138Z --tasks 10 --trials 3 --concurrency 1`.
+  - Exit code: 1.
+  - Rust completed and wrote `results/launch/20260605T041138Z/jnmetacode-awesome-claude-md-awesome-rust.json`.
+  - Rust result: verdict `placebo`, effect `-10`, CI `[-20, 0]`.
+  - The launch corpus now has 6 of 20 completed result JSON files.
+  - Resume 14 then failed during `matt-tdd` task generation after NVIDIA connection retries through retry `13/14`.
+- Direct NVIDIA diagnostics:
+  - Diagnostics directory: `results/diagnostics/20260605T104153Z-nvidia`.
+  - `GET /v1/models` returned HTTP 200 in 859 ms with 120 model IDs, so the API key is valid.
+  - Candidate chat health tested 22 available model IDs sequentially.
+  - Current runner `mistralai/mistral-small-4-119b-2603` failed a tiny chat prompt with a 45s connection abort.
+  - Original runner `deepseek-ai/deepseek-v4-flash` also failed a tiny chat prompt with a 45s connection abort.
+  - `qwen/qwen3-coder-480b-a35b-instruct` passed the Rust-like runner prompt in 13.7s with all quality signals.
+  - `qwen/qwen3-next-80b-a3b-instruct` passed JSON mode, full 20-task `matt-tdd` generation in 19.2s, and pass/fail grader checks.
+  - `stepfun-ai/step-3.7-flash` passed full 20-task `matt-tdd` generation only with 120s timeout and took 54.0s; it failed the grader pass case by returning reasoning text instead of parseable JSON.
+- Root-cause conclusion:
+  - This is not an API-key failure.
+  - The launch loop was caused by an unhealthy runner endpoint, StepFun grader unreliability, and the one-off `NVIDIA_TIMEOUT_MS=45000` override being too low for valid full task-generation calls.
+  - Continue M5 with `NVIDIA_TIMEOUT_MS=120000`, `NVIDIA_REQUEST_DELAY_MS=5000`, `--concurrency 1`, `NVIDIA_GENERATOR_MODEL=qwen/qwen3-next-80b-a3b-instruct`, `NVIDIA_GRADER_MODEL=qwen/qwen3-next-80b-a3b-instruct`, and `NVIDIA_RUNNER_MODEL=qwen/qwen3-coder-480b-a35b-instruct`.
+- Gate status:
+  - Still not passed. The launch corpus is at 6 of 20 completed result JSON files, and the model/config swap must be used for the remaining live run.

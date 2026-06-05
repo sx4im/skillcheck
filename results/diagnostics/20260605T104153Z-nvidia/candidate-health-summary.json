@@ -1,0 +1,309 @@
+{
+  "startedAt": "2026-06-05T10:47:42.723Z",
+  "baseUrl": "https://integrate.api.nvidia.com/v1",
+  "skipped": [],
+  "results": [
+    {
+      "model": "stepfun-ai/step-3.7-flash",
+      "ok": true,
+      "status": 200,
+      "elapsedMs": 1723,
+      "content": "Got it, the user wants exactly OK as the reply.",
+      "usage": {
+        "prompt_tokens": 17,
+        "total_tokens": 29,
+        "completion_tokens": 12,
+        "prompt_tokens_details": null
+      },
+      "retryAfter": null,
+      "requestId": null
+    },
+    {
+      "model": "mistralai/mistral-small-4-119b-2603",
+      "ok": false,
+      "status": "connection",
+      "elapsedMs": 45003,
+      "error": "AbortError: This operation was aborted"
+    },
+    {
+      "model": "qwen/qwen3-coder-480b-a35b-instruct",
+      "ok": true,
+      "status": 200,
+      "elapsedMs": 1335,
+      "content": "OK",
+      "usage": {
+        "prompt_tokens": 13,
+        "completion_tokens": 2,
+        "total_tokens": 15,
+        "prompt_tokens_details": {
+          "audio_tokens": null,
+          "cached_tokens": 13
+        }
+      },
+      "retryAfter": null,
+      "requestId": null
+    },
+    {
+      "model": "moonshotai/kimi-k2.6",
+      "ok": true,
+      "status": 200,
+      "elapsedMs": 4570,
+      "content": " OK",
+      "usage": {
+        "prompt_tokens": 14,
+        "total_tokens": 16,
+        "completion_tokens": 2,
+        "prompt_tokens_details": null
+      },
+      "retryAfter": null,
+      "requestId": null
+    },
+    {
+      "model": "openai/gpt-oss-120b",
+      "ok": true,
+      "status": 200,
+      "elapsedMs": 559,
+      "content": "The user says: \"Reply with exactly OK",
+      "usage": {
+        "prompt_tokens": 70,
+        "total_tokens": 82,
+        "completion_tokens": 12,
+        "prompt_tokens_details": null
+      },
+      "retryAfter": null,
+      "requestId": null
+    },
+    {
+      "model": "openai/gpt-oss-20b",
+      "ok": true,
+      "status": 200,
+      "elapsedMs": 1244,
+      "content": "The user says: \"Reply with exactly OK",
+      "usage": {
+        "prompt_tokens": 70,
+        "total_tokens": 82,
+        "completion_tokens": 12,
+        "prompt_tokens_details": null
+      },
+      "retryAfter": null,
+      "requestId": null
+    },
+    {
+      "model": "deepseek-ai/deepseek-v4-flash",
+      "ok": false,
+      "status": "connection",
+      "elapsedMs": 45001,
+      "error": "AbortError: This operation was aborted"
+    },
+    {
+      "model": "deepseek-ai/deepseek-v4-pro",
+      "ok": true,
+      "status": 200,
+      "elapsedMs": 2490,
+      "content": "OK",
+      "usage": {
+        "prompt_tokens": 9,
+        "total_tokens": 11,
+        "completion_tokens": 2,
+        "prompt_tokens_details": null,
+        "reasoning_tokens": 0
+      },
+      "retryAfter": null,
+      "requestId": null
+    },
+    {
+      "model": "mistralai/mistral-medium-3.5-128b",
+      "ok": true,
+      "status": 200,
+      "elapsedMs": 16982,
+      "content": "OK",
+      "usage": {
+        "prompt_tokens": 20,
+        "total_tokens": 22,
+        "completion_tokens": 2,
+        "prompt_tokens_details": null
+      },
+      "retryAfter": null,
+      "requestId": null
+    },
+    {
+      "model": "mistralai/mistral-large-3-675b-instruct-2512",
+      "ok": false,
+      "status": "connection",
+      "elapsedMs": 45001,
+      "error": "AbortError: This operation was aborted"
+    },
+    {
+      "model": "mistralai/codestral-22b-instruct-v0.1",
+      "ok": false,
+      "status": 404,
+      "elapsedMs": 840,
+      "content": "",
+      "error": "{\"status\":404,\"title\":\"Not Found\",\"detail\":\"Function '9a10b012-e6df-46fd-83b2-700dcbc75814': Not found for account 'vzvH0iUVaURxjD6u_f1moAZEDRl9_XJMszCAmW-s84g'\"}",
+      "retryAfter": null,
+      "requestId": null
+    },
+    {
+      "model": "nvidia/nemotron-3-super-120b-a12b",
+      "ok": true,
+      "status": 200,
+      "elapsedMs": 1400,
+      "content": "The user says: \"Reply with exactly OK.\" So we",
+      "usage": {
+        "prompt_tokens": 21,
+        "total_tokens": 33,
+        "completion_tokens": 12,
+        "prompt_tokens_details": null
+      },
+      "retryAfter": null,
+      "requestId": null
+    },
+    {
+      "model": "nvidia/nemotron-3-nano-30b-a3b",
+      "ok": true,
+      "status": 200,
+      "elapsedMs": 548,
+      "content": "The user says: \"Reply with exactly OK.\" So we",
+      "usage": {
+        "prompt_tokens": 21,
+        "total_tokens": 33,
+        "completion_tokens": 12,
+        "prompt_tokens_details": null
+      },
+      "retryAfter": null,
+      "requestId": null
+    },
+    {
+      "model": "nvidia/llama-3.3-nemotron-super-49b-v1.5",
+      "ok": true,
+      "status": 200,
+      "elapsedMs": 1471,
+      "content": "\nOkay, the user wants me to reply with",
+      "usage": {
+        "prompt_tokens": 20,
+        "total_tokens": 32,
+        "completion_tokens": 12,
+        "prompt_tokens_details": null
+      },
+      "retryAfter": null,
+      "requestId": null
+    },
+    {
+      "model": "meta/llama-4-maverick-17b-128e-instruct",
+      "ok": true,
+      "status": 200,
+      "elapsedMs": 815,
+      "content": "OK",
+      "usage": {
+        "prompt_tokens": 15,
+        "total_tokens": 17,
+        "completion_tokens": 2,
+        "prompt_tokens_details": null
+      },
+      "retryAfter": null,
+      "requestId": null
+    },
+    {
+      "model": "meta/llama-3.3-70b-instruct",
+      "ok": true,
+      "status": 200,
+      "elapsedMs": 1153,
+      "content": "OK",
+      "usage": {
+        "prompt_tokens": 40,
+        "total_tokens": 42,
+        "completion_tokens": 2,
+        "prompt_tokens_details": null
+      },
+      "retryAfter": null,
+      "requestId": null
+    },
+    {
+      "model": "ibm/granite-34b-code-instruct",
+      "ok": false,
+      "status": 404,
+      "elapsedMs": 288,
+      "content": "",
+      "error": "{\"status\":404,\"title\":\"Not Found\",\"detail\":\"Function '4df48b4f-e3c5-4ade-82c7-c06b65e25d18': Not found for account 'vzvH0iUVaURxjD6u_f1moAZEDRl9_XJMszCAmW-s84g'\"}",
+      "retryAfter": null,
+      "requestId": null
+    },
+    {
+      "model": "bytedance/seed-oss-36b-instruct",
+      "ok": true,
+      "status": 200,
+      "elapsedMs": 3038,
+      "content": "\nGot it, the user wants me to reply with",
+      "usage": {
+        "prompt_tokens": 13,
+        "total_tokens": 25,
+        "completion_tokens": 12,
+        "prompt_tokens_details": null
+      },
+      "retryAfter": null,
+      "requestId": null
+    },
+    {
+      "model": "z-ai/glm-5.1",
+      "ok": true,
+      "status": 200,
+      "elapsedMs": 9013,
+      "content": "OK",
+      "usage": {
+        "prompt_tokens": 10,
+        "total_tokens": 12,
+        "completion_tokens": 2,
+        "prompt_tokens_details": null
+      },
+      "retryAfter": null,
+      "requestId": null
+    },
+    {
+      "model": "minimaxai/minimax-m2.7",
+      "ok": true,
+      "status": 200,
+      "elapsedMs": 2393,
+      "content": "The user says: \"Reply with exactly OK.\" So they",
+      "usage": {
+        "prompt_tokens": 43,
+        "completion_tokens": 12,
+        "total_tokens": 55,
+        "prompt_tokens_details": {
+          "audio_tokens": null,
+          "cached_tokens": 16
+        }
+      },
+      "retryAfter": null,
+      "requestId": null
+    },
+    {
+      "model": "qwen/qwen3-next-80b-a3b-instruct",
+      "ok": true,
+      "status": 200,
+      "elapsedMs": 531,
+      "content": "OK",
+      "usage": {
+        "prompt_tokens": 13,
+        "total_tokens": 15,
+        "completion_tokens": 2,
+        "prompt_tokens_details": null
+      },
+      "retryAfter": null,
+      "requestId": null
+    },
+    {
+      "model": "qwen/qwen3.5-122b-a10b",
+      "ok": true,
+      "status": 200,
+      "elapsedMs": 2518,
+      "content": "OK",
+      "usage": {
+        "prompt_tokens": 17,
+        "completion_tokens": 2,
+        "total_tokens": 19
+      },
+      "retryAfter": null,
+      "requestId": null
+    }
+  ]
+}

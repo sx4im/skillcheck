@@ -40,3 +40,10 @@
 - Because larger `NVIDIA_MAX_ATTEMPTS` values can produce very long fallback exponential waits, the NVIDIA adapter now supports `NVIDIA_MAX_RETRY_DELAY_MS` with a default 60000 ms cap. This is provider scheduling only and does not change trial math or scoring.
 - `awesome-go` remains in the M5 launch corpus but has been moved to the end of `corpus/launch-20.json` after repeated provider timeouts on one runner call. This changes only run order so other required launch skills can progress first; the 20-skill corpus membership is unchanged.
 - Domain fallback for formats without explicit `domain`, `description`, or `when_to_use` now uses only the first heading instead of body text. This better enforces the integrity rule that the task generator receives a declared domain, not skill instructions, and reduces provider load for CLAUDE.md corpus entries.
+- Direct NVIDIA diagnostics on 2026-06-05 validated that the API key is good: `GET /v1/models` returned HTTP 200 with 120 model IDs. The observed M5 failures are not an authentication problem. Root causes were model/endpoint reliability plus an overly low one-off launch timeout:
+  - `mistralai/mistral-small-4-119b-2603`, the current runner, failed a tiny chat health prompt with a 45s connection abort.
+  - `deepseek-ai/deepseek-v4-flash` also failed the tiny health prompt with a 45s connection abort.
+  - `stepfun-ai/step-3.7-flash` passed basic JSON mode but failed an actual grader pass case by returning reasoning text instead of parseable JSON.
+  - Full `matt-tdd` task generation succeeded with `NVIDIA_TIMEOUT_MS=120000`; `stepfun-ai/step-3.7-flash` took 54s, proving the previous `NVIDIA_TIMEOUT_MS=45000` launch override was too low for valid generation calls.
+  - `qwen/qwen3-next-80b-a3b-instruct` passed JSON mode, full 20-task `matt-tdd` generation in 19s, and pass/fail grader checks, so it replaces StepFun for generator/grader.
+  - `qwen/qwen3-coder-480b-a35b-instruct` passed the Rust-like runner prompt with full quality signals, so it replaces Mistral Small for runner. It is not used for generator/grader because NVIDIA returned HTTP 400 for the JSON-mode call.
