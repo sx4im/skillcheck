@@ -1,0 +1,62 @@
+[
+  {
+    "id": "t001",
+    "prompt": "Build a Vite SPA that uses React 19’s new useId hook to generate unique IDs for form elements in Server Components.",
+    "criterionType": "rubric",
+    "criterion": "Generated IDs are stable across server renders and unique within the component tree, with no duplicate IDs in output."
+  },
+  {
+    "id": "t002",
+    "prompt": "Implement a React 19 component that uses useTransition to defer rendering of a heavy list until after user interaction.",
+    "criterionType": "rubric",
+    "criterion": "Heavy list renders only after user triggers it, with visible loading state and no initial performance lag."
+  },
+  {
+    "id": "t003",
+    "prompt": "Use React 19’s new use() hook to directly consume a Promise returned from a Server Component in a Client Component.",
+    "criterionType": "rubric",
+    "criterion": "Component renders resolved data without manual async/await or useEffect, and shows loading state correctly during fetch."
+  },
+  {
+    "id": "t004",
+    "prompt": "Implement a React 19 component that uses the new useActionState hook to handle form submission with server-side validation errors.",
+    "criterionType": "rubric",
+    "criterion": "Form displays validation errors returned from server without full page reload and preserves user input correctly."
+  },
+  {
+    "id": "t005",
+    "prompt": "Implement a React 19 component that renders a table with Server Components for rows and Client Components for interactive cells.",
+    "criterionType": "rubric",
+    "criterion": "Table renders rows on server and interactive cells hydrate correctly on client with no hydration warnings."
+  },
+  {
+    "id": "t006",
+    "prompt": "Create a React 19 component using the new Server Components syntax that fetches user data from an API and renders it in a list without client-side hydration.",
+    "criterionType": "rubric",
+    "criterion": "Component renders fetched data correctly without client-side JavaScript execution and uses Server Component directives properly."
+  },
+  {
+    "id": "t007",
+    "prompt": "Create a Vite SPA with React 19 that uses the new Server Actions API to delete a record via a form submit without client-side routing.",
+    "criterionType": "rubric",
+    "criterion": "Form submission triggers server action, updates UI without page refresh, and shows success/error feedback appropriately."
+  },
+  {
+    "id": "t008",
+    "prompt": "Build a Vite SPA with React 19 that uses the new useOptimistic hook to update a cart total before API confirmation.",
+    "criterionType": "rubric",
+    "criterion": "Cart total updates immediately on user action and reverts if API fails, with correct final value after confirmation."
+  },
+  {
+    "id": "t009",
+    "prompt": "Use React 19’s new use() hook to consume a cached data object from a Server Component in a Client Component.",
+    "criterionType": "rubric",
+    "criterion": "Data is consumed without re-fetching and renders immediately without loading state flicker."
+  },
+  {
+    "id": "t010",
+    "prompt": "Build a React 19 Server Component that fetches and renders markdown content from a file, with no client-side parsing.",
+    "criterionType": "rubric",
+    "criterion": "Markdown renders as HTML on server and no client-side libraries or scripts are included or executed."
+  }
+]

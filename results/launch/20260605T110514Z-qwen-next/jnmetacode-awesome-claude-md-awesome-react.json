@@ -1,0 +1,188 @@
+{
+  "skill": {
+    "name": "React 19 + Vite SPA 项目",
+    "source": "https://github.com/jnMetaCode/awesome-claude-md/blob/fe38fcd8f245460b989879c9155a16404e77cffa/by-framework/react/CLAUDE.md",
+    "format": "CLAUDE.md",
+    "commit_hash": "e58a181a31738f927fe0e5aaccbe3473471628832c5b3958231a75667745d979",
+    "domain": "React 19 + Vite SPA 项目"
+  },
+  "config": {
+    "runner_model": "qwen/qwen3-next-80b-a3b-instruct",
+    "runner_version": "qwen/qwen3-next-80b-a3b-instruct",
+    "grader_model": "qwen/qwen3-next-80b-a3b-instruct",
+    "grader_version": "qwen/qwen3-next-80b-a3b-instruct",
+    "generator_model": "qwen/qwen3-next-80b-a3b-instruct",
+    "trials": 3,
+    "tasks": 10,
+    "temperature": 0.7,
+    "mode": "forced-injection"
+  },
+  "result": {
+    "effect_pp": -20,
+    "ci_pp": [
+      -36.67,
+      -6.67
+    ],
+    "verdict": "harms",
+    "with_skill_pass": 0.1,
+    "no_skill_pass": 0.3,
+    "token_overhead": 571,
+    "value_per_1k_tokens": -35.03
+  },
+  "tasks": [
+    {
+      "id": "t001",
+      "prompt": "Build a Vite SPA that uses React 19’s new useId hook to generate unique IDs for form elements in Server Components.",
+      "criterion_type": "rubric",
+      "criterion": "Generated IDs are stable across server renders and unique within the component tree, with no duplicate IDs in output.",
+      "arm_a_pass_rate": 0,
+      "arm_b_pass_rate": 0
+    },
+    {
+      "id": "t002",
+      "prompt": "Implement a React 19 component that uses useTransition to defer rendering of a heavy list until after user interaction.",
+      "criterion_type": "rubric",
+      "criterion": "Heavy list renders only after user triggers it, with visible loading state and no initial performance lag.",
+      "arm_a_pass_rate": 1,
+      "arm_b_pass_rate": 1
+    },
+    {
+      "id": "t003",
+      "prompt": "Use React 19’s new use() hook to directly consume a Promise returned from a Server Component in a Client Component.",
+      "criterion_type": "rubric",
+      "criterion": "Component renders resolved data without manual async/await or useEffect, and shows loading state correctly during fetch.",
+      "arm_a_pass_rate": 0,
+      "arm_b_pass_rate": 0
+    },
+    {
+      "id": "t004",
+      "prompt": "Implement a React 19 component that uses the new useActionState hook to handle form submission with server-side validation errors.",
+      "criterion_type": "rubric",
+      "criterion": "Form displays validation errors returned from server without full page reload and preserves user input correctly.",
+      "arm_a_pass_rate": 0,
+      "arm_b_pass_rate": 1
+    },
+    {
+      "id": "t005",
+      "prompt": "Implement a React 19 component that renders a table with Server Components for rows and Client Components for interactive cells.",
+      "criterion_type": "rubric",
+      "criterion": "Table renders rows on server and interactive cells hydrate correctly on client with no hydration warnings.",
+      "arm_a_pass_rate": 0,
+      "arm_b_pass_rate": 0
+    },
+    {
+      "id": "t006",
+      "prompt": "Create a React 19 component using the new Server Components syntax that fetches user data from an API and renders it in a list without client-side hydration.",
+      "criterion_type": "rubric",
+      "criterion": "Component renders fetched data correctly without client-side JavaScript execution and uses Server Component directives properly.",
+      "arm_a_pass_rate": 0,
+      "arm_b_pass_rate": 1
+    },
+    {
+      "id": "t007",
+      "prompt": "Create a Vite SPA with React 19 that uses the new Server Actions API to delete a record via a form submit without client-side routing.",
+      "criterion_type": "rubric",
+      "criterion": "Form submission triggers server action, updates UI without page refresh, and shows success/error feedback appropriately.",
+      "arm_a_pass_rate": 0,
+      "arm_b_pass_rate": 0
+    },
+    {
+      "id": "t008",
+      "prompt": "Build a Vite SPA with React 19 that uses the new useOptimistic hook to update a cart total before API confirmation.",
+      "criterion_type": "rubric",
+      "criterion": "Cart total updates immediately on user action and reverts if API fails, with correct final value after confirmation.",
+      "arm_a_pass_rate": 0,
+      "arm_b_pass_rate": 0
+    },
+    {
+      "id": "t009",
+      "prompt": "Use React 19’s new use() hook to consume a cached data object from a Server Component in a Client Component.",
+      "criterion_type": "rubric",
+      "criterion": "Data is consumed without re-fetching and renders immediately without loading state flicker.",
+      "arm_a_pass_rate": 0,
+      "arm_b_pass_rate": 0
+    },
+    {
+      "id": "t010",
+      "prompt": "Build a React 19 Server Component that fetches and renders markdown content from a file, with no client-side parsing.",
+      "criterion_type": "rubric",
+      "criterion": "Markdown renders as HTML on server and no client-side libraries or scripts are included or executed.",
+      "arm_a_pass_rate": 0,
+      "arm_b_pass_rate": 0
+    }
+  ],
+  "reproducibility": {
+    "task_suite_path": "results/tasks/44e5894a7b5897dad9f88844d197e27000fd33861cc824499f39a14949fd8dd7.json",
+    "transcript_hashes": [
+      "sha256:6b5ac7a63129e0d161470083fc138eb51ce8491ff309df13a8a2850dcdb49b8e",
+      "sha256:2f9a105365cf96dfc866edb441298d28a5b68f92381ff45c75352a479589da77",
+      "sha256:c380b6f4bb7a84c916a07188d59eda000cfa2951036333920e4c16c85a6ad5d9",
+      "sha256:138de2506a3c884d50071035c665c22511df73ead61484ad85bce033289ee9cc",
+      "sha256:13a9ee0cdbe401b248c7d4534158be217f84d0beeb72fccd5169b22d74b99acf",
+      "sha256:6e8db6c9a6699f0b0f3a95627c648fb794dbe2e76b2e63103302a83ed45dc426",
+      "sha256:c389a004895bd199400bb6274938b48d4bbabf6893e12fd43106db13c6764a55",
+      "sha256:8289fe5aea9792953a272aa775529a7831d60e75f8e75fafcad431563174a586",
+      "sha256:854db3f66003ec3e5507104710671faa186ca71db9fd38bbd3814deaf073d35e",
+      "sha256:4d0377341dde9ef20a68737dd290cb625870503902aa29c495e1fdb0822b545c",
+      "sha256:80d056dbf0825c2f889d9cc29a918af89b70542c19ad77aa5930bcf98e045fb7",
+      "sha256:536a2cd4ce79b0621ad8433023f7975ccb76328285d9c21a4388e9452e602140",
+      "sha256:c9e273084920f2edcb578497739025287f0461a45b240057fc41c25e58a5eb8b",
+      "sha256:5a71abe0b5625dca4a2504e3b7db509447ed96caf768459dc2de0c62296ece2b",
+      "sha256:d9053a2a228b87ec4632aebaa7765bc7015480df80414cba178b938ea0315573",
+      "sha256:ff9642091361e89784d585f6dc11a1c255f802785828d81b5df7953df0655cbf",
+      "sha256:0e2b80ab5af291fa5d0adaa74c17406b7e264b26275f076d951a29219be4bacd",
+      "sha256:f9d687f8fd9c73a45b35960e4dd7ee0c5c9e2305216f755448680a57350915ff",
+      "sha256:9d6b3ed52471a22ea613e9b3bffcda5c91e586ed9db758be4b33c1f67e1231d0",
+      "sha256:9f3a38b0a3bc21e58aa40566584373ea66de7f7c51828e33703a1621dbbe4af7",
+      "sha256:e57aa96b9f807dcf5b0fb778d0234bb40a716e6e97a8cdaf58f133b81b2d7f3d",
+      "sha256:57757457769b233a0f4039b49163aefabbd85c3ba20dadd85793431b30683deb",
+      "sha256:34fc269b606f3f1a6995f8b0d99fe7538d9e060087bf7faca6b81d771dfcd04e",
+      "sha256:a2cb4c5c64502f1b3ec994bdcfbc5ff6431cfbf4ab9dacafa59c22326089acf2",
+      "sha256:6ac913838ac4284944964e0d91f9222db1983948d495bfc4e6bd54543ef53417",
+      "sha256:fb7a9f5566dfc7b75f7ba95d6e8e041e810d91f2643cea16fdb6bdb5ad10a1f2",
+      "sha256:69e552d701fa279a18bae78a8759d5a02ea89f8b16ddfcc69d56a65e69018678",
+      "sha256:a4523ce62449a5a734b072d5f081125560a26baf68bfe43ea4a9bae089e27959",
+      "sha256:88360f2f9174d0049e6910e10e7be81dea2640e1b96cd8dbab008f5b1e06fe15",
+      "sha256:5ce97ec0654d4c67c9a3e5fd35dd4fe759004291e736e3e9d7070c9c2e9ac642",
+      "sha256:f600071e140f9a703374c48992b911eaec867caa0915ea4a52a517c7161c416c",
+      "sha256:6cdf299adfcb9911dd3c989f327613e6830e9a3567725687f0d844a47c6ff2d5",
+      "sha256:506ed49b623fef3aefe0a863b4a9c619cc436e919904f2c715ff23a898651365",
+      "sha256:2be552f452c11d012a2ee9d3cc0e21c0f1888282bb381d9db014fa062b526728",
+      "sha256:cb6424f5ec7e9f040324bee24a61ae944781f037cdfd21efdce3d2cb6a6cd7f4",
+      "sha256:a88e03746ff192d91c69cf89a9d510164de4f8562eabaf0ee807e2fc27a4ecc4",
+      "sha256:f722d9cc3d1ae63d3b77f43e59bf64ffe535892d4f91109fb844bd9d34168399",
+      "sha256:a968b7b117ff414374eb7bf1e42b8c9d63c984141eb13cc049e2869a0ae6a88b",
+      "sha256:238a465b6748cfad65f1369feab8b6ded11b27cfbc47c01c876b317ab15ff719",
+      "sha256:077d407c9149c4ffead79219dd762602a69e7c87312ec5313c952d5c921409c6",
+      "sha256:b374c925620b3d2d71b47340c88368605cf5272057cf048a8a98d831e5d23892",
+      "sha256:7f5c3424ed8774a4e61ee7369629e90fee15cee91337475b39d9e9fc6ad2d88d",
+      "sha256:2a813e5aecd0aca94ea01676b758f605daeb6c76865358a0775ae996c9cd2065",
+      "sha256:50a1b65b91d61d265dbf40219b02285cfe461ebab4387a0bde7d6ab3e45248d7",
+      "sha256:6fa9a83ca7b8e954c4f26b9b1418fef00b761a08e943d5700b098791e18a38b6",
+      "sha256:7cc2801b530991b57217184950edaf22c5c8648ff4e68973ebd1b8551bdcdfc1",
+      "sha256:f49f8dedf46dd62f059e0427524fd6a55f8266dfe127f9eb9702f962d87f37f6",
+      "sha256:e1f6f73de672589b1cdc51f1266607e686489a005ddc261f55cdff6164e804a9",
+      "sha256:fb5eb070f018bc7107deeed3c2297f0c388d1c62d5169ffc8da96540cdc4c29e",
+      "sha256:129ca1e26d33b64e01b8fea65f0db6f7d29d49538cf074fcdb507f2e2df84a66",
+      "sha256:356403c4f648924f4e03b967bb01c41e6fea79310619d335089c565dea7a3c35",
+      "sha256:821c1cd4bbda93e79e485012a4d1f250ee559a628b4e984bd25cf782b1cd1bec",
+      "sha256:846d24215b3467c70a12696f241c18c1f4de0211ba1dfd6404f3a828bc445b3a",
+      "sha256:d13009bcf3eb8aebd0909ee62cbe24d14125394618b39f47c1514c9693f6088f",
+      "sha256:1ff6d9281d33c79a42ceeca3aaef851cbc39c20509a72742321234d21d3cc56c",
+      "sha256:52a14c3f16dcd25e5c369b901691fe853637b2146f9e648ff8addfe57ed8ed6e",
+      "sha256:2a8472a35acc388a00f899cded552a9f2400a65c24eeca9a017c4de335ae0dc8",
+      "sha256:09fe390c8cb3338e7f8502ec628832f0834f4c42b36f48d0490b26de88cbb3ea",
+      "sha256:326956a4465dce96033e61278f89d946dbf08c651a8ce6db46d961479e3d621b",
+      "sha256:9dcb26735db6810838cc34912fcb78fe2ccc77b174d5b38be43bacb3cfa1063c"
+    ]
+  },
+  "history": [
+    {
+      "runner_version": "qwen/qwen3-next-80b-a3b-instruct",
+      "run_date": "2026-06-05",
+      "effect_pp": -20,
+      "verdict": "harms"
+    }
+  ],
+  "run_date": "2026-06-05"
+}

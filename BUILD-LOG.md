@@ -1012,3 +1012,19 @@
   - Keep `NVIDIA_TIMEOUT_MS=120000`, `NVIDIA_REQUEST_DELAY_MS=5000`, and `--concurrency 1`.
 - Gate status:
   - Still not passed. The launch corpus remains at 6 of 20 completed result JSON files.
+
+### M5 - Fresh Qwen Next Launch Started
+
+- Fresh launch directory:
+  - `results/launch/20260605T110514Z-qwen-next`.
+- Command:
+  - `NVIDIA_TIMEOUT_MS=120000 NVIDIA_REQUEST_DELAY_MS=5000 NVIDIA_MAX_ATTEMPTS=8 NVIDIA_MAX_RETRY_DELAY_MS=60000 node dist/bin/skillcheck.js corpus run --corpus corpus/launch-20.json --results results/launch/20260605T110514Z-qwen-next --tasks 10 --trials 3 --concurrency 1`.
+- Reason for new directory:
+  - Model config changed, so the final M5 launch cannot honestly mix with the six old-model partial results from `results/launch/20260605T041138Z`.
+- Current evidence:
+  - 2 of 20 result JSON files completed so far.
+  - `awesome-nextjs`: verdict `placebo`, effect `10`, CI `[-6.75, 26.75]`.
+  - `awesome-react`: verdict `harms`, effect `-20`, CI `[-36.67, -6.67]`.
+  - No NVIDIA retry, timeout, connection, abort, or 429 lines have appeared in the fresh run log so far.
+- Gate status:
+  - Still not passed. The fresh Qwen Next launch is active and incomplete.

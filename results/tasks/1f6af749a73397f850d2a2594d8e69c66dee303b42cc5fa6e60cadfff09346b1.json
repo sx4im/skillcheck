@@ -1,0 +1,62 @@
+[
+  {
+    "id": "t001",
+    "prompt": "Add a global error boundary that catches server errors and displays a user-friendly message with a retry button.",
+    "criterionType": "rubric",
+    "criterion": "Error boundary catches server errors and displays retry button that reloads the page correctly."
+  },
+  {
+    "id": "t002",
+    "prompt": "Create a reusable button component that accepts variant props and applies Tailwind CSS classes conditionally.",
+    "criterionType": "rubric",
+    "criterion": "Button renders correctly with all specified variants and no hardcoded styles or missing classes."
+  },
+  {
+    "id": "t003",
+    "prompt": "Add a loading skeleton UI for a server component that fetches data, ensuring it appears before content renders.",
+    "criterionType": "rubric",
+    "criterion": "Skeleton appears immediately on load and disappears when data is rendered, no flash of empty content."
+  },
+  {
+    "id": "t004",
+    "prompt": "Use next/font to load a custom font and apply it globally via CSS variables in the root layout.",
+    "criterionType": "rubric",
+    "criterion": "Custom font loads correctly and applies to all text without FOIT or layout shift."
+  },
+  {
+    "id": "t005",
+    "prompt": "Implement a server action that updates user preferences and redirects upon success using redirect from next/navigation.",
+    "criterionType": "rubric",
+    "criterion": "Server action executes, updates data, and redirects without client-side form submission."
+  },
+  {
+    "id": "t006",
+    "prompt": "Implement a server component that conditionally renders different content based on user role from cookies.",
+    "criterionType": "rubric",
+    "criterion": "Content renders correctly based on cookie value and no client-side role detection occurs."
+  },
+  {
+    "id": "t007",
+    "prompt": "Create a client component that uses useState to toggle a theme and persists the preference in localStorage.",
+    "criterionType": "rubric",
+    "criterion": "Theme toggle works client-side and retains state across page refreshes via localStorage."
+  },
+  {
+    "id": "t008",
+    "prompt": "Create a Next.js App Router page that fetches data from an API using server components and displays it in a card layout without client-side hydration.",
+    "criterionType": "rubric",
+    "criterion": "Page renders server-side content correctly with no client-side JavaScript used for data fetching or rendering."
+  },
+  {
+    "id": "t009",
+    "prompt": "Implement a dynamic route in App Router that accepts a slug parameter and displays corresponding content from a static data file.",
+    "criterionType": "rubric",
+    "criterion": "Route correctly resolves slug parameter and displays matching content without 404 or incorrect data."
+  },
+  {
+    "id": "t010",
+    "prompt": "Implement a server component that fetches data from two parallel API calls using Promise.all and renders results.",
+    "criterionType": "rubric",
+    "criterion": "Both API calls resolve successfully and data renders together without sequential delays or errors."
+  }
+]

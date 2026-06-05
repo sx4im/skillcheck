@@ -1,0 +1,188 @@
+{
+  "skill": {
+    "name": "CLAUDE.md - Next.js App Router 项目规范",
+    "source": "https://github.com/jnMetaCode/awesome-claude-md/blob/fe38fcd8f245460b989879c9155a16404e77cffa/by-framework/nextjs/CLAUDE.md",
+    "format": "CLAUDE.md",
+    "commit_hash": "aa8ed4be084f2e5dd22db02cd89916375a7f1f4fcbda90661d7cb3139abe863e",
+    "domain": "CLAUDE.md - Next.js App Router 项目规范"
+  },
+  "config": {
+    "runner_model": "qwen/qwen3-next-80b-a3b-instruct",
+    "runner_version": "qwen/qwen3-next-80b-a3b-instruct",
+    "grader_model": "qwen/qwen3-next-80b-a3b-instruct",
+    "grader_version": "qwen/qwen3-next-80b-a3b-instruct",
+    "generator_model": "qwen/qwen3-next-80b-a3b-instruct",
+    "trials": 3,
+    "tasks": 10,
+    "temperature": 0.7,
+    "mode": "forced-injection"
+  },
+  "result": {
+    "effect_pp": 10,
+    "ci_pp": [
+      -6.75,
+      26.75
+    ],
+    "verdict": "placebo",
+    "with_skill_pass": 0.6,
+    "no_skill_pass": 0.5,
+    "token_overhead": 829,
+    "value_per_1k_tokens": 12.06
+  },
+  "tasks": [
+    {
+      "id": "t001",
+      "prompt": "Add a global error boundary that catches server errors and displays a user-friendly message with a retry button.",
+      "criterion_type": "rubric",
+      "criterion": "Error boundary catches server errors and displays retry button that reloads the page correctly.",
+      "arm_a_pass_rate": 0,
+      "arm_b_pass_rate": 0
+    },
+    {
+      "id": "t002",
+      "prompt": "Create a reusable button component that accepts variant props and applies Tailwind CSS classes conditionally.",
+      "criterion_type": "rubric",
+      "criterion": "Button renders correctly with all specified variants and no hardcoded styles or missing classes.",
+      "arm_a_pass_rate": 1,
+      "arm_b_pass_rate": 1
+    },
+    {
+      "id": "t003",
+      "prompt": "Add a loading skeleton UI for a server component that fetches data, ensuring it appears before content renders.",
+      "criterion_type": "rubric",
+      "criterion": "Skeleton appears immediately on load and disappears when data is rendered, no flash of empty content.",
+      "arm_a_pass_rate": 0,
+      "arm_b_pass_rate": 0
+    },
+    {
+      "id": "t004",
+      "prompt": "Use next/font to load a custom font and apply it globally via CSS variables in the root layout.",
+      "criterion_type": "rubric",
+      "criterion": "Custom font loads correctly and applies to all text without FOIT or layout shift.",
+      "arm_a_pass_rate": 0,
+      "arm_b_pass_rate": 0
+    },
+    {
+      "id": "t005",
+      "prompt": "Implement a server action that updates user preferences and redirects upon success using redirect from next/navigation.",
+      "criterion_type": "rubric",
+      "criterion": "Server action executes, updates data, and redirects without client-side form submission.",
+      "arm_a_pass_rate": 1,
+      "arm_b_pass_rate": 1
+    },
+    {
+      "id": "t006",
+      "prompt": "Implement a server component that conditionally renders different content based on user role from cookies.",
+      "criterion_type": "rubric",
+      "criterion": "Content renders correctly based on cookie value and no client-side role detection occurs.",
+      "arm_a_pass_rate": 0,
+      "arm_b_pass_rate": 1
+    },
+    {
+      "id": "t007",
+      "prompt": "Create a client component that uses useState to toggle a theme and persists the preference in localStorage.",
+      "criterion_type": "rubric",
+      "criterion": "Theme toggle works client-side and retains state across page refreshes via localStorage.",
+      "arm_a_pass_rate": 1,
+      "arm_b_pass_rate": 1
+    },
+    {
+      "id": "t008",
+      "prompt": "Create a Next.js App Router page that fetches data from an API using server components and displays it in a card layout without client-side hydration.",
+      "criterion_type": "rubric",
+      "criterion": "Page renders server-side content correctly with no client-side JavaScript used for data fetching or rendering.",
+      "arm_a_pass_rate": 1,
+      "arm_b_pass_rate": 1
+    },
+    {
+      "id": "t009",
+      "prompt": "Implement a dynamic route in App Router that accepts a slug parameter and displays corresponding content from a static data file.",
+      "criterion_type": "rubric",
+      "criterion": "Route correctly resolves slug parameter and displays matching content without 404 or incorrect data.",
+      "arm_a_pass_rate": 1,
+      "arm_b_pass_rate": 0
+    },
+    {
+      "id": "t010",
+      "prompt": "Implement a server component that fetches data from two parallel API calls using Promise.all and renders results.",
+      "criterion_type": "rubric",
+      "criterion": "Both API calls resolve successfully and data renders together without sequential delays or errors.",
+      "arm_a_pass_rate": 1,
+      "arm_b_pass_rate": 0
+    }
+  ],
+  "reproducibility": {
+    "task_suite_path": "results/tasks/1f6af749a73397f850d2a2594d8e69c66dee303b42cc5fa6e60cadfff09346b1.json",
+    "transcript_hashes": [
+      "sha256:82a1fc2e5bc6acd879c3b1888e31f544faa95da7459ccf2171f8b632f3b5e374",
+      "sha256:c0cad2488818b982e4858e9d544d9d5e415a767c3af8b3c9fbfce84aafa05d3e",
+      "sha256:d368823e53739f20f7955b46dc2b013ded17a90d66f4e5d0856622bf8706111e",
+      "sha256:16e4739904be28393e812ffa92f793cac4a6cc5c189fa77af2731dbe181dd89f",
+      "sha256:60fc7ddfdadd23a100819564ed1671c6e1f5782b4519bfe426ab38238ecc169d",
+      "sha256:e6349cb70c6b4bfa251e9be700fbe96fe5a71bd2fe015f346ffdca9d2d789f57",
+      "sha256:ead90fb60505fce86ba6313f737f8be0a510aa1db8d70e392b8532b1dd202986",
+      "sha256:c5580be6bea36a800096a6ded8f70b3b6aa0f852f9c1792882ac2235286a020a",
+      "sha256:a0fc7723bc2d898db2fccefa63cd379412e6a183503a72fcc51b7328ae275a7d",
+      "sha256:19cdd6e43b51c9a6a5297eb8f92965f68ce599dfe8f70f116b263367bb159eeb",
+      "sha256:c358186b92f51b3a49048bc3b3d358e99064e3b8d562f5353c54cd5bfd35b197",
+      "sha256:149e870a444b557e9e64f4f79bc72ef021eaac198449ac2b349ae6bb89480c65",
+      "sha256:605eba230486b739d028da346649500adcaf80dbb0fe5740609aa1d14990ff27",
+      "sha256:c205efd54ed61e3547b2a4461357050b8daff97ce40fc1a21cd2843abf2135cc",
+      "sha256:32434767e0a2b21ce062068bb5a5c7ee96339e80de0eb2401d0e51b2797458a4",
+      "sha256:feb3707c76b2183ee7ba8ea3d241135ca5f6c75a205afd4f993ae86d9a292f89",
+      "sha256:d657229385e48fe03726c8801ea75435c3a6b98e5162d40bb38445028dcbffb5",
+      "sha256:cad84037f13fa1bc1b53099988e880dc2e4734d4eec221da1326de8aaa3cc346",
+      "sha256:1a9151b5dba4411566199db6f6bb4a6cd8950fd3620c6d3a57dab590dbc8d6d2",
+      "sha256:861fb13af08e42f8c73661675d8157cfd35d9fe09539cf0f3f27fea38055a05f",
+      "sha256:3ede00cc689655ef4e5ca669fef5dae420a08e9db9baad5dc1aaab60c2622adc",
+      "sha256:10eef7a7d3858d16a25c7a063faae39ba26b5ca206cba8d43b37d8429e7182a5",
+      "sha256:eb4fec8afa1d059f1f193b9f62bbb409d3c656070b1d4e7c73fb18818c685aeb",
+      "sha256:5352f024dba38e9f4a090b82478c467830e7b7a113c0bb99fca43c0515c3e837",
+      "sha256:5d2b3aa999b247c4109aab6da4d114d5a608545c111279034040e4ae11f31271",
+      "sha256:c3228d35fc13e3f089bc3bcbe84f1ee31cd93f445d67820fad26829ca73f5f7d",
+      "sha256:8a3e6d4474657302d6f21e0fa95b75a47db4cbad47f50fe12018c14cbd81246f",
+      "sha256:e85d378908b83fcbfe19e02eae672e114d2003a4ade087c9b1f8fcb3a875a0d2",
+      "sha256:82664996bd64b57dfd1a6b5888889f180706c728a55acc5a83054539cb082952",
+      "sha256:7bd50196c244bbcf88c1d522394f0eff1a6c187d67282bec01bce1d723aeb830",
+      "sha256:0f127b4f57c44aab59eb9ae65d376e86a74ec37ef3118de3e15061d38d9a4653",
+      "sha256:44f9de08c5f3fbde2fe96d8c3e10f8eac0c14dd81ee8d4523cfe3c7082d82d95",
+      "sha256:a7b89285262c1e32f09094c1663cee716b112b903c8351eca9ad66269bd1ac90",
+      "sha256:9ce43980e50c2aec97b43bd4aed541a4d8097c8c9763fdbd0639604dad8be453",
+      "sha256:c6b6452dc9083fbf8935e1bccddb7a2f76e03dc26fbfb67629fc5f1efdf57d09",
+      "sha256:3fa0abf85f0a6af2b883f9c69e1c3194d7d7b0b6ee1dc7c6d0a493da41eebbbe",
+      "sha256:b12981786c5159fb1b411b9e5870e9b2298f575e5534bc0fb99731392ff16139",
+      "sha256:e31f6e704a1f5967853cb989d12a994cf42553b8b67044490195d3dedd4e0b9c",
+      "sha256:172c94d91ea5a507042767c42c3a1ec371b2e9de995a8848dbb945a61a8badf0",
+      "sha256:05133ef92fc7300c2a90c7572f799aa0ac2b1de17401ecacabc9e892b7251c74",
+      "sha256:3c040b29ceced9be8bbea6c87e44cf90fc3c913af0ae3f10db1ccb32313a72b4",
+      "sha256:0166cb1a9ab34a5c06c5080608b34174bb2341923cd07a81124408d1f70ea3ef",
+      "sha256:86c6d5629acda5223e5cff39408f10d46f1c28916bf5789925a29f42441e887f",
+      "sha256:15f2ec3c566d50c6355f55e8091644ca981d73733d31f5164ce4ccb96bba0357",
+      "sha256:2f2a3e82d3808e820081fdd046956033c2737861c1db10d88ab8a1da39c72d03",
+      "sha256:54f88de4d6ee1298798e68e4b00d3311b099eb18d680b00bea2335a388d72f50",
+      "sha256:06367dcdc2c32f8b7e94fbda85642fafae4c01b85d0f477582ffe66aea21ccdb",
+      "sha256:30d7435f58e0caaaa1d18362cdaa607239fe0a73cef2bc8367f2a6f05b8c5fb1",
+      "sha256:db51484e1dd848bf1e1293a02368cbefde89529be72c4e29a6c40540882f6313",
+      "sha256:5667c1e28d099c4c03d0fd7ac2cb9bddbacfe2901de574483ab0cfe12328073b",
+      "sha256:9eca17aba7614717cd15aeabb833312a6b33f0347fa9a7d3402e518422faeb68",
+      "sha256:ea0d90dc3ab9d6ca26e522e9107d2f326132bc80da248874c4c8e888a601f626",
+      "sha256:d310542d57ec2f2df9301bdf075351b668cef615d8a62deda19841878f143aca",
+      "sha256:319a5a18534bf9fd979839f872c6d3c3ac391b3c665d930338d6ca1a59e96482",
+      "sha256:e15b2962809f0fd9e9d17cc852d9dee28f6e32de1f3fcfb0fe883b64bbc7419c",
+      "sha256:00190893d4aa1b774efb65649de3572e4e40c27ba2a74f7be0b1e7e5055f93e0",
+      "sha256:1b2e1377f252c2bb50c1d8657eae5ce02aa87ad82e33ce3c048b7f5c55337380",
+      "sha256:9961156dd8ca2be5130a3156ee42e4af7c552d366d6eac3132b7b3b6cf814815",
+      "sha256:f461f610a6b7cc59741743ca4e952ff29259c22e64d445df58ed3cad49719971",
+      "sha256:b65285afc162622f6265153896e6c90b152b5961ea7b2caf946f1ea3286190b2"
+    ]
+  },
+  "history": [
+    {
+      "runner_version": "qwen/qwen3-next-80b-a3b-instruct",
+      "run_date": "2026-06-05",
+      "effect_pp": 10,
+      "verdict": "placebo"
+    }
+  ],
+  "run_date": "2026-06-05"
+}
