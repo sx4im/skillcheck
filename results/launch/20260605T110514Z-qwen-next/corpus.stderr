@@ -1,0 +1,2495 @@
+[corpus] eval jnMetaCode/awesome-claude-md/awesome-nextjs
+[eval] run t001 trial 1/3 with_skill
+[eval] run t001 trial 1/3 no_skill
+[eval] run t001 trial 2/3 with_skill
+[eval] run t001 trial 2/3 no_skill
+[eval] run t001 trial 3/3 with_skill
+[eval] run t001 trial 3/3 no_skill
+[eval] run t002 trial 1/3 with_skill
+[eval] run t002 trial 1/3 no_skill
+[eval] run t002 trial 2/3 with_skill
+[eval] run t002 trial 2/3 no_skill
+[eval] run t002 trial 3/3 with_skill
+[eval] run t002 trial 3/3 no_skill
+[eval] run t003 trial 1/3 with_skill
+[eval] run t003 trial 1/3 no_skill
+[eval] run t003 trial 2/3 with_skill
+[eval] run t003 trial 2/3 no_skill
+[eval] run t003 trial 3/3 with_skill
+[eval] run t003 trial 3/3 no_skill
+[eval] run t004 trial 1/3 with_skill
+[eval] run t004 trial 1/3 no_skill
+[eval] run t004 trial 2/3 with_skill
+[eval] run t004 trial 2/3 no_skill
+[eval] run t004 trial 3/3 with_skill
+[eval] run t004 trial 3/3 no_skill
+[eval] run t005 trial 1/3 with_skill
+[eval] run t005 trial 1/3 no_skill
+[eval] run t005 trial 2/3 with_skill
+[eval] run t005 trial 2/3 no_skill
+[eval] run t005 trial 3/3 with_skill
+[eval] run t005 trial 3/3 no_skill
+[eval] run t006 trial 1/3 with_skill
+[eval] run t006 trial 1/3 no_skill
+[eval] run t006 trial 2/3 with_skill
+[eval] run t006 trial 2/3 no_skill
+[eval] run t006 trial 3/3 with_skill
+[eval] run t006 trial 3/3 no_skill
+[eval] run t007 trial 1/3 with_skill
+[eval] run t007 trial 1/3 no_skill
+[eval] run t007 trial 2/3 with_skill
+[eval] run t007 trial 2/3 no_skill
+[eval] run t007 trial 3/3 with_skill
+[eval] run t007 trial 3/3 no_skill
+[eval] run t008 trial 1/3 with_skill
+[eval] run t008 trial 1/3 no_skill
+[eval] run t008 trial 2/3 with_skill
+[eval] run t008 trial 2/3 no_skill
+[eval] run t008 trial 3/3 with_skill
+[eval] run t008 trial 3/3 no_skill
+[eval] run t009 trial 1/3 with_skill
+[eval] run t009 trial 1/3 no_skill
+[eval] run t009 trial 2/3 with_skill
+[eval] run t009 trial 2/3 no_skill
+[eval] run t009 trial 3/3 with_skill
+[eval] run t009 trial 3/3 no_skill
+[eval] run t010 trial 1/3 with_skill
+[eval] run t010 trial 1/3 no_skill
+[eval] run t010 trial 2/3 with_skill
+[eval] run t010 trial 2/3 no_skill
+[eval] run t010 trial 3/3 with_skill
+[eval] run t010 trial 3/3 no_skill
+[eval] grade t007 trial 1
+[eval] grade t008 trial 3
+[eval] grade t009 trial 1
+[eval] grade t010 trial 3
+[eval] grade t010 trial 2
+[eval] grade t004 trial 3
+[eval] grade t002 trial 3
+[eval] grade t009 trial 3
+[eval] grade t002 trial 3
+[eval] grade t010 trial 1
+[eval] grade t008 trial 3
+[eval] grade t005 trial 1
+[eval] grade t008 trial 2
+[eval] grade t004 trial 2
+[eval] grade t004 trial 1
+[eval] grade t007 trial 2
+[eval] grade t005 trial 2
+[eval] grade t005 trial 1
+[eval] grade t006 trial 3
+[eval] grade t001 trial 1
+[eval] grade t002 trial 1
+[eval] grade t007 trial 3
+[eval] grade t006 trial 1
+[eval] grade t004 trial 1
+[eval] grade t001 trial 2
+[eval] grade t006 trial 2
+[eval] grade t009 trial 2
+[eval] grade t005 trial 2
+[eval] grade t003 trial 1
+[eval] grade t007 trial 1
+[eval] grade t008 trial 2
+[eval] grade t005 trial 3
+[eval] grade t001 trial 2
+[eval] grade t003 trial 2
+[eval] grade t001 trial 3
+[eval] grade t001 trial 1
+[eval] grade t007 trial 2
+[eval] grade t008 trial 1
+[eval] grade t003 trial 3
+[eval] grade t009 trial 3
+[eval] grade t009 trial 2
+[eval] grade t002 trial 1
+[eval] grade t006 trial 2
+[eval] grade t008 trial 1
+[eval] grade t004 trial 3
+[eval] grade t007 trial 3
+[eval] grade t003 trial 3
+[eval] grade t006 trial 3
+[eval] grade t005 trial 3
+[eval] grade t010 trial 1
+[eval] grade t010 trial 2
+[eval] grade t010 trial 3
+[eval] grade t006 trial 1
+[eval] grade t001 trial 3
+[eval] grade t002 trial 2
+[eval] grade t002 trial 2
+[eval] grade t003 trial 1
+[eval] grade t003 trial 2
+[eval] grade t009 trial 1
+[eval] grade t004 trial 2
+[corpus] eval jnMetaCode/awesome-claude-md/awesome-react
+[eval] run t001 trial 1/3 with_skill
+[eval] run t001 trial 1/3 no_skill
+[eval] run t001 trial 2/3 with_skill
+[eval] run t001 trial 2/3 no_skill
+[eval] run t001 trial 3/3 with_skill
+[eval] run t001 trial 3/3 no_skill
+[eval] run t002 trial 1/3 with_skill
+[eval] run t002 trial 1/3 no_skill
+[eval] run t002 trial 2/3 with_skill
+[eval] run t002 trial 2/3 no_skill
+[eval] run t002 trial 3/3 with_skill
+[eval] run t002 trial 3/3 no_skill
+[eval] run t003 trial 1/3 with_skill
+[eval] run t003 trial 1/3 no_skill
+[eval] run t003 trial 2/3 with_skill
+[eval] run t003 trial 2/3 no_skill
+[eval] run t003 trial 3/3 with_skill
+[eval] run t003 trial 3/3 no_skill
+[eval] run t004 trial 1/3 with_skill
+[eval] run t004 trial 1/3 no_skill
+[eval] run t004 trial 2/3 with_skill
+[eval] run t004 trial 2/3 no_skill
+[eval] run t004 trial 3/3 with_skill
+[eval] run t004 trial 3/3 no_skill
+[eval] run t005 trial 1/3 with_skill
+[eval] run t005 trial 1/3 no_skill
+[eval] run t005 trial 2/3 with_skill
+[eval] run t005 trial 2/3 no_skill
+[eval] run t005 trial 3/3 with_skill
+[eval] run t005 trial 3/3 no_skill
+[eval] run t006 trial 1/3 with_skill
+[eval] run t006 trial 1/3 no_skill
+[eval] run t006 trial 2/3 with_skill
+[eval] run t006 trial 2/3 no_skill
+[eval] run t006 trial 3/3 with_skill
+[eval] run t006 trial 3/3 no_skill
+[eval] run t007 trial 1/3 with_skill
+[eval] run t007 trial 1/3 no_skill
+[eval] run t007 trial 2/3 with_skill
+[eval] run t007 trial 2/3 no_skill
+[eval] run t007 trial 3/3 with_skill
+[eval] run t007 trial 3/3 no_skill
+[eval] run t008 trial 1/3 with_skill
+[eval] run t008 trial 1/3 no_skill
+[eval] run t008 trial 2/3 with_skill
+[eval] run t008 trial 2/3 no_skill
+[eval] run t008 trial 3/3 with_skill
+[eval] run t008 trial 3/3 no_skill
+[eval] run t009 trial 1/3 with_skill
+[eval] run t009 trial 1/3 no_skill
+[eval] run t009 trial 2/3 with_skill
+[eval] run t009 trial 2/3 no_skill
+[eval] run t009 trial 3/3 with_skill
+[eval] run t009 trial 3/3 no_skill
+[eval] run t010 trial 1/3 with_skill
+[eval] run t010 trial 1/3 no_skill
+[eval] run t010 trial 2/3 with_skill
+[eval] run t010 trial 2/3 no_skill
+[eval] run t010 trial 3/3 with_skill
+[eval] run t010 trial 3/3 no_skill
+[eval] grade t006 trial 1
+[eval] grade t010 trial 1
+[eval] grade t010 trial 1
+[eval] grade t002 trial 3
+[eval] grade t010 trial 3
+[eval] grade t005 trial 1
+[eval] grade t007 trial 3
+[eval] grade t005 trial 1
+[eval] grade t007 trial 3
+[eval] grade t008 trial 2
+[eval] grade t004 trial 2
+[eval] grade t004 trial 3
+[eval] grade t008 trial 1
+[eval] grade t009 trial 3
+[eval] grade t003 trial 1
+[eval] grade t010 trial 3
+[eval] grade t006 trial 3
+[eval] grade t009 trial 1
+[eval] grade t002 trial 2
+[eval] grade t008 trial 3
+[eval] grade t008 trial 2
+[eval] grade t009 trial 3
+[eval] grade t001 trial 1
+[eval] grade t007 trial 2
+[eval] grade t002 trial 3
+[eval] grade t009 trial 2
+[eval] grade t005 trial 2
+[eval] grade t008 trial 1
+[eval] grade t008 trial 3
+[eval] grade t001 trial 3
+[eval] grade t007 trial 2
+[eval] grade t002 trial 2
+[eval] grade t002 trial 1
+[eval] grade t003 trial 2
+[eval] grade t003 trial 3
+[eval] grade t004 trial 2
+[eval] grade t009 trial 2
+[eval] grade t010 trial 2
+[eval] grade t005 trial 3
+[eval] grade t005 trial 3
+[eval] grade t003 trial 2
+[eval] grade t002 trial 1
+[eval] grade t005 trial 2
+[eval] grade t004 trial 1
+[eval] grade t001 trial 3
+[eval] grade t010 trial 2
+[eval] grade t006 trial 2
+[eval] grade t006 trial 2
+[eval] grade t003 trial 1
+[eval] grade t007 trial 1
+[eval] grade t004 trial 1
+[eval] grade t009 trial 1
+[eval] grade t001 trial 2
+[eval] grade t003 trial 3
+[eval] grade t006 trial 1
+[eval] grade t004 trial 3
+[eval] grade t007 trial 1
+[eval] grade t006 trial 3
+[eval] grade t001 trial 2
+[eval] grade t001 trial 1
+[corpus] eval jnMetaCode/awesome-claude-md/awesome-fastapi
+[eval] run t001 trial 1/3 with_skill
+[eval] run t001 trial 1/3 no_skill
+[eval] run t001 trial 2/3 with_skill
+[eval] run t001 trial 2/3 no_skill
+[eval] run t001 trial 3/3 with_skill
+[eval] run t001 trial 3/3 no_skill
+[eval] run t002 trial 1/3 with_skill
+[eval] run t002 trial 1/3 no_skill
+[eval] run t002 trial 2/3 with_skill
+[eval] run t002 trial 2/3 no_skill
+[eval] run t002 trial 3/3 with_skill
+[eval] run t002 trial 3/3 no_skill
+[eval] run t003 trial 1/3 with_skill
+[eval] run t003 trial 1/3 no_skill
+[eval] run t003 trial 2/3 with_skill
+[eval] run t003 trial 2/3 no_skill
+[eval] run t003 trial 3/3 with_skill
+[eval] run t003 trial 3/3 no_skill
+[eval] run t004 trial 1/3 with_skill
+[eval] run t004 trial 1/3 no_skill
+[eval] run t004 trial 2/3 with_skill
+[eval] run t004 trial 2/3 no_skill
+[eval] run t004 trial 3/3 with_skill
+[eval] run t004 trial 3/3 no_skill
+[eval] run t005 trial 1/3 with_skill
+[eval] run t005 trial 1/3 no_skill
+[eval] run t005 trial 2/3 with_skill
+[eval] run t005 trial 2/3 no_skill
+[eval] run t005 trial 3/3 with_skill
+[eval] run t005 trial 3/3 no_skill
+[eval] run t006 trial 1/3 with_skill
+[eval] run t006 trial 1/3 no_skill
+[eval] run t006 trial 2/3 with_skill
+[eval] run t006 trial 2/3 no_skill
+[eval] run t006 trial 3/3 with_skill
+[eval] run t006 trial 3/3 no_skill
+[eval] run t007 trial 1/3 with_skill
+[eval] run t007 trial 1/3 no_skill
+[eval] run t007 trial 2/3 with_skill
+[eval] run t007 trial 2/3 no_skill
+[eval] run t007 trial 3/3 with_skill
+[eval] run t007 trial 3/3 no_skill
+[eval] run t008 trial 1/3 with_skill
+[eval] run t008 trial 1/3 no_skill
+[eval] run t008 trial 2/3 with_skill
+[eval] run t008 trial 2/3 no_skill
+[eval] run t008 trial 3/3 with_skill
+[eval] run t008 trial 3/3 no_skill
+[eval] run t009 trial 1/3 with_skill
+[eval] run t009 trial 1/3 no_skill
+[eval] run t009 trial 2/3 with_skill
+[eval] run t009 trial 2/3 no_skill
+[eval] run t009 trial 3/3 with_skill
+[eval] run t009 trial 3/3 no_skill
+[eval] run t010 trial 1/3 with_skill
+[eval] run t010 trial 1/3 no_skill
+[eval] run t010 trial 2/3 with_skill
+[eval] run t010 trial 2/3 no_skill
+[eval] run t010 trial 3/3 with_skill
+[eval] run t010 trial 3/3 no_skill
+[eval] grade t004 trial 3
+[eval] grade t006 trial 2
+[eval] grade t003 trial 1
+[eval] grade t007 trial 1
+[eval] grade t008 trial 2
+[eval] grade t009 trial 3
+[eval] grade t007 trial 2
+[eval] grade t007 trial 1
+[eval] grade t001 trial 2
+[eval] grade t005 trial 1
+[eval] grade t004 trial 1
+[eval] grade t002 trial 2
+[eval] grade t008 trial 2
+[eval] grade t004 trial 1
+[eval] grade t007 trial 2
+[eval] grade t005 trial 2
+[eval] grade t006 trial 2
+[eval] grade t007 trial 3
+[eval] grade t008 trial 3
+[eval] grade t002 trial 1
+[eval] grade t003 trial 1
+[eval] grade t010 trial 3
+[eval] grade t005 trial 3
+[eval] grade t003 trial 2
+[eval] grade t006 trial 1
+[eval] grade t008 trial 3
+[eval] grade t003 trial 2
+[eval] grade t010 trial 2
+[eval] grade t001 trial 1
+[eval] grade t002 trial 1
+[eval] grade t003 trial 3
+[eval] grade t001 trial 3
+[eval] grade t003 trial 3
+[eval] grade t005 trial 3
+[eval] grade t001 trial 3
+[eval] grade t001 trial 1
+[eval] grade t002 trial 2
+[eval] grade t009 trial 2
+[eval] grade t010 trial 3
+[eval] grade t008 trial 1
+[eval] grade t008 trial 1
+[eval] grade t009 trial 1
+[eval] grade t009 trial 2
+[eval] grade t009 trial 1
+[eval] grade t004 trial 2
+[eval] grade t005 trial 1
+[eval] grade t005 trial 2
+[eval] grade t007 trial 3
+[eval] grade t006 trial 3
+[eval] grade t009 trial 3
+[eval] grade t004 trial 3
+[eval] grade t004 trial 2
+[eval] grade t001 trial 2
+[eval] grade t006 trial 1
+[eval] grade t010 trial 2
+[eval] grade t010 trial 1
+[eval] grade t010 trial 1
+[eval] grade t002 trial 3
+[eval] grade t006 trial 3
+[eval] grade t002 trial 3
+[corpus] eval jnMetaCode/awesome-claude-md/awesome-typescript
+[eval] run t001 trial 1/3 with_skill
+[eval] run t001 trial 1/3 no_skill
+[eval] run t001 trial 2/3 with_skill
+[eval] run t001 trial 2/3 no_skill
+[eval] run t001 trial 3/3 with_skill
+[eval] run t001 trial 3/3 no_skill
+[eval] run t002 trial 1/3 with_skill
+[eval] run t002 trial 1/3 no_skill
+[eval] run t002 trial 2/3 with_skill
+[eval] run t002 trial 2/3 no_skill
+[eval] run t002 trial 3/3 with_skill
+[eval] run t002 trial 3/3 no_skill
+[eval] run t003 trial 1/3 with_skill
+[eval] run t003 trial 1/3 no_skill
+[eval] run t003 trial 2/3 with_skill
+[eval] run t003 trial 2/3 no_skill
+[eval] run t003 trial 3/3 with_skill
+[eval] run t003 trial 3/3 no_skill
+[eval] run t004 trial 1/3 with_skill
+[eval] run t004 trial 1/3 no_skill
+[eval] run t004 trial 2/3 with_skill
+[eval] run t004 trial 2/3 no_skill
+[eval] run t004 trial 3/3 with_skill
+[eval] run t004 trial 3/3 no_skill
+[eval] run t005 trial 1/3 with_skill
+[eval] run t005 trial 1/3 no_skill
+[eval] run t005 trial 2/3 with_skill
+[eval] run t005 trial 2/3 no_skill
+[eval] run t005 trial 3/3 with_skill
+[eval] run t005 trial 3/3 no_skill
+[eval] run t006 trial 1/3 with_skill
+[eval] run t006 trial 1/3 no_skill
+[eval] run t006 trial 2/3 with_skill
+[eval] run t006 trial 2/3 no_skill
+[eval] run t006 trial 3/3 with_skill
+[eval] run t006 trial 3/3 no_skill
+[eval] run t007 trial 1/3 with_skill
+[eval] run t007 trial 1/3 no_skill
+[eval] run t007 trial 2/3 with_skill
+[eval] run t007 trial 2/3 no_skill
+[eval] run t007 trial 3/3 with_skill
+[eval] run t007 trial 3/3 no_skill
+[eval] run t008 trial 1/3 with_skill
+[eval] run t008 trial 1/3 no_skill
+[eval] run t008 trial 2/3 with_skill
+[eval] run t008 trial 2/3 no_skill
+[eval] run t008 trial 3/3 with_skill
+[eval] run t008 trial 3/3 no_skill
+[eval] run t009 trial 1/3 with_skill
+[eval] run t009 trial 1/3 no_skill
+[eval] run t009 trial 2/3 with_skill
+[eval] run t009 trial 2/3 no_skill
+[eval] run t009 trial 3/3 with_skill
+[eval] run t009 trial 3/3 no_skill
+[eval] run t010 trial 1/3 with_skill
+[eval] run t010 trial 1/3 no_skill
+[eval] run t010 trial 2/3 with_skill
+[eval] run t010 trial 2/3 no_skill
+[eval] run t010 trial 3/3 with_skill
+[eval] run t010 trial 3/3 no_skill
+[eval] grade t010 trial 3
+[eval] grade t001 trial 3
+[eval] grade t004 trial 1
+[eval] grade t002 trial 2
+[eval] grade t003 trial 3
+[eval] grade t003 trial 2
+[eval] grade t008 trial 1
+[eval] grade t001 trial 2
+[eval] grade t002 trial 1
+[eval] grade t009 trial 1
+[eval] grade t004 trial 3
+[eval] grade t009 trial 2
+[eval] grade t004 trial 3
+[eval] grade t001 trial 3
+[eval] grade t007 trial 3
+[eval] grade t008 trial 3
+[eval] grade t007 trial 1
+[eval] grade t003 trial 3
+[eval] grade t002 trial 2
+[eval] grade t010 trial 3
+[eval] grade t008 trial 2
+[eval] grade t007 trial 3
+[eval] grade t003 trial 1
+[eval] grade t009 trial 3
+[eval] grade t005 trial 3
+[eval] grade t010 trial 1
+[eval] grade t002 trial 1
+[eval] grade t005 trial 1
+[eval] grade t003 trial 2
+[eval] grade t005 trial 2
+[eval] grade t007 trial 1
+[eval] grade t007 trial 2
+[eval] grade t004 trial 1
+[eval] grade t002 trial 3
+[eval] grade t010 trial 1
+[eval] grade t001 trial 1
+[eval] grade t009 trial 2
+[eval] grade t004 trial 2
+[eval] grade t005 trial 3
+[eval] grade t006 trial 1
+[eval] grade t006 trial 2
+[eval] grade t004 trial 2
+[eval] grade t008 trial 1
+[eval] grade t006 trial 1
+[eval] grade t007 trial 2
+[eval] grade t006 trial 3
+[eval] grade t008 trial 3
+[eval] grade t001 trial 1
+[eval] grade t008 trial 2
+[eval] grade t002 trial 3
+[eval] grade t006 trial 3
+[eval] grade t006 trial 2
+[eval] grade t005 trial 2
+[eval] grade t009 trial 3
+[eval] grade t005 trial 1
+[eval] grade t010 trial 2
+[eval] grade t009 trial 1
+[eval] grade t001 trial 2
+[eval] grade t010 trial 2
+[eval] grade t003 trial 1
+[corpus] eval jnMetaCode/awesome-claude-md/awesome-python
+[eval] run t001 trial 1/3 with_skill
+[eval] run t001 trial 1/3 no_skill
+[eval] run t001 trial 2/3 with_skill
+[eval] run t001 trial 2/3 no_skill
+[eval] run t001 trial 3/3 with_skill
+[eval] run t001 trial 3/3 no_skill
+[eval] run t002 trial 1/3 with_skill
+[eval] run t002 trial 1/3 no_skill
+[eval] run t002 trial 2/3 with_skill
+[eval] run t002 trial 2/3 no_skill
+[eval] run t002 trial 3/3 with_skill
+[eval] run t002 trial 3/3 no_skill
+[eval] run t003 trial 1/3 with_skill
+[eval] run t003 trial 1/3 no_skill
+[eval] run t003 trial 2/3 with_skill
+[eval] run t003 trial 2/3 no_skill
+[eval] run t003 trial 3/3 with_skill
+[eval] run t003 trial 3/3 no_skill
+[eval] run t004 trial 1/3 with_skill
+[eval] run t004 trial 1/3 no_skill
+[eval] run t004 trial 2/3 with_skill
+[eval] run t004 trial 2/3 no_skill
+[eval] run t004 trial 3/3 with_skill
+[eval] run t004 trial 3/3 no_skill
+[eval] run t005 trial 1/3 with_skill
+[eval] run t005 trial 1/3 no_skill
+[eval] run t005 trial 2/3 with_skill
+[eval] run t005 trial 2/3 no_skill
+[eval] run t005 trial 3/3 with_skill
+[eval] run t005 trial 3/3 no_skill
+[eval] run t006 trial 1/3 with_skill
+[eval] run t006 trial 1/3 no_skill
+[eval] run t006 trial 2/3 with_skill
+[eval] run t006 trial 2/3 no_skill
+[eval] run t006 trial 3/3 with_skill
+[eval] run t006 trial 3/3 no_skill
+[eval] run t007 trial 1/3 with_skill
+[eval] run t007 trial 1/3 no_skill
+[eval] run t007 trial 2/3 with_skill
+[eval] run t007 trial 2/3 no_skill
+[eval] run t007 trial 3/3 with_skill
+[eval] run t007 trial 3/3 no_skill
+[eval] run t008 trial 1/3 with_skill
+[eval] run t008 trial 1/3 no_skill
+[eval] run t008 trial 2/3 with_skill
+[eval] run t008 trial 2/3 no_skill
+[eval] run t008 trial 3/3 with_skill
+[eval] run t008 trial 3/3 no_skill
+[eval] run t009 trial 1/3 with_skill
+[eval] run t009 trial 1/3 no_skill
+[eval] run t009 trial 2/3 with_skill
+[eval] run t009 trial 2/3 no_skill
+[eval] run t009 trial 3/3 with_skill
+[eval] run t009 trial 3/3 no_skill
+[eval] run t010 trial 1/3 with_skill
+[eval] run t010 trial 1/3 no_skill
+[eval] run t010 trial 2/3 with_skill
+[eval] run t010 trial 2/3 no_skill
+[eval] run t010 trial 3/3 with_skill
+[eval] run t010 trial 3/3 no_skill
+[eval] grade t010 trial 1
+[eval] grade t006 trial 1
+[eval] grade t007 trial 2
+[eval] grade t004 trial 2
+[eval] grade t009 trial 2
+[eval] grade t002 trial 1
+[eval] grade t006 trial 1
+[eval] grade t008 trial 2
+[eval] grade t004 trial 3
+[eval] grade t007 trial 2
+[eval] grade t002 trial 2
+[eval] grade t006 trial 2
+[eval] grade t003 trial 2
+[eval] grade t007 trial 3
+[eval] grade t002 trial 2
+[eval] grade t004 trial 2
+[eval] grade t007 trial 1
+[eval] grade t006 trial 2
+[eval] grade t002 trial 3
+[eval] grade t005 trial 2
+[eval] grade t010 trial 2
+[eval] grade t008 trial 1
+[eval] grade t009 trial 2
+[eval] grade t003 trial 1
+[eval] grade t008 trial 1
+[eval] grade t005 trial 1
+[eval] grade t006 trial 3
+[eval] grade t010 trial 3
+[eval] grade t010 trial 3
+[eval] grade t005 trial 1
+[eval] grade t001 trial 3
+[eval] grade t007 trial 3
+[eval] grade t002 trial 3
+[eval] grade t003 trial 1
+[eval] grade t009 trial 3
+[eval] grade t004 trial 3
+[eval] grade t010 trial 2
+[eval] grade t007 trial 1
+[eval] grade t003 trial 2
+[eval] grade t008 trial 3
+[eval] grade t005 trial 2
+[eval] grade t001 trial 1
+[eval] grade t003 trial 3
+[eval] grade t001 trial 2
+[eval] grade t001 trial 2
+[eval] grade t009 trial 1
+[eval] grade t002 trial 1
+[eval] grade t004 trial 1
+[eval] grade t005 trial 3
+[eval] grade t001 trial 1
+[eval] grade t009 trial 3
+[eval] grade t001 trial 3
+[eval] grade t004 trial 1
+[eval] grade t008 trial 3
+[eval] grade t010 trial 1
+[eval] grade t009 trial 1
+[eval] grade t005 trial 3
+[eval] grade t008 trial 2
+[eval] grade t006 trial 3
+[eval] grade t003 trial 3
+[corpus] eval jnMetaCode/awesome-claude-md/awesome-rust
+[eval] run t001 trial 1/3 with_skill
+[eval] run t001 trial 1/3 no_skill
+[eval] run t001 trial 2/3 with_skill
+[eval] run t001 trial 2/3 no_skill
+[eval] run t001 trial 3/3 with_skill
+[eval] run t001 trial 3/3 no_skill
+[eval] run t002 trial 1/3 with_skill
+[eval] run t002 trial 1/3 no_skill
+[eval] run t002 trial 2/3 with_skill
+[eval] run t002 trial 2/3 no_skill
+[eval] run t002 trial 3/3 with_skill
+[eval] run t002 trial 3/3 no_skill
+[eval] run t003 trial 1/3 with_skill
+[eval] run t003 trial 1/3 no_skill
+[eval] run t003 trial 2/3 with_skill
+[eval] run t003 trial 2/3 no_skill
+[eval] run t003 trial 3/3 with_skill
+[eval] run t003 trial 3/3 no_skill
+[eval] run t004 trial 1/3 with_skill
+[eval] run t004 trial 1/3 no_skill
+[eval] run t004 trial 2/3 with_skill
+[eval] run t004 trial 2/3 no_skill
+[eval] run t004 trial 3/3 with_skill
+[eval] run t004 trial 3/3 no_skill
+[eval] run t005 trial 1/3 with_skill
+[eval] run t005 trial 1/3 no_skill
+[eval] run t005 trial 2/3 with_skill
+[eval] run t005 trial 2/3 no_skill
+[eval] run t005 trial 3/3 with_skill
+[eval] run t005 trial 3/3 no_skill
+[eval] run t006 trial 1/3 with_skill
+[eval] run t006 trial 1/3 no_skill
+[eval] run t006 trial 2/3 with_skill
+[eval] run t006 trial 2/3 no_skill
+[eval] run t006 trial 3/3 with_skill
+[eval] run t006 trial 3/3 no_skill
+[eval] run t007 trial 1/3 with_skill
+[eval] run t007 trial 1/3 no_skill
+[eval] run t007 trial 2/3 with_skill
+[eval] run t007 trial 2/3 no_skill
+[eval] run t007 trial 3/3 with_skill
+[eval] run t007 trial 3/3 no_skill
+[eval] run t008 trial 1/3 with_skill
+[eval] run t008 trial 1/3 no_skill
+[eval] run t008 trial 2/3 with_skill
+[eval] run t008 trial 2/3 no_skill
+[eval] run t008 trial 3/3 with_skill
+[eval] run t008 trial 3/3 no_skill
+[eval] run t009 trial 1/3 with_skill
+[eval] run t009 trial 1/3 no_skill
+[eval] run t009 trial 2/3 with_skill
+[eval] run t009 trial 2/3 no_skill
+[eval] run t009 trial 3/3 with_skill
+[eval] run t009 trial 3/3 no_skill
+[eval] run t010 trial 1/3 with_skill
+[eval] run t010 trial 1/3 no_skill
+[eval] run t010 trial 2/3 with_skill
+[eval] run t010 trial 2/3 no_skill
+[eval] run t010 trial 3/3 with_skill
+[eval] run t010 trial 3/3 no_skill
+[eval] grade t001 trial 2
+[eval] grade t008 trial 1
+[eval] grade t006 trial 3
+[eval] grade t010 trial 1
+[eval] grade t008 trial 3
+[eval] grade t004 trial 3
+[eval] grade t003 trial 1
+[eval] grade t008 trial 2
+[eval] grade t002 trial 1
+[eval] grade t001 trial 1
+[eval] grade t008 trial 2
+[eval] grade t003 trial 3
+[eval] grade t006 trial 1
+[eval] grade t003 trial 3
+[eval] grade t008 trial 1
+[eval] grade t005 trial 1
+[eval] grade t005 trial 2
+[eval] grade t007 trial 3
+[eval] grade t007 trial 3
+[eval] grade t002 trial 3
+[eval] grade t003 trial 2
+[eval] grade t010 trial 3
+[eval] grade t005 trial 3
+[eval] grade t005 trial 3
+[eval] grade t009 trial 1
+[eval] grade t010 trial 2
+[eval] grade t005 trial 2
+[eval] grade t003 trial 2
+[eval] grade t006 trial 1
+[eval] grade t002 trial 3
+[eval] grade t007 trial 2
+[eval] grade t004 trial 2
+[eval] grade t009 trial 3
+[eval] grade t009 trial 2
+[eval] grade t001 trial 1
+[eval] grade t006 trial 3
+[eval] grade t007 trial 1
+[eval] grade t010 trial 3
+[eval] grade t001 trial 2
+[eval] grade t009 trial 1
+[eval] grade t010 trial 2
+[eval] grade t002 trial 2
+[eval] grade t004 trial 3
+[eval] grade t007 trial 1
+[eval] grade t006 trial 2
+[eval] grade t008 trial 3
+[eval] grade t010 trial 1
+[eval] grade t003 trial 1
+[eval] grade t004 trial 1
+[eval] grade t009 trial 3
+[eval] grade t001 trial 3
+[eval] grade t009 trial 2
+[eval] grade t004 trial 2
+[eval] grade t002 trial 2
+[eval] grade t002 trial 1
+[eval] grade t004 trial 1
+[eval] grade t005 trial 1
+[eval] grade t007 trial 2
+[eval] grade t001 trial 3
+[eval] grade t006 trial 2
+[corpus] eval mattpocock/skills/matt-tdd
+[eval] run t001 trial 1/3 with_skill
+[eval] run t001 trial 1/3 no_skill
+[eval] run t001 trial 2/3 with_skill
+[eval] run t001 trial 2/3 no_skill
+[eval] run t001 trial 3/3 with_skill
+[eval] run t001 trial 3/3 no_skill
+[eval] run t002 trial 1/3 with_skill
+[eval] run t002 trial 1/3 no_skill
+[eval] run t002 trial 2/3 with_skill
+[eval] run t002 trial 2/3 no_skill
+[eval] run t002 trial 3/3 with_skill
+[eval] run t002 trial 3/3 no_skill
+[eval] run t003 trial 1/3 with_skill
+[eval] run t003 trial 1/3 no_skill
+[eval] run t003 trial 2/3 with_skill
+[eval] run t003 trial 2/3 no_skill
+[eval] run t003 trial 3/3 with_skill
+[eval] run t003 trial 3/3 no_skill
+[eval] run t004 trial 1/3 with_skill
+[eval] run t004 trial 1/3 no_skill
+[eval] run t004 trial 2/3 with_skill
+[eval] run t004 trial 2/3 no_skill
+[eval] run t004 trial 3/3 with_skill
+[eval] run t004 trial 3/3 no_skill
+[eval] run t005 trial 1/3 with_skill
+[eval] run t005 trial 1/3 no_skill
+[eval] run t005 trial 2/3 with_skill
+[eval] run t005 trial 2/3 no_skill
+[eval] run t005 trial 3/3 with_skill
+[eval] run t005 trial 3/3 no_skill
+[eval] run t006 trial 1/3 with_skill
+[eval] run t006 trial 1/3 no_skill
+[eval] run t006 trial 2/3 with_skill
+[eval] run t006 trial 2/3 no_skill
+[eval] run t006 trial 3/3 with_skill
+[eval] run t006 trial 3/3 no_skill
+[eval] run t007 trial 1/3 with_skill
+[eval] run t007 trial 1/3 no_skill
+[eval] run t007 trial 2/3 with_skill
+[eval] run t007 trial 2/3 no_skill
+[eval] run t007 trial 3/3 with_skill
+[eval] run t007 trial 3/3 no_skill
+[eval] run t008 trial 1/3 with_skill
+[eval] run t008 trial 1/3 no_skill
+[eval] run t008 trial 2/3 with_skill
+[eval] run t008 trial 2/3 no_skill
+[eval] run t008 trial 3/3 with_skill
+[eval] run t008 trial 3/3 no_skill
+[eval] run t009 trial 1/3 with_skill
+[eval] run t009 trial 1/3 no_skill
+[eval] run t009 trial 2/3 with_skill
+[eval] run t009 trial 2/3 no_skill
+[eval] run t009 trial 3/3 with_skill
+[eval] run t009 trial 3/3 no_skill
+[eval] run t010 trial 1/3 with_skill
+[eval] run t010 trial 1/3 no_skill
+[eval] run t010 trial 2/3 with_skill
+[eval] run t010 trial 2/3 no_skill
+[eval] run t010 trial 3/3 with_skill
+[eval] run t010 trial 3/3 no_skill
+[eval] grade t005 trial 1
+[eval] grade t004 trial 3
+[eval] grade t005 trial 2
+[eval] grade t007 trial 1
+[eval] grade t005 trial 3
+[eval] grade t003 trial 2
+[eval] grade t008 trial 1
+[eval] grade t002 trial 1
+[eval] grade t004 trial 2
+[eval] grade t003 trial 3
+[eval] grade t008 trial 2
+[eval] grade t004 trial 1
+[eval] grade t001 trial 2
+[eval] grade t008 trial 2
+[eval] grade t010 trial 2
+[eval] grade t001 trial 2
+[eval] grade t003 trial 3
+[eval] grade t010 trial 1
+[eval] grade t001 trial 3
+[eval] grade t009 trial 1
+[eval] grade t001 trial 3
+[eval] grade t004 trial 1
+[eval] grade t009 trial 3
+[eval] grade t007 trial 2
+[eval] grade t009 trial 2
+[eval] grade t005 trial 2
+[eval] grade t006 trial 2
+[eval] grade t010 trial 3
+[eval] grade t003 trial 1
+[eval] grade t006 trial 2
+[eval] grade t002 trial 2
+[eval] grade t009 trial 1
+[eval] grade t007 trial 1
+[eval] grade t002 trial 1
+[eval] grade t003 trial 1
+[eval] grade t005 trial 3
+[eval] grade t005 trial 1
+[eval] grade t007 trial 3
+[eval] grade t010 trial 2
+[eval] grade t006 trial 3
+[eval] grade t002 trial 2
+[eval] grade t010 trial 1
+[eval] grade t002 trial 3
+[eval] grade t006 trial 3
+[eval] grade t004 trial 3
+[eval] grade t009 trial 3
+[eval] grade t003 trial 2
+[eval] grade t006 trial 1
+[eval] grade t009 trial 2
+[eval] grade t008 trial 1
+[eval] grade t007 trial 2
+[eval] grade t008 trial 3
+[eval] grade t001 trial 1
+[eval] grade t008 trial 3
+[eval] grade t002 trial 3
+[eval] grade t001 trial 1
+[eval] grade t007 trial 3
+[eval] grade t004 trial 2
+[eval] grade t010 trial 3
+[eval] grade t006 trial 1
+[corpus] eval mattpocock/skills/matt-diagnose
+[eval] run t001 trial 1/3 with_skill
+[eval] run t001 trial 1/3 no_skill
+[eval] run t001 trial 2/3 with_skill
+[eval] run t001 trial 2/3 no_skill
+[eval] run t001 trial 3/3 with_skill
+[eval] run t001 trial 3/3 no_skill
+[eval] run t002 trial 1/3 with_skill
+[eval] run t002 trial 1/3 no_skill
+[eval] run t002 trial 2/3 with_skill
+[eval] run t002 trial 2/3 no_skill
+[eval] run t002 trial 3/3 with_skill
+[eval] run t002 trial 3/3 no_skill
+[eval] run t003 trial 1/3 with_skill
+[eval] run t003 trial 1/3 no_skill
+[eval] run t003 trial 2/3 with_skill
+[eval] run t003 trial 2/3 no_skill
+[eval] run t003 trial 3/3 with_skill
+[eval] run t003 trial 3/3 no_skill
+[eval] run t004 trial 1/3 with_skill
+[eval] run t004 trial 1/3 no_skill
+[eval] run t004 trial 2/3 with_skill
+[eval] run t004 trial 2/3 no_skill
+[eval] run t004 trial 3/3 with_skill
+[eval] run t004 trial 3/3 no_skill
+[eval] run t005 trial 1/3 with_skill
+[eval] run t005 trial 1/3 no_skill
+[eval] run t005 trial 2/3 with_skill
+[eval] run t005 trial 2/3 no_skill
+[eval] run t005 trial 3/3 with_skill
+[eval] run t005 trial 3/3 no_skill
+[eval] run t006 trial 1/3 with_skill
+[eval] run t006 trial 1/3 no_skill
+[eval] run t006 trial 2/3 with_skill
+[eval] run t006 trial 2/3 no_skill
+[eval] run t006 trial 3/3 with_skill
+[eval] run t006 trial 3/3 no_skill
+[eval] run t007 trial 1/3 with_skill
+[eval] run t007 trial 1/3 no_skill
+[eval] run t007 trial 2/3 with_skill
+[eval] run t007 trial 2/3 no_skill
+[eval] run t007 trial 3/3 with_skill
+[eval] run t007 trial 3/3 no_skill
+[eval] run t008 trial 1/3 with_skill
+[eval] run t008 trial 1/3 no_skill
+[eval] run t008 trial 2/3 with_skill
+[eval] run t008 trial 2/3 no_skill
+[eval] run t008 trial 3/3 with_skill
+[eval] run t008 trial 3/3 no_skill
+[eval] run t009 trial 1/3 with_skill
+[eval] run t009 trial 1/3 no_skill
+[eval] run t009 trial 2/3 with_skill
+[eval] run t009 trial 2/3 no_skill
+[eval] run t009 trial 3/3 with_skill
+[eval] run t009 trial 3/3 no_skill
+[eval] run t010 trial 1/3 with_skill
+[eval] run t010 trial 1/3 no_skill
+[eval] run t010 trial 2/3 with_skill
+[eval] run t010 trial 2/3 no_skill
+[eval] run t010 trial 3/3 with_skill
+[eval] run t010 trial 3/3 no_skill
+[eval] grade t008 trial 1
+[eval] grade t010 trial 3
+[eval] grade t007 trial 3
+[eval] grade t009 trial 1
+[eval] grade t009 trial 2
+[eval] grade t006 trial 2
+[eval] grade t002 trial 1
+[eval] grade t006 trial 3
+[eval] grade t007 trial 1
+[eval] grade t010 trial 2
+[eval] grade t008 trial 3
+[eval] grade t004 trial 3
+[eval] grade t006 trial 1
+[eval] grade t006 trial 3
+[eval] grade t003 trial 3
+[eval] grade t007 trial 2
+[eval] grade t004 trial 3
+[eval] grade t008 trial 3
+[eval] grade t006 trial 2
+[eval] grade t001 trial 2
+[eval] grade t002 trial 3
+[eval] grade t010 trial 2
+[eval] grade t007 trial 2
+[eval] grade t004 trial 2
+[eval] grade t005 trial 3
+[eval] grade t003 trial 1
+[eval] grade t010 trial 1
+[eval] grade t003 trial 1
+[eval] grade t003 trial 2
+[eval] grade t003 trial 2
+[eval] grade t005 trial 3
+[eval] grade t004 trial 2
+[eval] grade t010 trial 1
+[eval] grade t009 trial 3
+[eval] grade t009 trial 3
+[eval] grade t005 trial 2
+[eval] grade t001 trial 3
+[eval] grade t002 trial 2
+[eval] grade t007 trial 3
+[eval] grade t005 trial 1
+[eval] grade t006 trial 1
+[eval] grade t005 trial 2
+[eval] grade t010 trial 3
+[eval] grade t004 trial 1
+[eval] grade t009 trial 1
+[eval] grade t001 trial 1
+[eval] grade t005 trial 1
+[eval] grade t002 trial 3
+[eval] grade t003 trial 3
+[eval] grade t009 trial 2
+[eval] grade t001 trial 1
+[eval] grade t007 trial 1
+[eval] grade t002 trial 2
+[eval] grade t001 trial 2
+[eval] grade t002 trial 1
+[eval] grade t008 trial 1
+[eval] grade t008 trial 2
+[eval] grade t001 trial 3
+[eval] grade t008 trial 2
+[eval] grade t004 trial 1
+[corpus] eval mattpocock/skills/matt-architecture
+[eval] run t001 trial 1/3 with_skill
+[eval] run t001 trial 1/3 no_skill
+[eval] run t001 trial 2/3 with_skill
+[eval] run t001 trial 2/3 no_skill
+[eval] run t001 trial 3/3 with_skill
+[eval] run t001 trial 3/3 no_skill
+[eval] run t002 trial 1/3 with_skill
+[eval] run t002 trial 1/3 no_skill
+[eval] run t002 trial 2/3 with_skill
+[eval] run t002 trial 2/3 no_skill
+[eval] run t002 trial 3/3 with_skill
+[eval] run t002 trial 3/3 no_skill
+[eval] run t003 trial 1/3 with_skill
+[eval] run t003 trial 1/3 no_skill
+[eval] run t003 trial 2/3 with_skill
+[eval] run t003 trial 2/3 no_skill
+[eval] run t003 trial 3/3 with_skill
+[eval] run t003 trial 3/3 no_skill
+[eval] run t004 trial 1/3 with_skill
+[eval] run t004 trial 1/3 no_skill
+[eval] run t004 trial 2/3 with_skill
+[eval] run t004 trial 2/3 no_skill
+[eval] run t004 trial 3/3 with_skill
+[eval] run t004 trial 3/3 no_skill
+[eval] run t005 trial 1/3 with_skill
+[eval] run t005 trial 1/3 no_skill
+[eval] run t005 trial 2/3 with_skill
+[eval] run t005 trial 2/3 no_skill
+[eval] run t005 trial 3/3 with_skill
+[eval] run t005 trial 3/3 no_skill
+[eval] run t006 trial 1/3 with_skill
+[eval] run t006 trial 1/3 no_skill
+[eval] run t006 trial 2/3 with_skill
+[eval] run t006 trial 2/3 no_skill
+[eval] run t006 trial 3/3 with_skill
+[eval] run t006 trial 3/3 no_skill
+[eval] run t007 trial 1/3 with_skill
+[eval] run t007 trial 1/3 no_skill
+[eval] run t007 trial 2/3 with_skill
+[eval] run t007 trial 2/3 no_skill
+[eval] run t007 trial 3/3 with_skill
+[eval] run t007 trial 3/3 no_skill
+[eval] run t008 trial 1/3 with_skill
+[eval] run t008 trial 1/3 no_skill
+[eval] run t008 trial 2/3 with_skill
+[eval] run t008 trial 2/3 no_skill
+[eval] run t008 trial 3/3 with_skill
+[eval] run t008 trial 3/3 no_skill
+[eval] run t009 trial 1/3 with_skill
+[eval] run t009 trial 1/3 no_skill
+[eval] run t009 trial 2/3 with_skill
+[eval] run t009 trial 2/3 no_skill
+[eval] run t009 trial 3/3 with_skill
+[eval] run t009 trial 3/3 no_skill
+[eval] run t010 trial 1/3 with_skill
+[eval] run t010 trial 1/3 no_skill
+[eval] run t010 trial 2/3 with_skill
+[eval] run t010 trial 2/3 no_skill
+[eval] run t010 trial 3/3 with_skill
+[eval] run t010 trial 3/3 no_skill
+[eval] grade t005 trial 1
+[eval] grade t002 trial 2
+[eval] grade t007 trial 2
+[eval] grade t006 trial 3
+[eval] grade t007 trial 3
+[eval] grade t001 trial 3
+[eval] grade t008 trial 1
+[eval] grade t009 trial 3
+[eval] grade t006 trial 3
+[eval] grade t002 trial 1
+[eval] grade t005 trial 2
+[eval] grade t004 trial 1
+[eval] grade t010 trial 2
+[eval] grade t005 trial 3
+[eval] grade t007 trial 1
+[eval] grade t002 trial 3
+[eval] grade t002 trial 3
+[eval] grade t009 trial 1
+[eval] grade t009 trial 1
+[eval] grade t004 trial 1
+[eval] grade t006 trial 1
+[eval] grade t003 trial 3
+[eval] grade t005 trial 1
+[eval] grade t005 trial 3
+[eval] grade t004 trial 2
+[eval] grade t008 trial 3
+[nim] retry 1/8 after connection; waiting 958 ms
+[eval] grade t002 trial 1
+[eval] grade t007 trial 1
+[eval] grade t008 trial 3
+[eval] grade t007 trial 3
+[eval] grade t001 trial 1
+[eval] grade t006 trial 2
+[eval] grade t007 trial 2
+[eval] grade t006 trial 1
+[eval] grade t001 trial 2
+[eval] grade t006 trial 2
+[eval] grade t010 trial 2
+[eval] grade t008 trial 2
+[eval] grade t008 trial 1
+[eval] grade t010 trial 1
+[eval] grade t001 trial 3
+[eval] grade t002 trial 2
+[eval] grade t009 trial 2
+[eval] grade t003 trial 2
+[eval] grade t003 trial 3
+[eval] grade t010 trial 3
+[eval] grade t004 trial 3
+[eval] grade t003 trial 2
+[eval] grade t009 trial 3
+[eval] grade t001 trial 1
+[eval] grade t003 trial 1
+[eval] grade t008 trial 2
+[eval] grade t004 trial 3
+[eval] grade t004 trial 2
+[eval] grade t003 trial 1
+[eval] grade t010 trial 3
+[eval] grade t005 trial 2
+[eval] grade t010 trial 1
+[eval] grade t009 trial 2
+[eval] grade t001 trial 2
+[corpus] eval mattpocock/skills/matt-prototype
+[eval] run t001 trial 1/3 with_skill
+[eval] run t001 trial 1/3 no_skill
+[eval] run t001 trial 2/3 with_skill
+[eval] run t001 trial 2/3 no_skill
+[eval] run t001 trial 3/3 with_skill
+[eval] run t001 trial 3/3 no_skill
+[eval] run t002 trial 1/3 with_skill
+[eval] run t002 trial 1/3 no_skill
+[eval] run t002 trial 2/3 with_skill
+[eval] run t002 trial 2/3 no_skill
+[eval] run t002 trial 3/3 with_skill
+[eval] run t002 trial 3/3 no_skill
+[eval] run t003 trial 1/3 with_skill
+[eval] run t003 trial 1/3 no_skill
+[eval] run t003 trial 2/3 with_skill
+[eval] run t003 trial 2/3 no_skill
+[eval] run t003 trial 3/3 with_skill
+[eval] run t003 trial 3/3 no_skill
+[eval] run t004 trial 1/3 with_skill
+[eval] run t004 trial 1/3 no_skill
+[eval] run t004 trial 2/3 with_skill
+[eval] run t004 trial 2/3 no_skill
+[eval] run t004 trial 3/3 with_skill
+[eval] run t004 trial 3/3 no_skill
+[eval] run t005 trial 1/3 with_skill
+[eval] run t005 trial 1/3 no_skill
+[nim] retry 1/8 after connection; waiting 959 ms
+[eval] run t005 trial 2/3 with_skill
+[eval] run t005 trial 2/3 no_skill
+[eval] run t005 trial 3/3 with_skill
+[eval] run t005 trial 3/3 no_skill
+[eval] run t006 trial 1/3 with_skill
+[eval] run t006 trial 1/3 no_skill
+[eval] run t006 trial 2/3 with_skill
+[eval] run t006 trial 2/3 no_skill
+[eval] run t006 trial 3/3 with_skill
+[eval] run t006 trial 3/3 no_skill
+[eval] run t007 trial 1/3 with_skill
+[eval] run t007 trial 1/3 no_skill
+[nim] retry 1/8 after connection; waiting 562 ms
+[eval] run t007 trial 2/3 with_skill
+[eval] run t007 trial 2/3 no_skill
+[eval] run t007 trial 3/3 with_skill
+[eval] run t007 trial 3/3 no_skill
+[eval] run t008 trial 1/3 with_skill
+[eval] run t008 trial 1/3 no_skill
+[eval] run t008 trial 2/3 with_skill
+[eval] run t008 trial 2/3 no_skill
+[eval] run t008 trial 3/3 with_skill
+[eval] run t008 trial 3/3 no_skill
+[eval] run t009 trial 1/3 with_skill
+[eval] run t009 trial 1/3 no_skill
+[nim] retry 1/8 after connection; waiting 769 ms
+[eval] run t009 trial 2/3 with_skill
+[eval] run t009 trial 2/3 no_skill
+[eval] run t009 trial 3/3 with_skill
+[eval] run t009 trial 3/3 no_skill
+[eval] run t010 trial 1/3 with_skill
+[eval] run t010 trial 1/3 no_skill
+[eval] run t010 trial 2/3 with_skill
+[eval] run t010 trial 2/3 no_skill
+[eval] run t010 trial 3/3 with_skill
+[eval] run t010 trial 3/3 no_skill
+[eval] grade t008 trial 3
+[eval] grade t006 trial 3
+[eval] grade t003 trial 2
+[eval] grade t003 trial 3
+[eval] grade t004 trial 1
+[eval] grade t003 trial 3
+[eval] grade t005 trial 1
+[eval] grade t005 trial 3
+[eval] grade t008 trial 1
+[eval] grade t008 trial 2
+[eval] grade t002 trial 2
+[eval] grade t007 trial 2
+[eval] grade t001 trial 3
+[eval] grade t010 trial 2
+[eval] grade t006 trial 1
+[eval] grade t006 trial 2
+[eval] grade t007 trial 1
+[eval] grade t004 trial 3
+[eval] grade t005 trial 1
+[eval] grade t009 trial 1
+[eval] grade t010 trial 3
+[eval] grade t010 trial 3
+[eval] grade t004 trial 3
+[eval] grade t004 trial 2
+[eval] grade t003 trial 1
+[eval] grade t010 trial 2
+[eval] grade t003 trial 1
+[eval] grade t008 trial 3
+[eval] grade t009 trial 2
+[eval] grade t006 trial 3
+[eval] grade t001 trial 1
+[eval] grade t001 trial 3
+[eval] grade t008 trial 1
+[eval] grade t007 trial 2
+[eval] grade t002 trial 3
+[eval] grade t004 trial 1
+[eval] grade t009 trial 3
+[eval] grade t007 trial 1
+[eval] grade t002 trial 1
+[eval] grade t007 trial 3
+[eval] grade t006 trial 2
+[eval] grade t009 trial 2
+[eval] grade t008 trial 2
+[eval] grade t009 trial 3
+[eval] grade t001 trial 2
+[eval] grade t005 trial 3
+[eval] grade t002 trial 1
+[eval] grade t006 trial 1
+[eval] grade t010 trial 1
+[eval] grade t004 trial 2
+[eval] grade t009 trial 1
+[eval] grade t005 trial 2
+[eval] grade t010 trial 1
+[eval] grade t001 trial 1
+[eval] grade t007 trial 3
+[eval] grade t002 trial 3
+[eval] grade t005 trial 2
+[eval] grade t003 trial 2
+[eval] grade t001 trial 2
+[eval] grade t002 trial 2
+[corpus] eval mattpocock/skills/matt-to-prd
+[eval] run t001 trial 1/3 with_skill
+[eval] run t001 trial 1/3 no_skill
+[eval] run t001 trial 2/3 with_skill
+[eval] run t001 trial 2/3 no_skill
+[eval] run t001 trial 3/3 with_skill
+[eval] run t001 trial 3/3 no_skill
+[eval] run t002 trial 1/3 with_skill
+[eval] run t002 trial 1/3 no_skill
+[eval] run t002 trial 2/3 with_skill
+[eval] run t002 trial 2/3 no_skill
+[eval] run t002 trial 3/3 with_skill
+[eval] run t002 trial 3/3 no_skill
+[eval] run t003 trial 1/3 with_skill
+[eval] run t003 trial 1/3 no_skill
+[eval] run t003 trial 2/3 with_skill
+[eval] run t003 trial 2/3 no_skill
+[eval] run t003 trial 3/3 with_skill
+[eval] run t003 trial 3/3 no_skill
+[eval] run t004 trial 1/3 with_skill
+[eval] run t004 trial 1/3 no_skill
+[eval] run t004 trial 2/3 with_skill
+[eval] run t004 trial 2/3 no_skill
+[eval] run t004 trial 3/3 with_skill
+[eval] run t004 trial 3/3 no_skill
+[eval] run t005 trial 1/3 with_skill
+[eval] run t005 trial 1/3 no_skill
+[eval] run t005 trial 2/3 with_skill
+[eval] run t005 trial 2/3 no_skill
+[eval] run t005 trial 3/3 with_skill
+[eval] run t005 trial 3/3 no_skill
+[eval] run t006 trial 1/3 with_skill
+[eval] run t006 trial 1/3 no_skill
+[eval] run t006 trial 2/3 with_skill
+[eval] run t006 trial 2/3 no_skill
+[eval] run t006 trial 3/3 with_skill
+[eval] run t006 trial 3/3 no_skill
+[eval] run t007 trial 1/3 with_skill
+[eval] run t007 trial 1/3 no_skill
+[eval] run t007 trial 2/3 with_skill
+[eval] run t007 trial 2/3 no_skill
+[eval] run t007 trial 3/3 with_skill
+[eval] run t007 trial 3/3 no_skill
+[eval] run t008 trial 1/3 with_skill
+[eval] run t008 trial 1/3 no_skill
+[eval] run t008 trial 2/3 with_skill
+[eval] run t008 trial 2/3 no_skill
+[eval] run t008 trial 3/3 with_skill
+[eval] run t008 trial 3/3 no_skill
+[eval] run t009 trial 1/3 with_skill
+[eval] run t009 trial 1/3 no_skill
+[eval] run t009 trial 2/3 with_skill
+[eval] run t009 trial 2/3 no_skill
+[eval] run t009 trial 3/3 with_skill
+[eval] run t009 trial 3/3 no_skill
+[eval] run t010 trial 1/3 with_skill
+[eval] run t010 trial 1/3 no_skill
+[eval] run t010 trial 2/3 with_skill
+[eval] run t010 trial 2/3 no_skill
+[eval] run t010 trial 3/3 with_skill
+[eval] run t010 trial 3/3 no_skill
+[eval] grade t009 trial 2
+[eval] grade t006 trial 2
+[eval] grade t008 trial 2
+[eval] grade t010 trial 2
+[eval] grade t006 trial 1
+[eval] grade t007 trial 3
+[eval] grade t004 trial 3
+[eval] grade t001 trial 1
+[eval] grade t004 trial 3
+[eval] grade t006 trial 1
+[eval] grade t002 trial 1
+[eval] grade t009 trial 3
+[eval] grade t007 trial 2
+[eval] grade t004 trial 2
+[eval] grade t008 trial 1
+[eval] grade t010 trial 1
+[eval] grade t001 trial 3
+[eval] grade t007 trial 1
+[eval] grade t009 trial 3
+[eval] grade t005 trial 2
+[eval] grade t008 trial 1
+[eval] grade t009 trial 2
+[eval] grade t006 trial 3
+[eval] grade t007 trial 1
+[eval] grade t002 trial 2
+[eval] grade t010 trial 3
+[eval] grade t005 trial 2
+[eval] grade t005 trial 1
+[eval] grade t007 trial 2
+[eval] grade t003 trial 2
+[eval] grade t006 trial 3
+[eval] grade t004 trial 2
+[eval] grade t003 trial 1
+[eval] grade t004 trial 1
+[eval] grade t007 trial 3
+[eval] grade t009 trial 1
+[eval] grade t008 trial 3
+[eval] grade t001 trial 2
+[eval] grade t002 trial 3
+[eval] grade t003 trial 3
+[eval] grade t003 trial 2
+[eval] grade t005 trial 1
+[eval] grade t008 trial 2
+[eval] grade t010 trial 1
+[eval] grade t002 trial 3
+[eval] grade t006 trial 2
+[eval] grade t004 trial 1
+[eval] grade t002 trial 1
+[eval] grade t005 trial 3
+[eval] grade t005 trial 3
+[eval] grade t001 trial 3
+[eval] grade t010 trial 3
+[eval] grade t010 trial 2
+[eval] grade t009 trial 1
+[eval] grade t001 trial 2
+[eval] grade t003 trial 3
+[eval] grade t003 trial 1
+[eval] grade t002 trial 2
+[eval] grade t008 trial 3
+[eval] grade t001 trial 1
+[corpus] eval mattpocock/skills/matt-to-issues
+[nim] retry 1/8 after connection; waiting 743 ms
+[eval] run t001 trial 1/3 with_skill
+[eval] run t001 trial 1/3 no_skill
+[nim] retry 1/8 after connection; waiting 600 ms
+[eval] run t001 trial 2/3 with_skill
+[eval] run t001 trial 2/3 no_skill
+[eval] run t001 trial 3/3 with_skill
+[eval] run t001 trial 3/3 no_skill
+[eval] run t002 trial 1/3 with_skill
+[nim] retry 1/8 after connection; waiting 808 ms
+[eval] run t002 trial 1/3 no_skill
+[nim] retry 1/8 after connection; waiting 511 ms
+[eval] run t002 trial 2/3 with_skill
+[eval] run t002 trial 2/3 no_skill
+[eval] run t002 trial 3/3 with_skill
+[eval] run t002 trial 3/3 no_skill
+[eval] run t003 trial 1/3 with_skill
+[eval] run t003 trial 1/3 no_skill
+[nim] retry 1/8 after connection; waiting 619 ms
+[nim] retry 2/8 after connection; waiting 1389 ms
+[eval] run t003 trial 2/3 with_skill
+[eval] run t003 trial 2/3 no_skill
+[eval] run t003 trial 3/3 with_skill
+[eval] run t003 trial 3/3 no_skill
+[eval] run t004 trial 1/3 with_skill
+[eval] run t004 trial 1/3 no_skill
+[eval] run t004 trial 2/3 with_skill
+[eval] run t004 trial 2/3 no_skill
+[eval] run t004 trial 3/3 with_skill
+[eval] run t004 trial 3/3 no_skill
+[eval] run t005 trial 1/3 with_skill
+[eval] run t005 trial 1/3 no_skill
+[nim] retry 1/8 after connection; waiting 878 ms
+[eval] run t005 trial 2/3 with_skill
+[eval] run t005 trial 2/3 no_skill
+[eval] run t005 trial 3/3 with_skill
+[eval] run t005 trial 3/3 no_skill
+[eval] run t006 trial 1/3 with_skill
+[eval] run t006 trial 1/3 no_skill
+[eval] run t006 trial 2/3 with_skill
+[eval] run t006 trial 2/3 no_skill
+[eval] run t006 trial 3/3 with_skill
+[eval] run t006 trial 3/3 no_skill
+[eval] run t007 trial 1/3 with_skill
+[eval] run t007 trial 1/3 no_skill
+[eval] run t007 trial 2/3 with_skill
+[eval] run t007 trial 2/3 no_skill
+[eval] run t007 trial 3/3 with_skill
+[eval] run t007 trial 3/3 no_skill
+[eval] run t008 trial 1/3 with_skill
+[eval] run t008 trial 1/3 no_skill
+[eval] run t008 trial 2/3 with_skill
+[eval] run t008 trial 2/3 no_skill
+[eval] run t008 trial 3/3 with_skill
+[eval] run t008 trial 3/3 no_skill
+[eval] run t009 trial 1/3 with_skill
+[eval] run t009 trial 1/3 no_skill
+[eval] run t009 trial 2/3 with_skill
+[eval] run t009 trial 2/3 no_skill
+[eval] run t009 trial 3/3 with_skill
+[eval] run t009 trial 3/3 no_skill
+[eval] run t010 trial 1/3 with_skill
+[eval] run t010 trial 1/3 no_skill
+[eval] run t010 trial 2/3 with_skill
+[eval] run t010 trial 2/3 no_skill
+[eval] run t010 trial 3/3 with_skill
+[eval] run t010 trial 3/3 no_skill
+[eval] grade t006 trial 1
+[eval] grade t009 trial 3
+[eval] grade t001 trial 3
+[eval] grade t002 trial 1
+[eval] grade t004 trial 3
+[eval] grade t007 trial 3
+[eval] grade t006 trial 1
+[eval] grade t001 trial 1
+[eval] grade t001 trial 2
+[eval] grade t006 trial 3
+[eval] grade t004 trial 1
+[eval] grade t007 trial 3
+[eval] grade t002 trial 3
+[eval] grade t001 trial 3
+[eval] grade t004 trial 2
+[eval] grade t008 trial 2
+[eval] grade t008 trial 3
+[eval] grade t006 trial 3
+[eval] grade t001 trial 1
+[eval] grade t008 trial 1
+[eval] grade t005 trial 3
+[eval] grade t009 trial 1
+[eval] grade t010 trial 3
+[eval] grade t010 trial 1
+[eval] grade t010 trial 1
+[eval] grade t009 trial 1
+[eval] grade t006 trial 2
+[eval] grade t006 trial 2
+[eval] grade t010 trial 2
+[eval] grade t005 trial 1
+[eval] grade t008 trial 3
+[eval] grade t008 trial 2
+[eval] grade t005 trial 1
+[eval] grade t004 trial 3
+[eval] grade t010 trial 3
+[eval] grade t005 trial 2
+[eval] grade t007 trial 2
+[eval] grade t007 trial 1
+[eval] grade t002 trial 2
+[eval] grade t004 trial 1
+[eval] grade t003 trial 2
+[eval] grade t007 trial 1
+[eval] grade t003 trial 3
+[eval] grade t010 trial 2
+[eval] grade t005 trial 2
+[eval] grade t002 trial 3
+[eval] grade t004 trial 2
+[eval] grade t009 trial 2
+[eval] grade t008 trial 1
+[eval] grade t003 trial 2
+[eval] grade t003 trial 1
+[eval] grade t007 trial 2
+[eval] grade t002 trial 1
+[eval] grade t005 trial 3
+[eval] grade t002 trial 2
+[eval] grade t003 trial 1
+[eval] grade t003 trial 3
+[eval] grade t009 trial 3
+[eval] grade t009 trial 2
+[eval] grade t001 trial 2
+[corpus] eval mattpocock/skills/matt-triage
+[nim] retry 1/8 after connection; waiting 848 ms
+[nim] retry 2/8 after connection; waiting 1491 ms
+[eval] run t001 trial 1/3 with_skill
+[eval] run t001 trial 1/3 no_skill
+[eval] run t001 trial 2/3 with_skill
+[eval] run t001 trial 2/3 no_skill
+[eval] run t001 trial 3/3 with_skill
+[eval] run t001 trial 3/3 no_skill
+[eval] run t002 trial 1/3 with_skill
+[eval] run t002 trial 1/3 no_skill
+[eval] run t002 trial 2/3 with_skill
+[eval] run t002 trial 2/3 no_skill
+[eval] run t002 trial 3/3 with_skill
+[eval] run t002 trial 3/3 no_skill
+[eval] run t003 trial 1/3 with_skill
+[eval] run t003 trial 1/3 no_skill
+[nim] retry 1/8 after connection; waiting 776 ms
+[nim] retry 2/8 after connection; waiting 1071 ms
+[eval] run t003 trial 2/3 with_skill
+[eval] run t003 trial 2/3 no_skill
+[eval] run t003 trial 3/3 with_skill
+[eval] run t003 trial 3/3 no_skill
+[eval] run t004 trial 1/3 with_skill
+[eval] run t004 trial 1/3 no_skill
+[nim] retry 1/8 after connection; waiting 513 ms
+[nim] retry 2/8 after connection; waiting 1028 ms
+[eval] run t004 trial 2/3 with_skill
+[eval] run t004 trial 2/3 no_skill
+[eval] run t004 trial 3/3 with_skill
+[eval] run t004 trial 3/3 no_skill
+[eval] run t005 trial 1/3 with_skill
+[eval] run t005 trial 1/3 no_skill
+[eval] run t005 trial 2/3 with_skill
+[eval] run t005 trial 2/3 no_skill
+[eval] run t005 trial 3/3 with_skill
+[eval] run t005 trial 3/3 no_skill
+[eval] run t006 trial 1/3 with_skill
+[eval] run t006 trial 1/3 no_skill
+[eval] run t006 trial 2/3 with_skill
+[eval] run t006 trial 2/3 no_skill
+[eval] run t006 trial 3/3 with_skill
+[eval] run t006 trial 3/3 no_skill
+[eval] run t007 trial 1/3 with_skill
+[eval] run t007 trial 1/3 no_skill
+[nim] retry 1/8 after connection; waiting 646 ms
+[eval] run t007 trial 2/3 with_skill
+[eval] run t007 trial 2/3 no_skill
+[eval] run t007 trial 3/3 with_skill
+[eval] run t007 trial 3/3 no_skill
+[eval] run t008 trial 1/3 with_skill
+[eval] run t008 trial 1/3 no_skill
+[eval] run t008 trial 2/3 with_skill
+[eval] run t008 trial 2/3 no_skill
+[eval] run t008 trial 3/3 with_skill
+[eval] run t008 trial 3/3 no_skill
+[eval] run t009 trial 1/3 with_skill
+[eval] run t009 trial 1/3 no_skill
+[eval] run t009 trial 2/3 with_skill
+[eval] run t009 trial 2/3 no_skill
+[eval] run t009 trial 3/3 with_skill
+[eval] run t009 trial 3/3 no_skill
+[eval] run t010 trial 1/3 with_skill
+[eval] run t010 trial 1/3 no_skill
+[eval] run t010 trial 2/3 with_skill
+[eval] run t010 trial 2/3 no_skill
+[eval] run t010 trial 3/3 with_skill
+[eval] run t010 trial 3/3 no_skill
+[eval] grade t005 trial 1
+[eval] grade t008 trial 2
+[eval] grade t010 trial 1
+[eval] grade t007 trial 1
+[eval] grade t002 trial 3
+[eval] grade t004 trial 3
+[eval] grade t007 trial 2
+[eval] grade t009 trial 1
+[eval] grade t007 trial 2
+[eval] grade t006 trial 3
+[eval] grade t007 trial 3
+[eval] grade t001 trial 3
+[eval] grade t009 trial 3
+[eval] grade t001 trial 3
+[eval] grade t010 trial 3
+[eval] grade t010 trial 1
+[eval] grade t004 trial 3
+[eval] grade t003 trial 1
+[eval] grade t009 trial 1
+[eval] grade t006 trial 3
+[eval] grade t004 trial 1
+[eval] grade t004 trial 2
+[eval] grade t003 trial 3
+[eval] grade t010 trial 3
+[eval] grade t003 trial 2
+[eval] grade t009 trial 2
+[eval] grade t003 trial 1
+[eval] grade t001 trial 2
+[eval] grade t010 trial 2
+[eval] grade t008 trial 3
+[eval] grade t002 trial 2
+[eval] grade t004 trial 2
+[eval] grade t002 trial 1
+[eval] grade t001 trial 1
+[eval] grade t006 trial 1
+[eval] grade t008 trial 2
+[eval] grade t007 trial 1
+[eval] grade t008 trial 1
+[eval] grade t010 trial 2
+[eval] grade t003 trial 2
+[eval] grade t003 trial 3
+[eval] grade t009 trial 2
+[eval] grade t005 trial 3
+[eval] grade t004 trial 1
+[eval] grade t005 trial 1
+[eval] grade t001 trial 2
+[eval] grade t002 trial 3
+[eval] grade t009 trial 3
+[eval] grade t005 trial 2
+[eval] grade t002 trial 1
+[eval] grade t007 trial 3
+[eval] grade t008 trial 3
+[eval] grade t001 trial 1
+[eval] grade t002 trial 2
+[eval] grade t006 trial 1
+[eval] grade t006 trial 2
+[eval] grade t005 trial 2
+[eval] grade t008 trial 1
+[eval] grade t006 trial 2
+[eval] grade t005 trial 3
+[corpus] eval sickn33/antigravity-awesome-skills/antigravity-angular
+[eval] run t001 trial 1/3 with_skill
+[eval] run t001 trial 1/3 no_skill
+[eval] run t001 trial 2/3 with_skill
+[eval] run t001 trial 2/3 no_skill
+[eval] run t001 trial 3/3 with_skill
+[eval] run t001 trial 3/3 no_skill
+[eval] run t002 trial 1/3 with_skill
+[eval] run t002 trial 1/3 no_skill
+[eval] run t002 trial 2/3 with_skill
+[eval] run t002 trial 2/3 no_skill
+[eval] run t002 trial 3/3 with_skill
+[eval] run t002 trial 3/3 no_skill
+[eval] run t003 trial 1/3 with_skill
+[eval] run t003 trial 1/3 no_skill
+[eval] run t003 trial 2/3 with_skill
+[eval] run t003 trial 2/3 no_skill
+[eval] run t003 trial 3/3 with_skill
+[eval] run t003 trial 3/3 no_skill
+[eval] run t004 trial 1/3 with_skill
+[eval] run t004 trial 1/3 no_skill
+[eval] run t004 trial 2/3 with_skill
+[eval] run t004 trial 2/3 no_skill
+[eval] run t004 trial 3/3 with_skill
+[eval] run t004 trial 3/3 no_skill
+[eval] run t005 trial 1/3 with_skill
+[eval] run t005 trial 1/3 no_skill
+[eval] run t005 trial 2/3 with_skill
+[eval] run t005 trial 2/3 no_skill
+[eval] run t005 trial 3/3 with_skill
+[eval] run t005 trial 3/3 no_skill
+[eval] run t006 trial 1/3 with_skill
+[eval] run t006 trial 1/3 no_skill
+[eval] run t006 trial 2/3 with_skill
+[eval] run t006 trial 2/3 no_skill
+[eval] run t006 trial 3/3 with_skill
+[eval] run t006 trial 3/3 no_skill
+[eval] run t007 trial 1/3 with_skill
+[nim] retry 1/8 after connection; waiting 766 ms
+[eval] run t007 trial 1/3 no_skill
+[nim] retry 1/8 after connection; waiting 570 ms
+[nim] retry 2/8 after connection; waiting 1440 ms
+[eval] run t007 trial 2/3 with_skill
+[eval] run t007 trial 2/3 no_skill
+[eval] run t007 trial 3/3 with_skill
+[eval] run t007 trial 3/3 no_skill
+[eval] run t008 trial 1/3 with_skill
+[nim] retry 1/8 after connection; waiting 850 ms
+[nim] retry 2/8 after connection; waiting 1434 ms
+[nim] retry 3/8 after connection; waiting 2300 ms
+[eval] run t008 trial 1/3 no_skill
+[eval] run t008 trial 2/3 with_skill
+[eval] run t008 trial 2/3 no_skill
+[eval] run t008 trial 3/3 with_skill
+[eval] run t008 trial 3/3 no_skill
+[eval] run t009 trial 1/3 with_skill
+[nim] retry 1/8 after connection; waiting 808 ms
+[eval] run t009 trial 1/3 no_skill
+[eval] run t009 trial 2/3 with_skill
+[eval] run t009 trial 2/3 no_skill
+[eval] run t009 trial 3/3 with_skill
+[eval] run t009 trial 3/3 no_skill
+[eval] run t010 trial 1/3 with_skill
+[nim] retry 1/8 after connection; waiting 524 ms
+[eval] run t010 trial 1/3 no_skill
+[eval] run t010 trial 2/3 with_skill
+[eval] run t010 trial 2/3 no_skill
+[eval] run t010 trial 3/3 with_skill
+[eval] run t010 trial 3/3 no_skill
+[eval] grade t010 trial 1
+[eval] grade t002 trial 3
+[eval] grade t005 trial 2
+[eval] grade t006 trial 1
+[eval] grade t005 trial 2
+[eval] grade t006 trial 3
+[eval] grade t001 trial 2
+[eval] grade t007 trial 1
+[eval] grade t007 trial 2
+[eval] grade t001 trial 3
+[eval] grade t009 trial 3
+[eval] grade t010 trial 2
+[eval] grade t010 trial 3
+[eval] grade t005 trial 3
+[eval] grade t005 trial 1
+[eval] grade t005 trial 3
+[eval] grade t002 trial 2
+[eval] grade t008 trial 2
+[eval] grade t006 trial 1
+[eval] grade t010 trial 1
+[eval] grade t009 trial 2
+[eval] grade t003 trial 1
+[eval] grade t004 trial 3
+[eval] grade t004 trial 1
+[eval] grade t008 trial 2
+[eval] grade t004 trial 2
+[eval] grade t007 trial 2
+[eval] grade t008 trial 3
+[eval] grade t006 trial 2
+[eval] grade t001 trial 2
+[eval] grade t001 trial 3
+[eval] grade t008 trial 3
+[eval] grade t003 trial 2
+[eval] grade t009 trial 1
+[eval] grade t004 trial 3
+[eval] grade t002 trial 1
+[eval] grade t007 trial 1
+[eval] grade t001 trial 1
+[eval] grade t002 trial 2
+[eval] grade t009 trial 1
+[eval] grade t009 trial 3
+[eval] grade t006 trial 2
+[eval] grade t006 trial 3
+[eval] grade t005 trial 1
+[eval] grade t010 trial 2
+[eval] grade t003 trial 2
+[eval] grade t007 trial 3
+[eval] grade t001 trial 1
+[eval] grade t003 trial 3
+[eval] grade t002 trial 1
+[eval] grade t009 trial 2
+[eval] grade t008 trial 1
+[eval] grade t004 trial 1
+[eval] grade t010 trial 3
+[eval] grade t008 trial 1
+[eval] grade t004 trial 2
+[eval] grade t007 trial 3
+[eval] grade t003 trial 3
+[eval] grade t002 trial 3
+[eval] grade t003 trial 1
+[corpus] eval sickn33/antigravity-awesome-skills/antigravity-api-docs
+[nim] retry 1/8 after connection; waiting 735 ms
+[nim] retry 2/8 after connection; waiting 1382 ms
+[eval] run t001 trial 1/3 with_skill
+[eval] run t001 trial 1/3 no_skill
+[eval] run t001 trial 2/3 with_skill
+[eval] run t001 trial 2/3 no_skill
+[eval] run t001 trial 3/3 with_skill
+[eval] run t001 trial 3/3 no_skill
+[eval] run t002 trial 1/3 with_skill
+[eval] run t002 trial 1/3 no_skill
+[eval] run t002 trial 2/3 with_skill
+[eval] run t002 trial 2/3 no_skill
+[eval] run t002 trial 3/3 with_skill
+[eval] run t002 trial 3/3 no_skill
+[eval] run t003 trial 1/3 with_skill
+[eval] run t003 trial 1/3 no_skill
+[eval] run t003 trial 2/3 with_skill
+[eval] run t003 trial 2/3 no_skill
+[eval] run t003 trial 3/3 with_skill
+[eval] run t003 trial 3/3 no_skill
+[eval] run t004 trial 1/3 with_skill
+[eval] run t004 trial 1/3 no_skill
+[eval] run t004 trial 2/3 with_skill
+[eval] run t004 trial 2/3 no_skill
+[eval] run t004 trial 3/3 with_skill
+[eval] run t004 trial 3/3 no_skill
+[eval] run t005 trial 1/3 with_skill
+[eval] run t005 trial 1/3 no_skill
+[eval] run t005 trial 2/3 with_skill
+[eval] run t005 trial 2/3 no_skill
+[eval] run t005 trial 3/3 with_skill
+[eval] run t005 trial 3/3 no_skill
+[eval] run t006 trial 1/3 with_skill
+[eval] run t006 trial 1/3 no_skill
+[eval] run t006 trial 2/3 with_skill
+[eval] run t006 trial 2/3 no_skill
+[eval] run t006 trial 3/3 with_skill
+[eval] run t006 trial 3/3 no_skill
+[eval] run t007 trial 1/3 with_skill
+[nim] retry 1/8 after connection; waiting 888 ms
+[eval] run t007 trial 1/3 no_skill
+[eval] run t007 trial 2/3 with_skill
+[eval] run t007 trial 2/3 no_skill
+[eval] run t007 trial 3/3 with_skill
+[eval] run t007 trial 3/3 no_skill
+[eval] run t008 trial 1/3 with_skill
+[eval] run t008 trial 1/3 no_skill
+[eval] run t008 trial 2/3 with_skill
+[eval] run t008 trial 2/3 no_skill
+[eval] run t008 trial 3/3 with_skill
+[eval] run t008 trial 3/3 no_skill
+[eval] run t009 trial 1/3 with_skill
+[eval] run t009 trial 1/3 no_skill
+[eval] run t009 trial 2/3 with_skill
+[eval] run t009 trial 2/3 no_skill
+[eval] run t009 trial 3/3 with_skill
+[eval] run t009 trial 3/3 no_skill
+[eval] run t010 trial 1/3 with_skill
+[eval] run t010 trial 1/3 no_skill
+[eval] run t010 trial 2/3 with_skill
+[eval] run t010 trial 2/3 no_skill
+[eval] run t010 trial 3/3 with_skill
+[eval] run t010 trial 3/3 no_skill
+[eval] grade t006 trial 1
+[nim] retry 1/8 after connection; waiting 993 ms
+[eval] grade t002 trial 3
+[eval] grade t002 trial 1
+[eval] grade t009 trial 1
+[eval] grade t008 trial 1
+[eval] grade t010 trial 2
+[nim] retry 1/8 after connection; waiting 586 ms
+[eval] grade t001 trial 3
+[eval] grade t003 trial 2
+[eval] grade t008 trial 2
+[eval] grade t010 trial 3
+[eval] grade t008 trial 3
+[eval] grade t001 trial 2
+[eval] grade t003 trial 1
+[nim] retry 1/8 after connection; waiting 802 ms
+[eval] grade t006 trial 3
+[eval] grade t005 trial 3
+[nim] retry 1/8 after connection; waiting 914 ms
+[eval] grade t009 trial 1
+[eval] grade t005 trial 2
+[eval] grade t004 trial 3
+[eval] grade t008 trial 1
+[eval] grade t002 trial 3
+[eval] grade t006 trial 3
+[eval] grade t010 trial 2
+[eval] grade t006 trial 2
+[eval] grade t001 trial 3
+[eval] grade t002 trial 2
+[eval] grade t004 trial 3
+[eval] grade t003 trial 1
+[eval] grade t007 trial 2
+[eval] grade t001 trial 2
+[eval] grade t009 trial 3
+[eval] grade t005 trial 2
+[eval] grade t004 trial 1
+[eval] grade t008 trial 3
+[eval] grade t006 trial 1
+[eval] grade t005 trial 1
+[eval] grade t004 trial 1
+[eval] grade t010 trial 1
+[eval] grade t002 trial 2
+[eval] grade t005 trial 3
+[eval] grade t003 trial 2
+[eval] grade t006 trial 2
+[eval] grade t001 trial 1
+[eval] grade t007 trial 1
+[eval] grade t005 trial 1
+[eval] grade t009 trial 3
+[eval] grade t007 trial 3
+[eval] grade t003 trial 3
+[eval] grade t008 trial 2
+[eval] grade t004 trial 2
+[eval] grade t007 trial 2
+[eval] grade t003 trial 3
+[eval] grade t007 trial 3
+[eval] grade t001 trial 1
+[eval] grade t002 trial 1
+[eval] grade t010 trial 3
+[eval] grade t004 trial 2
+[eval] grade t010 trial 1
+[eval] grade t009 trial 2
+[eval] grade t007 trial 1
+[eval] grade t009 trial 2
+[corpus] eval sickn33/antigravity-awesome-skills/antigravity-api-design
+[nim] retry 1/8 after connection; waiting 896 ms
+[eval] run t001 trial 1/3 with_skill
+[eval] run t001 trial 1/3 no_skill
+[nim] retry 1/8 after connection; waiting 552 ms
+[eval] run t001 trial 2/3 with_skill
+[eval] run t001 trial 2/3 no_skill
+[eval] run t001 trial 3/3 with_skill
+[eval] run t001 trial 3/3 no_skill
+[eval] run t002 trial 1/3 with_skill
+[eval] run t002 trial 1/3 no_skill
+[eval] run t002 trial 2/3 with_skill
+[eval] run t002 trial 2/3 no_skill
+[eval] run t002 trial 3/3 with_skill
+[eval] run t002 trial 3/3 no_skill
+[eval] run t003 trial 1/3 with_skill
+[nim] retry 1/8 after connection; waiting 678 ms
+[nim] retry 2/8 after connection; waiting 1064 ms
+[eval] run t003 trial 1/3 no_skill
+[nim] retry 1/8 after connection; waiting 642 ms
+[eval] run t003 trial 2/3 with_skill
+[eval] run t003 trial 2/3 no_skill
+[eval] run t003 trial 3/3 with_skill
+[eval] run t003 trial 3/3 no_skill
+[eval] run t004 trial 1/3 with_skill
+[eval] run t004 trial 1/3 no_skill
+[nim] retry 1/8 after connection; waiting 781 ms
+[nim] retry 2/8 after connection; waiting 1299 ms
+[nim] retry 3/8 after connection; waiting 2037 ms
+[eval] run t004 trial 2/3 with_skill
+[eval] run t004 trial 2/3 no_skill
+[eval] run t004 trial 3/3 with_skill
+[eval] run t004 trial 3/3 no_skill
+[eval] run t005 trial 1/3 with_skill
+[eval] run t005 trial 1/3 no_skill
+[nim] retry 1/8 after connection; waiting 605 ms
+[nim] retry 2/8 after connection; waiting 1103 ms
+[nim] retry 3/8 after connection; waiting 2286 ms
+[nim] retry 4/8 after connection; waiting 4074 ms
+[nim] retry 5/8 after connection; waiting 8044 ms
+[eval] run t005 trial 2/3 with_skill
+[eval] run t005 trial 2/3 no_skill
+[eval] run t005 trial 3/3 with_skill
+[eval] run t005 trial 3/3 no_skill
+[eval] run t006 trial 1/3 with_skill
+[nim] retry 1/8 after connection; waiting 862 ms
+[nim] retry 2/8 after connection; waiting 1155 ms
+[nim] retry 3/8 after connection; waiting 2177 ms
+[nim] retry 4/8 after connection; waiting 4022 ms
+[eval] run t006 trial 1/3 no_skill
+[nim] retry 1/8 after connection; waiting 617 ms
+[eval] run t006 trial 2/3 with_skill
+[eval] run t006 trial 2/3 no_skill
+[eval] run t006 trial 3/3 with_skill
+[eval] run t006 trial 3/3 no_skill
+[eval] run t007 trial 1/3 with_skill
+[nim] retry 1/8 after connection; waiting 852 ms
+[eval] run t007 trial 1/3 no_skill
+[eval] run t007 trial 2/3 with_skill
+[eval] run t007 trial 2/3 no_skill
+[eval] run t007 trial 3/3 with_skill
+[eval] run t007 trial 3/3 no_skill
+[eval] run t008 trial 1/3 with_skill
+[eval] run t008 trial 1/3 no_skill
+[eval] run t008 trial 2/3 with_skill
+[eval] run t008 trial 2/3 no_skill
+[eval] run t008 trial 3/3 with_skill
+[eval] run t008 trial 3/3 no_skill
+[eval] run t009 trial 1/3 with_skill
+[eval] run t009 trial 1/3 no_skill
+[eval] run t009 trial 2/3 with_skill
+[eval] run t009 trial 2/3 no_skill
+[eval] run t009 trial 3/3 with_skill
+[eval] run t009 trial 3/3 no_skill
+[eval] run t010 trial 1/3 with_skill
+[nim] retry 1/8 after connection; waiting 982 ms
+[eval] run t010 trial 1/3 no_skill
+[eval] run t010 trial 2/3 with_skill
+[eval] run t010 trial 2/3 no_skill
+[eval] run t010 trial 3/3 with_skill
+[eval] run t010 trial 3/3 no_skill
+[eval] grade t010 trial 1
+[eval] grade t001 trial 3
+[eval] grade t001 trial 2
+[eval] grade t008 trial 2
+[eval] grade t006 trial 1
+[eval] grade t002 trial 3
+[eval] grade t008 trial 3
+[eval] grade t005 trial 1
+[eval] grade t005 trial 2
+[nim] retry 1/8 after connection; waiting 943 ms
+[nim] retry 2/8 after connection; waiting 1207 ms
+[nim] retry 3/8 after connection; waiting 2421 ms
+[eval] grade t002 trial 2
+[eval] grade t008 trial 2
+[eval] grade t008 trial 3
+[eval] grade t008 trial 1
+[eval] grade t002 trial 2
+[eval] grade t010 trial 3
+[eval] grade t009 trial 2
+[eval] grade t006 trial 3
+[eval] grade t001 trial 2
+[eval] grade t003 trial 2
+[eval] grade t003 trial 1
+[eval] grade t007 trial 2
+[eval] grade t005 trial 2
+[eval] grade t008 trial 1
+[eval] grade t005 trial 3
+[eval] grade t003 trial 2
+[eval] grade t010 trial 3
+[eval] grade t006 trial 2
+[eval] grade t001 trial 1
+[eval] grade t009 trial 2
+[eval] grade t007 trial 2
+[eval] grade t005 trial 1
+[eval] grade t001 trial 3
+[eval] grade t010 trial 2
+[eval] grade t006 trial 3
+[eval] grade t002 trial 1
+[eval] grade t002 trial 1
+[eval] grade t004 trial 1
+[eval] grade t001 trial 1
+[eval] grade t002 trial 3
+[eval] grade t009 trial 1
+[eval] grade t007 trial 3
+[eval] grade t003 trial 3
+[eval] grade t004 trial 3
+[eval] grade t004 trial 2
+[eval] grade t006 trial 1
+[eval] grade t004 trial 2
+[eval] grade t007 trial 3
+[eval] grade t009 trial 3
+[eval] grade t004 trial 3
+[eval] grade t007 trial 1
+[eval] grade t005 trial 3
+[eval] grade t009 trial 1
+[eval] grade t003 trial 1
+[eval] grade t010 trial 2
+[eval] grade t006 trial 2
+[eval] grade t004 trial 1
+[eval] grade t010 trial 1
+[eval] grade t003 trial 3
+[eval] grade t007 trial 1
+[eval] grade t009 trial 3
+[corpus] eval sickn33/antigravity-awesome-skills/antigravity-astro
+[nim] retry 1/8 after connection; waiting 560 ms
+[eval] run t001 trial 1/3 with_skill
+[nim] retry 1/8 after connection; waiting 930 ms
+[eval] run t001 trial 1/3 no_skill
+[nim] retry 1/8 after connection; waiting 637 ms
+[eval] run t001 trial 2/3 with_skill
+[eval] run t001 trial 2/3 no_skill
+[eval] run t001 trial 3/3 with_skill
+[eval] run t001 trial 3/3 no_skill
+[eval] run t002 trial 1/3 with_skill
+[nim] retry 1/8 after connection; waiting 997 ms
+[eval] run t002 trial 1/3 no_skill
+[nim] retry 1/8 after connection; waiting 699 ms
+[nim] retry 2/8 after connection; waiting 1343 ms
+[nim] retry 3/8 after connection; waiting 2380 ms
+[eval] run t002 trial 2/3 with_skill
+[eval] run t002 trial 2/3 no_skill
+[eval] run t002 trial 3/3 with_skill
+[eval] run t002 trial 3/3 no_skill
+[eval] run t003 trial 1/3 with_skill
+[eval] run t003 trial 1/3 no_skill
+[eval] run t003 trial 2/3 with_skill
+[eval] run t003 trial 2/3 no_skill
+[eval] run t003 trial 3/3 with_skill
+[eval] run t003 trial 3/3 no_skill
+[eval] run t004 trial 1/3 with_skill
+[eval] run t004 trial 1/3 no_skill
+[eval] run t004 trial 2/3 with_skill
+[eval] run t004 trial 2/3 no_skill
+[eval] run t004 trial 3/3 with_skill
+[eval] run t004 trial 3/3 no_skill
+[eval] run t005 trial 1/3 with_skill
+[eval] run t005 trial 1/3 no_skill
+[eval] run t005 trial 2/3 with_skill
+[eval] run t005 trial 2/3 no_skill
+[eval] run t005 trial 3/3 with_skill
+[eval] run t005 trial 3/3 no_skill
+[eval] run t006 trial 1/3 with_skill
+[eval] run t006 trial 1/3 no_skill
+[eval] run t006 trial 2/3 with_skill
+[eval] run t006 trial 2/3 no_skill
+[eval] run t006 trial 3/3 with_skill
+[eval] run t006 trial 3/3 no_skill
+[eval] run t007 trial 1/3 with_skill
+[eval] run t007 trial 1/3 no_skill
+[eval] run t007 trial 2/3 with_skill
+[eval] run t007 trial 2/3 no_skill
+[eval] run t007 trial 3/3 with_skill
+[eval] run t007 trial 3/3 no_skill
+[eval] run t008 trial 1/3 with_skill
+[eval] run t008 trial 1/3 no_skill
+[eval] run t008 trial 2/3 with_skill
+[eval] run t008 trial 2/3 no_skill
+[eval] run t008 trial 3/3 with_skill
+[eval] run t008 trial 3/3 no_skill
+[eval] run t009 trial 1/3 with_skill
+[eval] run t009 trial 1/3 no_skill
+[eval] run t009 trial 2/3 with_skill
+[eval] run t009 trial 2/3 no_skill
+[eval] run t009 trial 3/3 with_skill
+[eval] run t009 trial 3/3 no_skill
+[eval] run t010 trial 1/3 with_skill
+[eval] run t010 trial 1/3 no_skill
+[eval] run t010 trial 2/3 with_skill
+[eval] run t010 trial 2/3 no_skill
+[eval] run t010 trial 3/3 with_skill
+[eval] run t010 trial 3/3 no_skill
+[eval] grade t004 trial 2
+[eval] grade t001 trial 3
+[eval] grade t002 trial 3
+[eval] grade t002 trial 2
+[eval] grade t007 trial 1
+[eval] grade t008 trial 2
+[eval] grade t008 trial 2
+[eval] grade t009 trial 3
+[eval] grade t003 trial 1
+[eval] grade t009 trial 2
+[eval] grade t006 trial 1
+[eval] grade t005 trial 1
+[eval] grade t006 trial 3
+[eval] grade t003 trial 2
+[eval] grade t006 trial 2
+[eval] grade t003 trial 3
+[eval] grade t008 trial 1
+[eval] grade t002 trial 1
+[eval] grade t004 trial 1
+[eval] grade t009 trial 2
+[eval] grade t004 trial 3
+[eval] grade t007 trial 1
+[eval] grade t001 trial 3
+[eval] grade t008 trial 3
+[eval] grade t001 trial 1
+[eval] grade t001 trial 1
+[eval] grade t010 trial 1
+[eval] grade t010 trial 1
+[eval] grade t005 trial 2
+[eval] grade t010 trial 3
+[eval] grade t006 trial 3
+[eval] grade t003 trial 2
+[eval] grade t004 trial 3
+[eval] grade t007 trial 2
+[eval] grade t002 trial 1
+[eval] grade t002 trial 2
+[eval] grade t003 trial 3
+[eval] grade t006 trial 2
+[eval] grade t001 trial 2
+[eval] grade t009 trial 1
+[eval] grade t007 trial 2
+[eval] grade t001 trial 2
+[eval] grade t009 trial 1
+[eval] grade t005 trial 1
+[eval] grade t009 trial 3
+[eval] grade t010 trial 3
+[eval] grade t002 trial 3
+[eval] grade t006 trial 1
+[eval] grade t004 trial 2
+[eval] grade t005 trial 2
+[eval] grade t010 trial 2
+[eval] grade t008 trial 1
+[eval] grade t005 trial 3
+[eval] grade t008 trial 3
+[eval] grade t007 trial 3
+[eval] grade t004 trial 1
+[eval] grade t010 trial 2
+[eval] grade t003 trial 1
+[eval] grade t007 trial 3
+[eval] grade t005 trial 3
+[corpus] eval sickn33/antigravity-awesome-skills/antigravity-auth-patterns
+[eval] run t001 trial 1/3 with_skill
+[nim] retry 1/8 after connection; waiting 749 ms
+[eval] run t001 trial 1/3 no_skill
+[nim] retry 1/8 after connection; waiting 702 ms
+[eval] run t001 trial 2/3 with_skill
+[eval] run t001 trial 2/3 no_skill
+[eval] run t001 trial 3/3 with_skill
+[eval] run t001 trial 3/3 no_skill
+[eval] run t002 trial 1/3 with_skill
+[nim] retry 1/8 after connection; waiting 628 ms
+[eval] run t002 trial 1/3 no_skill
+[nim] retry 1/8 after connection; waiting 580 ms
+[nim] retry 2/8 after connection; waiting 1339 ms
+[nim] retry 3/8 after connection; waiting 2100 ms
+[nim] retry 4/8 after connection; waiting 4377 ms
+[nim] retry 5/8 after connection; waiting 8141 ms
+[eval] run t002 trial 2/3 with_skill
+[eval] run t002 trial 2/3 no_skill
+[eval] run t002 trial 3/3 with_skill
+[eval] run t002 trial 3/3 no_skill
+[eval] run t003 trial 1/3 with_skill
+[nim] retry 1/8 after connection; waiting 630 ms
+[eval] run t003 trial 1/3 no_skill
+[eval] run t003 trial 2/3 with_skill
+[eval] run t003 trial 2/3 no_skill
+[eval] run t003 trial 3/3 with_skill
+[eval] run t003 trial 3/3 no_skill
+[eval] run t004 trial 1/3 with_skill
+[eval] run t004 trial 1/3 no_skill
+[eval] run t004 trial 2/3 with_skill
+[eval] run t004 trial 2/3 no_skill
+[eval] run t004 trial 3/3 with_skill
+[eval] run t004 trial 3/3 no_skill
+[eval] run t005 trial 1/3 with_skill
+[eval] run t005 trial 1/3 no_skill
+[eval] run t005 trial 2/3 with_skill
+[eval] run t005 trial 2/3 no_skill
+[eval] run t005 trial 3/3 with_skill
+[eval] run t005 trial 3/3 no_skill
+[eval] run t006 trial 1/3 with_skill
+[eval] run t006 trial 1/3 no_skill
+[eval] run t006 trial 2/3 with_skill
+[eval] run t006 trial 2/3 no_skill
+[eval] run t006 trial 3/3 with_skill
+[eval] run t006 trial 3/3 no_skill
+[eval] run t007 trial 1/3 with_skill
+[eval] run t007 trial 1/3 no_skill
+[eval] run t007 trial 2/3 with_skill
+[eval] run t007 trial 2/3 no_skill
+[eval] run t007 trial 3/3 with_skill
+[eval] run t007 trial 3/3 no_skill
+[eval] run t008 trial 1/3 with_skill
+[eval] run t008 trial 1/3 no_skill
+[eval] run t008 trial 2/3 with_skill
+[eval] run t008 trial 2/3 no_skill
+[eval] run t008 trial 3/3 with_skill
+[eval] run t008 trial 3/3 no_skill
+[eval] run t009 trial 1/3 with_skill
+[eval] run t009 trial 1/3 no_skill
+[eval] run t009 trial 2/3 with_skill
+[eval] run t009 trial 2/3 no_skill
+[eval] run t009 trial 3/3 with_skill
+[eval] run t009 trial 3/3 no_skill
+[eval] run t010 trial 1/3 with_skill
+[eval] run t010 trial 1/3 no_skill
+[eval] run t010 trial 2/3 with_skill
+[eval] run t010 trial 2/3 no_skill
+[eval] run t010 trial 3/3 with_skill
+[eval] run t010 trial 3/3 no_skill
+[eval] grade t006 trial 2
+[eval] grade t010 trial 2
+[eval] grade t008 trial 1
+[eval] grade t004 trial 2
+[eval] grade t010 trial 3
+[eval] grade t007 trial 1
+[eval] grade t007 trial 3
+[eval] grade t002 trial 2
+[eval] grade t009 trial 3
+[eval] grade t006 trial 1
+[eval] grade t008 trial 2
+[eval] grade t005 trial 3
+[eval] grade t010 trial 3
+[eval] grade t001 trial 2
+[eval] grade t001 trial 1
+[eval] grade t003 trial 1
+[eval] grade t003 trial 1
+[eval] grade t005 trial 2
+[eval] grade t005 trial 1
+[eval] grade t008 trial 3
+[eval] grade t006 trial 3
+[eval] grade t006 trial 2
+[eval] grade t006 trial 3
+[eval] grade t010 trial 1
+[eval] grade t010 trial 1
+[eval] grade t004 trial 1
+[eval] grade t001 trial 3
+[eval] grade t008 trial 1
+[eval] grade t009 trial 1
+[eval] grade t009 trial 2
+[eval] grade t001 trial 3
+[eval] grade t007 trial 2
+[eval] grade t003 trial 2
+[eval] grade t005 trial 2
+[eval] grade t010 trial 2
+[eval] grade t003 trial 3
+[eval] grade t004 trial 3
+[eval] grade t004 trial 1
+[eval] grade t009 trial 1
+[eval] grade t005 trial 1
+[eval] grade t002 trial 1
+[eval] grade t005 trial 3
+[eval] grade t008 trial 3
+[eval] grade t008 trial 2
+[eval] grade t004 trial 3
+[eval] grade t007 trial 2
+[eval] grade t009 trial 2
+[eval] grade t003 trial 2
+[eval] grade t004 trial 2
+[eval] grade t002 trial 3
+[eval] grade t002 trial 2
+[eval] grade t002 trial 1
+[eval] grade t007 trial 1
+[eval] grade t007 trial 3
+[eval] grade t009 trial 3
+[eval] grade t003 trial 3
+[eval] grade t006 trial 1
+[eval] grade t001 trial 1
+[eval] grade t002 trial 3
+[eval] grade t001 trial 2
+[corpus] eval sickn33/antigravity-awesome-skills/antigravity-adr
+[eval] run t001 trial 1/3 with_skill
+[eval] run t001 trial 1/3 no_skill
+[eval] run t001 trial 2/3 with_skill
+[eval] run t001 trial 2/3 no_skill
+[eval] run t001 trial 3/3 with_skill
+[eval] run t001 trial 3/3 no_skill
+[eval] run t002 trial 1/3 with_skill
+[eval] run t002 trial 1/3 no_skill
+[eval] run t002 trial 2/3 with_skill
+[eval] run t002 trial 2/3 no_skill
+[eval] run t002 trial 3/3 with_skill
+[eval] run t002 trial 3/3 no_skill
+[eval] run t003 trial 1/3 with_skill
+[eval] run t003 trial 1/3 no_skill
+[eval] run t003 trial 2/3 with_skill
+[eval] run t003 trial 2/3 no_skill
+[eval] run t003 trial 3/3 with_skill
+[eval] run t003 trial 3/3 no_skill
+[eval] run t004 trial 1/3 with_skill
+[eval] run t004 trial 1/3 no_skill
+[eval] run t004 trial 2/3 with_skill
+[eval] run t004 trial 2/3 no_skill
+[eval] run t004 trial 3/3 with_skill
+[eval] run t004 trial 3/3 no_skill
+[eval] run t005 trial 1/3 with_skill
+[eval] run t005 trial 1/3 no_skill
+[eval] run t005 trial 2/3 with_skill
+[eval] run t005 trial 2/3 no_skill
+[eval] run t005 trial 3/3 with_skill
+[eval] run t005 trial 3/3 no_skill
+[eval] run t006 trial 1/3 with_skill
+[nim] retry 1/8 after connection; waiting 996 ms
+[eval] run t006 trial 1/3 no_skill
+[eval] run t006 trial 2/3 with_skill
+[eval] run t006 trial 2/3 no_skill
+[eval] run t006 trial 3/3 with_skill
+[eval] run t006 trial 3/3 no_skill
+[eval] run t007 trial 1/3 with_skill
+[eval] run t007 trial 1/3 no_skill
+[eval] run t007 trial 2/3 with_skill
+[eval] run t007 trial 2/3 no_skill
+[eval] run t007 trial 3/3 with_skill
+[eval] run t007 trial 3/3 no_skill
+[eval] run t008 trial 1/3 with_skill
+[eval] run t008 trial 1/3 no_skill
+[eval] run t008 trial 2/3 with_skill
+[eval] run t008 trial 2/3 no_skill
+[eval] run t008 trial 3/3 with_skill
+[eval] run t008 trial 3/3 no_skill
+[eval] run t009 trial 1/3 with_skill
+[eval] run t009 trial 1/3 no_skill
+[nim] retry 1/8 after connection; waiting 577 ms
+[nim] retry 2/8 after connection; waiting 1437 ms
+[eval] run t009 trial 2/3 with_skill
+[eval] run t009 trial 2/3 no_skill
+[eval] run t009 trial 3/3 with_skill
+[eval] run t009 trial 3/3 no_skill
+[eval] run t010 trial 1/3 with_skill
+[eval] run t010 trial 1/3 no_skill
+[eval] run t010 trial 2/3 with_skill
+[eval] run t010 trial 2/3 no_skill
+[eval] run t010 trial 3/3 with_skill
+[eval] run t010 trial 3/3 no_skill
+[eval] grade t006 trial 2
+[eval] grade t010 trial 1
+[eval] grade t001 trial 1
+[eval] grade t004 trial 3
+[eval] grade t007 trial 2
+[eval] grade t007 trial 3
+[eval] grade t004 trial 1
+[eval] grade t006 trial 3
+[eval] grade t006 trial 1
+[eval] grade t009 trial 2
+[eval] grade t001 trial 2
+[eval] grade t008 trial 3
+[eval] grade t008 trial 1
+[eval] grade t003 trial 1
+[eval] grade t010 trial 1
+[eval] grade t009 trial 2
+[eval] grade t008 trial 2
+[eval] grade t006 trial 1
+[eval] grade t003 trial 1
+[eval] grade t004 trial 3
+[eval] grade t002 trial 1
+[eval] grade t010 trial 2
+[eval] grade t005 trial 1
+[eval] grade t001 trial 1
+[eval] grade t002 trial 2
+[eval] grade t007 trial 2
+[eval] grade t010 trial 3
+[eval] grade t008 trial 2
+[eval] grade t009 trial 3
+[eval] grade t006 trial 3
+[eval] grade t007 trial 1
+[eval] grade t002 trial 3
+[eval] grade t005 trial 2
+[eval] grade t010 trial 3
+[eval] grade t005 trial 3
+[eval] grade t001 trial 2
+[eval] grade t010 trial 2
+[eval] grade t002 trial 2
+[eval] grade t008 trial 3
+[eval] grade t002 trial 3
+[eval] grade t004 trial 2
+[eval] grade t003 trial 2
+[eval] grade t007 trial 3
+[eval] grade t004 trial 1
+[eval] grade t001 trial 3
+[eval] grade t009 trial 3
+[eval] grade t009 trial 1
+[eval] grade t004 trial 2
+[eval] grade t007 trial 1
+[eval] grade t003 trial 3
+[eval] grade t005 trial 3
+[eval] grade t009 trial 1
+[eval] grade t003 trial 2
+[eval] grade t006 trial 2
+[eval] grade t001 trial 3
+[eval] grade t003 trial 3
+[eval] grade t002 trial 1
+[eval] grade t005 trial 2
+[eval] grade t005 trial 1
+[eval] grade t008 trial 1
+[corpus] eval jnMetaCode/awesome-claude-md/awesome-go
+[eval] run t001 trial 1/3 with_skill
+[eval] run t001 trial 1/3 no_skill
+[eval] run t001 trial 2/3 with_skill
+[eval] run t001 trial 2/3 no_skill
+[eval] run t001 trial 3/3 with_skill
+[eval] run t001 trial 3/3 no_skill
+[eval] run t002 trial 1/3 with_skill
+[eval] run t002 trial 1/3 no_skill
+[eval] run t002 trial 2/3 with_skill
+[eval] run t002 trial 2/3 no_skill
+[eval] run t002 trial 3/3 with_skill
+[eval] run t002 trial 3/3 no_skill
+[eval] run t003 trial 1/3 with_skill
+[eval] run t003 trial 1/3 no_skill
+[eval] run t003 trial 2/3 with_skill
+[eval] run t003 trial 2/3 no_skill
+[eval] run t003 trial 3/3 with_skill
+[eval] run t003 trial 3/3 no_skill
+[eval] run t004 trial 1/3 with_skill
+[eval] run t004 trial 1/3 no_skill
+[eval] run t004 trial 2/3 with_skill
+[eval] run t004 trial 2/3 no_skill
+[eval] run t004 trial 3/3 with_skill
+[eval] run t004 trial 3/3 no_skill
+[eval] run t005 trial 1/3 with_skill
+[eval] run t005 trial 1/3 no_skill
+[eval] run t005 trial 2/3 with_skill
+[eval] run t005 trial 2/3 no_skill
+[eval] run t005 trial 3/3 with_skill
+[eval] run t005 trial 3/3 no_skill
+[eval] run t006 trial 1/3 with_skill
+[eval] run t006 trial 1/3 no_skill
+[eval] run t006 trial 2/3 with_skill
+[eval] run t006 trial 2/3 no_skill
+[eval] run t006 trial 3/3 with_skill
+[eval] run t006 trial 3/3 no_skill
+[eval] run t007 trial 1/3 with_skill
+[eval] run t007 trial 1/3 no_skill
+[eval] run t007 trial 2/3 with_skill
+[eval] run t007 trial 2/3 no_skill
+[eval] run t007 trial 3/3 with_skill
+[eval] run t007 trial 3/3 no_skill
+[eval] run t008 trial 1/3 with_skill
+[eval] run t008 trial 1/3 no_skill
+[eval] run t008 trial 2/3 with_skill
+[eval] run t008 trial 2/3 no_skill
+[eval] run t008 trial 3/3 with_skill
+[eval] run t008 trial 3/3 no_skill
+[eval] run t009 trial 1/3 with_skill
+[eval] run t009 trial 1/3 no_skill
+[eval] run t009 trial 2/3 with_skill
+[eval] run t009 trial 2/3 no_skill
+[eval] run t009 trial 3/3 with_skill
+[eval] run t009 trial 3/3 no_skill
+[eval] run t010 trial 1/3 with_skill
+[eval] run t010 trial 1/3 no_skill
+[eval] run t010 trial 2/3 with_skill
+[eval] run t010 trial 2/3 no_skill
+[eval] run t010 trial 3/3 with_skill
+[eval] run t010 trial 3/3 no_skill
+[eval] grade t002 trial 3
+[eval] grade t009 trial 2
+[eval] grade t006 trial 1
+[eval] grade t010 trial 1
+[eval] grade t010 trial 1
+[eval] grade t002 trial 2
+[eval] grade t006 trial 1
+[eval] grade t009 trial 1
+[eval] grade t006 trial 3
+[eval] grade t009 trial 2
+[eval] grade t004 trial 1
+[eval] grade t007 trial 1
+[eval] grade t005 trial 2
+[eval] grade t001 trial 2
+[eval] grade t005 trial 2
+[eval] grade t010 trial 2
+[eval] grade t002 trial 2
+[eval] grade t007 trial 1
+[eval] grade t005 trial 1
+[eval] grade t002 trial 1
+[eval] grade t010 trial 3
+[eval] grade t003 trial 1
+[eval] grade t004 trial 3
+[eval] grade t009 trial 3
+[eval] grade t004 trial 3
+[eval] grade t004 trial 1
+[eval] grade t006 trial 3
+[eval] grade t005 trial 3
+[eval] grade t003 trial 3
+[eval] grade t001 trial 1
+[eval] grade t007 trial 3
+[eval] grade t001 trial 3
+[eval] grade t006 trial 2
+[eval] grade t007 trial 3
+[eval] grade t010 trial 3
+[eval] grade t009 trial 1
+[eval] grade t002 trial 1
+[eval] grade t008 trial 1
+[eval] grade t007 trial 2
+[eval] grade t003 trial 2
+[eval] grade t001 trial 2
+[eval] grade t001 trial 1
+[eval] grade t005 trial 3
+[eval] grade t008 trial 1
+[eval] grade t003 trial 2
+[eval] grade t003 trial 1
+[eval] grade t004 trial 2
+[eval] grade t002 trial 3
+[eval] grade t007 trial 2
+[eval] grade t003 trial 3
+[eval] grade t009 trial 3
+[eval] grade t010 trial 2
+[eval] grade t008 trial 3
+[eval] grade t004 trial 2
+[eval] grade t008 trial 2
+[eval] grade t008 trial 3
+[eval] grade t006 trial 2
+[eval] grade t001 trial 3
+[eval] grade t008 trial 2
+[eval] grade t005 trial 1

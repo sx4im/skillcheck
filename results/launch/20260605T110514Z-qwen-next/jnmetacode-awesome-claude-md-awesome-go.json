@@ -1,0 +1,188 @@
+{
+  "skill": {
+    "name": "CLAUDE.md - Go 项目规范",
+    "source": "https://github.com/jnMetaCode/awesome-claude-md/blob/fe38fcd8f245460b989879c9155a16404e77cffa/by-language/go/CLAUDE.md",
+    "format": "CLAUDE.md",
+    "commit_hash": "841f9dbd3828c5d7e36d8132f6f026780a4119e90c5c847dd9bfdb2068d8a268",
+    "domain": "CLAUDE.md - Go 项目规范"
+  },
+  "config": {
+    "runner_model": "qwen/qwen3-next-80b-a3b-instruct",
+    "runner_version": "qwen/qwen3-next-80b-a3b-instruct",
+    "grader_model": "qwen/qwen3-next-80b-a3b-instruct",
+    "grader_version": "qwen/qwen3-next-80b-a3b-instruct",
+    "generator_model": "qwen/qwen3-next-80b-a3b-instruct",
+    "trials": 3,
+    "tasks": 10,
+    "temperature": 0.7,
+    "mode": "forced-injection"
+  },
+  "result": {
+    "effect_pp": 20,
+    "ci_pp": [
+      6.67,
+      36.67
+    ],
+    "verdict": "helps",
+    "with_skill_pass": 0.2,
+    "no_skill_pass": 0,
+    "token_overhead": 676,
+    "value_per_1k_tokens": 29.59
+  },
+  "tasks": [
+    {
+      "id": "t001",
+      "prompt": "Validate that all test files in CLAUDE.md end with '_test.go' and are located in the same directory as the code they test.",
+      "criterion_type": "rubric",
+      "criterion": "All test files must have the suffix '_test.go' and reside in the same directory as the corresponding production code.",
+      "arm_a_pass_rate": 0,
+      "arm_b_pass_rate": 0
+    },
+    {
+      "id": "t002",
+      "prompt": "Ensure all Go files in the CLAUDE.md project use the standard package comment format starting with 'Package <name> provides'.",
+      "criterion_type": "rubric",
+      "criterion": "Each Go file must have a package comment immediately after the package declaration, starting with 'Package <name> provides' and ending with a period.",
+      "arm_a_pass_rate": 0,
+      "arm_b_pass_rate": 0
+    },
+    {
+      "id": "t003",
+      "prompt": "Verify that the CLAUDE.md project uses only stable, versioned dependencies listed in go.sum.",
+      "criterion_type": "rubric",
+      "criterion": "All dependencies must be pinned to specific versions in go.sum; no v0, v1, or unreleased versions are allowed.",
+      "arm_a_pass_rate": 0,
+      "arm_b_pass_rate": 0
+    },
+    {
+      "id": "t004",
+      "prompt": "Require that all structs in CLAUDE.md have field tags for JSON marshaling, even if empty.",
+      "criterion_type": "rubric",
+      "criterion": "Every struct field that may be serialized to JSON must have a json tag, even if it is empty: `json:\"\"`.",
+      "arm_a_pass_rate": 0,
+      "arm_b_pass_rate": 0
+    },
+    {
+      "id": "t005",
+      "prompt": "Confirm that all Go source files in the CLAUDE.md project use tab indentation with 8-character tab stops.",
+      "criterion_type": "rubric",
+      "criterion": "All source files must use tabs for indentation, not spaces, and no line may contain more than 8 characters per tab stop.",
+      "arm_a_pass_rate": 0,
+      "arm_b_pass_rate": 0
+    },
+    {
+      "id": "t006",
+      "prompt": "Verify that all error returns in CLAUDE.md are checked immediately after the function call.",
+      "criterion_type": "rubric",
+      "criterion": "Every function call returning an error must be followed by an explicit error check on the next line.",
+      "arm_a_pass_rate": 1,
+      "arm_b_pass_rate": 0
+    },
+    {
+      "id": "t007",
+      "prompt": "Ensure that the CLAUDE.md project includes a LICENSE file in the root directory with a valid open-source license.",
+      "criterion_type": "rubric",
+      "criterion": "The project root must contain a LICENSE file with a recognized open-source license text, such as MIT or Apache 2.0.",
+      "arm_a_pass_rate": 0,
+      "arm_b_pass_rate": 0
+    },
+    {
+      "id": "t008",
+      "prompt": "Ensure all internal packages in CLAUDE.md are located under a directory named 'internal' and are not imported by external packages.",
+      "criterion_type": "rubric",
+      "criterion": "No external package outside the module may import any package under the 'internal' directory.",
+      "arm_a_pass_rate": 1,
+      "arm_b_pass_rate": 0
+    },
+    {
+      "id": "t009",
+      "prompt": "Require that all functions in CLAUDE.md with more than 10 lines of code include a comment explaining their purpose.",
+      "criterion_type": "rubric",
+      "criterion": "Every function exceeding 10 lines must have a preceding comment summarizing its behavior, not just restating the code.",
+      "arm_a_pass_rate": 0,
+      "arm_b_pass_rate": 0
+    },
+    {
+      "id": "t010",
+      "prompt": "Ensure the CLAUDE.md project uses consistent naming for variables: camelCase for exported, and camelCase for unexported.",
+      "criterion_type": "rubric",
+      "criterion": "All variable names must use camelCase; no underscores or snake_case are permitted in any variable declaration.",
+      "arm_a_pass_rate": 0,
+      "arm_b_pass_rate": 0
+    }
+  ],
+  "reproducibility": {
+    "task_suite_path": "results/tasks/686d93d50228b88857b6ba1cb0c409dc6a195436cbc92ed4cc125e68665f2826.json",
+    "transcript_hashes": [
+      "sha256:8685d0d7a2fd3280c8794d31f13ae8c38a3227bb5ff19ee80d8c89ef291f327a",
+      "sha256:7b72254c8f84de0cc4fd95c73d378f5ab08e06607aa39858af31f405bf4af7b4",
+      "sha256:96326e63809a7f1c02dfd78b038cf8f8aefdccd59bb1e3cc3f5402ae99560b73",
+      "sha256:09b041b25ddf15ed38ca00e360d84fbbd093dadffe67ebdf96afe831e95895ca",
+      "sha256:399ef53004761049c62a4fa8f3ca52ba65728f72d2d5bdbfa56099737b9a7692",
+      "sha256:6c5abcf36354ecedb157c8cbe0a7dbb5cd601b4794307d4c7c53271d30ffa3a5",
+      "sha256:41634fd293d570371ce1f4f2d2b2dd5632556b912b8c4bf2b84131865a1a3a6d",
+      "sha256:5920dffb7c7f2c076f1ca01c9c139dbcc60cd741926b711a2c4d2fb1c582d97e",
+      "sha256:44ccb7e69f9417445950ea06844f565e5cf6a79745e3f4d34b2a40bcd2f1697c",
+      "sha256:73558893ea2f30f0a8eaa383fb58093f28904915e09309314e36d275e06bfe55",
+      "sha256:4ac494b49e12ace0de25b29d4e2714645ec13b67a5f15cac4b18959c01bce2e8",
+      "sha256:82708a81a0af8fd734cdfd139f27a8af4a846d35bce6b159fa97ce725fa4e08b",
+      "sha256:4d1c6fcea34b1c9ec1008aa1eccee640010178b479e532d9cd4b33219fbd495e",
+      "sha256:a04f08198da3d16cbb1e56024d2ad0f51eeca580be582e62d2c8ccd4e8db57b2",
+      "sha256:34cec214650c873f9027344416d3e090ad4f4fc08b5a0c8a9792583af6bc3e25",
+      "sha256:d5c37a7c09354370d9fa47113e1becfa75b7cc893f5e537a3719f11d3426fda4",
+      "sha256:6015051f71dbcc3151a04123d794c5689d1cfc35f0bb5b9580eeba060b534c32",
+      "sha256:6057865ac4908b9a3c29539b60924269869348aca406720f117f7086c6e2b8a5",
+      "sha256:229fc5de6fabd344581c321e3e7c1cfe6f3e76f852d9218524b995ce301e45bc",
+      "sha256:8f47fc7aa1af12b685733ef966966806c82ea0d0c31d8d81e32b8b2d2a30c89e",
+      "sha256:0cad0dc58aaa0a2174ecaae936d3dcd9aedd8f76890d2279276ee29462e8a578",
+      "sha256:2ce70710647d7042f67ec0cb423ce7221dbe82f1c72e216c832c062436ffe8aa",
+      "sha256:8bfc47c8ed6da17e056991838be157451fe8dda266d0725875a3a79d03c61ef3",
+      "sha256:009c8e16caa7866881c620ec68574c6006f6f9abd394fd4abbfc76919e8b054d",
+      "sha256:5267b193df67f197c51e71271668533ab2ee8318ff4eee65282a6cd09129610a",
+      "sha256:d9cda615d2c369ffd6166cb4a5e89a34c9a66bf14ab992b25457b0d3a4df6efb",
+      "sha256:cf89172bd05a3a12ed3f9f2fa8d706e64edfb1f9e1c044e16679f55137af14c3",
+      "sha256:afff591c4ed38ab1e0165053f312c2ca4cd740315c8d07fcad0af4c4d07c2513",
+      "sha256:adf11e8bfc9b6508e22fd9cd3774669d95500c57e19f1ae6e5741d8c78c8e53d",
+      "sha256:43b6c787e85e0ed7764e5f5e9d317f5ba726e74793c3d817823fa97da511b770",
+      "sha256:575221dadebbc0030c63cf720ec0aad245d60621dbfdd0a46a5e91ee4aaa44c1",
+      "sha256:32ad840a110b773c12c69cd00d930ff031c82d8bb728718d5a55fa241de290a5",
+      "sha256:b0e63a334949666be636678403a5fa65582d7993c1b40d25db5f40d1ed4b37d6",
+      "sha256:d2df71901758864ed64cf4db058821c0b250772df23fc03db57d8cd3c75e61b5",
+      "sha256:e00a829364e598a4f82be89ae4b069ed2f086d19a800437f21680a64d8809e11",
+      "sha256:a1577fb6345c25d3a5b4c76705b713a0de118c8b610e9c8792e5445644a6d6d3",
+      "sha256:8cb1cddb1abdb00d8fc99af498e07b4129bafe3b1e505d49bbbe560f09ed005e",
+      "sha256:59a7b15092e7af97dd1719e4eda6c2567c5ebce809dc0bcc571bb7d9e3a0a6c5",
+      "sha256:8e16b657fe6073d7258b6db88aab3f8f5889f09ee37b400aa93b1162040b10c1",
+      "sha256:f96c383aa9bb12f6001a7b955dae9fdea01cd772d1aee4e1e481ee04d45c049e",
+      "sha256:adb6192a5a7981c0ff88dc6412c21805dd26d3d8b30e7b7c2261edeaf0b37c7f",
+      "sha256:bc100d098eb56a229129db00ffa9ded717fabb9e5fb56a2dc67e854743d13b10",
+      "sha256:872920e2b9491386e605dc2e1e6a5e0511f5b98b5dfc7dd63a912e9f3db0d80f",
+      "sha256:015beff9fe943b9ce617654fd3719ab201a9209a906c2883260a1542773c302e",
+      "sha256:a9a1e6487e3ac41e3fd5860a94a481c39e12f323dea88596cb894bd23c106ccc",
+      "sha256:672fa312d9f280e63f9e314fb34ee3e707ba98266b65410b24cc378c316886ea",
+      "sha256:43d47dbacf8da7790682504e65c5acf2e11a87da041e9585d9c7ae2aa3abbb84",
+      "sha256:aa4b0c6453723d37ef1efb346260cefd573db86b4482791aa410eed978687994",
+      "sha256:744fe029dc43b1bb2b7d582828002e68533619157fc46dc62a8b7d71d91ea13e",
+      "sha256:4e91af72b562970eff44d9135caa0d6dc6d1ed884e534ae227f3570755a0491f",
+      "sha256:a2ff33602c3bc83e4466f5092046a04f22f92d5ce44905eca9abea46d4f7ba35",
+      "sha256:9952f8f6c5736f3c0cba526821a5d65961651fb54d5ba1f1b90c669471c1681f",
+      "sha256:85c0fe7d3204a7be19623e2e39d6022c8526023dfe3bf82be7917bb249e6f861",
+      "sha256:4fbb73e14849a7d99dabfb3fe336d2d4810f931e4d227caa6b018bea241f26f6",
+      "sha256:559d3fd734c4ae61498f31da3d5a4dd1235dd6385c462ef3180a134416776043",
+      "sha256:0c7909f37fcd50bdb3469e522d5a8de1d03d85c6a960f10e85780ca83cf2065d",
+      "sha256:944fa1858410b9dc5e86d02edaa08ddf9b0510dd919d66aea23ccd9739a232dc",
+      "sha256:f6ec2bbbfff69ab47ed28b7ee20cee05d552c8fde525b1558d2a717a7a0aad59",
+      "sha256:b18ae8f22acdde370028a0434e8fa998cc873f47f47f15ca289a2087a94bcddf",
+      "sha256:ae1712cd9ef03e30c3e43df922059294b6972ce4ead19e955eb7aba9b1d2d698"
+    ]
+  },
+  "history": [
+    {
+      "runner_version": "qwen/qwen3-next-80b-a3b-instruct",
+      "run_date": "2026-06-05",
+      "effect_pp": 20,
+      "verdict": "helps"
+    }
+  ],
+  "run_date": "2026-06-05"
+}

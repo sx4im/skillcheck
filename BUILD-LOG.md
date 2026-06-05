@@ -1111,3 +1111,17 @@
   - Seventy-five transient NVIDIA connection retry lines have appeared in the fresh run log so far; no 429 lines have appeared.
 - Gate status:
   - Still not passed. The fresh Qwen Next launch is active and incomplete.
+
+### M5 - Fresh Qwen Next Launch Completed
+
+- Completion evidence:
+  - Fresh launch directory: `results/launch/20260605T110514Z-qwen-next`.
+  - Command exit code: `0`.
+  - The run produced 20 skill result JSON files plus `summary.json`.
+  - `awesome-go`: verdict `helps`, effect `20`, CI `[6.67, 36.67]`.
+  - The Go result uses 10 generated tasks and 3 paired trials per task.
+  - The generated Go task suite is `results/tasks/686d93d50228b88857b6ba1cb0c409dc6a195436cbc92ed4cc125e68665f2826.json`.
+  - The full run log contains 75 transient NVIDIA connection retry lines, 0 `429` lines, and 0 terminal error lines.
+  - `summary.json`, `corpus.stdout`, `corpus.stderr`, and `corpus.exit` are committed with the launch results for reproducibility.
+- Gate status:
+  - The fresh 20-skill launch corpus has completed, but M5 is not passed until findings, rot report, site, docs, packaging, audit, and CI workflow checks are refreshed and verified.
