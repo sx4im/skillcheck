@@ -723,3 +723,21 @@
   - Current live skill after checkpoint: `awesome-go`.
 - Gate status:
   - Still not passed. The launch corpus needs all 20 result JSON files plus the final verification and findings update.
+
+### M5 - Resumed 5000ms Run Failed On Go Timeout
+
+- Resumed command:
+  - Run directory: `results/launch/20260605T041138Z`.
+  - Command: `NVIDIA_REQUEST_DELAY_MS=5000 node dist/bin/skillcheck.js corpus run --corpus corpus/launch-20.json --results results/launch/20260605T041138Z --tasks 10 --trials 3 --concurrency 1`.
+  - Exit code: 1.
+- Failure evidence:
+  - The run skipped the five existing completed results and continued to `awesome-go`.
+  - `awesome-go` generated its task suite and completed task `t001` trial 1/3 `with_skill`.
+  - The failure occurred on task `t001` trial 1/3 `no_skill`.
+  - NVIDIA retried connection failures through retry `7/8`, then returned `Request timed out.`
+  - No `awesome-go` result JSON was written.
+- Durable result state:
+  - Completed launch result JSON files remain 5 of 20.
+  - The next resume should skip those five results and retry `awesome-go`.
+- Gate status:
+  - Still not passed. The provider timeout did not change M5 task count, trial count, scoring, or thresholds.

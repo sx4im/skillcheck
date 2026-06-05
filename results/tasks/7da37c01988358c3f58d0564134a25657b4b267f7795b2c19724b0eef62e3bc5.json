@@ -1,0 +1,62 @@
+[
+  {
+    "id": "t001",
+    "prompt": "Generate mock implementations for the PaymentGateway interface in internal/payment/gateway.go using testify/mock.",
+    "criterionType": "rubric",
+    "criterion": "Pass if a valid mock file exists that matches all method signatures of the PaymentGateway interface."
+  },
+  {
+    "id": "t002",
+    "prompt": "Run `golangci-lint run` on the project and resolve all reported warnings to meet the zero-warning requirement.",
+    "criterionType": "rubric",
+    "criterion": "Pass if golangci-lint completes with zero warnings or errors."
+  },
+  {
+    "id": "t003",
+    "prompt": "Add a proper exit mechanism for the worker goroutine in internal/worker/pool.go to prevent goroutine leaks from unbuffered channel sends.",
+    "criterionType": "rubric",
+    "criterion": "Pass if all goroutines have a clear shutdown path, no unbuffered channel sends without matching receivers."
+  },
+  {
+    "id": "t004",
+    "prompt": "Run `go mod tidy` in the project root and confirm go.sum has no extraneous dependency entries.",
+    "criterionType": "rubric",
+    "criterion": "Pass if go mod tidy runs without errors and go.sum only contains required dependency checksums."
+  },
+  {
+    "id": "t005",
+    "prompt": "Verify that no log.Fatal calls exist outside of main package initialization code, per the project's error handling rules.",
+    "criterionType": "rubric",
+    "criterion": "Pass if log.Fatal is only used in cmd/ main.go initialization logic, no other files contain it."
+  },
+  {
+    "id": "t006",
+    "prompt": "Move the UserRepository interface definition from pkg/auth/repo.go to its consumer internal/user/service.go to follow the accept interfaces rule.",
+    "criterionType": "rubric",
+    "criterion": "Pass if the interface is defined in the consumer file, and the repo returns a concrete struct implementation."
+  },
+  {
+    "id": "t007",
+    "prompt": "Add a test case for empty input to the table-driven tests in pkg/validator/validator_test.go to cover the edge case.",
+    "criterionType": "rubric",
+    "criterion": "Pass if the test case table includes a scenario for empty input with the expected validation result/error."
+  },
+  {
+    "id": "t008",
+    "prompt": "Run `goimports -w .` on the entire project to fix import formatting before code commit.",
+    "criterionType": "rubric",
+    "criterion": "Pass if goimports makes no changes to any file after the first run, all imports are properly sorted."
+  },
+  {
+    "id": "t009",
+    "prompt": "Update the GetUserByID function signature to accept context.Context as the first parameter named ctx.",
+    "criterionType": "rubric",
+    "criterion": "Pass if ctx is the first parameter of type context.Context, no other parameters come before it."
+  },
+  {
+    "id": "t010",
+    "prompt": "Fix the shadowed outer err variable in the inner scope of internal/order/process.go by declaring var err error before assignment.",
+    "criterionType": "rubric",
+    "criterion": "Pass if no short variable declaration := shadows an outer err variable in the file."
+  }
+]
