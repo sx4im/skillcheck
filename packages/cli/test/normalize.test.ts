@@ -51,4 +51,17 @@ describe('normalizeSkill', () => {
     expect(skill.format).toBe('CLAUDE.md');
     expect(skill.domain).toBe('Next.js app development');
   });
+
+  it('uses only the heading when no domain is declared', async () => {
+    const dir = await mkdtemp(path.join(tmpdir(), 'skillcheck-normalize-'));
+    await writeFile(
+      path.join(dir, 'CLAUDE.md'),
+      '# Rust Project Rules\n\nNever reveal this body-only lint instruction to task generation.\n'
+    );
+
+    const skill = await normalizeSkill(dir);
+
+    expect(skill.domain).toBe('Rust Project Rules');
+    expect(skill.domain).not.toContain('lint instruction');
+  });
 });

@@ -848,3 +848,30 @@
   - Retry diagnostics: one connection retry, then success.
 - Gate status:
   - Still not passed. The runner endpoint is not fully down, but the launch corpus remains at 5 of 20 completed result JSON files.
+
+### M5 - Rust Retry Still Failed; Domain Fallback Fixed
+
+- Resumed command:
+  - Run directory: `results/launch/20260605T041138Z`.
+  - Command: `NVIDIA_TIMEOUT_MS=45000 NVIDIA_REQUEST_DELAY_MS=5000 NVIDIA_MAX_ATTEMPTS=14 NVIDIA_MAX_RETRY_DELAY_MS=30000 node dist/bin/skillcheck.js corpus run --corpus corpus/launch-20.json --results results/launch/20260605T041138Z --tasks 10 --trials 3 --concurrency 1`.
+  - Exit code: 1.
+- Failure evidence:
+  - The run skipped the five existing completed results and retried `awesome-rust`.
+  - The failure occurred before any `[eval] run ...` marker, so it happened during task generation rather than runner execution.
+  - NVIDIA retried connection failures through retry `13/14`, then returned `Connection error.`
+  - No Rust task-suite JSON or `awesome-rust` result JSON was written.
+- Provider checks:
+  - Runner health after the Rust failure passed with content `OK` after one connection retry.
+  - Simple generator health passed with content `{"ok": true}`.
+  - A manual Rust task-generation request with `maxTokens=5000` failed after connection retries with `APIConnectionError: read ETIMEDOUT`.
+- Follow-up implementation change:
+  - Found that fallback domain inference used the first 200 body tokens when no explicit domain/description/when_to_use field existed.
+  - Changed fallback domain inference to use only the first heading, preventing body-only instruction text from reaching the generator.
+  - Added a regression test for heading-only fallback.
+  - This is an integrity fix: it better enforces the generator-domain boundary and does not change tasks, trials, scoring, or thresholds.
+- Local verification:
+  - `npm run typecheck`: passed.
+  - `npm test`: passed, 6 test files, 16 tests.
+  - `npm run build`: passed.
+- Gate status:
+  - Still not passed. The launch corpus remains at 5 of 20 completed result JSON files.

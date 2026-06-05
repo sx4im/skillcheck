@@ -65,8 +65,7 @@ function firstHeading(text: string): string | undefined {
 }
 
 function inferDomain(text: string): string {
-  const firstTokens = text.replace(/\s+/g, ' ').trim().split(' ').slice(0, 200).join(' ');
-  return firstTokens || 'general agent skill';
+  return firstHeading(text) || 'general agent skill';
 }
 
 function extractDomain(text: string): string {
