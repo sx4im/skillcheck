@@ -1,0 +1,188 @@
+{
+  "skill": {
+    "name": "React 19 + Vite SPA 项目",
+    "source": "https://github.com/jnMetaCode/awesome-claude-md/blob/fe38fcd8f245460b989879c9155a16404e77cffa/by-framework/react/CLAUDE.md",
+    "format": "CLAUDE.md",
+    "commit_hash": "e58a181a31738f927fe0e5aaccbe3473471628832c5b3958231a75667745d979",
+    "domain": "# React 19 + Vite SPA 项目 ## 技术栈 - React 19 + TypeScript，Vite 6 构建 - React Router v7 路由管理 - Zustand 状态管理（轻量场景用 Jotai） - Tailwind CSS 4 样式方案 - Vitest + React Testing Library 测试 ## 项目结构 ``` src/ components/ # 可复用 UI 组件（纯展示，无业务逻辑） pages/ # 页面级组件，对应路由 hooks/ # 自定义 hooks stores/ # Zustand store 定义 lib/ # 工具函数、API 客户端 types/ # TypeScript 类型定义 ``` ## 开发规范 - 组件使用函数式写法 + TypeScript，Props 用 interface 定义 - 优先使用 React 19 新特性：`use()` hook 处理 Promise/Context，`useOptimistic` 管理乐观更新 - 了解 Server Components 概念，但本项目为纯 SPA，所有组件均为 Client Components - 使用 `React.lazy()` + `Suspense` 做路由级代码分割 - 状态管理原则：组件本地状态用 `useState`，跨组件共享用 Zustand，服务端状态用 TanStack Query ## 路由 - React Router v7 使用 `createBrowserRouter` + `RouterProvider` 模式 - 数据加载用 `loader`，表单提交用 `action` - 路由定义集中在 `src/router.tsx` ## 样式 - Tailwind CSS utility class 优先，组件变体用 `clsx` 或 `cva` 管理条件样式 ## 测试 - 运行测试：`npx vitest` 或 `npx vitest run` - 单个文件：`npx vitest src/components/Button.test.tsx` - 组件测试用 `render` + `screen` + `userEvent`，优先按角色/文本查询 DOM - 异步断言使用 `waitFor` 或 `findBy*` 查询 ## 常用命令 ```bash npm run dev # 启动开发服务器（默认 5173 端口） npm run build # 生产构建，输出到 dist/ npm run preview # 预览生产构建 npm run lint # ESLint 检查 npm run test # 运行测试 ``` ## 常见陷阱 - Tailwind v4"
+  },
+  "config": {
+    "runner_model": "mistralai/mistral-small-4-119b-2603",
+    "runner_version": "mistralai/mistral-small-4-119b-2603",
+    "grader_model": "stepfun-ai/step-3.7-flash",
+    "grader_version": "stepfun-ai/step-3.7-flash",
+    "generator_model": "stepfun-ai/step-3.7-flash",
+    "trials": 3,
+    "tasks": 10,
+    "temperature": 0.7,
+    "mode": "forced-injection"
+  },
+  "result": {
+    "effect_pp": -10,
+    "ci_pp": [
+      -33.33,
+      16.67
+    ],
+    "verdict": "placebo",
+    "with_skill_pass": 0.3,
+    "no_skill_pass": 0.4,
+    "token_overhead": 645,
+    "value_per_1k_tokens": -15.5
+  },
+  "tasks": [
+    {
+      "id": "t001",
+      "prompt": "Configure Vite to output build files to dist/ folder, verify npm run build generates index.html and asset bundles correctly.",
+      "criterion_type": "rubric",
+      "criterion": "npm run build completes without errors, dist/ contains index.html and JS/CSS assets, app runs via npm run preview.",
+      "arm_a_pass_rate": 0,
+      "arm_b_pass_rate": 0
+    },
+    {
+      "id": "t002",
+      "prompt": "Create a mock API client in src/lib/api.ts with a getTodos function that returns a promise resolving to a todo array after 1s delay.",
+      "criterion_type": "rubric",
+      "criterion": "getTodos returns a promise that resolves after 1s with sample todo data, can be used in components and tests.",
+      "arm_a_pass_rate": 1,
+      "arm_b_pass_rate": 0
+    },
+    {
+      "id": "t003",
+      "prompt": "Implement a useLocalStorage hook in src/hooks/useLocalStorage.ts that syncs state with localStorage, supports initial value and type safety.",
+      "criterion_type": "rubric",
+      "criterion": "Hook persists state to localStorage, updates UI when storage changes, works with string and number types.",
+      "arm_a_pass_rate": 0,
+      "arm_b_pass_rate": 0
+    },
+    {
+      "id": "t004",
+      "prompt": "Add a Card component in src/components/Card.tsx with optional header and footer slots, use cva for variant management, style with Tailwind utility classes.",
+      "criterion_type": "rubric",
+      "criterion": "Card renders header/footer when provided, uses cva for variant styling, all styling uses Tailwind utility classes.",
+      "arm_a_pass_rate": 0,
+      "arm_b_pass_rate": 1
+    },
+    {
+      "id": "t005",
+      "prompt": "Use React 19's use() hook to read a Promise from a Context in a UserProfile component, show loading state while promise resolves.",
+      "criterion_type": "rubric",
+      "criterion": "UserProfile uses use() to read promise from context, shows loading state while pending, renders user data when resolved.",
+      "arm_a_pass_rate": 1,
+      "arm_b_pass_rate": 0
+    },
+    {
+      "id": "t006",
+      "prompt": "Create a reusable Button component in src/components/Button.tsx with TypeScript interface props, support primary/secondary variants via clsx, include disabled state.",
+      "criterion_type": "rubric",
+      "criterion": "Button accepts variant/disabled props, renders correct Tailwind classes, uses TypeScript interface for props.",
+      "arm_a_pass_rate": 1,
+      "arm_b_pass_rate": 1
+    },
+    {
+      "id": "t007",
+      "prompt": "Implement a TodoList page at /todos that uses TanStack Query to fetch todos from the mock API, shows loading and error states.",
+      "criterion_type": "rubric",
+      "criterion": "/todos page fetches todos via TanStack Query, shows loading spinner while fetching, error message on failure, renders todo list on success.",
+      "arm_a_pass_rate": 0,
+      "arm_b_pass_rate": 1
+    },
+    {
+      "id": "t008",
+      "prompt": "Add a dark mode toggle component in src/components/DarkModeToggle.tsx, uses Zustand store to persist theme preference in localStorage, applies dark class to html element.",
+      "criterion_type": "rubric",
+      "criterion": "Toggle switches between light/dark mode, preference persists across page reloads, html element gets dark class when dark mode is active.",
+      "arm_a_pass_rate": 0,
+      "arm_b_pass_rate": 0
+    },
+    {
+      "id": "t009",
+      "prompt": "Set up React Router v7 in src/router.tsx using createBrowserRouter, define a / route rendering Home page from src/pages/Home.tsx, wrap app with RouterProvider in main.tsx.",
+      "criterion_type": "rubric",
+      "criterion": "Router uses createBrowserRouter, / route loads Home page, app renders via RouterProvider without errors.",
+      "arm_a_pass_rate": 0,
+      "arm_b_pass_rate": 0
+    },
+    {
+      "id": "t010",
+      "prompt": "Add a 404 Not Found page in src/pages/NotFound.tsx, configure React Router to render it for any unmatched routes.",
+      "criterion_type": "rubric",
+      "criterion": "Navigating to undefined route renders 404 page, includes link back to home, no console errors.",
+      "arm_a_pass_rate": 0,
+      "arm_b_pass_rate": 1
+    }
+  ],
+  "reproducibility": {
+    "task_suite_path": "results/tasks/99d714e99a9d899f1006b81ec6c0e427da868234927f8a4dd4b5ca7486c16c1b.json",
+    "transcript_hashes": [
+      "sha256:d086be40ed924199a3ab44510ec7ac6e808a5369bc19a8bd9a026915d166d368",
+      "sha256:cea0d13f4a11a6c426055fe1028801bde2b6b02c89bfe7a546161381d469472e",
+      "sha256:5aef8224b9dd4279ed3003cfd6b8b771fbf3f307eb37db5f7fae233d42580970",
+      "sha256:35e223ff14ee1f8859ae44634662bf3c747998c64247f030a91d779d055d571a",
+      "sha256:6e4aeb3a041b45da36e501a9e61fcbf7a247990be9949ad62cb7cf8505c2af22",
+      "sha256:434880daba0565041557565e96728b3ac45846b09c7518c8e8ac68c2aa9c8e30",
+      "sha256:2ca01b84ca61e7e762c23e8295511ae61dd48935dbf06895d77eaba83c310caf",
+      "sha256:e344ea0d040e933755fe925ca3a968dc288ebba338e27f2b1794b7b36fc66ade",
+      "sha256:2f503050a2ad761eedcd46df6302a85d51fa09ad6c4975090ac0ef609fe5b437",
+      "sha256:cf0f59a0c51e588dd85be43758bd655d51588186de536c606a419e20d03744f0",
+      "sha256:a2e902ec68385e7214c7380d3f2ca1e15624d58dc1d0f12b72e5d0089abc5411",
+      "sha256:bc03519d0f6b1c7ee36d88ba8e44b05622c80c0dadca4aa91cf28f08b1a5c5ec",
+      "sha256:578cebe93183fb29d2916c168c5946a924a593932be745d6e51a456f7be05a79",
+      "sha256:cdbb84aa6e303edab6d8df8fd5719caf61e0d9f122837deb5ff27357730e547b",
+      "sha256:c4f0a350da49e1864c699e6d5b0e4aa786002d2889fc412474ce0f0b82f24b3f",
+      "sha256:18cfaced41de71cdf0aa4b6995bcc40477ae31419cbb77a69821a8d89161b7eb",
+      "sha256:692ee1af4d8a91f79489e469345e7ea35bd04cd4f45874bd94800261a9c2c623",
+      "sha256:b86aee6ac2796a973ea6d580eef67a63e7272012e53b92dc60eb4289cf9421aa",
+      "sha256:bd575b797865d3774d4ededfcc3dafa2b5ce9801bb3e4e1cb819594039574136",
+      "sha256:243a2363dbdf3fc2c8057215522ea9fbff89faacc820045460a78925aa0bf24b",
+      "sha256:368864ae8f6f909e5fbcad60179a4091ed0c452423b64a8eb3b855c62c924cb7",
+      "sha256:0b8590fbf6409eb7480a17d77099f25adefcbdee56792851081d522679611b7a",
+      "sha256:32442e64c7f0cb21295c952594371e9712f643efd11cfb71b5adcd42c31079eb",
+      "sha256:7b5e578ad0cc8e0088277f245624116c4f34488dae7797efe7ce4e3b71432080",
+      "sha256:5896a857ea1106f36b21d171e3142502d9128834768288694380cf868d0d5c81",
+      "sha256:8d6ec838328fdf0c741c41887174b9976f93a6e16b42f19577829b94db38acb9",
+      "sha256:a7bf274f55448fa3c0253986ffbed1b2316997cce9522ff828d2b7ddfb60dcc6",
+      "sha256:106ba675141ecdfa70ff729d6e986ab062f4de7cadfd9ad8a531272d9a55265d",
+      "sha256:faaeff134762fa50d6ccaf6426f6a7a157798f550d1f180ffa4f55ee25456631",
+      "sha256:ff3694d9689f115271bb89a9402ca9d277fbd1dcf505818c496701a37f747cb0",
+      "sha256:98e98f6b6bc444f934b891d33d1c8e44158be6bf2da9cf93de116448f2e8d99e",
+      "sha256:c190de571adf664a99248c336675b084124589ea1d1078e7eeaa093dcbf92b2a",
+      "sha256:104133cfb2f4191fb706086cf5c2142457205324afd3fc828c6d270c7991cce0",
+      "sha256:464ac4f8c93ed8f6bae9146acfc3afd5800ade94ed32eb39564b9235d37fe009",
+      "sha256:553e2403348508ff28f187e44b5eecb57417ec9c4892791df7fefe7b95f3606b",
+      "sha256:31fd0756edad92e88e18933af0a1ad648754b97ed19985742616669280069226",
+      "sha256:7f6f23b0718947f4ee5125cc868221e9308358190921b880d593610cb8c21521",
+      "sha256:6267c79166fb3ac34329c8ffd07c9400e6687e4c306459c2281fa1bdad7aac96",
+      "sha256:433d7fd71c8fa5c67725f944f3e31dec6c8263577d948e7023db22421c7855c8",
+      "sha256:6fb725956a7c9954cf00f57be16c48bdbca2bbe268a344f81ba7e2a9f68aec84",
+      "sha256:4730d011eeff4c8076bc0d638a1ea9b41c20b1e914d3b096caeaf76d89a6cf14",
+      "sha256:96ba91e86ed2e40186e811ced9a436a328f3a018762e3fc3cdf420ceae661b82",
+      "sha256:0135abd30c0992481db3b704912a6fae0c0b9eae3b378b815bcc3d748a4465b5",
+      "sha256:1bcbf2e89fd95c8e62b581252fc36547b70f822c0727b2e4bf63d77f10cc306d",
+      "sha256:4c43144e16772ee84d4215fa33b45b929e646065d10117a899d5d4a29248070b",
+      "sha256:7b4e11d8c4191f25b1184435a249ef0673b973ebf50da9279e2927f962441fb3",
+      "sha256:6f00d028443633241964463ac52e4d0418d0e9639609011f15cedaff9210bc93",
+      "sha256:d9ef89453ee780ce7ffff119a5fd851cbd864339ac9b6d3e30bbb9df593ec5a4",
+      "sha256:6d1524a19f7c0311bda98d39db43740000448a44fbbd00fd9dbd1e0c92c8cdc4",
+      "sha256:1c09fb3210dcc95ebaf5fac8d23f6dd36164291004722e3774b8f5619e7de52b",
+      "sha256:1cb7cb89aedefb2c34bbdc0f3161d35ace4bf911f44b0d6535fa24d7024e4aad",
+      "sha256:b584218d91284623738614ebd4b3162a87eaf4fb98a11346c9ae35966ce804ce",
+      "sha256:62ddfb1d37e4aaf758fafe2c84acaa303edbe4c4559a5e1e3f5338507e999009",
+      "sha256:9dca8f078718b0c7c94617616dcb5c876bafc0ce4eb97d050ffff63d422f4931",
+      "sha256:1fb190b88049a95323fa3de6700ac5382b71ee785c1007cd17fedcdcd09220b5",
+      "sha256:1d428f934f35e4f34f1457a0831acc2b4ae443a5c252002e8aaf431c7a62effc",
+      "sha256:159d2c21ce24e502644a10b3ba09c248dd3c90b5eaf0a69c36ac0f198b63d3c1",
+      "sha256:1302803cfd743c08c1f214ced9a3db6f5c93157723b1e5fecdb7fb34f00a8b52",
+      "sha256:0b1048f948fa996881bd42ad8911def2a4161e828f7696bfbe94e01feabe4d47",
+      "sha256:c3246a7d5c5672f7b1779af1c1a5f4494e64a9402c2ae85d7239e9dd0c74fe0f"
+    ]
+  },
+  "history": [
+    {
+      "runner_version": "mistralai/mistral-small-4-119b-2603",
+      "run_date": "2026-06-05",
+      "effect_pp": -10,
+      "verdict": "placebo"
+    }
+  ],
+  "run_date": "2026-06-05"
+}

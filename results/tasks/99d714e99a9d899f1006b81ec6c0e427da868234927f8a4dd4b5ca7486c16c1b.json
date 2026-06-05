@@ -1,0 +1,62 @@
+[
+  {
+    "id": "t001",
+    "prompt": "Configure Vite to output build files to dist/ folder, verify npm run build generates index.html and asset bundles correctly.",
+    "criterionType": "rubric",
+    "criterion": "npm run build completes without errors, dist/ contains index.html and JS/CSS assets, app runs via npm run preview."
+  },
+  {
+    "id": "t002",
+    "prompt": "Create a mock API client in src/lib/api.ts with a getTodos function that returns a promise resolving to a todo array after 1s delay.",
+    "criterionType": "rubric",
+    "criterion": "getTodos returns a promise that resolves after 1s with sample todo data, can be used in components and tests."
+  },
+  {
+    "id": "t003",
+    "prompt": "Implement a useLocalStorage hook in src/hooks/useLocalStorage.ts that syncs state with localStorage, supports initial value and type safety.",
+    "criterionType": "rubric",
+    "criterion": "Hook persists state to localStorage, updates UI when storage changes, works with string and number types."
+  },
+  {
+    "id": "t004",
+    "prompt": "Add a Card component in src/components/Card.tsx with optional header and footer slots, use cva for variant management, style with Tailwind utility classes.",
+    "criterionType": "rubric",
+    "criterion": "Card renders header/footer when provided, uses cva for variant styling, all styling uses Tailwind utility classes."
+  },
+  {
+    "id": "t005",
+    "prompt": "Use React 19's use() hook to read a Promise from a Context in a UserProfile component, show loading state while promise resolves.",
+    "criterionType": "rubric",
+    "criterion": "UserProfile uses use() to read promise from context, shows loading state while pending, renders user data when resolved."
+  },
+  {
+    "id": "t006",
+    "prompt": "Create a reusable Button component in src/components/Button.tsx with TypeScript interface props, support primary/secondary variants via clsx, include disabled state.",
+    "criterionType": "rubric",
+    "criterion": "Button accepts variant/disabled props, renders correct Tailwind classes, uses TypeScript interface for props."
+  },
+  {
+    "id": "t007",
+    "prompt": "Implement a TodoList page at /todos that uses TanStack Query to fetch todos from the mock API, shows loading and error states.",
+    "criterionType": "rubric",
+    "criterion": "/todos page fetches todos via TanStack Query, shows loading spinner while fetching, error message on failure, renders todo list on success."
+  },
+  {
+    "id": "t008",
+    "prompt": "Add a dark mode toggle component in src/components/DarkModeToggle.tsx, uses Zustand store to persist theme preference in localStorage, applies dark class to html element.",
+    "criterionType": "rubric",
+    "criterion": "Toggle switches between light/dark mode, preference persists across page reloads, html element gets dark class when dark mode is active."
+  },
+  {
+    "id": "t009",
+    "prompt": "Set up React Router v7 in src/router.tsx using createBrowserRouter, define a / route rendering Home page from src/pages/Home.tsx, wrap app with RouterProvider in main.tsx.",
+    "criterionType": "rubric",
+    "criterion": "Router uses createBrowserRouter, / route loads Home page, app renders via RouterProvider without errors."
+  },
+  {
+    "id": "t010",
+    "prompt": "Add a 404 Not Found page in src/pages/NotFound.tsx, configure React Router to render it for any unmatched routes.",
+    "criterionType": "rubric",
+    "criterion": "Navigating to undefined route renders 404 page, includes link back to home, no console errors."
+  }
+]

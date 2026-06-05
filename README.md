@@ -44,7 +44,7 @@ Useful rate-limit controls:
 
 ```bash
 NVIDIA_TIMEOUT_MS=120000
-NVIDIA_REQUEST_DELAY_MS=3000
+NVIDIA_REQUEST_DELAY_MS=5000
 ```
 
 ## Commands
@@ -52,7 +52,7 @@ NVIDIA_REQUEST_DELAY_MS=3000
 ```bash
 skillcheck eval <path> --tasks 10 --trials 3 --output results/my-run.json
 skillcheck verify <result.json> --sample 3
-NVIDIA_REQUEST_DELAY_MS=3000 skillcheck corpus run --corpus corpus/launch-20.json --results results/launch/20260604 --tasks 10 --trials 3 --concurrency 1
+NVIDIA_REQUEST_DELAY_MS=5000 skillcheck corpus run --corpus corpus/launch-20.json --results results/launch/20260604 --tasks 10 --trials 3 --concurrency 1
 skillcheck rot --results results --output results/rot/report.json
 ```
 

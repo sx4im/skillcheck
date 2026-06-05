@@ -664,3 +664,22 @@
   - This changes only pacing; M5 task count, trial count, scoring, and thresholds remain unchanged.
 - Gate status:
   - Still not passed. The full 20-skill corpus run must be retried at the slower request pace.
+
+### M5 - 3000ms Pace Still Hit 429
+
+- Serialized retry command:
+  - Run directory: `results/launch/20260605T040519Z`.
+  - Command: `NVIDIA_REQUEST_DELAY_MS=3000 node dist/bin/skillcheck.js corpus run --corpus corpus/launch-20.json --results results/launch/20260605T040519Z --tasks 10 --trials 3 --concurrency 1`.
+  - Exit marker: `130`, intentionally stopped after repeated HTTP 429s.
+- Evidence:
+  - Reused cached `awesome-nextjs` work and wrote `jnmetacode-awesome-claude-md-awesome-nextjs.json`.
+  - Completed `awesome-react` and wrote `jnmetacode-awesome-claude-md-awesome-react.json`.
+  - Next.js result: verdict `placebo`, effect `20`, CI `[-3.33, 46.67]`.
+  - React result: verdict `placebo`, effect `-10`, CI `[-33.33, 16.67]`.
+  - NVIDIA returned repeated HTTP 429 responses during grading, including a retry chain through retry `4/5`.
+- Follow-up run policy:
+  - Keep `--concurrency 1`.
+  - Use `NVIDIA_REQUEST_DELAY_MS=5000`, the code default, for a conservative 12 RPM target.
+  - This changes only call pacing; M5 task count, trial count, scoring, and thresholds remain unchanged.
+- Gate status:
+  - Still not passed. The full 20-skill corpus run must be retried at the 5000ms pace after a cooldown.
