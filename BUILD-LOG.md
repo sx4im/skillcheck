@@ -994,6 +994,21 @@
 - Root-cause conclusion:
   - This is not an API-key failure.
   - The launch loop was caused by an unhealthy runner endpoint, StepFun grader unreliability, and the one-off `NVIDIA_TIMEOUT_MS=45000` override being too low for valid full task-generation calls.
-  - Continue M5 with `NVIDIA_TIMEOUT_MS=120000`, `NVIDIA_REQUEST_DELAY_MS=5000`, `--concurrency 1`, `NVIDIA_GENERATOR_MODEL=qwen/qwen3-next-80b-a3b-instruct`, `NVIDIA_GRADER_MODEL=qwen/qwen3-next-80b-a3b-instruct`, and `NVIDIA_RUNNER_MODEL=qwen/qwen3-coder-480b-a35b-instruct`.
+  - Continue M5 with `NVIDIA_TIMEOUT_MS=120000`, `NVIDIA_REQUEST_DELAY_MS=5000`, `--concurrency 1`, and `qwen/qwen3-next-80b-a3b-instruct` for generator, grader, and runner.
 - Gate status:
   - Still not passed. The launch corpus is at 6 of 20 completed result JSON files, and the model/config swap must be used for the remaining live run.
+
+### M5 - Runner Choice Corrected After Sanity Check
+
+- Follow-up sanity check:
+  - `qwen/qwen3-next-80b-a3b-instruct` returned valid JSON for the configured generator JSON call in 1.9s.
+  - `qwen/qwen3-coder-480b-a35b-instruct` then failed a tiny configured runner call with a 45s abort.
+- Final Qwen Next sanity check:
+  - Configured generator JSON call passed in 2.0s.
+  - Configured Rust-like runner call passed in 2.9s.
+- Decision:
+  - Do not use Qwen Coder as the launch runner despite its earlier high-quality Rust sample.
+  - Use `qwen/qwen3-next-80b-a3b-instruct` for generator, grader, and runner because it has the strongest reliability evidence across all required call types.
+  - Keep `NVIDIA_TIMEOUT_MS=120000`, `NVIDIA_REQUEST_DELAY_MS=5000`, and `--concurrency 1`.
+- Gate status:
+  - Still not passed. The launch corpus remains at 6 of 20 completed result JSON files.
