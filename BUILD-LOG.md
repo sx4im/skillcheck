@@ -832,3 +832,19 @@
   - No `awesome-rust` result JSON was written.
 - Gate status:
   - Still not passed. The launch corpus remains at 5 of 20 completed result JSON files.
+
+### M5 - Runner Health After Rust Failure
+
+- Health-check command:
+  - Run ID: `20260605T064259Z`.
+  - Command: one `NvidiaNimClient.complete` call to `NVIDIA_RUNNER_MODEL` with prompt `Reply with OK.`, `temperature=0`, and `maxTokens=4`.
+  - Env overrides: `NVIDIA_TIMEOUT_MS=45000`, `NVIDIA_REQUEST_DELAY_MS=5000`, `NVIDIA_MAX_ATTEMPTS=3`, `NVIDIA_MAX_RETRY_DELAY_MS=10000`.
+  - Exit code: 0.
+- Result:
+  - Requested model: `mistralai/mistral-small-4-119b-2603`.
+  - Response model: `mistralai/mistral-small-4-119b-2603`.
+  - Content: `OK`.
+  - Usage: prompt tokens 19, completion tokens 2, total tokens 21.
+  - Retry diagnostics: one connection retry, then success.
+- Gate status:
+  - Still not passed. The runner endpoint is not fully down, but the launch corpus remains at 5 of 20 completed result JSON files.
