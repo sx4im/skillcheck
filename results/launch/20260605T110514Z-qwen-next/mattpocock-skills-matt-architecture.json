@@ -1,0 +1,188 @@
+{
+  "skill": {
+    "name": "Improve Codebase Architecture",
+    "source": "https://github.com/mattpocock/skills/blob/aaf2453fbdfe7a15c07f11d861224f34ab4b53cb/skills/engineering/improve-codebase-architecture/SKILL.md",
+    "format": "SKILL.md",
+    "commit_hash": "f00de04c7bb83cfd0ed1f97f3401a83838212c30856912ee44ba406649e6c749",
+    "domain": "Find deepening opportunities in a codebase, informed by the domain language in CONTEXT.md and the decisions in docs/adr/. Use when the user wants to improve architecture, find refactoring opportunities, consolidate tightly-coupled modules, or make a codebase more testable and AI-navigable."
+  },
+  "config": {
+    "runner_model": "qwen/qwen3-next-80b-a3b-instruct",
+    "runner_version": "qwen/qwen3-next-80b-a3b-instruct",
+    "grader_model": "qwen/qwen3-next-80b-a3b-instruct",
+    "grader_version": "qwen/qwen3-next-80b-a3b-instruct",
+    "generator_model": "qwen/qwen3-next-80b-a3b-instruct",
+    "trials": 3,
+    "tasks": 10,
+    "temperature": 0.7,
+    "mode": "forced-injection"
+  },
+  "result": {
+    "effect_pp": 0,
+    "ci_pp": [
+      -16.67,
+      16.67
+    ],
+    "verdict": "placebo",
+    "with_skill_pass": 0.1,
+    "no_skill_pass": 0.1,
+    "token_overhead": 1482,
+    "value_per_1k_tokens": 0
+  },
+  "tasks": [
+    {
+      "id": "t001",
+      "prompt": "Find logging statements that emit raw strings and replace them with structured logs using domain event types from CONTEXT.md.",
+      "criterion_type": "rubric",
+      "criterion": "All logs use structured domain event types; no unstructured string messages remain.",
+      "arm_a_pass_rate": 0,
+      "arm_b_pass_rate": 0
+    },
+    {
+      "id": "t002",
+      "prompt": "Detect entities with fields that map to multiple external systems and extract value objects per CONTEXT.md’s domain modeling rules.",
+      "criterion_type": "rubric",
+      "criterion": "All multi-system fields are replaced with value objects that encapsulate one domain concept only.",
+      "arm_a_pass_rate": 1,
+      "arm_b_pass_rate": 0
+    },
+    {
+      "id": "t003",
+      "prompt": "Identify modules that lack domain-specific unit tests and write tests that verify behavior using only domain language and contracts from CONTEXT.md.",
+      "criterion_type": "rubric",
+      "criterion": "Every module has at least one unit test using only domain terms and no implementation details.",
+      "arm_a_pass_rate": 0,
+      "arm_b_pass_rate": 0
+    },
+    {
+      "id": "t004",
+      "prompt": "Identify test files that mock more than five external dependencies and refactor to use domain-specific test doubles defined in CONTEXT.md.",
+      "criterion_type": "rubric",
+      "criterion": "Each test uses at most two domain-aligned test doubles; no external system mocks remain.",
+      "arm_a_pass_rate": 0,
+      "arm_b_pass_rate": 0
+    },
+    {
+      "id": "t005",
+      "prompt": "Identify configuration files scattered across modules and consolidate them into a single domain-aware config service per ADR-4.",
+      "criterion_type": "rubric",
+      "criterion": "All configuration is loaded through one domain-config service; no inline or module-specific configs exist.",
+      "arm_a_pass_rate": 0,
+      "arm_b_pass_rate": 1
+    },
+    {
+      "id": "t006",
+      "prompt": "Find repositories that return raw SQL or ORM queries and replace them with query objects defined in CONTEXT.md’s query language.",
+      "criterion_type": "rubric",
+      "criterion": "All data access uses named query objects; no raw queries or ORM fragments remain in repositories.",
+      "arm_a_pass_rate": 0,
+      "arm_b_pass_rate": 0
+    },
+    {
+      "id": "t007",
+      "prompt": "Find components that directly call external APIs and wrap them in adapter services aligned with CONTEXT.md’s external interface contracts.",
+      "criterion_type": "rubric",
+      "criterion": "All external calls go through domain-defined adapters; no direct HTTP or SDK calls remain.",
+      "arm_a_pass_rate": 0,
+      "arm_b_pass_rate": 0
+    },
+    {
+      "id": "t008",
+      "prompt": "Find state machines implemented as switch statements and replace them with state objects following ADR-8’s state pattern.",
+      "criterion_type": "rubric",
+      "criterion": "All state logic is encapsulated in state objects; no switch/case statements remain.",
+      "arm_a_pass_rate": 0,
+      "arm_b_pass_rate": 0
+    },
+    {
+      "id": "t009",
+      "prompt": "Locate conditional logic based on environment variables and replace with feature flags managed by a domain feature service per ADR-11.",
+      "criterion_type": "rubric",
+      "criterion": "All conditionals use feature flags; no environment-variable checks remain in business logic.",
+      "arm_a_pass_rate": 0,
+      "arm_b_pass_rate": 0
+    },
+    {
+      "id": "t010",
+      "prompt": "Detect classes with more than five public methods that operate on unrelated domain concepts and split them into focused services per ADR-6.",
+      "criterion_type": "rubric",
+      "criterion": "Each class has at most three methods, all operating on a single domain concept.",
+      "arm_a_pass_rate": 0,
+      "arm_b_pass_rate": 0
+    }
+  ],
+  "reproducibility": {
+    "task_suite_path": "results/tasks/6be0c667932c56cf3cb477ec92508eaa7c0b507d95e80a803742957134c2baa8.json",
+    "transcript_hashes": [
+      "sha256:cffcabb7278534b7f6f6725aecc12f84e9db728993bea8c196e400a518905aac",
+      "sha256:8f13079583b43ac761fbe25fa4d56feedb92aea24bb0b4213fd0360e35e2d607",
+      "sha256:4e2be0a2b2b7bcc78d1977d13bee3189b60deb6216a0738738ed74e3f25588cc",
+      "sha256:5577c72a1a136a9fa1342b7a010ece78e25e57bf262ce868747bceafee7f3872",
+      "sha256:6bc47c045f0eb07aff02e8b05d51d8a5864d9be40451d845360d62a5ceefd886",
+      "sha256:d9f36399fddc333c361240442ddc5f022644c5e756a3acf3dd7fb0e204960458",
+      "sha256:e731babe8a54d3a74bdb752c26b88a23a89f5bb25b70ee32fed4d06684d3a2c1",
+      "sha256:6dd61201a34fd8a28b0470576d419d1345181dac1d888a0c07fbc7d3c9972a4f",
+      "sha256:1f62edc4b62f7024d30dbba92b84fa32ac20f3b62648ac5489d49dd315ddbb0f",
+      "sha256:fa70d3e9f6a970c34b9a7002bd4751be862a825be2f38797281142a8312c4bf2",
+      "sha256:257df96a4cdca0a2e7dd37ef4124f4a2c4900dc46b296b3626c0e9bc6ead6957",
+      "sha256:3ce756ff4bfd27ccce30c92314f2411e30fcd85adcaa90453db7e3c575cb2aa9",
+      "sha256:88fe148bd8f3ba25672382376750c3660b8dbcbdf849ca4d9487390ce6963ff8",
+      "sha256:dd4b33833fb989d4fa2b7147138871becf24fe03bd27c85e725e7de74552c18f",
+      "sha256:39143b474289b7e75791b7e8941f62f84f1f4a79ff4e6ce5dbedd278814cb90c",
+      "sha256:89d42c6b1f07874054b2c08f17eb0aa7417c482f244cb151c7f94bf32ac48190",
+      "sha256:03192342c0829832eab3c2e280829356083128b3d3e88c840c6e18ca4ad4e7e0",
+      "sha256:9ab02f2092720ede1cadf3bba7daf121c34ef257ab617c5a23b22a0d8536e1d0",
+      "sha256:94a1ae5f1ee1aa83276616b8daf850e8494ac50d9d682a05efcf8d49e6282d96",
+      "sha256:02c63d3d7e913c4aa75707b75b51f8520c6a3aecc81892bc9baa7f40470afd78",
+      "sha256:de86144e2e9bc3ce5c0eb73d924ddd27d31771345fd8adf6724ab32814b9e7b5",
+      "sha256:eceb74247a815f40e4af835c8a8025b93cdd704ba7496de9452b14b6c5b5e34b",
+      "sha256:bcaf15b5cd6f053a2ee3c507be2937f3851e5fa78ea988aa1a06907c87bec31c",
+      "sha256:d91d9066753cf044e44654fbddd965e66f9fa31012c360c2a5a5031d67c6d64e",
+      "sha256:3a97624040c6b815896dc0eb82c1e3bd259f5ac135f5800016edf3f7bb48b2e2",
+      "sha256:73153e99955c0458d91b78c97f1b42d6343676b5552322ba6e7e0eb6c36e8bca",
+      "sha256:c61b3917eb33eba36dc6790849a54a5dac57933df7bd60e584c99a5f60acadd7",
+      "sha256:79626586e3cb3ba2b252bdd55488eb20b4abedac99fd1e146d34c04a749ec3b1",
+      "sha256:50c86f165149ec679040e2b3c040472bf6efcbc76919dceef80cca2064dbf00d",
+      "sha256:793ae076b1591f992790397c818725bc9d2718037ea19990cbf76000b22b550d",
+      "sha256:8e0d20f8b0ec0ce121061f7fc6a48c4fdebb6ee3cb94ca68a06d6392a85f6731",
+      "sha256:7f77da03e46db7bab743f758b72b7517250349a732276496eb0d14ca30d63578",
+      "sha256:529c3c7a0441e0ecae3de273337e794dd97686627bfce982936b111fbbef4548",
+      "sha256:ab1dd86b4bf16027e440f796d318f41e3fadb82c19814e0ac420fc81fd074017",
+      "sha256:ba080909c26a37841a62e8190b9456451876f786212d4c1b0020e2480e31df11",
+      "sha256:983823703ea21085e478c73e90d8f58fe6ad4257c9e328399778e6ec7ac032f8",
+      "sha256:8f3c57737723eb3f8f941b5a5932a2ece83cc03332e4f1035df920b2ecbc6a4c",
+      "sha256:31b5cc77598845d5554cb2dab2cad93a51bb85af89940fb2325c48b94c57d7bb",
+      "sha256:f063f90bb1afc49fa3c18fb8e8c8e9f2a4ef13939b2520fe9fd424dd4b290065",
+      "sha256:ff93d9328227b395f656651c05b76d83a0537b3ebdb01eb37c1ab8732fa50736",
+      "sha256:b367a9b8709a8961f257df9b180946f5d2dbfd4917c827437400fa3b50bcd361",
+      "sha256:a96a5703781ceae65f0f4994e82cf100a057db804e699b99cdfa5a502ff320ac",
+      "sha256:9f4986346a0be0c9cf5ceb1563f6bfb0137e04315f0801e798390473b0cac764",
+      "sha256:f6a66a099c31e6c00287907bc6e3a873488398f44868e6a3a03ccda6846e1ab7",
+      "sha256:af90721d32275471a13115303536888f9eb9433856dcc160f8ed38566e389791",
+      "sha256:48ad740037a4b913188f1b8004ec2039f148ff077ce60a756532a922ecb723c6",
+      "sha256:d4644d27014a04f41e1f0491dcc91e59030e1d21eb63b7b16c960b9ddad05667",
+      "sha256:1eed282730dd14ab8732f75f0cc02e9860e548e8a9d17b70bd9e7efead14bd5c",
+      "sha256:a34a2cb7b5bc74fb05d587f9b0247eead5790b7cec5ff3d55c13404940228a9e",
+      "sha256:089d07e8906f5b8a4ee5e5318c6b3712301ecfd921d4587c5f6e0a6a7e2fed31",
+      "sha256:6adac1f95fe1df9ec1323638478a52d4496bd266be3d62cbc637fe1477472361",
+      "sha256:ceaa503de8cc9267d5681d860407baf5515b186b6a45c73a1619c3f818d291d4",
+      "sha256:e8ff7826411e6dbcbff62cae7bb35727b33b95599a8be9b0e76a78910c67547d",
+      "sha256:51c96fcd0817d0ee1e5e2693066181a5e6b510020ccfb933cab52f31a3a750cd",
+      "sha256:c020608e0962c1aeaef8edcec22a342c4117fcb56185a508268016c01734be6f",
+      "sha256:0c9933cd9b370197f57e6be7ff778117b4a859e2e12e5a87cf8b806948335b36",
+      "sha256:70c690ca073fa5363d22ccf650fdf75c6322fd4a0cb7851913bf302fd60601c4",
+      "sha256:de79ad5a9bb51da38b97f2bc372a780a9674af49f79dc143cadf6455d17cc2c9",
+      "sha256:24b0e8fb3863c9355022d40cdbe61950fda02410b106347db9251fbfd407f368",
+      "sha256:fe0dab8972f9a2808d411d912adb9b468a5ea6f0f8e29a61255ccdbbfbf00ca2"
+    ]
+  },
+  "history": [
+    {
+      "runner_version": "qwen/qwen3-next-80b-a3b-instruct",
+      "run_date": "2026-06-05",
+      "effect_pp": 0,
+      "verdict": "placebo"
+    }
+  ],
+  "run_date": "2026-06-05"
+}
