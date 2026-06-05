@@ -875,3 +875,20 @@
   - `npm run build`: passed.
 - Gate status:
   - Still not passed. The launch corpus remains at 5 of 20 completed result JSON files.
+
+### M5 - Rust Progress After Domain Fallback Fix
+
+- Resumed command:
+  - Run directory: `results/launch/20260605T041138Z`.
+  - Command: `NVIDIA_TIMEOUT_MS=45000 NVIDIA_REQUEST_DELAY_MS=5000 NVIDIA_MAX_ATTEMPTS=14 NVIDIA_MAX_RETRY_DELAY_MS=30000 node dist/bin/skillcheck.js corpus run --corpus corpus/launch-20.json --results results/launch/20260605T041138Z --tasks 10 --trials 3 --concurrency 1`.
+  - Exit code: 1.
+- Evidence:
+  - The run skipped the five existing completed results and retried `awesome-rust`.
+  - Heading-only domain fallback allowed Rust task generation to complete after connection retries.
+  - Rust task suite written: `results/tasks/0f6bc244d925ace338eebf71570348045ef4cd29c7ae274a5150da8cf14cd201.json`.
+  - Rust runner execution completed through task `t002` trial 1/3 `with_skill`.
+  - The failure occurred on task `t002` trial 1/3 `no_skill` after NVIDIA connection retries through retry `13/14`.
+  - Final error: `Request timed out.`
+  - No `awesome-rust` result JSON was written.
+- Gate status:
+  - Still not passed. The launch corpus remains at 5 of 20 completed result JSON files, but Rust now has reusable generated tasks and partial cached runner outputs.
