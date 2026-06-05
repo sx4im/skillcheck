@@ -78,29 +78,42 @@ export async function generateTasks(
   cache: JsonCache
 ): Promise<GeneratedTask[]> {
   const generatedCount = input.count * 2;
-  const response = await cache.getOrSet('generator', { model: config.generatorModel, input, generatedCount, promptVersion: 6 }, () =>
-    client.complete({
-      model: config.generatorModel,
-      temperature: 0.4,
-      maxTokens: 4000,
-      responseFormat: 'json_object',
-      chatTemplateKwargs: { thinking: false },
-      messages: [
-        {
-          role: 'system',
-          content: 'Generate independent evaluation tasks. You only know the declared domain, never skill instructions. Return only compact JSON.'
-        },
-        {
-          role: 'user',
-          content: `Declared domain:\n${input.domain}\n\nGenerate ${generatedCount} concise tasks. Return {"tasks":[{"id":"t1","prompt":"one concrete task under 80 words","criterion":"one pass/fail rubric under 60 words"}]}. Keep every criterion a single string, not an array.`
-        }
-      ]
-    })
-  );
+  let lastError: unknown;
+  for (let attempt = 1; attempt <= 3; attempt += 1) {
+    const response = await cache.getOrSet(
+      'generator',
+      { model: config.generatorModel, input, generatedCount, promptVersion: 7, attempt },
+      () =>
+        client.complete({
+          model: config.generatorModel,
+          temperature: 0.4,
+          maxTokens: 8000,
+          responseFormat: 'json_object',
+          chatTemplateKwargs: { thinking: false },
+          messages: [
+            {
+              role: 'system',
+              content: 'Generate independent evaluation tasks. You only know the declared domain, never skill instructions. Return only valid compact JSON.'
+            },
+            {
+              role: 'user',
+              content: `Declared domain:\n${input.domain}\n\nGenerate ${generatedCount} concise tasks. Return exactly {"tasks":[{"id":"t1","prompt":"one concrete task under 80 words","criterion":"one pass/fail rubric under 60 words"}]}. Keep every criterion a single string, not an array. Do not include markdown or commentary.`
+            }
+          ]
+        })
+    );
 
-  const generated = validateTasks(extractJsonPayload(response.content), generatedCount);
-  return seededShuffle(generated, `${input.domain}:${config.generatorModel}`).slice(0, input.count).map((task, index) => ({
-    ...task,
-    id: `t${String(index + 1).padStart(3, '0')}`
-  }));
+    try {
+      const generated = validateTasks(extractJsonPayload(response.content), generatedCount);
+      return seededShuffle(generated, `${input.domain}:${config.generatorModel}`).slice(0, input.count).map((task, index) => ({
+        ...task,
+        id: `t${String(index + 1).padStart(3, '0')}`
+      }));
+    } catch (error) {
+      lastError = error;
+      console.error(`[eval] generator returned invalid JSON on attempt ${attempt}/3`);
+    }
+  }
+
+  throw lastError instanceof Error ? lastError : new Error('Generator did not return valid tasks after retries');
 }

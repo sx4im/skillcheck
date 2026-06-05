@@ -571,3 +571,21 @@
   - Sample runner: `mistralai/mistral-small-4-119b-2603`.
 - Gate status:
   - Still not passed. The cache-warm sample now passes, but M5 still requires the full 20-skill launch corpus run and updated launch findings from those real numbers.
+
+### M5 - Full Corpus Attempt Failed
+
+- Full corpus command:
+  - Run directory: `results/launch/20260604T155026Z`.
+  - Command: `node dist/bin/skillcheck.js corpus run --corpus corpus/launch-20.json --results results/launch/20260604T155026Z --tasks 10 --trials 3 --concurrency 2`.
+  - Exit code: 1.
+- Failure evidence:
+  - `corpus.stderr` started `awesome-nextjs` and `awesome-react` concurrently.
+  - One generator response failed JSON parsing with `Unterminated string in JSON at position 4787 (line 19 column 15)`.
+  - The other worker entered runner execution for `t001` trial 1/3 `with_skill`, then hit NVIDIA connection retries through retry `4/5`.
+  - No result JSON files were produced.
+- Follow-up implementation change:
+  - `generateTasks` now retries malformed generator JSON up to 3 attempts with separate cache keys.
+  - The retry keeps the PRD rule that the generator receives only the declared domain and still generates `2N` tasks before deterministic sampling.
+  - Added a unit test proving malformed generator JSON is retried.
+- Gate status:
+  - Still not passed. The full 20-skill corpus run produced no result JSON and must be rerun after the generator retry fix.
