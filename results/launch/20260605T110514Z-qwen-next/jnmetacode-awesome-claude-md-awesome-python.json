@@ -1,0 +1,188 @@
+{
+  "skill": {
+    "name": "Python 项目规范",
+    "source": "https://github.com/jnMetaCode/awesome-claude-md/blob/fe38fcd8f245460b989879c9155a16404e77cffa/by-language/python/CLAUDE.md",
+    "format": "CLAUDE.md",
+    "commit_hash": "0b4d651677f053f77f949d9905af6e59b9b1baf9d26d2ca530f6eb316ad29ce6",
+    "domain": "Python 项目规范"
+  },
+  "config": {
+    "runner_model": "qwen/qwen3-next-80b-a3b-instruct",
+    "runner_version": "qwen/qwen3-next-80b-a3b-instruct",
+    "grader_model": "qwen/qwen3-next-80b-a3b-instruct",
+    "grader_version": "qwen/qwen3-next-80b-a3b-instruct",
+    "generator_model": "qwen/qwen3-next-80b-a3b-instruct",
+    "trials": 3,
+    "tasks": 10,
+    "temperature": 0.7,
+    "mode": "forced-injection"
+  },
+  "result": {
+    "effect_pp": -20,
+    "ci_pp": [
+      -36.67,
+      -6.67
+    ],
+    "verdict": "harms",
+    "with_skill_pass": 0.2,
+    "no_skill_pass": 0.4,
+    "token_overhead": 633,
+    "value_per_1k_tokens": -31.6
+  },
+  "tasks": [
+    {
+      "id": "t001",
+      "prompt": "Validate that all test files are named with prefix test_ and reside in a tests/ directory.",
+      "criterion_type": "rubric",
+      "criterion": "All test files are named test_*.py and located exclusively within a top-level tests/ directory.",
+      "arm_a_pass_rate": 0,
+      "arm_b_pass_rate": 0
+    },
+    {
+      "id": "t002",
+      "prompt": "Confirm that function names use snake_case and class names use PascalCase throughout the codebase.",
+      "criterion_type": "rubric",
+      "criterion": "All function names are snake_case and all class names are PascalCase with no exceptions.",
+      "arm_a_pass_rate": 1,
+      "arm_b_pass_rate": 1
+    },
+    {
+      "id": "t003",
+      "prompt": "Verify that every module has a docstring describing its purpose and public interfaces.",
+      "criterion_type": "rubric",
+      "criterion": "Every .py file contains a top-level docstring explaining module purpose and key functions.",
+      "arm_a_pass_rate": 0,
+      "arm_b_pass_rate": 0
+    },
+    {
+      "id": "t004",
+      "prompt": "Ensure all module-level constants are named in UPPER_SNAKE_CASE.",
+      "criterion_type": "rubric",
+      "criterion": "All module-level constants use UPPER_SNAKE_CASE naming with no lowercase or mixed case.",
+      "arm_a_pass_rate": 0,
+      "arm_b_pass_rate": 1
+    },
+    {
+      "id": "t005",
+      "prompt": "Verify that all functions have a return statement if they are annotated with a return type.",
+      "criterion_type": "rubric",
+      "criterion": "Every function with a return type annotation includes a return statement or raises an exception.",
+      "arm_a_pass_rate": 0,
+      "arm_b_pass_rate": 0
+    },
+    {
+      "id": "t006",
+      "prompt": "Check that no print statements exist outside of test files or debugging sections.",
+      "criterion_type": "rubric",
+      "criterion": "No print() calls appear in non-test Python files unless explicitly marked with # DEBUG comment.",
+      "arm_a_pass_rate": 0,
+      "arm_b_pass_rate": 0
+    },
+    {
+      "id": "t007",
+      "prompt": "Validate that all conditional expressions use explicit comparisons (e.g., x is not None, not just x).",
+      "criterion_type": "rubric",
+      "criterion": "All conditionals avoid truthiness for None; use explicit comparisons like x is not None.",
+      "arm_a_pass_rate": 0,
+      "arm_b_pass_rate": 0
+    },
+    {
+      "id": "t008",
+      "prompt": "Ensure no unused imports exist in any Python file.",
+      "criterion_type": "rubric",
+      "criterion": "No import statement is present that is not referenced anywhere in the same file.",
+      "arm_a_pass_rate": 0,
+      "arm_b_pass_rate": 1
+    },
+    {
+      "id": "t009",
+      "prompt": "Verify that type hints are used for all function parameters and return types.",
+      "criterion_type": "rubric",
+      "criterion": "Every function has full type annotations for parameters and return value using PEP 484 syntax.",
+      "arm_a_pass_rate": 0,
+      "arm_b_pass_rate": 0
+    },
+    {
+      "id": "t010",
+      "prompt": "Confirm that all module names are lowercase with underscores if needed, no camelCase.",
+      "criterion_type": "rubric",
+      "criterion": "All module filenames use lowercase letters and underscores only, no uppercase or camelCase.",
+      "arm_a_pass_rate": 1,
+      "arm_b_pass_rate": 1
+    }
+  ],
+  "reproducibility": {
+    "task_suite_path": "results/tasks/e3a04aaed43072325d3793c0e633234a4aa8d8d3679e64c16791b2835f8f65a7.json",
+    "transcript_hashes": [
+      "sha256:1d89f65c7a32d87ed6250828db981b7447990630843f0fa9c33ba469484a8721",
+      "sha256:afd0a87236df75fdef7fc5105c6a1376cd309646cb7927ab96b7f57df81fe251",
+      "sha256:06c9f8e6bcef493ef6bbd79217427c1610e005c5496939300af1ea29415f32a1",
+      "sha256:11e53e4e8fc86027386df85b99afda90f3b0528cdbf424f1d7b2120ba78d2a51",
+      "sha256:c1016e4539d34b27afa331f2a479abb195afe20f14c793806e33209b6e3511d3",
+      "sha256:a06e5035ebaef0b9456747d0b29d40ad10e1fa497714412a1edb80749fd9ce76",
+      "sha256:e11ebd5a073b71edbffba734a1ae7e6f589d512e19d5b4cca9bd4acadfbb0de0",
+      "sha256:2a025169046c340fb1a37f4e6e3bfbd862e76a8b7613d853620a6272f18aa8a0",
+      "sha256:8aea4bcf8904e551aac131ea22254ba7d4f1113c8313fb1421f00d6d42fc90a1",
+      "sha256:c811911a5686c8238cbaac7dcdc5c672557b05931c577edf3509be4170231355",
+      "sha256:abf3471ba1277ad1240011a4d583434ad9c176fa9d85888d7a5562bc2b66acda",
+      "sha256:16188e99d2960acb8009126d48471530b5fa59e99a007a56b95f7fb8a2e340a3",
+      "sha256:a97f6e663d883b50584b8a49f58e238705a1c46edd10b943ba6b83bdb36c9889",
+      "sha256:a6766ddce24e6547ef988e9877080fbec6a7e4c54c3cf4e52150c34e100b86ab",
+      "sha256:08396fb999c76762f4d6d56f3ed47c52821568245fed7ef530a095634744322d",
+      "sha256:a99f1b07b2e731152d2a6a16a856c7cf669f28a4b0578a575e03375ffa74b3be",
+      "sha256:735368adb48155440e7fd0baee5e5f6bb4d95bfc083fbff9a69b7a78d5dc1923",
+      "sha256:77f3cfdd1eb18ff7d13774c8a5614a8347a8ef8e1ddc46c6ba68c22a303a1dc1",
+      "sha256:8286acc41599e15d01abdf03bafa97a018715a59940342b9681fad2c374f61a0",
+      "sha256:f255fba99193ea67fb0ac4b72bfd27700f428bdfe8db9a9642cf95593c2c1ac8",
+      "sha256:1d025a02613256f06a952adf0057f6a7615665ae91b55cb7852ecf669f074032",
+      "sha256:5f86abd6ecc921a129667b14441e0dcdab67111143271750c3b0a18472b91711",
+      "sha256:0902c3210c0a16a917f355c8211e2f92a354c0e2c100570503285dd575d927cf",
+      "sha256:b7382e4a85ea0db5d276b87d2d98f95d9ce5b2a7e9266465c39ab1d83e9a7702",
+      "sha256:b0b1b01c5d12c73c978e02b25cd80a84135049b972e1cd94fbadc6bff2f5a35a",
+      "sha256:3d20f87349b145c0825f08b12cf045fd7449ae50d237fee83a18f360d4be5b9a",
+      "sha256:46ce56e0e5242f09585bc37e20a853eca1c07dd5d8eff488f6a92cf433695e6d",
+      "sha256:46b455b665792135fc886f9b5e462f1031fdc07b06870e9e5a6290ad49ea7a02",
+      "sha256:bec314d842ac4d96790c8ab6d80b45cbee3c5e3053b127ce08e20c8597aeb496",
+      "sha256:1b14f26969d3902d6029d7b0b5a31ae2c4335b71f3060f3b700468e97df6529a",
+      "sha256:d01000d4db97281174874b08cce1ec8cd6bea244904abd98470347ef6b19266e",
+      "sha256:54fb19dd4eae66ca709c1c891b884dcd4a6d45117a5687396a981415482e4d55",
+      "sha256:54de5c8d27cb080a4c5a570e89fbd4634b8d27a98fbd1c2dd11db5b3a8e58a92",
+      "sha256:a3728367bb9f5f6911b23c3662a7be5404ff67bbf4fa6ab95813b28213091c86",
+      "sha256:dcf8a3a622d7c9021ef84108808227e5d20b612aa3bf6e623146a3560c2fd000",
+      "sha256:b521a12092415d87279c95ac347981282c68efd616663d18861f6f367139783d",
+      "sha256:c61d99544fce0be696a37eb2c371750d5083dd9d99236bc857faa2e26d1641a3",
+      "sha256:54f644ef0709ffaa0b5dbc41891c7fdd41f2cd46905100d093a7d20c7d2b29fa",
+      "sha256:4b7d31a9008821fa613a7c80721845f96ee53a8a65451a1b8302cf04f4550fee",
+      "sha256:9dd874201af279ecf14da620cffc7544ed902db4141338b04a8c366980302a46",
+      "sha256:ce76dce076ef4a377fc066b3d4583b7838dd4945fc08882e2e7244affb3670d8",
+      "sha256:46f66fe25e9acec8fccd6cf2b630ea829b69d9ef5964f6511520c3732a52c0f8",
+      "sha256:4f5b64d05284cf949888515508a659ed9da11640f8952bacd4b52adb92da9316",
+      "sha256:3995a55574a5710cd8436c287e751fc2b630098af324476a44561d25d50e7df9",
+      "sha256:52f70b5564b42dd6b0d727ed6fdbc1f1be887f0e1d82ba12f9793ee273853220",
+      "sha256:9f8ed40cd41ff7e78337f9f24f8fadfd0a051741be5fabe857734cbadf1cf291",
+      "sha256:5ac41e0315b6614414ab6bc71711b1d4c4350c06cb1db924903a07846d95e159",
+      "sha256:5fe36ea1ec73ac97fb30086324c8cce70a29c5a4f539a4fb13340dc3cd3e6b6a",
+      "sha256:4778bd945f11cdc1fa32e8f570971466a634a00ab70ab7364c966e089c1581bf",
+      "sha256:8e3b5e8623313ac2406ad1d6c5692c624f1555a7f6eaf52851fbf8fa6559ebea",
+      "sha256:8dacdb5e04612e92aeab4d8df8440e9a4050b673d25c3fdfe5fcd633df3e3e12",
+      "sha256:4bc56a9f73127f12aad23ce5318fa371e01c2e40d5564378dfac417936889d5d",
+      "sha256:d93c90b56d6ec369e95fbd89913d4e603e676f6aa1f59225ee5cd959bc4ed97f",
+      "sha256:0832c585c1edf4e66975058b71a033db66a67f0a760e9f1488e81ba546d8e2fb",
+      "sha256:8e641e4df7f2478ec299505455060d0b19a65a9874cfa7e123d6ed055ee9c4a9",
+      "sha256:47b3c1e7c9cafed52573d8437f430ed08fe878c53e1d42a53a532b8e5dd30ce7",
+      "sha256:b2327386fe3319c3812a4ed72505136f65d664ee4731a148ef4c7dbc1456b480",
+      "sha256:448f421bff931a71599bfdc526e21e273e0bbfcaccfc4c04fb35913fb6f00f6a",
+      "sha256:a3864a4dff4676f3852de821fc964a7f57344228870a48e6bf2646b0ce1d4ef7",
+      "sha256:050747d6a70ce48f24ba7f95c6ed0f7d9f0c93ab4a606dcdc4342534db21c774"
+    ]
+  },
+  "history": [
+    {
+      "runner_version": "qwen/qwen3-next-80b-a3b-instruct",
+      "run_date": "2026-06-05",
+      "effect_pp": -20,
+      "verdict": "harms"
+    }
+  ],
+  "run_date": "2026-06-05"
+}
