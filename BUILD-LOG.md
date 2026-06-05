@@ -801,3 +801,20 @@
   - `npm run build`: passed.
 - Gate status:
   - Still not passed. The launch corpus remains at 5 of 20 completed result JSON files.
+
+### M5 - 14-Attempt Capped Resume Still Failed On Go
+
+- Resumed command:
+  - Run directory: `results/launch/20260605T041138Z`.
+  - Command: `NVIDIA_TIMEOUT_MS=45000 NVIDIA_REQUEST_DELAY_MS=5000 NVIDIA_MAX_ATTEMPTS=14 NVIDIA_MAX_RETRY_DELAY_MS=30000 node dist/bin/skillcheck.js corpus run --corpus corpus/launch-20.json --results results/launch/20260605T041138Z --tasks 10 --trials 3 --concurrency 1`.
+  - Exit code: 1.
+- Failure evidence:
+  - The run skipped the five existing completed results and retried `awesome-go`.
+  - The failure remained task `t002` trial 1/3 `with_skill`.
+  - NVIDIA retried connection failures through retry `13/14` with fallback waits capped at `30000 ms`, then returned `Connection error.`
+  - No `awesome-go` result JSON was written.
+- Follow-up run policy:
+  - Keep `awesome-go` in the launch corpus, but move it to the end of `corpus/launch-20.json` so the other required launch skills can run before retrying the persistently failing Go call.
+  - This changes only corpus order; the 20 pinned skills, 10 tasks, 3 trials, blind grading, and verdict thresholds are unchanged.
+- Gate status:
+  - Still not passed. The launch corpus remains at 5 of 20 completed result JSON files.
