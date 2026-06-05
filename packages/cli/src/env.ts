@@ -7,6 +7,7 @@ export interface NvidiaConfig {
   baseUrl: string;
   timeoutMs: number;
   requestDelayMs: number;
+  maxAttempts: number;
   generatorModel: string;
   graderModel: string;
   runnerModel: string;
@@ -31,11 +32,17 @@ export function loadNvidiaConfig(): NvidiaConfig {
     throw new Error('NVIDIA_REQUEST_DELAY_MS must be a non-negative number when set');
   }
 
+  const maxAttempts = Number(process.env.NVIDIA_MAX_ATTEMPTS?.trim() || 8);
+  if (!Number.isInteger(maxAttempts) || maxAttempts <= 0) {
+    throw new Error('NVIDIA_MAX_ATTEMPTS must be a positive integer when set');
+  }
+
   return {
     apiKey: requireEnv('NVIDIA_API_KEY'),
     baseUrl: process.env.NVIDIA_BASE_URL?.trim() || 'https://integrate.api.nvidia.com/v1',
     timeoutMs,
     requestDelayMs,
+    maxAttempts,
     generatorModel: requireEnv('NVIDIA_GENERATOR_MODEL'),
     graderModel: requireEnv('NVIDIA_GRADER_MODEL'),
     runnerModel: requireEnv('NVIDIA_RUNNER_MODEL')

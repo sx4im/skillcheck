@@ -22,7 +22,6 @@ export interface CompletionResponse {
 }
 
 const RETRYABLE_STATUSES = new Set([408, 409, 429, 500, 502, 503, 504]);
-const MAX_ATTEMPTS = 8;
 
 function extractTextContent(content: unknown): string | undefined {
   if (typeof content === 'string') {
@@ -103,10 +102,10 @@ function getRetryAfterMs(error: unknown): number | undefined {
   return undefined;
 }
 
-function describeRetry(error: unknown, attempt: number, waitMs: number): void {
+function describeRetry(error: unknown, attempt: number, waitMs: number, maxAttempts: number): void {
   const status = getStatus(error);
   const label = status === undefined ? 'connection' : `status ${status}`;
-  console.error(`[nim] retry ${attempt + 1}/${MAX_ATTEMPTS} after ${label}; waiting ${waitMs} ms`);
+  console.error(`[nim] retry ${attempt + 1}/${maxAttempts} after ${label}; waiting ${waitMs} ms`);
 }
 
 export class NvidiaNimClient {
@@ -115,9 +114,11 @@ export class NvidiaNimClient {
 
   private readonly client: OpenAI;
   private readonly requestDelayMs: number;
+  private readonly maxAttempts: number;
 
   constructor(config: NvidiaConfig) {
     this.requestDelayMs = config.requestDelayMs;
+    this.maxAttempts = config.maxAttempts;
     this.client = new OpenAI({
       apiKey: config.apiKey,
       baseURL: config.baseUrl,
@@ -152,7 +153,7 @@ export class NvidiaNimClient {
   async complete(request: CompletionRequest): Promise<CompletionResponse> {
     let lastError: unknown;
 
-    for (let attempt = 0; attempt < MAX_ATTEMPTS; attempt += 1) {
+    for (let attempt = 0; attempt < this.maxAttempts; attempt += 1) {
       try {
         const extraBody = request.chatTemplateKwargs
           ? {
@@ -193,7 +194,7 @@ export class NvidiaNimClient {
         lastError = error;
         const status = getStatus(error);
         const retryable = status === undefined || RETRYABLE_STATUSES.has(status);
-        if (!retryable || attempt === MAX_ATTEMPTS - 1) {
+        if (!retryable || attempt === this.maxAttempts - 1) {
           break;
         }
 
@@ -201,7 +202,7 @@ export class NvidiaNimClient {
         const baseDelayMs = status === 429 ? 5000 : 500;
         const jitter = Math.floor(Math.random() * 500);
         const waitMs = retryAfterMs ?? baseDelayMs * 2 ** attempt + jitter;
-        describeRetry(error, attempt, waitMs);
+        describeRetry(error, attempt, waitMs, this.maxAttempts);
         await sleep(waitMs);
       }
     }

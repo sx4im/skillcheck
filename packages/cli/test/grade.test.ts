@@ -27,6 +27,7 @@ describe('gradeOutputs', () => {
       apiKey: 'test',
       timeoutMs: 1000,
       requestDelayMs: 0,
+      maxAttempts: 8,
       generatorModel: 'generator',
       graderModel: 'grader',
       runnerModel: 'runner'
@@ -73,6 +74,7 @@ describe('gradeOutputs', () => {
       apiKey: 'test',
       timeoutMs: 1000,
       requestDelayMs: 0,
+      maxAttempts: 8,
       generatorModel: 'generator',
       graderModel: 'grader',
       runnerModel: 'runner'

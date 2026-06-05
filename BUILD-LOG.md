@@ -760,3 +760,21 @@
   - This changes only provider timeout handling; M5 still uses 20 skills, 10 tasks, 3 trials, blind grading, and unchanged verdict thresholds.
 - Gate status:
   - Still not passed. The launch corpus remains at 5 of 20 completed result JSON files.
+
+### M5 - 45000ms Timeout Resume Still Failed On Go
+
+- Resumed command:
+  - Run directory: `results/launch/20260605T041138Z`.
+  - Command: `NVIDIA_TIMEOUT_MS=45000 NVIDIA_REQUEST_DELAY_MS=5000 node dist/bin/skillcheck.js corpus run --corpus corpus/launch-20.json --results results/launch/20260605T041138Z --tasks 10 --trials 3 --concurrency 1`.
+  - Exit code: 1.
+- Failure evidence:
+  - The run skipped the five existing completed results and retried `awesome-go`.
+  - The failure remained task `t002` trial 1/3 `with_skill`.
+  - NVIDIA retried connection failures through retry `7/8`, then returned `Request timed out.`
+  - `awesome-go` task prompt length is 110 characters, and the Go skill file is 2326 bytes, so the repeated timeout is not caused by an unusually large prompt.
+  - No `awesome-go` result JSON was written.
+- Follow-up implementation change:
+  - Added `NVIDIA_MAX_ATTEMPTS` with default `8` so launch resumes can use a larger retryable request budget without changing scoring behavior.
+  - This changes only provider retry handling; M5 still uses 20 skills, 10 tasks, 3 trials, blind grading, and unchanged verdict thresholds.
+- Gate status:
+  - Still not passed. The launch corpus remains at 5 of 20 completed result JSON files.
