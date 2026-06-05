@@ -1,0 +1,188 @@
+{
+  "skill": {
+    "name": "CLAUDE.md - TypeScript 项目规范",
+    "source": "https://github.com/jnMetaCode/awesome-claude-md/blob/fe38fcd8f245460b989879c9155a16404e77cffa/by-language/typescript/CLAUDE.md",
+    "format": "CLAUDE.md",
+    "commit_hash": "cc9446bc0fd48aa1757f7ff02cfdfa5747f48373d78e58399d0d0918faf34237",
+    "domain": "CLAUDE.md - TypeScript 项目规范"
+  },
+  "config": {
+    "runner_model": "qwen/qwen3-next-80b-a3b-instruct",
+    "runner_version": "qwen/qwen3-next-80b-a3b-instruct",
+    "grader_model": "qwen/qwen3-next-80b-a3b-instruct",
+    "grader_version": "qwen/qwen3-next-80b-a3b-instruct",
+    "generator_model": "qwen/qwen3-next-80b-a3b-instruct",
+    "trials": 3,
+    "tasks": 10,
+    "temperature": 0.7,
+    "mode": "forced-injection"
+  },
+  "result": {
+    "effect_pp": 0,
+    "ci_pp": [
+      -20.08,
+      20.08
+    ],
+    "verdict": "placebo",
+    "with_skill_pass": 0.3,
+    "no_skill_pass": 0.3,
+    "token_overhead": 693,
+    "value_per_1k_tokens": 0
+  },
+  "tasks": [
+    {
+      "id": "t001",
+      "prompt": "Verify that every exported function or class has a JSDoc comment describing parameters, return type, and purpose.",
+      "criterion_type": "rubric",
+      "criterion": "Every export must have a complete JSDoc block; missing or incomplete JSDoc fails.",
+      "arm_a_pass_rate": 1,
+      "arm_b_pass_rate": 0
+    },
+    {
+      "id": "t002",
+      "prompt": "Require that all function parameters are typed explicitly, never inferred.",
+      "criterion_type": "rubric",
+      "criterion": "Every function parameter must have an explicit type annotation; inferred types fail.",
+      "arm_a_pass_rate": 0,
+      "arm_b_pass_rate": 0
+    },
+    {
+      "id": "t003",
+      "prompt": "Ensure no variable is declared with 'var'; only 'let' or 'const' are permitted.",
+      "criterion_type": "rubric",
+      "criterion": "Presence of 'var' in any file causes failure; only 'let'/'const' allowed.",
+      "arm_a_pass_rate": 1,
+      "arm_b_pass_rate": 1
+    },
+    {
+      "id": "t004",
+      "prompt": "Require all enum values to be uppercase with underscore separators (e.g., STATUS_ACTIVE).",
+      "criterion_type": "rubric",
+      "criterion": "All enum members must use UPPER_CASE_WITH_UNDERSCORES; lowercase or camelCase fails.",
+      "arm_a_pass_rate": 1,
+      "arm_b_pass_rate": 0
+    },
+    {
+      "id": "t005",
+      "prompt": "Ensure no console.log statements remain in production code; all must be removed or wrapped.",
+      "criterion_type": "rubric",
+      "criterion": "Presence of console.log in non-test files causes failure; must be absent.",
+      "arm_a_pass_rate": 0,
+      "arm_b_pass_rate": 1
+    },
+    {
+      "id": "t006",
+      "prompt": "Require all private class members to be prefixed with an underscore (e.g., _config).",
+      "criterion_type": "rubric",
+      "criterion": "All private class fields must start with underscore; missing prefix fails.",
+      "arm_a_pass_rate": 0,
+      "arm_b_pass_rate": 0
+    },
+    {
+      "id": "t007",
+      "prompt": "Mandate that all async functions explicitly declare their return type as Promise<T>.",
+      "criterion_type": "rubric",
+      "criterion": "Every async function must have a Promise<T> return type annotation; omission fails.",
+      "arm_a_pass_rate": 0,
+      "arm_b_pass_rate": 0
+    },
+    {
+      "id": "t008",
+      "prompt": "Validate that all function return types are explicitly declared, never inferred.",
+      "criterion_type": "rubric",
+      "criterion": "Every function must have an explicit return type annotation; inferred returns fail.",
+      "arm_a_pass_rate": 0,
+      "arm_b_pass_rate": 0
+    },
+    {
+      "id": "t009",
+      "prompt": "Confirm that all interface names use PascalCase and prefix with 'I' (e.g., IUserService).",
+      "criterion_type": "rubric",
+      "criterion": "All interfaces must be named with 'I' prefix and PascalCase; deviation fails.",
+      "arm_a_pass_rate": 0,
+      "arm_b_pass_rate": 1
+    },
+    {
+      "id": "t010",
+      "prompt": "Verify that all configuration files (e.g., tsconfig.json) are formatted with two-space indentation.",
+      "criterion_type": "rubric",
+      "criterion": "All JSON config files must use two-space indentation; tabs or four spaces fail.",
+      "arm_a_pass_rate": 0,
+      "arm_b_pass_rate": 0
+    }
+  ],
+  "reproducibility": {
+    "task_suite_path": "results/tasks/6f34b091c3721a6783ac937350cd11c9af60843592bfb98a12467ffc54709f3a.json",
+    "transcript_hashes": [
+      "sha256:fa4f98e114c4bdf6b54392281d7c727c0557318af6b77880016e5c8a033c2bd6",
+      "sha256:137676bed1fe8f2b2251fa893cff82917adae65f34b439924584c583d0fb8a03",
+      "sha256:ac57b5de9e9577fdf635f51b67e9bf6a5bfa5824a61f77a275a3e27f2160b1bc",
+      "sha256:e95f30b0f7fe97f909af80801313101db547dfeaa827ef8dbe6a31634bbf5195",
+      "sha256:2f3f26ea075059d82b963eb4d79e1ce73f18a5483038a6525427951842698993",
+      "sha256:dd4b552fad04fef0d6e1da44ac94f134171b8342b0e5aa04fef8c66e76a4d8a0",
+      "sha256:c69fdba53cb77fc1cf95c39ac081597a26f39605569449a2c7b7ff6e4c3abc2b",
+      "sha256:ecc43b885b52987e720937f98ec9ed27a1fba1837efc00f5689fb19bdf267e15",
+      "sha256:e19e28f86037ab7561ac5cd02a0995b85a58721338c1aff58e78fe46d39d7aa8",
+      "sha256:25a70bbc63cdae26f376f1876c33ae05549ee14e3ef789fd7db1a6fb9fb6eb8e",
+      "sha256:7427f29a5decf56cb3015df47898ae06cf771bc43d710ee2f7c708bed6cfefa6",
+      "sha256:77a4138b79bf6fe3d439bed55954e58f21283421f0dc1d659e89db10ef2e87ed",
+      "sha256:a444badefba2889a9a5c811b13d6e21a71b605d652608c4c5355e0ba6f5eb046",
+      "sha256:b35ddcadb73f2e5c0492e81d174735b6091c50568796d565ab667213a9f88a31",
+      "sha256:ed805142908d835b216e621feed410d0652c44c780ac6fb5553208e0f8d79ac6",
+      "sha256:a089fb48e9c72e4005142cbbbb9a6f120aa384650db27d65f701378c66959c27",
+      "sha256:770891ec87642b1e6a0fb49b824a13cb85207eacb1c0059e3968765b0e71db3b",
+      "sha256:076829a95ccd016cc3cbfb87993af03dc12642c1c8bfbb7e9075b59194cfbc06",
+      "sha256:25081ad8602bb11646b81a0640d489ac3293aa5604ee41d0a023b59dd7ab09e1",
+      "sha256:bb8f66a343a1dff98b5d24dd7cbd231be756b43484e149935fdd9c1b6272cd14",
+      "sha256:d781da6881a5b0ade74841c369c5e2ca3714eeca3520819bf6e71653f575a08e",
+      "sha256:033051a89707cad9cbe585f71e33f2d28f3b58be60808a669ccf6530491cc2d9",
+      "sha256:1a5cbc5296b33c1514ebf3a551f9bb75e367220b207e9198200fb1f9d47b0bab",
+      "sha256:2b1451b0c3d48bded8adfa3ddcc57ed724a61f9a8b43ba5b77bbf2f1c2b99992",
+      "sha256:43db462370986353a8343f3c0731f0ea75645d9699d47c25467564adcbc2c07f",
+      "sha256:6e9439c9ffe25ef51e70d40cba60a007928e412128f1afc5af5da0e7157fdca8",
+      "sha256:61396b2d01e6fccffea0d5bf68ceed6603a73d68b922013b9f896053e426ebcc",
+      "sha256:a0f5bb40b57bf2f838dd3f523c79400fc0c2ff0bdabb2015ba5891b57df635dd",
+      "sha256:e450364f41a35264edd62b966225e11a090adace925ff774d018f7e6d67fa82a",
+      "sha256:4f6dfd9fcaf35e2105392bb9cd454a972572b7753406f90232e0d37b19495c07",
+      "sha256:d2c7ab854fc42c8efc4e6269058a9eb31c7b3a45a58ece414a7cd9f5835e7c40",
+      "sha256:7807e6d390b3847ece4a4fa750d35d4e2a51e2bee6effa97efe1f83b97fc568d",
+      "sha256:d48119b58f6b0fa97cd4336af7d44c947687bd7226db6b9c1b79445f5e424023",
+      "sha256:a6d751d7bfb50e41433885ce74fe5026d8c859218fbc724313424548f0621cef",
+      "sha256:66e3b4c80d82f0b7b234dc8245d4957df8b3ba5ffd681b366c83b773f9c1bd7c",
+      "sha256:2e778c1ed6b6bab56963237b9d7b5a0d5d19da5327c7b6da30783bd302823780",
+      "sha256:6004db539b072b378e09002dc195800ab72bd24c1a2335dd26331ae26a02d656",
+      "sha256:46e0aa1ff248a794a7f4e729112de3ed06ea1b3fbab541a51f6783ed40728906",
+      "sha256:c54da3300b6720e970f3d99be64a100262ddfca87fdc00ef22a8cbf06d96358c",
+      "sha256:3df5249eb5677f8b9636f3eeaddb10bf4b5ec4bb43a3807dd913dd4124731ff6",
+      "sha256:52f6ea37ca193e065a5656dd6be98e79222d3c19d6afcb58fb465a24b1f3356d",
+      "sha256:d99060c397ae8a5ffbf1306faa534c2ac1b18d3c99967995f096d1614ef11fa7",
+      "sha256:3ff6102e74218ce2886cb6e911a03d0ff3cb9d96ae5334e39052712a255d63e8",
+      "sha256:45ac9676b93ac2274b969e89a8a3664ad71bfaa4d7b2c0bbaff8ef6c387fdec9",
+      "sha256:7348cbf15f16eb2bb714e746e71bf050d8c5ce1b48c2e20f08c8f0de04d45e45",
+      "sha256:29f69359a160b0f6626e3787d38ddbb1cadf4bca6b4549448923cc669263b7aa",
+      "sha256:cda02ac687177611d2ef70f0d4864fa3752bb0960f91fb730bcd071286b3d6d9",
+      "sha256:853eb06b793f1e36ff13f85415f6db99d6d44a7b8adfd5020fba591165d85e67",
+      "sha256:992ac294d6311a2ed6dce387bd1f0dbdce5d2e114f22bf01def2064185eb4187",
+      "sha256:f6608a1db6288b8faffb879d6b82bccfa6ac3f71aeff73b1fed75df38df83e42",
+      "sha256:efb7ae8d969e8ecbff991400adebcdfdaa0779745d859615361205bbb2668a2c",
+      "sha256:30e71469d10e4391101897b236ba10a10bbd5aa40543a1041c443ab73b8faecb",
+      "sha256:ffd77352c12eb5db84a76a442405765152b4fe67f1ed191448366956c08c7233",
+      "sha256:dccdd628c03215243646e2a57a1df62f03d862ce191fe9c99b29a34a39b08fc0",
+      "sha256:f4640ec914666bec6a1a35e1fcda57f805d4dcdb2e0daa7c1a1d36ac8f82a24f",
+      "sha256:5ed128f4d32a21cf01798dc26f0a642ce5b747b06c5098db91cc366148b126c1",
+      "sha256:be46179cfe71f24c196b1350dd39811f2b254008de93fb4b3466b3ca08168fea",
+      "sha256:ee42b80fa7197f1a311f660d6f69e07d67f6d7c4c8b319d13a67e5e14feafd68",
+      "sha256:d3425a262d4db0b984063039e12c33db92242df99ca44e59e0e34de973715d4e",
+      "sha256:91531e3a3ffdebefded09efd89d5bbffe67106d99ec7484151eb4771a7126359"
+    ]
+  },
+  "history": [
+    {
+      "runner_version": "qwen/qwen3-next-80b-a3b-instruct",
+      "run_date": "2026-06-05",
+      "effect_pp": 0,
+      "verdict": "placebo"
+    }
+  ],
+  "run_date": "2026-06-05"
+}
