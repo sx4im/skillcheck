@@ -28,7 +28,7 @@ Do not publish to npm until every item below is complete.
 3. Run the capped 20-skill corpus:
 
    ```bash
-   node dist/bin/skillcheck.js corpus run --corpus corpus/launch-20.json --results results/launch/$(date -u +%Y%m%dT%H%M%SZ) --tasks 10 --trials 3 --concurrency 1
+   NVIDIA_REQUEST_DELAY_MS=3000 node dist/bin/skillcheck.js corpus run --corpus corpus/launch-20.json --results results/launch/$(date -u +%Y%m%dT%H%M%SZ) --tasks 10 --trials 3 --concurrency 1
    ```
 
 4. Regenerate rot report:

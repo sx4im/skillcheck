@@ -647,3 +647,20 @@
   - `npm run build`: passed.
 - Gate status:
   - Still not passed. The full 20-skill corpus run must be retried after the grader parser fix.
+
+### M5 - Serialized Run Hit 429 At 1500ms Delay
+
+- Serialized retry command:
+  - Run directory: `results/launch/20260605T034913Z`.
+  - Command: `node dist/bin/skillcheck.js corpus run --corpus corpus/launch-20.json --results results/launch/20260605T034913Z --tasks 10 --trials 3 --concurrency 1`.
+  - Exit marker: `130`, intentionally stopped after HTTP 429s appeared during grading.
+- Evidence:
+  - First completed launch result: `jnmetacode-awesome-claude-md-awesome-nextjs.json`.
+  - Result verdict: `placebo`, effect `20`, CI `[-3.33, 46.67]`.
+  - The second skill reached grading, but NVIDIA returned repeated HTTP 429 responses while using `NVIDIA_REQUEST_DELAY_MS=1500`.
+- Follow-up run policy:
+  - Keep `--concurrency 1`.
+  - Override launch corpus runs with `NVIDIA_REQUEST_DELAY_MS=3000` to stay below the user-reported 40 RPM dashboard ceiling.
+  - This changes only pacing; M5 task count, trial count, scoring, and thresholds remain unchanged.
+- Gate status:
+  - Still not passed. The full 20-skill corpus run must be retried at the slower request pace.
