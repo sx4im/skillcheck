@@ -937,3 +937,23 @@
   - No `awesome-rust` result JSON was written.
 - Gate status:
   - Still not passed. The launch corpus remains at 5 of 20 completed result JSON files, with additional Rust runner calls cached for the next resume.
+
+### M5 - Rust Runner Checkpoint Advanced To Task 9
+
+- Resumed command:
+  - Run directory: `results/launch/20260605T041138Z`.
+  - Command: `NVIDIA_TIMEOUT_MS=45000 NVIDIA_REQUEST_DELAY_MS=5000 NVIDIA_MAX_ATTEMPTS=14 NVIDIA_MAX_RETRY_DELAY_MS=30000 node dist/bin/skillcheck.js corpus run --corpus corpus/launch-20.json --results results/launch/20260605T041138Z --tasks 10 --trials 3 --concurrency 1`.
+  - Exit code: 1.
+- Rate-limit check:
+  - Public NVIDIA API docs confirm hosted LLM NIM calls use `https://integrate.api.nvidia.com/v1` and `POST /v1/chat/completions`.
+  - NVIDIA troubleshooting docs describe 429 from NVIDIA-hosted models as the hosted API threshold being exceeded and recommend reducing concurrency.
+  - NVIDIA Developer Forum reports for build.nvidia.com match the dashboard's 40 RPM limit.
+  - The local adapter already uses a static process-wide queue, and launch resumes use `--concurrency 1`; `NVIDIA_REQUEST_DELAY_MS=5000` keeps request starts well below 40 RPM.
+- Evidence:
+  - The run skipped the five existing completed results and reused cached Rust generated tasks plus cached Rust runner outputs.
+  - Rust runner execution advanced past the prior failure and completed through task `t008` trial 3/3 `no_skill`.
+  - The failure occurred on task `t009` trial 1/3 `with_skill` after NVIDIA connection retries through retry `13/14`.
+  - Final error: `Connection error.`
+  - No `awesome-rust` result JSON was written.
+- Gate status:
+  - Still not passed. The launch corpus remains at 5 of 20 completed result JSON files, with additional Rust runner calls cached for the next resume.
