@@ -1,0 +1,61 @@
+import { mkdtemp } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
+import path from 'node:path';
+import { describe, expect, it } from 'vitest';
+import type { NvidiaNimClient } from '../src/adapters/nvidia-nim.js';
+import { JsonCache } from '../src/cache.js';
+import type { NvidiaConfig } from '../src/env.js';
+import { gradeOutputs } from '../src/grade.js';
+import type { GeneratedTask, TrialOutput } from '../src/types.js';
+
+describe('gradeOutputs', () => {
+  it('retries when the grader returns malformed JSON', async () => {
+    const cacheDir = await mkdtemp(path.join(tmpdir(), 'skillcheck-grade-cache-'));
+    let calls = 0;
+    const client = {
+      complete: async () => {
+        calls += 1;
+        return {
+          content: calls === 1 ? '{ score: 1 }' : '{"score":1,"reason":"meets criterion"}',
+          model: 'grader',
+          usage: { promptTokens: 1, completionTokens: 1, totalTokens: 2 }
+        };
+      }
+    } as unknown as NvidiaNimClient;
+    const config = {
+      baseUrl: 'https://example.test',
+      apiKey: 'test',
+      timeoutMs: 1000,
+      requestDelayMs: 0,
+      generatorModel: 'generator',
+      graderModel: 'grader',
+      runnerModel: 'runner'
+    } satisfies NvidiaConfig;
+    const tasks: GeneratedTask[] = [
+      {
+        id: 't001',
+        prompt: 'Do the task',
+        criterionType: 'rubric',
+        criterion: 'Output must satisfy the task.'
+      }
+    ];
+    const outputs: TrialOutput[] = [
+      {
+        taskId: 't001',
+        trial: 1,
+        arm: 'with_skill',
+        output: 'The task is satisfied.',
+        model: 'runner',
+        promptTokens: 1,
+        completionTokens: 1,
+        totalTokens: 2,
+        transcriptHash: 'sha256:test'
+      }
+    ];
+
+    const graded = await gradeOutputs(tasks, outputs, config, client, new JsonCache(cacheDir));
+
+    expect(calls).toBe(2);
+    expect(graded[0]?.pass).toBe(true);
+  });
+});

@@ -74,30 +74,51 @@ export async function gradeOutputs(
     }
 
     console.error(`[eval] grade ${output.taskId} trial ${output.trial}`);
-    const response = await cache.getOrSet(
-      'grader',
-      { model: config.graderModel, criterion: task.criterion, output: output.output, promptVersion: 5, responseFormat: 'json_object' },
-      () =>
-        client.complete({
+    let grade: GradePayload | undefined;
+    let lastError: unknown;
+    for (let attempt = 1; attempt <= 3; attempt += 1) {
+      const response = await cache.getOrSet(
+        'grader',
+        {
           model: config.graderModel,
-          temperature: 0,
-          maxTokens: 120,
+          criterion: task.criterion,
+          output: output.output,
+          promptVersion: 6,
           responseFormat: 'json_object',
-          chatTemplateKwargs: { thinking: false },
-          messages: [
-            {
-              role: 'system',
-              content:
-                'You are a blind evaluator. Grade only the provided output against the success criterion. You do not know which experimental arm produced it. Do not explain your reasoning. Return only JSON.'
-            },
-            {
-              role: 'user',
-              content: `Success criterion:\n${task.criterion}\n\nOutput to grade:\n${output.output}\n\nReturn exactly one JSON object with this shape: {"score":0,"reason":"brief reason"}. Use score 1 only if the output satisfies the criterion; otherwise use 0.`
-            }
-          ]
-        })
-    );
-    const grade = parseGrade(response.content);
+          attempt
+        },
+        () =>
+          client.complete({
+            model: config.graderModel,
+            temperature: 0,
+            maxTokens: 240,
+            responseFormat: 'json_object',
+            chatTemplateKwargs: { thinking: false },
+            messages: [
+              {
+                role: 'system',
+                content:
+                  'You are a blind evaluator. Grade only the provided output against the success criterion. You do not know which experimental arm produced it. Do not explain your reasoning. Return only valid JSON.'
+              },
+              {
+                role: 'user',
+                content: `Success criterion:\n${task.criterion}\n\nOutput to grade:\n${output.output}\n\nReturn exactly one JSON object with this shape: {"score":0,"reason":"brief reason"}. Use score 1 only if the output satisfies the criterion; otherwise use 0. Do not include markdown or commentary.`
+              }
+            ]
+          })
+      );
+
+      try {
+        grade = parseGrade(response.content);
+        break;
+      } catch (error) {
+        lastError = error;
+        console.error(`[eval] grader returned invalid JSON on attempt ${attempt}/3`);
+      }
+    }
+    if (!grade) {
+      throw lastError instanceof Error ? lastError : new Error('Grader did not return a valid grade after retries');
+    }
     graded.set(output.transcriptHash, {
       ...output,
       score: grade.score,

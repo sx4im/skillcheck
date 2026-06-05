@@ -607,3 +607,21 @@
   - `README.md` and `RELEASE-CHECKLIST.md` now show the M5 launch corpus command with `--concurrency 1`.
 - Gate status:
   - Still not passed. The full 20-skill corpus run must be retried with serialized NVIDIA calls.
+
+### M5 - Serialized Run Reached Grading, Then Failed
+
+- Serialized full corpus command:
+  - Run directory: `results/launch/20260605T033842Z`.
+  - Command: `node dist/bin/skillcheck.js corpus run --corpus corpus/launch-20.json --results results/launch/20260605T033842Z --tasks 10 --trials 3 --concurrency 1`.
+  - Exit code: 1.
+- Failure evidence:
+  - The run executed all 10 tasks for `awesome-nextjs`, with 3 trials per arm.
+  - The failure occurred during blind grading after several grade calls.
+  - Error: `Expected property name or '}' in JSON at position 1 (line 1 column 2)`.
+  - No result JSON files were produced.
+- Follow-up implementation change:
+  - `gradeOutputs` now retries malformed grader JSON up to 3 attempts with separate cache keys.
+  - The retry keeps grader inputs blind: criterion plus output only, no arm label and no skill body.
+  - Added a unit test proving malformed grader JSON is retried.
+- Gate status:
+  - Still not passed. The full 20-skill corpus run must be retried after the grader retry fix.
