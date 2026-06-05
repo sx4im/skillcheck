@@ -1,0 +1,62 @@
+[
+  {
+    "id": "t001",
+    "prompt": "Use environment variables for database URL and secret key with default fallbacks.",
+    "criterionType": "rubric",
+    "criterion": "App must read DB_URL and SECRET_KEY from env vars and use defaults if unset."
+  },
+  {
+    "id": "t002",
+    "prompt": "Add Pydantic model for User with fields id (int), name (str), email (str) and validate email format.",
+    "criterionType": "rubric",
+    "criterion": "Model must reject invalid email formats and accept valid ones with correct field types."
+  },
+  {
+    "id": "t003",
+    "prompt": "Add rate limiting to /users endpoint allowing max 10 requests per minute.",
+    "criterionType": "rubric",
+    "criterion": "Exceeding 10 requests/minute must return 429 Too Many Requests status."
+  },
+  {
+    "id": "t004",
+    "prompt": "Use async/await for database queries in all endpoint handlers.",
+    "criterionType": "rubric",
+    "criterion": "All database operations must use async/await syntax with async-compatible drivers."
+  },
+  {
+    "id": "t005",
+    "prompt": "Implement exception handler for HTTPException returning custom JSON {\"error\":\"message\"}",
+    "criterionType": "rubric",
+    "criterion": "All HTTPException instances must return JSON with exact structure {\"error\":\"message\"}."
+  },
+  {
+    "id": "t006",
+    "prompt": "Protect /admin endpoint with JWT token authentication using OAuth2PasswordBearer.",
+    "criterionType": "rubric",
+    "criterion": "Endpoint must return 401 if no valid JWT token is provided in Authorization header."
+  },
+  {
+    "id": "t007",
+    "prompt": "Use OpenAPI tags to group /users and /admin endpoints under 'User Management'.",
+    "criterionType": "rubric",
+    "criterion": "OpenAPI docs must show both endpoints grouped under a tag named 'User Management'."
+  },
+  {
+    "id": "t008",
+    "prompt": "Generate OpenAPI schema and save it to openapi.json in project root.",
+    "criterionType": "rubric",
+    "criterion": "File openapi.json must exist in root and contain valid OpenAPI 3.0 schema."
+  },
+  {
+    "id": "t009",
+    "prompt": "Configure FastAPI to serve static files from ./static at /static/ path.",
+    "criterionType": "rubric",
+    "criterion": "Files in ./static must be accessible via GET /static/filename without 404."
+  },
+  {
+    "id": "t010",
+    "prompt": "Implement dependency injection for database session using FastAPI's Depends().",
+    "criterionType": "rubric",
+    "criterion": "Dependency must provide a session object and close it after request completion without leaks."
+  }
+]

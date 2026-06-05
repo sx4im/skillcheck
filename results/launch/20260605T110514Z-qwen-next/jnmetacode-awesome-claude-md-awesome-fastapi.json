@@ -1,0 +1,188 @@
+{
+  "skill": {
+    "name": "CLAUDE.md - FastAPI 项目规范",
+    "source": "https://github.com/jnMetaCode/awesome-claude-md/blob/fe38fcd8f245460b989879c9155a16404e77cffa/by-framework/fastapi/CLAUDE.md",
+    "format": "CLAUDE.md",
+    "commit_hash": "e256728fda4827e12524eaed2677fc0f93a6f29840f0c9a7f9987991f1b817bf",
+    "domain": "CLAUDE.md - FastAPI 项目规范"
+  },
+  "config": {
+    "runner_model": "qwen/qwen3-next-80b-a3b-instruct",
+    "runner_version": "qwen/qwen3-next-80b-a3b-instruct",
+    "grader_model": "qwen/qwen3-next-80b-a3b-instruct",
+    "grader_version": "qwen/qwen3-next-80b-a3b-instruct",
+    "generator_model": "qwen/qwen3-next-80b-a3b-instruct",
+    "trials": 3,
+    "tasks": 10,
+    "temperature": 0.7,
+    "mode": "forced-injection"
+  },
+  "result": {
+    "effect_pp": -10,
+    "ci_pp": [
+      -26.67,
+      10
+    ],
+    "verdict": "placebo",
+    "with_skill_pass": 0.5,
+    "no_skill_pass": 0.6,
+    "token_overhead": 1027,
+    "value_per_1k_tokens": -9.74
+  },
+  "tasks": [
+    {
+      "id": "t001",
+      "prompt": "Use environment variables for database URL and secret key with default fallbacks.",
+      "criterion_type": "rubric",
+      "criterion": "App must read DB_URL and SECRET_KEY from env vars and use defaults if unset.",
+      "arm_a_pass_rate": 1,
+      "arm_b_pass_rate": 0
+    },
+    {
+      "id": "t002",
+      "prompt": "Add Pydantic model for User with fields id (int), name (str), email (str) and validate email format.",
+      "criterion_type": "rubric",
+      "criterion": "Model must reject invalid email formats and accept valid ones with correct field types.",
+      "arm_a_pass_rate": 1,
+      "arm_b_pass_rate": 1
+    },
+    {
+      "id": "t003",
+      "prompt": "Add rate limiting to /users endpoint allowing max 10 requests per minute.",
+      "criterion_type": "rubric",
+      "criterion": "Exceeding 10 requests/minute must return 429 Too Many Requests status.",
+      "arm_a_pass_rate": 0,
+      "arm_b_pass_rate": 1
+    },
+    {
+      "id": "t004",
+      "prompt": "Use async/await for database queries in all endpoint handlers.",
+      "criterion_type": "rubric",
+      "criterion": "All database operations must use async/await syntax with async-compatible drivers.",
+      "arm_a_pass_rate": 1,
+      "arm_b_pass_rate": 1
+    },
+    {
+      "id": "t005",
+      "prompt": "Implement exception handler for HTTPException returning custom JSON {\"error\":\"message\"}",
+      "criterion_type": "rubric",
+      "criterion": "All HTTPException instances must return JSON with exact structure {\"error\":\"message\"}.",
+      "arm_a_pass_rate": 1,
+      "arm_b_pass_rate": 1
+    },
+    {
+      "id": "t006",
+      "prompt": "Protect /admin endpoint with JWT token authentication using OAuth2PasswordBearer.",
+      "criterion_type": "rubric",
+      "criterion": "Endpoint must return 401 if no valid JWT token is provided in Authorization header.",
+      "arm_a_pass_rate": 0,
+      "arm_b_pass_rate": 0
+    },
+    {
+      "id": "t007",
+      "prompt": "Use OpenAPI tags to group /users and /admin endpoints under 'User Management'.",
+      "criterion_type": "rubric",
+      "criterion": "OpenAPI docs must show both endpoints grouped under a tag named 'User Management'.",
+      "arm_a_pass_rate": 0,
+      "arm_b_pass_rate": 1
+    },
+    {
+      "id": "t008",
+      "prompt": "Generate OpenAPI schema and save it to openapi.json in project root.",
+      "criterion_type": "rubric",
+      "criterion": "File openapi.json must exist in root and contain valid OpenAPI 3.0 schema.",
+      "arm_a_pass_rate": 0,
+      "arm_b_pass_rate": 0
+    },
+    {
+      "id": "t009",
+      "prompt": "Configure FastAPI to serve static files from ./static at /static/ path.",
+      "criterion_type": "rubric",
+      "criterion": "Files in ./static must be accessible via GET /static/filename without 404.",
+      "arm_a_pass_rate": 0,
+      "arm_b_pass_rate": 0
+    },
+    {
+      "id": "t010",
+      "prompt": "Implement dependency injection for database session using FastAPI's Depends().",
+      "criterion_type": "rubric",
+      "criterion": "Dependency must provide a session object and close it after request completion without leaks.",
+      "arm_a_pass_rate": 1,
+      "arm_b_pass_rate": 1
+    }
+  ],
+  "reproducibility": {
+    "task_suite_path": "results/tasks/8131c5c092e7c913c629370f65d2d52115d119320786fbc4a03d4068b98df074.json",
+    "transcript_hashes": [
+      "sha256:f1be86aa7b03864ae0d1826ea8c523dc40881aa287e913949e105b25f0384cb8",
+      "sha256:c0f80ce582b5d937b8b6c24c29223e0c5698a27ec6cae983890e91be2b62b990",
+      "sha256:f2717988ca34b17e92a6b0e5eb6e4245f8b979db2e8f0d303b0ca83aa63580bf",
+      "sha256:42b735f02fc72cb0cc62605dd27f108578836902c5cc4df2a35007468c42c40a",
+      "sha256:5c860d16508f9c36edd2ab7f554bee5081a2e7c6f7cb4dc49e28d4e893afa973",
+      "sha256:3889aee2a202768f720149fbdb1c003362803b356b684e667fc4afc70736c08e",
+      "sha256:32d7bf0319acc79ab1e046b26a70619d4449c48e10657840946b395488eab267",
+      "sha256:b1c4789a2de58ab34e1aebb3acfb03d0f741c1659956427842826e3e86d44e00",
+      "sha256:d49ca8e9c41bd79a1dfd3d98994c5b9d412d1cb0cb42dc240fe3e4cd28f03c97",
+      "sha256:1f95e946b4b88ace44911b760a091f123668592b73fd28d9f9dea9c7c25cbea2",
+      "sha256:560bb02cbd2ec93e85a771e96f664d8da07d6da4b88fd5ab9d25fadd58f38cdf",
+      "sha256:5a8cb72c17756abbf7627bf604fb66929d6bae969910efe8cabbee5c05579bd6",
+      "sha256:e0f210d77e57b8e33ccfb56d51337a6b8a869248ac52dd8f65c39c8566bdc554",
+      "sha256:9e8e3e44bf14bfe9b98910de986d24e52ae7fcea85b5070f1a53f438b56f434d",
+      "sha256:59b1e2774922718520d4d5efd41e6db36e16ec932cf9be4e5f72b179c9105e4b",
+      "sha256:cbfd9800a911a775d9391d740d2782bf5d11e363b7b12c0cae4d3b5eb7c445d3",
+      "sha256:7df2d706eca39eba5e8ee532aa2349be8399aa9bf385dadfd4a6a9b953d59952",
+      "sha256:a44accbaf26c3bdcdfa1289c3eef1e313bf775635f0e6c080e776058ea5e8bf7",
+      "sha256:a8ecd42eb7e6b60a3ced6c3f46b18e96527b1c8da99f94ce727326a75669e986",
+      "sha256:0f2225e05337476c8c9a586b40185f5906a3e3328626284e40fc62b5b9169182",
+      "sha256:f26871ab8c0e080dade8133cef1616cac124252391817553f997bb09afe883cb",
+      "sha256:3b309fdb0b22f18218c7981760b1cdff771b802273610383d0b440e0d5d48f52",
+      "sha256:04ec63642c15ceb5db2e12a82d975d0b55ff9b45cda29b23e9bbe2e51fd1be7a",
+      "sha256:128abc20dcbb405ba0e1f806c3db27494b22bf6bfdf062b7eb00c4fe0957de7a",
+      "sha256:e3bded67a7716ad0dd11f21f2bc478ea701de772ceff889c8b484d8b94db77f2",
+      "sha256:fbf6b5dcd624ca9cfb768e596ac3195338955e7228c178bbb899ba8d4d8c0e12",
+      "sha256:65a24e2bafd51d3875d21ae26c190e5e9223ab17e53cc15a0976108c496f46b7",
+      "sha256:22681903d87f9e13b12c1bc6505808a564cf5e6b6da1cac2afc795ec343764b8",
+      "sha256:cee2a44462bfa8b9339354459cb7296e9e938fdfc4b88659d484202fbb9be181",
+      "sha256:0904249198859856396d32a76e907680033077ff6f76244c504bee92dbcfc108",
+      "sha256:11eba7a5f8a0c8af411f9b9dd2317038107fad1c5a97948310fe816ed7e68d48",
+      "sha256:d67b50cc9c02a698161f3712c4b54cf79ead0b1bbecbd86ea8d7b99b0b0b6eeb",
+      "sha256:652423fa09199e4862c07b4e7d4c53fcf24c95b6ae0d871e11f1afa237d87105",
+      "sha256:7e3b86578e0a9d131d70649414d4f76d5defe9d4c2d892a8aa5e4d56410ef3c4",
+      "sha256:72b3165516f6f4478c4845e60264b20fcb6436bbefca477bbaf5d0e1c206a60a",
+      "sha256:d07272689f148c043e490503a01adb415478387428ba8cbbaa6fd79a387ba0b6",
+      "sha256:550b1dbe5dda27692dde7602fea0ba9b05c2e98317f428f5b416ad70b225eb69",
+      "sha256:e41a36050f693419e980ef76551e3cf75c23e5e3093d9e283c754016f294b6fa",
+      "sha256:385f5258d69c4e463239725685876720b10ef48beab643725b8f99294057d29a",
+      "sha256:9cfa7ec392a7b22e76250fe51fbbd77dddb219427b1df8387e3f1aae24de5052",
+      "sha256:53773583138b6bd8377cfd78cdde9492760b3b0136780d3d3d067312b7df9d3e",
+      "sha256:17a2740628123131dbdd2a5a6a1d9a14f24f1c6f372d49e5576f05a6433a1993",
+      "sha256:0b5b49b33b24ab5d7b3cea3821823e1c22f57de8f1bdb5c47d696b25a4b7b3eb",
+      "sha256:58a7766b07e3de493ee03af688b6cefaa1ad1b574baae0d32f47baf1280bce99",
+      "sha256:37ad9c4794685929120d802f8a202ea66a88263584da98a2f4f7968dd5eb7f4b",
+      "sha256:90cfa84f1271767e787865280925ef2aff63acce5afa7e0ac813d1417e4cf921",
+      "sha256:010e8d5401cb9dad8ceb8ac3f72a131096fd6c286d8dfd602193ed1e7b7bd475",
+      "sha256:53b0fc7a1f0560fb1660b8621aacf2c626e12d7a7d7d2c84fe5cd3ffb5c37235",
+      "sha256:05084ffa1cea13710c612f1c0fd5f1cd42f45361336649e4ab9356859ce79d74",
+      "sha256:5b71015fe07547827a11beef57daa2fe6950c9043b292ed5a5e63154016491e7",
+      "sha256:4d9a2e4c94d6035edc7fff7eb8baa278944a58993f596c667150ac6a6db12d5a",
+      "sha256:047644090b31c41bb9dabd2b6384f46f469b21a560910878bad34c33c69e2b39",
+      "sha256:e0528765c4a5293054f59f49ea07c8d06d32f3a47712fe49eb62e340f014a3b2",
+      "sha256:52b0f63106d69a12aff729acfb36d16ef1f2255ee23f066dc12f463e24329a53",
+      "sha256:65210a9d8a34df851af35f17c015a66639623789cb9b335a708fc88547cd08b4",
+      "sha256:c006a2519aacd6f222146ce6674f72111f5eb3cf18a32e0bb4516759241df8a9",
+      "sha256:a7766fdc82a430415adf56172d94a73017e9f3012f708694cb81aeaf8efd0238",
+      "sha256:61407e50fcbd932f0fd27b7a1f3473af8397d13ee02a1430dbd2388cc0a77903",
+      "sha256:d45823cc5da2dc0f101fbb9b40d9faea4cf396748297ddc6fba6c0b5ede633d2",
+      "sha256:b1bc7b82fe3bee769a74164329ee605520d2098a5ab2135190eef90a9bd2b506"
+    ]
+  },
+  "history": [
+    {
+      "runner_version": "qwen/qwen3-next-80b-a3b-instruct",
+      "run_date": "2026-06-05",
+      "effect_pp": -10,
+      "verdict": "placebo"
+    }
+  ],
+  "run_date": "2026-06-05"
+}
