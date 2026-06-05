@@ -1,0 +1,62 @@
+[
+  {
+    "id": "t001",
+    "prompt": "Identify any existing systems or tools the user wants the solution to replace or complement.",
+    "criterionType": "rubric",
+    "criterion": "All referenced systems are listed as named by the user, with no assumptions about functionality overlap."
+  },
+  {
+    "id": "t002",
+    "prompt": "Compile all user preferences for UI/UX style, tone, or interaction patterns mentioned.",
+    "criterionType": "rubric",
+    "criterion": "All UI/UX preferences are listed as stated, with no interpretation of implied design choices."
+  },
+  {
+    "id": "t003",
+    "prompt": "Extract non-functional requirements such as performance, scalability, or security constraints stated in the conversation.",
+    "criterionType": "rubric",
+    "criterion": "All non-functional requirements are correctly identified and no inferred constraints are included."
+  },
+  {
+    "id": "t004",
+    "prompt": "List all user roles or personas referenced in the conversation with their associated needs.",
+    "criterionType": "rubric",
+    "criterion": "Each role is named as stated and linked only to needs explicitly attributed to it in the conversation."
+  },
+  {
+    "id": "t005",
+    "prompt": "Document any user-specified data formats, protocols, or APIs that must be supported.",
+    "criterionType": "rubric",
+    "criterion": "All data formats and protocols are listed verbatim from the conversation without modification."
+  },
+  {
+    "id": "t006",
+    "prompt": "Identify and list all functional features explicitly requested by the user during the conversation.",
+    "criterionType": "rubric",
+    "criterion": "Every functional feature mentioned is listed without omission or addition, using the user’s exact terminology where possible."
+  },
+  {
+    "id": "t007",
+    "prompt": "Document all stated success criteria or metrics the user expects the solution to achieve.",
+    "criterionType": "rubric",
+    "criterion": "Success metrics are listed verbatim from the conversation with no interpretation or numerical estimation."
+  },
+  {
+    "id": "t008",
+    "prompt": "Extract all user requirements mentioned in the conversation and list them as numbered bullet points without interpretation.",
+    "criterionType": "rubric",
+    "criterion": "All user requirements are accurately captured as distinct, uninterpreted statements with no added assumptions."
+  },
+  {
+    "id": "t009",
+    "prompt": "List all integrations or third-party systems referenced by the user as required.",
+    "criterionType": "rubric",
+    "criterion": "Each integration is named precisely as stated, with no added assumptions about compatibility or scope."
+  },
+  {
+    "id": "t010",
+    "prompt": "Extract any stated user expectations around accessibility or inclusivity.",
+    "criterionType": "rubric",
+    "criterion": "Accessibility requirements are captured exactly as stated, with no assumptions about WCAG levels or standards."
+  }
+]
