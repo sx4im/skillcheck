@@ -1,0 +1,188 @@
+{
+  "skill": {
+    "name": "Test-Driven Development",
+    "source": "https://github.com/mattpocock/skills/blob/aaf2453fbdfe7a15c07f11d861224f34ab4b53cb/skills/engineering/tdd/SKILL.md",
+    "format": "SKILL.md",
+    "commit_hash": "af059705061156fd4845ddbb736fe92b564118ac5f03551e09ef9e8f6d970638",
+    "domain": "Test-driven development with red-green-refactor loop. Use when user wants to build features or fix bugs using TDD, mentions \"red-green-refactor\", wants integration tests, or asks for test-first development."
+  },
+  "config": {
+    "runner_model": "qwen/qwen3-next-80b-a3b-instruct",
+    "runner_version": "qwen/qwen3-next-80b-a3b-instruct",
+    "grader_model": "qwen/qwen3-next-80b-a3b-instruct",
+    "grader_version": "qwen/qwen3-next-80b-a3b-instruct",
+    "generator_model": "qwen/qwen3-next-80b-a3b-instruct",
+    "trials": 3,
+    "tasks": 10,
+    "temperature": 0.7,
+    "mode": "forced-injection"
+  },
+  "result": {
+    "effect_pp": -30,
+    "ci_pp": [
+      -53.33,
+      -6.67
+    ],
+    "verdict": "harms",
+    "with_skill_pass": 0.4,
+    "no_skill_pass": 0.7,
+    "token_overhead": 931,
+    "value_per_1k_tokens": -32.22
+  },
+  "tasks": [
+    {
+      "id": "t001",
+      "prompt": "Write a test that expects an array to be sorted after calling a sort method, implement sorting, then refactor to use built-in sort.",
+      "criterion_type": "rubric",
+      "criterion": "Test fails on unsorted output, passes after correct sort, and refactored code replaces manual logic with built-in method.",
+      "arm_a_pass_rate": 0,
+      "arm_b_pass_rate": 0
+    },
+    {
+      "id": "t002",
+      "prompt": "Write a test for a discount calculator that doesn’t apply tiered discounts, implement logic, then refactor to use a lookup table.",
+      "criterion_type": "rubric",
+      "criterion": "Test fails on tiered cases, passes after implementation, and refactored code replaces conditionals with a lookup table.",
+      "arm_a_pass_rate": 0,
+      "arm_b_pass_rate": 0
+    },
+    {
+      "id": "t003",
+      "prompt": "Create a test for a user authentication function that returns false for empty passwords, implement logic, then refactor to use a helper method.",
+      "criterion_type": "rubric",
+      "criterion": "Test fails before implementation, passes after fixing logic, and refactored code uses a reusable helper for validation.",
+      "arm_a_pass_rate": 1,
+      "arm_b_pass_rate": 1
+    },
+    {
+      "id": "t004",
+      "prompt": "Write a failing test for a URL validator that accepts malformed URLs, fix validation, then refactor to use a single regex pattern.",
+      "criterion_type": "rubric",
+      "criterion": "Test fails on invalid URLs, passes after fix, and refactored code uses one defined regex pattern.",
+      "arm_a_pass_rate": 0,
+      "arm_b_pass_rate": 1
+    },
+    {
+      "id": "t005",
+      "prompt": "Write a test that expects an exception when dividing by zero, implement the check, then refactor to extract validation logic.",
+      "criterion_type": "rubric",
+      "criterion": "Test fails before implementation, passes after adding exception handling, and refactored code isolates validation cleanly.",
+      "arm_a_pass_rate": 1,
+      "arm_b_pass_rate": 0
+    },
+    {
+      "id": "t006",
+      "prompt": "Write a failing test for a temperature converter that doesn’t handle negative Celsius, fix the logic, then refactor to extract conversion constants.",
+      "criterion_type": "rubric",
+      "criterion": "Test fails on negative input, passes after fix, and refactored code uses constants for conversion factors.",
+      "arm_a_pass_rate": 0,
+      "arm_b_pass_rate": 1
+    },
+    {
+      "id": "t007",
+      "prompt": "Create a test for a shopping cart that rejects adding zero-quantity items, implement validation, then refactor to use a guard clause.",
+      "criterion_type": "rubric",
+      "criterion": "Test fails before validation, passes after implementation, and refactored code uses guard clause for early return.",
+      "arm_a_pass_rate": 0,
+      "arm_b_pass_rate": 1
+    },
+    {
+      "id": "t008",
+      "prompt": "Write a failing test for a pagination function that returns wrong page count, fix calculation, then refactor to avoid magic numbers.",
+      "criterion_type": "rubric",
+      "criterion": "Test fails on incorrect count, passes after fix, and refactored code replaces magic numbers with named variables.",
+      "arm_a_pass_rate": 0,
+      "arm_b_pass_rate": 1
+    },
+    {
+      "id": "t009",
+      "prompt": "Create a test for a currency converter that fails on unsupported currencies, implement check, then refactor to use a set of allowed currencies.",
+      "criterion_type": "rubric",
+      "criterion": "Test fails on unsupported currency, passes after check, and refactored code uses a set for validation.",
+      "arm_a_pass_rate": 1,
+      "arm_b_pass_rate": 1
+    },
+    {
+      "id": "t010",
+      "prompt": "Write a failing test for a function that adds two numbers, then implement the function to pass it. Refactor to remove duplication.",
+      "criterion_type": "rubric",
+      "criterion": "Test fails initially, passes after implementation, and refactored code has no duplication while maintaining test coverage.",
+      "arm_a_pass_rate": 1,
+      "arm_b_pass_rate": 1
+    }
+  ],
+  "reproducibility": {
+    "task_suite_path": "results/tasks/a7ab21f07ab21edad990c9bb02d3e2b4f03c5580b171498966eaeb6d598c9661.json",
+    "transcript_hashes": [
+      "sha256:c62bb9277c610c5c7c029eed37336913ecf8914bad2c9c3d6b034cc06289cd7a",
+      "sha256:793e88abac4619e903cf44aa7928f31b9d9c4fbacb09d7d4b5466da968e3faf2",
+      "sha256:ca60525219f445b4ac90a2bbfa36282191766a383d67fec2eb205d6e0b9d650c",
+      "sha256:98c7b3f2636f5051763371d093b02252ef253024965249113d2e7c665c8fb2eb",
+      "sha256:6e5f7c00189c7f3b82844247770fb544e0a96ea62dca05f0dcef8677f614b7d6",
+      "sha256:b9be5eb5fc6097b6dc81f3578c61404c10f596c0cdfe077e460f84ce78b3be10",
+      "sha256:60b368c4fe3cc689d92896d46ebf424399ecc024ecaf1d465ce41523adc90e94",
+      "sha256:518b763039a0c44406f413c12612384a463ea0773021db926c77f0566a27e5bb",
+      "sha256:2f5374ab889178ccbe3f4fa0e03a488e9491acbc3bade8d826d4a2b12559af0c",
+      "sha256:c018d9c540a89936d8669da2132c11fc2ec95918a386c4f47b0ada08c3471408",
+      "sha256:ea85a43c9082d68226554d0ca629cc1c424dd1f4fb1963ebb9f032bdfa38df6a",
+      "sha256:713497ff037561b7c14d2e2e972ca200f200d9b079852b3882585da6708380f4",
+      "sha256:bd5b441cb5a4f316272eb7500d1200412fd34ffafbed238277d4d1327deeb58c",
+      "sha256:a9e545afe7b2f44bd14c909ea568302e64b525526efda495ba4f1bc6970c1978",
+      "sha256:39074069e87105be65cc5d7fb0f2c96e8d5fc09a8019dd5b6c07bb0c0405b0e4",
+      "sha256:dc55d04b036fbaa67a42024baaa4b7a5b8ce9f722e11035875d81eb93f38c800",
+      "sha256:5c21d6b5486793d803d721e3fce36da8511f54c3e8546a418f9379caefa273d4",
+      "sha256:7cc159a91cf66e477781d8ab281dd1059d1733c5d178ab12244aa2784aeeb948",
+      "sha256:906936f7b103a2d4553649ffc721e2089e07a678a6f4a0f037de4ba7f77d543e",
+      "sha256:5fbeb0134bf637c5de911cf3ac0eb5643c749e40e306e918d320420f10d338af",
+      "sha256:ad478653ca97db8e57c6ade3e14fae70b1b53fbc9924aeab6798fb488b45c23c",
+      "sha256:0b96986a6fd951aa0d5e7c6ac64b5e45cdf8e53d7841a33b93f1ee7a80f1c997",
+      "sha256:4def0e5f5494731bc76d37a675f86db2b9b40d78597084830f21c2168247b0dc",
+      "sha256:603f985d3a1649f76d8ad6096589151a5c253eebbb7283f91d52a64893da50f1",
+      "sha256:075bd6899e4764abaedfe3072be7337cd39f12050a317dbaa313b18aabfc9c52",
+      "sha256:51b9c532dc935f782019f3e666b0ddcc83b480a8d974ab4cbb5f816ac8340899",
+      "sha256:46262fc662ccf791e99c2334ba58112a13d61c6f0074c99845340d03c9302a34",
+      "sha256:e8b3ed79fdab956b5b644a3580dfa85d03830babaa78e8148ece6b5f7749064b",
+      "sha256:196da879c199fb1fddfb0b649155f888e80132258cdbcf25ec1d47e1a2758d95",
+      "sha256:a8765fe5e7cfb4cbdea4ad2ff2b82211df06a156d71a6d9828d5a08a95ec4189",
+      "sha256:23c0eb8623d833c4938cd2cd1c1c65f712729572ea66ba8387d97908807f5490",
+      "sha256:fb15d8fdc4f1b379a8c8520fb1b0b41a8b90d695dd54c5212025235d55737f64",
+      "sha256:ba09729681c19689d3dd848f7a396cd0a18d919579d243d120a70daad557d00b",
+      "sha256:3e665936d937a97ed0571c88fabbe143dd96cac954778a34484bf600030fac71",
+      "sha256:5a1bec6d17084f81b43233cd867eca9dda37ab962d2f79bd98fcabaf297be8ef",
+      "sha256:7a2279c8da33f026ceb46134f2dc29aabeb6e79f33b9f2739978ba3ae8e5a7bb",
+      "sha256:64a10e92ce87f5bba5b6ce25c436c64a31741c925c2087b5796cf1c8048a098c",
+      "sha256:be9fed0b74cdc195e31b262f854e856967f7113aae01da8d669445ee57e7879f",
+      "sha256:d327d42c3eea91d3c53432c4d6740ba6fa89823bc2e83031a79757e745764ba5",
+      "sha256:0a3d28c71c739d5b5546e76af450c1c584eec4e9f995e853924ecca3449f330e",
+      "sha256:b725fb155dc4037f2747a21126439201214a92913543a447f31e955cf9036ce4",
+      "sha256:6f5c2da9e1684325d6852f12350ea4f7a2ec387ee3b4cc8572a18c1f2648068a",
+      "sha256:6de522fdac390d7e4a898ed692101e703af956352c17057ea305db74719b1d4f",
+      "sha256:47ed1fd0e97e14e82ea2654037e9b765939fe2749e7a498f249c6ed3511519bd",
+      "sha256:34cfc76fb07f6b12a53023bb09eae6c025f3ea175636da263ec14d0537dc94df",
+      "sha256:39e921a4adce6fd4fe21d13954cf3e783b7400b153efc8097514c0b851bed2c3",
+      "sha256:6e1061b1f3dd0c8c23906c1a891ee8d09951453730d222f957569c5a6406d3df",
+      "sha256:58469c7563294328716601666c7205c1dd0b2cb656a9a03a5f35b8f1f9371559",
+      "sha256:4f3faa72ce32856b0c4252d39174ae6bfc026cb57319159b83309c9debd137c5",
+      "sha256:9efb23cbeaa32f8b468798c59f48a6f3587c1c49efb7d85ab573d9ed20fe56d6",
+      "sha256:3283478f9c61dc77dc9a7d145188837adef24f74626983e831d3e619625e8c52",
+      "sha256:3e5d03aafa8f4bd8dc8d47993050261ebdd95f94a65fb8d40d7d1ed7ca93c669",
+      "sha256:e81d5bd235a61e5eeed524595360b491327aeb664494047fc3d24a413b2b0c9e",
+      "sha256:1863ccab628a8845295c9e444e1e4dce3d320bb56570eaf175d78536f14f16a3",
+      "sha256:432fde73f58676a22bdd6aade225a9b613bcd39552992d5dcb61d29a7e7b2bd5",
+      "sha256:e191d11d7c9e3f05ca7557b17ce8c9a0f8392c96ddfc0dcb5411de7b0b5906a2",
+      "sha256:3cf59770df19aa5cd3a7749c600c80c6cc86bf4198c8ed8e415eb1dc3bb54307",
+      "sha256:059c0a879fdc60ea437173ed7024d01fd53514b2eb92d9c53c432b6f06b075b5",
+      "sha256:d0d17d86311915cf1975005809963be06f1c20fb714413321a637c8f00130021",
+      "sha256:d3a9e873930e463d0a394fa1ba29ba3e314ef1eeb8307523883199054f8a59ec"
+    ]
+  },
+  "history": [
+    {
+      "runner_version": "qwen/qwen3-next-80b-a3b-instruct",
+      "run_date": "2026-06-05",
+      "effect_pp": -30,
+      "verdict": "harms"
+    }
+  ],
+  "run_date": "2026-06-05"
+}
