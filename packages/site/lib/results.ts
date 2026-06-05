@@ -1,3 +1,4 @@
+import { existsSync, readFileSync } from 'node:fs';
 import { readFile, readdir } from 'node:fs/promises';
 import path from 'node:path';
 
@@ -84,8 +85,19 @@ function configuredPath(root: string, value: string): string {
   return path.isAbsolute(value) ? value : path.join(root, value);
 }
 
+function defaultResultsDir(root: string): string {
+  const latestLaunchPointer = path.join(root, 'results/launch/latest-qwen-next-dir.txt');
+  if (existsSync(latestLaunchPointer)) {
+    const latestLaunchDir = readFileSync(latestLaunchPointer, 'utf8').trim();
+    if (latestLaunchDir) {
+      return configuredPath(root, latestLaunchDir);
+    }
+  }
+  return path.join(root, 'results');
+}
+
 function resultsDir(root: string): string {
-  return configuredPath(root, process.env.SKILLCHECK_RESULTS_DIR ?? 'results');
+  return process.env.SKILLCHECK_RESULTS_DIR ? configuredPath(root, process.env.SKILLCHECK_RESULTS_DIR) : defaultResultsDir(root);
 }
 
 function rotReportPath(root: string): string {

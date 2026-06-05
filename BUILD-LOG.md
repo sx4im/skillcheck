@@ -1125,3 +1125,35 @@
   - `summary.json`, `corpus.stdout`, `corpus.stderr`, and `corpus.exit` are committed with the launch results for reproducibility.
 - Gate status:
   - The fresh 20-skill launch corpus has completed, but M5 is not passed until findings, rot report, site, docs, packaging, audit, and CI workflow checks are refreshed and verified.
+
+### M5 - Final Docs And Launch-Only Report Refresh
+
+- Updated evidence:
+  - `FINDINGS-DRAFT.md` now uses only the completed Qwen Next 20-skill launch numbers: 3 helps, 11 placebo, 6 harms, mean effect `-6.5` pp.
+  - `README.md` now includes the requested one-line GitHub install command: `npm install -g git+ssh://git@github.com/sx4im/skillcheck.git`.
+  - `README.md` documents the current Qwen Next NVIDIA NIM model stack and conservative launch controls.
+  - `METHODOLOGY.md` now describes the completed 20-skill v1 launch corpus instead of a pre-launch seed corpus.
+  - `RELEASE-CHECKLIST.md` now uses the final conservative launch command and the launch-only rot report command.
+  - `results/rot/report.json` was regenerated from `results/launch/20260605T110514Z-qwen-next`; summary is 20 skills, 20 new, 0 stable, 0 rot.
+  - The leaderboard now defaults to the launch directory pointed at by `results/launch/latest-qwen-next-dir.txt`, while preserving `SKILLCHECK_RESULTS_DIR` overrides for historical or fixture views.
+- Gate status:
+  - Still not passed. Final verification commands have not all run yet.
+
+### M5 - Final Verification
+
+- Verification commands:
+  - `npm run typecheck`: passed.
+  - `npm test`: passed, 6 test files and 16 tests.
+  - Skipped-test scan `rg "\.skip|describe\.skip|it\.skip|test\.skip|skip\(" packages/cli/test packages`: passed with no matches.
+  - `npm run build`: passed.
+  - `npm run site:build`: passed; Next generated 23 static pages, including 20 skill detail pages.
+  - `npm audit`: passed with 0 vulnerabilities.
+  - `npm pack --dry-run`: passed; tarball contains compiled `dist`, `README.md`, `METHODOLOGY.md`, and `package.json`.
+  - `npx --yes github-actionlint .github/workflows/rot.yml`: passed.
+  - `node dist/bin/skillcheck.js --help`: passed and printed the CLI commands for `eval`, `verify`, `corpus run`, and `rot`.
+- Artifact checks:
+  - `results/launch/20260605T110514Z-qwen-next` contains 20 result JSON files plus `summary.json`.
+  - `results/rot/report.json` summary is 20 skills, 20 new, 0 stable, 0 rot.
+  - Static export contains 20 skill detail HTML pages.
+- Gate status:
+  - M5 passed.

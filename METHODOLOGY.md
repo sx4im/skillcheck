@@ -87,5 +87,5 @@ The leaderboard renders the latest rot status and the per-skill history timeline
 - Forced injection does not measure trigger reliability.
 - LLM-graded tasks inherit the limitations of the grader model, even with blind labels.
 - Assets are recorded but not executed in v1.
-- The seed corpus is intentionally capped before launch; it should not be treated as the final public corpus.
-- NVIDIA NIM availability and rate limits affect live corpus completion, so every failed or interrupted run is recorded separately from gate-passing evidence.
+- The v1 launch seed corpus is intentionally capped at 20 skills; it is launch evidence, not a comprehensive public corpus.
+- NVIDIA NIM availability affects live corpus completion. Failed or interrupted runs are recorded separately from gate-passing evidence, and the M5 launch findings use only the completed Qwen Next launch run.
