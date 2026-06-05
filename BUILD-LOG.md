@@ -741,3 +741,22 @@
   - The next resume should skip those five results and retry `awesome-go`.
 - Gate status:
   - Still not passed. The provider timeout did not change M5 task count, trial count, scoring, or thresholds.
+
+### M5 - Second Resume Failed On Go Timeout
+
+- Resumed command:
+  - Run directory: `results/launch/20260605T041138Z`.
+  - Command: `NVIDIA_REQUEST_DELAY_MS=5000 node dist/bin/skillcheck.js corpus run --corpus corpus/launch-20.json --results results/launch/20260605T041138Z --tasks 10 --trials 3 --concurrency 1`.
+  - Exit code: 1.
+- Failure evidence:
+  - The run skipped the five existing completed results and retried `awesome-go`.
+  - The previously failing `t001` trial 1/3 `no_skill` call recovered.
+  - The next failure occurred on task `t002` trial 1/3 `with_skill`.
+  - NVIDIA retried connection failures through retry `7/8`, then returned `Request timed out.`
+  - No `awesome-go` result JSON was written.
+- Follow-up run policy:
+  - Keep `--concurrency 1` and `NVIDIA_REQUEST_DELAY_MS=5000`.
+  - Use `NVIDIA_TIMEOUT_MS=45000` for future resumes so dead transport attempts recycle faster.
+  - This changes only provider timeout handling; M5 still uses 20 skills, 10 tasks, 3 trials, blind grading, and unchanged verdict thresholds.
+- Gate status:
+  - Still not passed. The launch corpus remains at 5 of 20 completed result JSON files.
