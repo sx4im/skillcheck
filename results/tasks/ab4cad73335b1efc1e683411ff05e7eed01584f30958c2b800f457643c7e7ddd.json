@@ -1,0 +1,62 @@
+[
+  {
+    "id": "t001",
+    "prompt": "Document the decision to use infrastructure-as-code (IaC), comparing manual provisioning risks and automation tool options.",
+    "criterionType": "rubric",
+    "criterion": "The ADR must identify risks of manual provisioning, evaluate at least two IaC tools, and justify the selected tool with team capability alignment."
+  },
+  {
+    "id": "t002",
+    "prompt": "Write an ADR for choosing a logging framework, evaluating scalability, log retention policies, and query performance.",
+    "criterionType": "rubric",
+    "criterion": "The ADR must compare frameworks on scalability, retention limits, and query speed, and justify the choice with test results."
+  },
+  {
+    "id": "t003",
+    "prompt": "Create an ADR for switching from synchronous to asynchronous communication, detailing latency trade-offs and error handling strategy.",
+    "criterionType": "rubric",
+    "criterion": "The ADR must quantify latency impact, describe retry/dead-letter mechanisms, and confirm monitoring for message backlog."
+  },
+  {
+    "id": "t004",
+    "prompt": "Record the rationale for enforcing mandatory code reviews for all production changes, including team throughput impact.",
+    "criterionType": "rubric",
+    "criterion": "The ADR must state security/quality goals, quantify expected delay in deployment cycles, and propose mitigation for bottlenecks."
+  },
+  {
+    "id": "t005",
+    "prompt": "Document a decision to migrate from monolithic to microservices architecture, including constraints, alternatives considered, and why the chosen path was selected.",
+    "criterionType": "rubric",
+    "criterion": "The ADR must clearly state the problem, list at least two alternatives, justify the chosen solution with context, and identify stakeholders impacted."
+  },
+  {
+    "id": "t006",
+    "prompt": "Write an ADR for adopting a CI/CD pipeline with automated canary deployments, including success metrics and rollback triggers.",
+    "criterionType": "rubric",
+    "criterion": "The ADR must define success metrics (e.g., error rate), specify automated rollback conditions, and confirm monitoring coverage."
+  },
+  {
+    "id": "t007",
+    "prompt": "Document the decision to enforce code signing for all deployments, including security benefits and CI/CD integration steps.",
+    "criterionType": "rubric",
+    "criterion": "The ADR must explain the security rationale, list integration steps in CI/CD pipeline, and note impact on deployment velocity."
+  },
+  {
+    "id": "t008",
+    "prompt": "Record the rationale for adopting GraphQL over REST, addressing client flexibility, bandwidth usage, and caching challenges.",
+    "criterionType": "rubric",
+    "criterion": "The ADR must contrast GraphQL and REST on client needs, data transfer efficiency, and caching limitations, with clear justification."
+  },
+  {
+    "id": "t009",
+    "prompt": "Write an ADR for adopting a new database technology, specifying performance benchmarks, compatibility risks, and rollback plan.",
+    "criterionType": "rubric",
+    "criterion": "The ADR must include measurable performance goals, identified compatibility risks, and a documented rollback procedure with dependencies."
+  },
+  {
+    "id": "t010",
+    "prompt": "Write an ADR for containerizing legacy applications, assessing refactoring effort, dependency conflicts, and runtime performance.",
+    "criterionType": "rubric",
+    "criterion": "The ADR must estimate refactoring effort, list resolved dependency conflicts, and include performance benchmarks before and after."
+  }
+]

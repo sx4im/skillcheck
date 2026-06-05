@@ -1,0 +1,188 @@
+{
+  "skill": {
+    "name": "Architecture Decision Records",
+    "source": "https://github.com/sickn33/antigravity-awesome-skills/blob/b806b97a9a48063f7bdbee5611caf40edd17e305/plugins/antigravity-awesome-skills-claude/skills/architecture-decision-records/SKILL.md",
+    "format": "SKILL.md",
+    "commit_hash": "59e80953eae19a56810923357168ab55f665b958a56a9da96eeb4c317784f523",
+    "domain": "Comprehensive patterns for creating, maintaining, and managing Architecture Decision Records (ADRs) that capture the context and rationale behind significant technical decisions."
+  },
+  "config": {
+    "runner_model": "qwen/qwen3-next-80b-a3b-instruct",
+    "runner_version": "qwen/qwen3-next-80b-a3b-instruct",
+    "grader_model": "qwen/qwen3-next-80b-a3b-instruct",
+    "grader_version": "qwen/qwen3-next-80b-a3b-instruct",
+    "generator_model": "qwen/qwen3-next-80b-a3b-instruct",
+    "trials": 3,
+    "tasks": 10,
+    "temperature": 0.7,
+    "mode": "forced-injection"
+  },
+  "result": {
+    "effect_pp": 0,
+    "ci_pp": [
+      0,
+      0
+    ],
+    "verdict": "placebo",
+    "with_skill_pass": 1,
+    "no_skill_pass": 1,
+    "token_overhead": 2866,
+    "value_per_1k_tokens": 0
+  },
+  "tasks": [
+    {
+      "id": "t001",
+      "prompt": "Document the decision to use infrastructure-as-code (IaC), comparing manual provisioning risks and automation tool options.",
+      "criterion_type": "rubric",
+      "criterion": "The ADR must identify risks of manual provisioning, evaluate at least two IaC tools, and justify the selected tool with team capability alignment.",
+      "arm_a_pass_rate": 1,
+      "arm_b_pass_rate": 1
+    },
+    {
+      "id": "t002",
+      "prompt": "Write an ADR for choosing a logging framework, evaluating scalability, log retention policies, and query performance.",
+      "criterion_type": "rubric",
+      "criterion": "The ADR must compare frameworks on scalability, retention limits, and query speed, and justify the choice with test results.",
+      "arm_a_pass_rate": 1,
+      "arm_b_pass_rate": 1
+    },
+    {
+      "id": "t003",
+      "prompt": "Create an ADR for switching from synchronous to asynchronous communication, detailing latency trade-offs and error handling strategy.",
+      "criterion_type": "rubric",
+      "criterion": "The ADR must quantify latency impact, describe retry/dead-letter mechanisms, and confirm monitoring for message backlog.",
+      "arm_a_pass_rate": 1,
+      "arm_b_pass_rate": 1
+    },
+    {
+      "id": "t004",
+      "prompt": "Record the rationale for enforcing mandatory code reviews for all production changes, including team throughput impact.",
+      "criterion_type": "rubric",
+      "criterion": "The ADR must state security/quality goals, quantify expected delay in deployment cycles, and propose mitigation for bottlenecks.",
+      "arm_a_pass_rate": 1,
+      "arm_b_pass_rate": 1
+    },
+    {
+      "id": "t005",
+      "prompt": "Document a decision to migrate from monolithic to microservices architecture, including constraints, alternatives considered, and why the chosen path was selected.",
+      "criterion_type": "rubric",
+      "criterion": "The ADR must clearly state the problem, list at least two alternatives, justify the chosen solution with context, and identify stakeholders impacted.",
+      "arm_a_pass_rate": 1,
+      "arm_b_pass_rate": 1
+    },
+    {
+      "id": "t006",
+      "prompt": "Write an ADR for adopting a CI/CD pipeline with automated canary deployments, including success metrics and rollback triggers.",
+      "criterion_type": "rubric",
+      "criterion": "The ADR must define success metrics (e.g., error rate), specify automated rollback conditions, and confirm monitoring coverage.",
+      "arm_a_pass_rate": 1,
+      "arm_b_pass_rate": 1
+    },
+    {
+      "id": "t007",
+      "prompt": "Document the decision to enforce code signing for all deployments, including security benefits and CI/CD integration steps.",
+      "criterion_type": "rubric",
+      "criterion": "The ADR must explain the security rationale, list integration steps in CI/CD pipeline, and note impact on deployment velocity.",
+      "arm_a_pass_rate": 1,
+      "arm_b_pass_rate": 1
+    },
+    {
+      "id": "t008",
+      "prompt": "Record the rationale for adopting GraphQL over REST, addressing client flexibility, bandwidth usage, and caching challenges.",
+      "criterion_type": "rubric",
+      "criterion": "The ADR must contrast GraphQL and REST on client needs, data transfer efficiency, and caching limitations, with clear justification.",
+      "arm_a_pass_rate": 1,
+      "arm_b_pass_rate": 1
+    },
+    {
+      "id": "t009",
+      "prompt": "Write an ADR for adopting a new database technology, specifying performance benchmarks, compatibility risks, and rollback plan.",
+      "criterion_type": "rubric",
+      "criterion": "The ADR must include measurable performance goals, identified compatibility risks, and a documented rollback procedure with dependencies.",
+      "arm_a_pass_rate": 1,
+      "arm_b_pass_rate": 1
+    },
+    {
+      "id": "t010",
+      "prompt": "Write an ADR for containerizing legacy applications, assessing refactoring effort, dependency conflicts, and runtime performance.",
+      "criterion_type": "rubric",
+      "criterion": "The ADR must estimate refactoring effort, list resolved dependency conflicts, and include performance benchmarks before and after.",
+      "arm_a_pass_rate": 1,
+      "arm_b_pass_rate": 1
+    }
+  ],
+  "reproducibility": {
+    "task_suite_path": "results/tasks/ab4cad73335b1efc1e683411ff05e7eed01584f30958c2b800f457643c7e7ddd.json",
+    "transcript_hashes": [
+      "sha256:84341e9621564c3e95dc03b93dd6914e97d19b60c130ac949ba3bd70212af5e3",
+      "sha256:4cc7888bbbc04ae5458326be4e997e8ed3f16b3ce2548e884ab427ee75e401d7",
+      "sha256:4f3dcc1e830f29fc22d904e49511c0cf4a61a8ce903c27c9996a630d2e491efe",
+      "sha256:f762f76cc3c72dfadbb7c0fff2fc936f10751d381b1e04d45d031ee5d6131114",
+      "sha256:0f62d4b21fd535923ca3c7e099f01d5efb63010d1a6a736cbbc1118b3515b890",
+      "sha256:b73102417ba09d860b2fc31ea7be841b93461881e013a4a0f7841b2f0c4bcc7e",
+      "sha256:c71d19f546306e862430c98148945ee73b3c1a2e3aa3be9e3ea40dc564865dce",
+      "sha256:4cbaabbf91d749380359c5c0fa2b61c0aa53071b0ac1bff2aa312ab2b76516d8",
+      "sha256:6a7f65c721ea5a4bfc3e431895664f8339a62e3340101bbd11effb92433b8584",
+      "sha256:7443628e99dd20d1914495469827b86bda991082dd50aae209130e18c0c182cb",
+      "sha256:6a188befca1fbe3cabcec08df3365baa377b47e2c1731cf1660b874cfc0d2da5",
+      "sha256:944907e9459317a291028f4bff05b64bc40c3dcd36cd3b8a669d8e95050c144e",
+      "sha256:99607c23d432adba07d3e8a0572e19ad8c68167fcb4cc2f9b63986484555e5d3",
+      "sha256:2fdc461ea896504ba98ad1ea97e7ab4eda0825d40104209ed399c014d9be2380",
+      "sha256:5a36d18f850b9cf6209478e4dba6803250d62c836ce200676a866fa551407edd",
+      "sha256:9679a688c4a5d6695fa75545a864e2baf9c2b7d8538a08d68873a779f422b5f5",
+      "sha256:a608b29faf857d2a72ec031fd065d648be8a45f7e0f9f1d42987ecd7790d7f8f",
+      "sha256:f86fdc4a7973a7471b00810dbb2bfad825cbacd1b3889ab2a7b03d85f3c7891a",
+      "sha256:6b11c6f41eed392e30367f3fff53e445d4192a4881d218707d3b14ffcba711fd",
+      "sha256:5a5b37e5e44a98e409f18fdbb9d6f369aae08e8cd41a3fa36b1e1d4c1126f609",
+      "sha256:822de50afd41bdcf4fddd55fb26eef072d914d44839d18d9c05cbcab4de5e63d",
+      "sha256:55eb54160aab433408be45e1d3720d8ed0c08e56a7ad48703c568635cfe6c02a",
+      "sha256:c4ef2e5ea9c3b9a11d9dcb59b34e5c1c455e232804e161b8623882884e22243d",
+      "sha256:c13346097a86dc0e06601b047ae694308bef3dbe780551440c5ba8f014724928",
+      "sha256:bc6385202aaefc94d26b7c1c8d6e7741fed09b965d1f302306819c2a82245f08",
+      "sha256:3d4ac4eb7fa8b2600d65a6e2d7818921349505bca4dc1a1d82645102f7611b6f",
+      "sha256:165726ff9dbeca9ce99bdaf12e9d9cba9d0e89ad3857338b2338c1dcf9cf648c",
+      "sha256:459e2576dfc588a4fe3fc1f539d17fa17e96077b3c6f9c09fe51cfd0926386de",
+      "sha256:0003b6b600c752665f4d60b1c08b3cda3d6fc1fc0235c61ab556ebe0729006e0",
+      "sha256:b57e9358a76096fa4201d109a73cc3618091f4a04c354d0f0fb14e175f640ff0",
+      "sha256:a25a917973940004f442ffaf9a14dbe38b3aba1d03fddb0b931f31e7d331d050",
+      "sha256:e893e7f9ebda9f27434509c843953340d0ef6f81ac1a2c5df897d747b05e3b24",
+      "sha256:372aed61b6127574f5a0e1b49f44b90a6175a6f2621b4f188a038708b5639684",
+      "sha256:20b8643fb3d2ec2fbc1fba3f505f1d3e0e798b057a6b322fac9f49d2a554eb66",
+      "sha256:5aae4366bbcd65e5d9e7c69c560ee817b1569bbda36cc7e2976d1f395198dd3d",
+      "sha256:c824b8ca6f55d2b8c5042d8960d325ec97bc64f8886995c005c9b4f6e6c70969",
+      "sha256:8b7e7df94941b174cc7c586ccb9f77c8b9baf96da8a28b345074da1452c7b98a",
+      "sha256:b5465774a4a9a4d154bb1e4d12ddc2560e2d2cfe049dfe5d4c523acf3fbf04a7",
+      "sha256:c7f2ee25380c119a92b9daaa168f2d24f70fcdcc3507dcdc0cc22c1a32f4f9ae",
+      "sha256:1aa558942ef0e5a2e985cc92009265631007841215f9d9821f4db18eff1dd73e",
+      "sha256:625ddc83415ebcff8f3b4a0ff7363c27e8791ba517e0021f50b45a3ae7878bbd",
+      "sha256:3fdb8f5857f4bc97d0edb2d798f1513f5087b67c48ebce3d36386b5ca3f84331",
+      "sha256:a5107d043e5c8287fd9a859e8f2ad239b952e8a825adf5cb58cdb3cf61c89c73",
+      "sha256:3c963cea7cd9dbdc78cf5851356bcc0a015f8f74f638ebe336ed3ea5a7819d75",
+      "sha256:58089e810ad34362563a2e51a43e6b47720e50bdbf271fcda1afca557cbb1d27",
+      "sha256:a4397fd9e5a95170b018c3c45aa052b15f0f3ca5c23ffb97ab19af6a525deb02",
+      "sha256:bf72ee19f254d50d27e87a98143d6aed271e51118f615b5df1129b45df04fcd0",
+      "sha256:af3923daa22f1df706e709eaadda67465565dc95613dbaf2f50f6043a1c2dedd",
+      "sha256:ad9fb2ca7d7057946dac5ed62dbf0ee6a5f230625c4b7247ffa9f4653400b90b",
+      "sha256:dc8b2f0ee454d737c31da7bc7472466d60f07a84a29fda3317eba9011f0d9436",
+      "sha256:1a09dac0c89ba95a75ceea6fb27e92c3d8a61368b623c363c97bff66279d4813",
+      "sha256:ec8ab08225dbb67d884919818edd58ee462682300178c1f3a7b015df66076d03",
+      "sha256:4395225ca719197c128219b8ccc7cbacaf14936fcd36a3280d676ff2e1b577b9",
+      "sha256:80a6938c918f8b0c3bdfb22e8a81f71ee185ae36a6ae547d3cbe378ce785eebf",
+      "sha256:105d7d4540c4a286e4c37f14c3e2ededd955fe7afec7a674d2b1bfb34d5a5a86",
+      "sha256:6b75b6c818605043ab9feabbbe25fc3aca4eaf51c0c52f5cad67e2a703632421",
+      "sha256:a56261480482884e80123d94622989ec56ab60ac99bdb4578873459414bd282d",
+      "sha256:2c7841a48c3869d65ff3efafd7771d3bb9c1ce1721c8daf5aab84bb755db86b3",
+      "sha256:da5f6538f89360a5c2cffa5832570c3a1acb2bb15ecb064d8bb059b3c3392ab9",
+      "sha256:4400d9b855508f5d1ea94e18fb98636af0b6bc1f10ae3dec50afd5b6675484e4"
+    ]
+  },
+  "history": [
+    {
+      "runner_version": "qwen/qwen3-next-80b-a3b-instruct",
+      "run_date": "2026-06-05",
+      "effect_pp": 0,
+      "verdict": "placebo"
+    }
+  ],
+  "run_date": "2026-06-05"
+}
