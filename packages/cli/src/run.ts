@@ -29,7 +29,12 @@ async function runOne(
   cache: JsonCache
 ): Promise<TrialOutput> {
   const messages = messagesForArm(skill, task, arm === 'with_skill');
-  const response = await cache.getOrSet('runner', { model: config.runnerModel, temperature: 0.7, maxTokens: 1200, messages }, () =>
+  // `trial` MUST be part of the cache key. Without it, every trial for the same
+  // (skill, task, arm) produces identical `messages` and therefore the same key,
+  // so trials 2..K silently read trial 1's cached output. That collapses K
+  // independent stochastic samples (temperature 0.7) into one replicated K times
+  // and makes the paired-bootstrap CI ~sqrt(K) too narrow (pseudo-replication).
+  const response = await cache.getOrSet('runner', { model: config.runnerModel, temperature: 0.7, maxTokens: 1200, promptVersion: 1, trial, messages }, () =>
     client.complete({
       model: config.runnerModel,
       messages,

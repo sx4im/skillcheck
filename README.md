@@ -43,13 +43,18 @@ The quick run shows a blue/white result card in the terminal. It does not write 
 
 ## Cloud Setup
 
-For shared/public usage, point the CLI at your Skillcheck Cloud endpoint:
+The hosted option lets users run checks without any model-provider key of their own. Deploy the **`dashboard/`** folder on Vercel: users sign in with GitHub, get a Skillcheck API key with 10 free runs, and the CLI proxies through your server-side NVIDIA key (after the free runs they upgrade via Stripe). Full click-by-click walkthrough in **`dashboard/SETUP.md`**.
+
+Once deployed, the CLI connects with:
 
 ```bash
-export SKILLCHECK_API_URL=https://api.yourdomain.com/v1
+export SKILLCHECK_API_URL=https://your-app.vercel.app/api
+export SKILLCHECK_TOKEN=sk_live_...   # from your dashboard
 ```
 
-See `docs/skillcheck-cloud.md` for the proxy and dashboard plan.
+Or run `skillcheck setup` and paste the URL and key when prompted.
+
+Other references: `dashboard.md` is a drop-in single-file connect page for users who run their own proxy; `docs/skillcheck-cloud.md` documents the OpenAI-compatible API contract and a minimal proxy; `docs/skillcheck-cloud-build-plan.md` is the deeper multi-service architecture.
 
 ## Local Development
 

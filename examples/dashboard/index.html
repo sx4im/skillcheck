@@ -1,70 +1,3 @@
-# Skillcheck Dashboard
-
-A zero-backend, single-file dashboard where a user **pastes their Skillcheck API URL** (and an optional token), and immediately gets everything they need to **start using `skillcheck`**: the exact CLI commands wired to their URL, a one-click connection test, and an in-browser "with vs without skill" preview to confirm the pipe works before they ever touch the terminal.
-
-It is plain HTML/CSS/JS — no build step, no framework, no server of its own. All settings live in the browser's `localStorage`; the token is only ever sent to the API URL the user pasted. The ready-to-open file is committed at [`examples/dashboard/index.html`](examples/dashboard/index.html) and the full source is reproduced at the bottom of this document.
-
-## What it does
-
-1. **Connect** — paste the Skillcheck API URL (e.g. `https://api.yourdomain.com/v1`) and an optional `sk_live_…` token. The URL is normalized exactly like `skillcheck setup` (a bare host becomes `…/v1`). **Test connection** pings `GET <origin>/health` and shows a live status badge.
-2. **Start using skillcheck** — the page renders copy-paste commands personalized with the saved URL/token:
-   - `npm install -g @sx4im/skillcheck`
-   - `export SKILLCHECK_API_URL=…` (plus `export SKILLCHECK_TOKEN=…` only when a token was entered)
-   - the interactive `skillcheck setup` equivalent
-   - `skillcheck check path/to/SKILL.md`
-3. **Quick check in the browser** *(optional preview)* — paste a skill body and a task; the dashboard calls `POST <apiUrl>/chat/completions` twice (one arm with the skill injected as a system message, one without) and shows both outputs side by side, plus the prompt-token overhead of injecting the skill. The arm construction mirrors the CLI runner (`packages/cli/src/run.ts`).
-
-## Run it
-
-The dashboard is a static file. Pick whichever is easiest:
-
-```bash
-# 1. Just open it (works from file:// because the bundled proxy returns CORS *)
-xdg-open examples/dashboard/index.html      # macOS: open …, Windows: start …
-
-# 2. Serve it locally
-npx --yes serve examples/dashboard          # then visit the printed URL
-
-# 3. Deploy it static (Vercel / Netlify / GitHub Pages / S3)
-#    Upload examples/dashboard/index.html as-is. There is nothing to configure at
-#    build time — the user supplies the API URL at runtime in the browser.
-```
-
-Because every setting is entered at runtime and stored client-side, the same deployed file serves every user; there are no per-deploy environment variables.
-
-## How the paste-URL flow works
-
-- The API URL is validated and normalized in the browser the same way the CLI does in `packages/cli/src/config.ts`: trim trailing slashes, require `http(s)://`, and default a path-less host to `/v1`.
-- It is saved to `localStorage` under `skillcheck.apiUrl`; the optional token under `skillcheck.token`. This is the browser-side mirror of the CLI config the user would otherwise create with `skillcheck setup`.
-- Pasting the URL here does **not** write the CLI's `~/.config/skillcheck/config.json`; the dashboard hands the user the `skillcheck setup` / `export` commands that do. The dashboard and the CLI agree on the same URL contract, so a URL that works in one works in the other.
-
-## What a backend must expose
-
-The dashboard talks to the same OpenAI-compatible contract the CLI expects:
-
-- `POST <apiUrl>/chat/completions` — used by the live preview. Body is OpenAI-shaped (`model`, `messages`, `temperature`, `max_tokens`, `stream:false`); `Authorization: Bearer <token>` is sent when a token is set.
-- `GET <origin>/health` — optional; used only by **Test connection**. If it is absent, the URL is still saved and the user is told to verify with a real check.
-- **CORS**: the browser preview needs the API to allow the dashboard's origin. The bundled proxy in [`examples/nvidia-proxy`](examples/nvidia-proxy) already responds with `access-control-allow-origin: *` and handles the `OPTIONS` preflight, so the preview works out of the box (including from `file://`). A production Skillcheck Cloud API should allow your dashboard's real origin instead of `*`. See [`docs/skillcheck-cloud.md`](docs/skillcheck-cloud.md) for the API contract and the minimal proxy.
-
-If a browser call is blocked by CORS, the dashboard says so and points the user to run the check from the CLI, which is not subject to browser CORS.
-
-## Preview vs. the real verdict
-
-The in-browser preview is deliberately a **single, ungraded trial** so it stays cheap and instant. It shows the qualitative contrast and proves the connection — it is **not** the measurement. The real verdict comes from the CLI, which generates *N* independent tasks, runs *K* trials per arm, grades blind, and reports an effect with a bootstrap confidence interval. See [`METHODOLOGY.md`](METHODOLOGY.md), and run:
-
-```bash
-skillcheck check path/to/SKILL.md --tasks 10 --trials 3
-```
-
-## Going further: hosted multi-user backend
-
-This dashboard intentionally has no accounts, tokens, billing, or usage tracking — it is the fastest path from "I have an API URL" to "I'm running checks." When you want a hosted product (sign-up, self-serve token creation, per-org rate limits, usage and run history), the full backend architecture, database schema, endpoints, and phased build order live in [`docs/skillcheck-cloud-build-plan.md`](docs/skillcheck-cloud-build-plan.md).
-
-## Source
-
-The complete dashboard follows. It is identical to [`examples/dashboard/index.html`](examples/dashboard/index.html) — copy this block into an `index.html` and open it, or just open the committed file.
-
-````html
 <!doctype html>
 <html lang="en">
   <head>
@@ -458,5 +391,3 @@ The complete dashboard follows. It is identical to [`examples/dashboard/index.ht
     </script>
   </body>
 </html>
-````
-

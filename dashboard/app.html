@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Skillcheck — Dashboard</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="/assets/styles.css" />
+  </head>
+  <body>
+    <div class="util">
+      <div class="wrap">
+        <span id="utilEmail">Skillcheck Cloud</span>
+        <a href="/api/auth/logout">Sign out</a>
+      </div>
+    </div>
+
+    <nav class="nav">
+      <div class="wrap">
+        <a class="brand" href="/">
+          <span class="mark" aria-hidden="true">
+            <svg width="26" height="18" viewBox="0 0 26 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M4 0H12L8 18H0L4 0Z" fill="#024ad8" />
+              <path d="M16 0H24L20 18H12L16 0Z" fill="#296ef9" />
+            </svg>
+          </span>
+          Skillcheck
+        </a>
+        <div class="spacer"></div>
+        <div class="right">
+          <span id="planBadge" class="badge badge-outline">Free</span>
+          <a class="btn btn-outline-ink btn-sm" href="/api/auth/logout">Sign out</a>
+        </div>
+      </div>
+    </nav>
+
+    <main class="wrap" style="padding-top:40px; padding-bottom:64px">
+      <div class="eyebrow">Dashboard</div>
+      <h1 style="font-size:44px">Your API key</h1>
+      <p class="muted" style="margin-top:8px">Use this key as <code>SKILLCHECK_TOKEN</code>. It maps to our server-side model provider key — keep it private.</p>
+
+      <div id="loading" class="muted" style="margin-top:32px">Loading…</div>
+
+      <div id="content" style="display:none; margin-top:32px">
+        <div class="dash-grid">
+          <div class="stack">
+            <div class="card">
+              <h3>Skillcheck API key</h3>
+              <div class="keyfield" style="margin-top:12px">
+                <code id="apiKey">sk_live_…</code>
+                <button class="btn btn-outline-ink btn-sm" id="revealBtn">Reveal</button>
+                <button class="btn btn-primary btn-sm" id="copyKeyBtn">Copy</button>
+              </div>
+              <div style="margin-top:14px">
+                <button class="btn-text" id="rotateBtn">Rotate key</button>
+                <span class="fine" style="margin-left:8px">Rotating invalidates the old key immediately.</span>
+              </div>
+            </div>
+
+            <div class="card">
+              <div class="usage-head">
+                <h3>Usage</h3>
+                <span id="usageCount" class="muted">0 / 10 runs</span>
+              </div>
+              <div class="bar"><div class="bar-fill" id="usageBar"></div></div>
+              <div id="upgradeRow" style="margin-top:18px; display:none">
+                <button class="btn btn-primary" id="upgradeBtn">Upgrade to Pro</button>
+                <span class="fine" id="upgradeNote" style="margin-left:8px"></span>
+              </div>
+              <div id="proRow" style="margin-top:18px; display:none">
+                <span class="badge badge-pro">Pro — unlimited runs</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <h3>Quickstart</h3>
+            <p class="muted" style="margin-top:8px">Paste these into your terminal, then check any skill.</p>
+            <div class="code" id="commands" style="margin-top:14px"><span id="commandsText"></span><button class="copy" id="copyCmd">Copy</button></div>
+            <p class="fine" style="margin-top:12px">Prefer interactive setup? Run <code>skillcheck setup</code> and paste the URL and key when asked.</p>
+          </div>
+        </div>
+
+        <div class="card" style="margin-top:24px">
+          <h3>Quick check in the browser</h3>
+          <p class="muted" style="margin-top:8px">
+            Runs your task once with and once without the skill so you can see the contrast. This preview does not consume a run —
+            for the real verdict (N tasks × K trials, blind grading, bootstrap CI) use <code>skillcheck check</code>.
+          </p>
+          <label for="skill">Skill instructions</label>
+          <textarea id="skill" placeholder="Paste the body of your SKILL.md here…"></textarea>
+          <label for="task">Task prompt</label>
+          <textarea id="task" placeholder="A concrete task the skill should help with…" style="min-height:64px"></textarea>
+          <div style="margin-top:16px; display:flex; gap:12px; align-items:center; flex-wrap:wrap">
+            <button class="btn btn-ink" id="runBtn">Run with vs without skill</button>
+            <span id="runStatus" class="status"></span>
+          </div>
+          <div class="preview-grid">
+            <div class="arm">
+              <h4>With skill</h4>
+              <div id="withBody" class="body"></div>
+            </div>
+            <div class="arm">
+              <h4>Without skill</h4>
+              <div id="noBody" class="body"></div>
+            </div>
+          </div>
+          <p class="fine" id="overhead" style="margin-top:10px"></p>
+        </div>
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="wrap">
+        <div class="legal">© <span id="year"></span> Skillcheck. Keep your API key private.</div>
+      </div>
+    </footer>
+
+    <script src="/assets/app.js"></script>
+  </body>
+</html>

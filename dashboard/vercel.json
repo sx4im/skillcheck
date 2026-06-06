@@ -1,0 +1,9 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "functions": {
+    "api/chat/completions.js": { "maxDuration": 60 }
+  },
+  "rewrites": [
+    { "source": "/health", "destination": "/api/health" }
+  ]
+}

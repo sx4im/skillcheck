@@ -67,8 +67,8 @@ export async function promptText(question: string): Promise<string> {
 
 export function printSetupIntro(): void {
   console.log(`${blue('First-time setup')}`);
-  console.log('Paste your Skillcheck API URL, then Skillcheck will open the file picker.');
-  console.log(`${dim('Example:')} https://api.yourdomain.com/v1\n`);
+  console.log('Paste your Skillcheck API URL and API key from the dashboard, then Skillcheck opens the file picker.');
+  console.log(`${dim('Example URL:')} https://your-app.vercel.app/api\n`);
 }
 
 export function supportedSkillFilesText(): string {
@@ -363,6 +363,9 @@ export function formatResultCard(result: unknown, outputPath?: string): string {
 
 export function sanitizeCliError(error: unknown): string {
   const raw = error instanceof Error ? error.message : String(error);
+  if (/quota[_ ]?exceeded|payment required|free .*runs|\b402\b/i.test(raw)) {
+    return raw.replace(/^\d+\s+/, '').replace(/NVIDIA[_ -]?NIM|NVIDIA/gi, 'Skillcheck Cloud');
+  }
   if (/api[_ -]?key|credential|unauthorized|authentication|401/i.test(raw)) {
     return 'Skillcheck Cloud is not connected for this workspace. Please try again later or contact the workspace owner.';
   }

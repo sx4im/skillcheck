@@ -51,6 +51,7 @@ npm run site:build
 npm audit
 npm pack --dry-run
 npx --yes github-actionlint .github/workflows/rot.yml
+( cd dashboard && npm test )
 ```
 
 Confirm no skipped tests:
@@ -60,6 +61,29 @@ rg "\\.skip|describe\\.skip|it\\.skip|test\\.skip|skip\\(" packages/cli/test pac
 ```
 
 The command above should print nothing.
+
+## Dashboard (Skillcheck Cloud)
+
+1. Run the dashboard logic + proxy integration tests:
+
+   ```bash
+   ( cd dashboard && npm test )
+   ```
+
+2. Deploy `dashboard/` on Vercel and configure every variable per `dashboard/SETUP.md` (Root Directory = `dashboard`, Framework = Other).
+3. Smoke-test the live flow: sign in with GitHub → a `sk_live_…` key appears → `skillcheck check` against `SKILLCHECK_API_URL=https://<app>/api` increments dashboard usage by one.
+4. Confirm free-run gating: the 11th run returns HTTP 402 with the upgrade link.
+
+## Public Repository Readiness
+
+Before flipping the repo to public, confirm no secrets are committed:
+
+```bash
+git ls-files | xargs rg -n "nvapi-[A-Za-z0-9_-]{8,}|sk_live_[A-Za-z0-9]{16,}|UPSTASH_REDIS_REST_TOKEN=.+|AUTH_GITHUB_SECRET=.+|STRIPE_SECRET_KEY=sk_[A-Za-z0-9]{16,}" || echo "clean"
+git check-ignore .env dashboard/.env
+```
+
+The first command should print `clean`; the second should echo both paths (they are git-ignored). Also confirm `dashboard/.env.example` ships only empty placeholders.
 
 ## Publish Steps
 
