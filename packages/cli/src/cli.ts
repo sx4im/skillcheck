@@ -36,8 +36,10 @@ async function ensureCloudConfigured(force = false): Promise<void> {
     try {
       const apiUrl = normalizeApiUrl(value);
       const current = loadUserConfig();
-      const filePath = saveUserConfig({ ...current, apiUrl });
-      console.log(`Saved Skillcheck API URL to ${filePath}\n`);
+      const keyInput = await promptText('Skillcheck API key (press Enter to skip): ');
+      const next = keyInput ? { ...current, apiUrl, token: keyInput } : { ...current, apiUrl };
+      const filePath = saveUserConfig(next);
+      console.log(`Saved Skillcheck settings to ${filePath}\n`);
       return;
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);

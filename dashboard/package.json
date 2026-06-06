@@ -1,0 +1,13 @@
+{
+  "name": "skillcheck-dashboard",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Skillcheck Cloud dashboard + metered proxy (zero-dependency, deploys on Vercel).",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "test": "node test/smoke.mjs && node test/proxy.mjs"
+  }
+}

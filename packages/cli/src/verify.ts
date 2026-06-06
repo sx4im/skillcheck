@@ -1,3 +1,4 @@
+import { randomUUID } from 'node:crypto';
 import { readFile } from 'node:fs/promises';
 import { NvidiaNimClient } from './adapters/nvidia-nim.js';
 import { JsonCache } from './cache.js';
@@ -62,8 +63,11 @@ export async function verifyResult(options: VerifyOptions): Promise<unknown> {
     reproducibility: { task_suite_path: string };
   };
   const config = loadNvidiaConfig();
-  const client = new NvidiaNimClient(config);
-  const cache = new JsonCache();
+  const client = new NvidiaNimClient(config, { defaultHeaders: { 'x-skillcheck-run': randomUUID() } });
+  // Verification must be an independent re-measurement, so it bypasses the cache.
+  // Reusing the shared on-disk cache would replay the original run's outputs and
+  // make `verify` trivially pass on the machine that produced the result.
+  const cache = JsonCache.disabled();
   const skill = await normalizeSkill(published.skill.source);
   const tasks = parseTasks(await readFile(published.reproducibility.task_suite_path, 'utf8')).slice(0, options.sample);
   const outputs = await runTrials(skill, tasks, published.config.trials, config, client, cache);

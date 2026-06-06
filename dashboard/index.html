@@ -1,0 +1,167 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Skillcheck — does your agent skill actually help?</title>
+    <meta name="description" content="Measure whether an agent skill improves task performance. Sign in, get an API key with 10 free runs, and check any SKILL.md from the CLI." />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="/assets/styles.css" />
+  </head>
+  <body>
+    <div class="util">
+      <div class="wrap">
+        <span>Skillcheck Cloud — forced-injection A/B evaluation for agent skills</span>
+        <a href="/api/auth/login">Sign in</a>
+      </div>
+    </div>
+
+    <nav class="nav">
+      <div class="wrap">
+        <a class="brand" href="/">
+          <span class="mark" aria-hidden="true">
+            <svg width="26" height="18" viewBox="0 0 26 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M4 0H12L8 18H0L4 0Z" fill="#024ad8" />
+              <path d="M16 0H24L20 18H12L16 0Z" fill="#296ef9" />
+            </svg>
+          </span>
+          Skillcheck
+        </a>
+        <div class="links">
+          <a href="#how">How it works</a>
+          <a href="#pricing">Pricing</a>
+          <a href="https://github.com/sx4im/skillcheck">Docs</a>
+        </div>
+        <div class="spacer"></div>
+        <div class="right">
+          <a class="btn btn-primary" href="/api/auth/login">Sign in with GitHub</a>
+        </div>
+      </div>
+    </nav>
+
+    <header class="hero section">
+      <div class="chevrons"></div>
+      <div class="wrap">
+        <div class="eyebrow">Agent skill evaluation</div>
+        <h1>Does your skill actually help?</h1>
+        <p class="lead">
+          Skillcheck runs a forced-injection A/B test: your runner model solves generated tasks
+          with and without the skill, grades blind, and returns an effect in percentage points
+          with a confidence interval. Sign in, get an API key, and check any skill from the CLI.
+        </p>
+        <div class="cta-row">
+          <a class="btn btn-primary" href="/api/auth/login">Get your API key</a>
+          <a class="btn btn-outline-ink" href="https://github.com/sx4im/skillcheck/blob/main/METHODOLOGY.md">View the methodology</a>
+        </div>
+        <div style="margin-top:40px; max-width:620px">
+          <div class="code" id="installCode">npm install -g @sx4im/skillcheck
+skillcheck check ./SKILL.md<button class="copy" data-copy="installCode">Copy</button></div>
+        </div>
+      </div>
+    </header>
+
+    <section class="band-cloud section" id="how">
+      <div class="wrap">
+        <div class="eyebrow">How it works</div>
+        <h2>Three steps to a verdict</h2>
+        <div class="grid grid-3" style="margin-top:40px">
+          <div class="card">
+            <div class="num">1</div>
+            <h3>Sign in with GitHub</h3>
+            <p>No setup, no credit card. We create your account and issue a Skillcheck API key tied to it.</p>
+          </div>
+          <div class="card">
+            <div class="num">2</div>
+            <h3>Get 10 free runs</h3>
+            <p>Your key includes 10 free <code>skillcheck check</code> runs. The model provider key stays on our server — never in your terminal.</p>
+          </div>
+          <div class="card">
+            <div class="num">3</div>
+            <h3>Run skillcheck</h3>
+            <p>Paste two commands, point the CLI at your key, and measure any SKILL.md, AGENTS.md, CLAUDE.md, or .cursorrules.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="pricing">
+      <div class="wrap" style="text-align:center">
+        <div class="eyebrow">Pricing</div>
+        <h2>Start free. Upgrade when it pays off.</h2>
+        <div class="tiers" style="margin-top:40px; text-align:left">
+          <div class="tier">
+            <div class="name">Free</div>
+            <div class="price">$0</div>
+            <ul>
+              <li>10 Skillcheck runs included</li>
+              <li>Full CLI: check, eval, verify</li>
+              <li>Blind grading + bootstrap CI</li>
+              <li>Community support</li>
+            </ul>
+            <a class="btn btn-outline" href="/api/auth/login" style="width:100%">Get started</a>
+          </div>
+          <div class="tier tier-featured">
+            <div class="name">Pro</div>
+            <div class="price">$19 <small>/ one-time</small></div>
+            <ul>
+              <li>Everything in Free</li>
+              <li>Unlimited Skillcheck runs</li>
+              <li>Corpus &amp; rot reporting</li>
+              <li>Priority model capacity</li>
+            </ul>
+            <a class="btn btn-primary" href="/api/auth/login" style="width:100%">Upgrade after sign-in</a>
+          </div>
+        </div>
+        <p class="fine" style="margin-top:20px">Price shown is an example — set your own in Stripe. Upgrade lives in your dashboard after sign-in.</p>
+      </div>
+    </section>
+
+    <section class="band-ink section">
+      <div class="wrap" style="text-align:center">
+        <h2>Ready to measure your skills?</h2>
+        <p class="lead" style="color:#c9d3ea; margin:16px auto 28px">Sign in with GitHub and get your API key in seconds.</p>
+        <a class="btn btn-primary" href="/api/auth/login">Get your API key</a>
+      </div>
+    </section>
+
+    <footer class="footer">
+      <div class="wrap">
+        <div class="cols">
+          <div>
+            <a class="brand" href="/" style="color:#fff">
+              <span class="mark" aria-hidden="true">
+                <svg width="26" height="18" viewBox="0 0 26 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M4 0H12L8 18H0L4 0Z" fill="#024ad8" />
+                  <path d="M16 0H24L20 18H12L16 0Z" fill="#296ef9" />
+                </svg>
+              </span>
+              Skillcheck
+            </a>
+            <p style="color:#aab3c9; margin-top:12px; max-width:280px">Measure whether an agent skill actually improves task performance.</p>
+          </div>
+          <div>
+            <h4>Product</h4>
+            <div class="stack">
+              <a href="#how">How it works</a>
+              <a href="#pricing">Pricing</a>
+              <a href="/api/auth/login">Sign in</a>
+            </div>
+          </div>
+          <div>
+            <h4>Resources</h4>
+            <div class="stack">
+              <a href="https://github.com/sx4im/skillcheck">GitHub</a>
+              <a href="https://github.com/sx4im/skillcheck/blob/main/METHODOLOGY.md">Methodology</a>
+              <a href="https://www.npmjs.com/package/@sx4im/skillcheck">npm</a>
+            </div>
+          </div>
+        </div>
+        <div class="legal">© <span id="year"></span> Skillcheck. Built on the @sx4im/skillcheck CLI.</div>
+      </div>
+    </footer>
+
+    <script src="/assets/landing.js"></script>
+  </body>
+</html>

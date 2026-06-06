@@ -120,7 +120,7 @@ export class NvidiaNimClient {
   private readonly maxAttempts: number;
   private readonly maxRetryDelayMs: number;
 
-  constructor(config: NvidiaConfig) {
+  constructor(config: NvidiaConfig, options: { defaultHeaders?: Record<string, string> } = {}) {
     this.requestDelayMs = config.requestDelayMs;
     this.maxAttempts = config.maxAttempts;
     this.maxRetryDelayMs = config.maxRetryDelayMs;
@@ -128,7 +128,8 @@ export class NvidiaNimClient {
       apiKey: config.apiKey,
       baseURL: config.baseUrl,
       maxRetries: 0,
-      timeout: config.timeoutMs
+      timeout: config.timeoutMs,
+      defaultHeaders: options.defaultHeaders
     });
   }
 

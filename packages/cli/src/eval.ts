@@ -1,3 +1,4 @@
+import { randomUUID } from 'node:crypto';
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { NvidiaNimClient } from './adapters/nvidia-nim.js';
@@ -110,7 +111,10 @@ export async function evalSkill(options: EvalOptions): Promise<unknown> {
   const skill = await normalizeSkill(options.inputPath);
   const baseConfig = loadNvidiaConfig();
   const config = applyModelOverrides(baseConfig, options);
-  const client = new NvidiaNimClient(config);
+  // One run id per evalSkill call. The hosted proxy meters by distinct run id, so
+  // every model call in this run shares it and the whole check counts as one run.
+  const runId = randomUUID();
+  const client = new NvidiaNimClient(config, { defaultHeaders: { 'x-skillcheck-run': runId } });
   const cache = new JsonCache();
 
   const tasks = options.taskSuite

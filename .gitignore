@@ -9,4 +9,6 @@ site/node_modules/
 packages/site/.next/
 packages/site/out/
 packages/site/node_modules/
+.vercel/
+dashboard/.vercel/
 .DS_Store
