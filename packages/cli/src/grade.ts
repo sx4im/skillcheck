@@ -60,6 +60,7 @@ export async function gradeOutputs(
   const taskById = new Map(tasks.map((task) => [task.id, task]));
   const shuffled = seededShuffle(outputs, hashJson(outputs.map((output) => output.transcriptHash)));
   const graded = new Map<string, GradedOutput>();
+  const debug = process.env.SKILLCHECK_DEBUG === '1';
 
   for (const output of shuffled) {
     const task = taskById.get(output.taskId);
@@ -75,7 +76,9 @@ export async function gradeOutputs(
       continue;
     }
 
-    console.error(`[eval] grade ${output.taskId} trial ${output.trial}`);
+    if (debug) {
+      console.error(`[skillcheck] grade ${output.taskId} trial ${output.trial}`);
+    }
     let grade: GradePayload | undefined;
     let lastError: unknown;
     for (let attempt = 1; attempt <= 3; attempt += 1) {
@@ -115,7 +118,9 @@ export async function gradeOutputs(
         break;
       } catch (error) {
         lastError = error;
-        console.error(`[eval] grader returned invalid JSON on attempt ${attempt}/3`);
+        if (debug) {
+          console.error(`[skillcheck] grader returned invalid JSON on attempt ${attempt}/3`);
+        }
       }
     }
     if (!grade) {

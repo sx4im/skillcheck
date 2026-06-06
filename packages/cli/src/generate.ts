@@ -111,7 +111,9 @@ export async function generateTasks(
       }));
     } catch (error) {
       lastError = error;
-      console.error(`[eval] generator returned invalid JSON on attempt ${attempt}/3`);
+      if (process.env.SKILLCHECK_DEBUG === '1') {
+        console.error(`[skillcheck] generator returned invalid JSON on attempt ${attempt}/3`);
+      }
     }
   }
 

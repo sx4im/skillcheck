@@ -65,23 +65,58 @@ The command above should print nothing.
 
 Only after M5 passes:
 
-1. Set the intended package version in `package.json`.
-2. Commit the release prep changes.
-3. Tag the release:
+1. Confirm the package name is still available:
+
+   ```bash
+   npm view @sx4im/skillcheck
+   ```
+
+   `404 Not Found` means the name is available. Any successful package response means the name has already been claimed.
+
+2. Log in with the npm account that should own the package:
+
+   ```bash
+   npm login
+   npm whoami
+   ```
+
+3. Confirm the intended package version in `package.json`.
+4. Build and inspect the package:
+
+   ```bash
+   npm run build
+   npm pack --dry-run
+   ```
+
+5. Commit the release prep changes.
+6. Tag the release:
 
    ```bash
    git tag vX.Y.Z
    git push origin main --tags
    ```
 
-4. Publish manually:
+7. Publish manually. The first successful publish registers the `@sx4im/skillcheck` package name.
+
+   With npm WebAuthn/security-key 2FA enabled:
 
    ```bash
    npm publish --access public
    ```
 
-5. Verify:
+   With an authenticator-app OTP:
 
    ```bash
-   npx skillcheck@X.Y.Z --help
+   npm publish --access public --otp=123456
+   ```
+
+   Replace `123456` with the current 6-digit npm two-factor authentication code.
+
+   Without account 2FA, create a granular access token on npm with `Bypass two-factor authentication` enabled and `Read and write` access to all packages, then publish with that token.
+
+8. Verify the registry package:
+
+   ```bash
+   npm view @sx4im/skillcheck version
+   npx --yes @sx4im/skillcheck@latest --help
    ```

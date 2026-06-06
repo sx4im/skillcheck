@@ -61,11 +61,16 @@ export async function runTrials(
   cache: JsonCache
 ): Promise<TrialOutput[]> {
   const outputs: TrialOutput[] = [];
+  const debug = process.env.SKILLCHECK_DEBUG === '1';
   for (const task of tasks) {
     for (let trial = 1; trial <= trials; trial += 1) {
-      console.error(`[eval] run ${task.id} trial ${trial}/${trials} with_skill`);
+      if (debug) {
+        console.error(`[skillcheck] run ${task.id} trial ${trial}/${trials} with_skill`);
+      }
       outputs.push(await runOne(skill, task, trial, 'with_skill', config, client, cache));
-      console.error(`[eval] run ${task.id} trial ${trial}/${trials} no_skill`);
+      if (debug) {
+        console.error(`[skillcheck] run ${task.id} trial ${trial}/${trials} no_skill`);
+      }
       outputs.push(await runOne(skill, task, trial, 'no_skill', config, client, cache));
     }
   }

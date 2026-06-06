@@ -103,9 +103,12 @@ function getRetryAfterMs(error: unknown): number | undefined {
 }
 
 function describeRetry(error: unknown, attempt: number, waitMs: number, maxAttempts: number): void {
+  if (process.env.SKILLCHECK_DEBUG_RETRIES !== '1') {
+    return;
+  }
   const status = getStatus(error);
   const label = status === undefined ? 'connection' : `status ${status}`;
-  console.error(`[nim] retry ${attempt + 1}/${maxAttempts} after ${label}; waiting ${waitMs} ms`);
+  console.error(`[skillcheck] retry ${attempt + 1}/${maxAttempts} after ${label}; waiting ${waitMs} ms`);
 }
 
 export class NvidiaNimClient {
@@ -180,7 +183,7 @@ export class NvidiaNimClient {
         const content = extractMessageText(message);
         if (content === undefined) {
           const keys = message ? Object.keys(message).sort().join(',') : 'none';
-          throw new Error(`NVIDIA NIM response did not include text content; message keys: ${keys}`);
+          throw new Error(`Skillcheck Cloud response did not include text content; message keys: ${keys}`);
         }
 
         return {

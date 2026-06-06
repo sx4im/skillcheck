@@ -8,24 +8,48 @@ Measure whether an agent skill actually improves task performance.
 
 - M0-M4 gates have passed and are recorded in `BUILD-LOG.md`.
 - M5 completed a 20-skill launch corpus in `results/launch/20260605T110514Z-qwen-next`.
-- The launch used `qwen/qwen3-next-80b-a3b-instruct` for generator, grader, and runner after direct NVIDIA diagnostics showed the original StepFun, DeepSeek, and Mistral stack was not reliable enough to complete the corpus.
-- Do not publish to npm until `RELEASE-CHECKLIST.md` is complete.
+- Published on npm as `@sx4im/skillcheck`.
 
 ## One-Line Install
 
-Install the CLI from this GitHub repo:
-
 ```bash
-npm install -g git+ssh://git@github.com/sx4im/skillcheck.git
-```
-
-After npm publication, the install command becomes:
-
-```bash
-npm install -g skillcheck
+npm install -g @sx4im/skillcheck
 ```
 
 Requires Node.js 20 or newer.
+
+## Usage
+
+```bash
+skillcheck
+```
+
+On first run, Skillcheck asks for your Skillcheck API URL and saves it locally. Then it opens the interactive picker. Select `SKILL.md`, `AGENTS.md`, `CLAUDE.md`, `.cursorrules`, or a folder containing one.
+
+Change the saved API URL later:
+
+```bash
+skillcheck setup
+```
+
+You can also pass a path directly:
+
+```bash
+skillcheck check path/to/SKILL.md
+skillcheck path/to/skill-folder
+```
+
+The quick run shows a blue/white result card in the terminal. It does not write a results folder unless you explicitly pass `--output`.
+
+## Cloud Setup
+
+For shared/public usage, point the CLI at your Skillcheck Cloud endpoint:
+
+```bash
+export SKILLCHECK_API_URL=https://api.yourdomain.com/v1
+```
+
+See `docs/skillcheck-cloud.md` for the proxy and dashboard plan.
 
 ## Local Development
 
@@ -35,40 +59,27 @@ npm run build
 node dist/bin/skillcheck.js --help
 ```
 
-You can also run the compiled CLI directly:
-
-```bash
-node dist/bin/skillcheck.js eval fixtures/m2/strong-skill/SKILL.md --task-suite fixtures/m2/deterministic-tasks.json --tasks 3 --trials 3 --output /tmp/skillcheck-result.json
-```
-
-## Environment
-
-Copy `.env.example` to `.env` and set `NVIDIA_API_KEY`.
-
-Required for live NVIDIA NIM calls:
-
-```bash
-NVIDIA_API_KEY=...
-NVIDIA_BASE_URL=https://integrate.api.nvidia.com/v1
-NVIDIA_GENERATOR_MODEL=qwen/qwen3-next-80b-a3b-instruct
-NVIDIA_GRADER_MODEL=qwen/qwen3-next-80b-a3b-instruct
-NVIDIA_RUNNER_MODEL=qwen/qwen3-next-80b-a3b-instruct
-```
-
-Recommended launch-run provider controls:
-
-```bash
-NVIDIA_TIMEOUT_MS=120000
-NVIDIA_REQUEST_DELAY_MS=5000
-NVIDIA_MAX_ATTEMPTS=8
-NVIDIA_MAX_RETRY_DELAY_MS=60000
-```
-
-The final M5 run used `--concurrency 1` and a 5 second process-wide request delay. The completed run had 75 recovered NVIDIA connection retries and no `429` rate-limit lines.
-
 ## Commands
 
-Evaluate one skill:
+Friendly skill check:
+
+```bash
+skillcheck check path/to/SKILL.md
+```
+
+You can also omit `check` when the argument is an existing path:
+
+```bash
+skillcheck path/to/skill-folder
+```
+
+Run a stronger check:
+
+```bash
+skillcheck check path/to/SKILL.md --tasks 10 --trials 3
+```
+
+Advanced raw JSON evaluator:
 
 ```bash
 skillcheck eval path/to/SKILL.md --tasks 10 --trials 3 --output results/my-run.json
@@ -119,3 +130,26 @@ See `FINDINGS-DRAFT.md` for the current draft write-up and caveats.
 ## Release
 
 Do not publish from this repo until `RELEASE-CHECKLIST.md` is complete and M5 final verification has passed.
+
+To publish the public npm package, log in with the npm account that should own `skillcheck`, then run one of the publish flows below.
+
+With npm WebAuthn/security-key 2FA enabled:
+
+```bash
+npm login
+npm publish --access public
+npm view @sx4im/skillcheck version
+npx --yes @sx4im/skillcheck@latest --help
+```
+
+With an authenticator-app OTP:
+
+```bash
+npm publish --access public --otp=123456
+```
+
+Replace `123456` with the current 6-digit npm two-factor authentication code.
+
+Without account 2FA, create a granular access token on npm with `Bypass two-factor authentication` enabled and `Read and write` access to all packages, then publish with that token.
+
+If the package name is still free, `npm publish` creates/registers `@sx4im/skillcheck` automatically.

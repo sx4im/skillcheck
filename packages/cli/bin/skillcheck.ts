@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 import { main } from '../src/cli.js';
+import { formatFatalError } from '../src/ui.js';
 
 main(process.argv).catch((error: unknown) => {
-  const message = error instanceof Error ? error.message : String(error);
-  console.error(message);
+  console.error(formatFatalError(error));
   process.exitCode = 1;
 });

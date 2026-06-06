@@ -1,24 +1,49 @@
+import { existsSync } from 'node:fs';
 import { NvidiaNimClient } from './adapters/nvidia-nim.js';
+import { getConfiguredApiUrl, loadUserConfig, normalizeApiUrl, saveUserConfig } from './config.js';
 import { runCorpus, type CorpusRunOptions } from './corpus.js';
 import { evalSkill, type EvalOptions } from './eval.js';
 import { runM0Gate } from './m0/run.js';
 import { runRot, type RotOptions } from './rot.js';
+import {
+  formatResultCard,
+  printHelpUi,
+  printBanner,
+  printSetupIntro,
+  promptText,
+  selectSkillPath,
+  startProgress,
+  validateSkillInput
+} from './ui.js';
 import { verifyResult } from './verify.js';
 
 function printHelp(): void {
-  console.log(`skillcheck
+  printHelpUi();
+}
 
-Usage:
-  skillcheck m0
-  skillcheck eval <path> [--tasks N] [--trials K] [--output file.json] [--task-suite file.json]
-    [--runner model] [--grader model] [--generator model]
-  skillcheck verify <result.json> [--sample n]
-  skillcheck corpus run --corpus corpus.json [--results dir] [--tasks N] [--trials K]
-    [--concurrency N] [--runner model] [--limit N]
-  skillcheck rot [--results dir] [--output file.json] [--model model] [--corpus corpus.yaml]
-    [--tasks N] [--trials K]
+async function ensureCloudConfigured(force = false): Promise<void> {
+  if (!force && getConfiguredApiUrl()) {
+    return;
+  }
+  if (!process.stdin.isTTY || !process.stdout.isTTY) {
+    throw new Error('Skillcheck setup is required. Run `skillcheck setup` in an interactive terminal.');
+  }
 
-M0 is the hardcoded spike. eval is the M1 forced-injection evaluator.`);
+  printBanner();
+  printSetupIntro();
+  for (;;) {
+    const value = await promptText('Skillcheck API URL: ');
+    try {
+      const apiUrl = normalizeApiUrl(value);
+      const current = loadUserConfig();
+      const filePath = saveUserConfig({ ...current, apiUrl });
+      console.log(`Saved Skillcheck API URL to ${filePath}\n`);
+      return;
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      console.log(`${message}\n`);
+    }
+  }
 }
 
 function readOption(argv: string[], name: string): string | undefined {
@@ -57,8 +82,12 @@ function readOptionalNumberOption(argv: string[], name: string): number | undefi
   return parsed;
 }
 
-function parseEvalOptions(argv: string[]): EvalOptions {
-  const inputPath = argv[3];
+function hasFlag(argv: string[], name: string): boolean {
+  return argv.includes(name);
+}
+
+function parseEvalOptions(argv: string[], inputIndex = 3): EvalOptions {
+  const inputPath = argv[inputIndex];
   if (!inputPath || inputPath.startsWith('--')) {
     throw new Error('Usage: skillcheck eval <path> [--tasks N] [--trials K] [--output file.json]');
   }
@@ -78,6 +107,39 @@ function parseEvalOptions(argv: string[]): EvalOptions {
     grader: readOption(argv, '--grader'),
     generator: readOption(argv, '--generator'),
     taskSuite: readOption(argv, '--task-suite')
+  };
+}
+
+interface CheckOptions {
+  evalOptions: EvalOptions;
+  json: boolean;
+  output?: string;
+}
+
+export function parseCheckOptions(argv: string[], inputIndex = 3): CheckOptions {
+  const inputPath = argv[inputIndex];
+  if (!inputPath || inputPath.startsWith('--')) {
+    throw new Error(
+      'Usage: skillcheck check <path-to-skill-file-or-folder>\nExample: skillcheck check ./SKILL.md'
+    );
+  }
+
+  const output = readOption(argv, '--output');
+  return {
+    evalOptions: {
+      inputPath,
+      output,
+      tasks: readNumberOption(argv, '--tasks', 3),
+      trials: readNumberOption(argv, '--trials', 2),
+      mode: 'forced',
+      runner: readOption(argv, '--runner'),
+      grader: readOption(argv, '--grader'),
+      generator: readOption(argv, '--generator'),
+      taskSuite: readOption(argv, '--task-suite'),
+      saveArtifacts: Boolean(output)
+    },
+    json: hasFlag(argv, '--json'),
+    output
   };
 }
 
@@ -109,11 +171,49 @@ function parseCorpusRunOptions(argv: string[]): CorpusRunOptions {
   };
 }
 
+async function runCheck(options: CheckOptions, showBanner = true): Promise<void> {
+  if (showBanner && !options.json) {
+    printBanner();
+  }
+  await validateSkillInput(options.evalOptions.inputPath);
+  await ensureCloudConfigured(false);
+  const progress = options.json ? undefined : startProgress();
+  let result: unknown;
+  try {
+    result = await evalSkill(options.evalOptions);
+    progress?.finish();
+  } catch (error) {
+    progress?.fail();
+    throw error;
+  }
+  if (options.json) {
+    console.log(JSON.stringify(result, null, 2));
+    return;
+  }
+  console.log(formatResultCard(result, options.output));
+}
+
+async function runInteractiveCheck(): Promise<void> {
+  await ensureCloudConfigured(false);
+  const selectedPath = await selectSkillPath();
+  await runCheck(parseCheckOptions(['node', 'skillcheck', 'check', selectedPath]), false);
+}
+
 export async function main(argv: string[]): Promise<void> {
   const command = argv[2];
 
-  if (!command || command === '--help' || command === '-h') {
+  if (command === '--help' || command === '-h') {
     printHelp();
+    return;
+  }
+
+  if (!command) {
+    await runInteractiveCheck();
+    return;
+  }
+
+  if (command === 'setup' || command === 'config') {
+    await ensureCloudConfigured(true);
     return;
   }
 
@@ -121,6 +221,11 @@ export async function main(argv: string[]): Promise<void> {
     const report = await runM0Gate((config) => new NvidiaNimClient(config));
     console.log(JSON.stringify(report, null, 2));
     process.exitCode = report.passed ? 0 : 1;
+    return;
+  }
+
+  if (command === 'check') {
+    await runCheck(parseCheckOptions(argv));
     return;
   }
 
@@ -156,6 +261,11 @@ export async function main(argv: string[]): Promise<void> {
   if (command === 'rot') {
     const result = await runRot(parseRotOptions(argv));
     console.log(JSON.stringify(result, null, 2));
+    return;
+  }
+
+  if (!command.startsWith('-') && existsSync(command)) {
+    await runCheck(parseCheckOptions(['node', 'skillcheck', 'check', ...argv.slice(2)]));
     return;
   }
 

@@ -22,6 +22,7 @@ export interface EvalOptions {
   generator?: string;
   taskSuite?: string;
   sourceLabel?: string;
+  saveArtifacts?: boolean;
 }
 
 function applyModelOverrides(config: NvidiaConfig, options: EvalOptions): NvidiaConfig {
@@ -106,18 +107,21 @@ function parseTaskSuite(text: string): GeneratedTask[] {
 }
 
 export async function evalSkill(options: EvalOptions): Promise<unknown> {
+  const skill = await normalizeSkill(options.inputPath);
   const baseConfig = loadNvidiaConfig();
   const config = applyModelOverrides(baseConfig, options);
   const client = new NvidiaNimClient(config);
   const cache = new JsonCache();
-  const skill = await normalizeSkill(options.inputPath);
 
   const tasks = options.taskSuite
     ? parseTaskSuite(await readFile(options.taskSuite, 'utf8')).slice(0, options.tasks)
     : await generateTasks({ domain: skill.domain, count: options.tasks }, config, client, cache);
   const taskSuiteHash = hashJson({ skill: skill.versionHash, tasks });
-  const taskSuitePath = options.taskSuite ?? `results/tasks/${taskSuiteHash}.json`;
-  await writeJson(taskSuitePath, tasks);
+  const shouldSaveArtifacts = options.saveArtifacts ?? true;
+  const taskSuitePath = options.taskSuite ?? (shouldSaveArtifacts ? `results/tasks/${taskSuiteHash}.json` : undefined);
+  if (!options.taskSuite && taskSuitePath) {
+    await writeJson(taskSuitePath, tasks);
+  }
 
   const outputs = await runTrials(skill, tasks, options.trials, config, client, cache);
   const graded = await gradeOutputs(tasks, outputs, config, client, cache);
@@ -159,7 +163,7 @@ export async function evalSkill(options: EvalOptions): Promise<unknown> {
     },
     tasks: breakdowns,
     reproducibility: {
-      task_suite_path: taskSuitePath,
+      ...(taskSuitePath ? { task_suite_path: taskSuitePath } : {}),
       transcript_hashes: graded.map((item) => item.transcriptHash)
     },
     history: [
