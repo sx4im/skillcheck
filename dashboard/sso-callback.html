@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Signing you in… — Skillcheck</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="/assets/styles.css" />
+  </head>
+  <body>
+    <div class="wrap" style="padding:120px 0; text-align:center">
+      <div class="brand" style="justify-content:center; margin-bottom:16px">
+        <span class="mark" aria-hidden="true">
+          <svg width="26" height="18" viewBox="0 0 26 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M4 0H12L8 18H0L4 0Z" fill="#024ad8" />
+            <path d="M16 0H24L20 18H12L16 0Z" fill="#296ef9" />
+          </svg>
+        </span>
+        Skillcheck
+      </div>
+      <p class="muted">Completing sign-in…</p>
+    </div>
+    <script type="module">
+      import { getClerk } from '/assets/auth.js';
+      try {
+        const clerk = await getClerk();
+        await clerk.handleRedirectCallback({ afterSignInUrl: '/app.html', afterSignUpUrl: '/app.html' });
+      } catch (error) {
+        location.href = '/?error=sso';
+      }
+    </script>
+  </body>
+</html>

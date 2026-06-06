@@ -13,7 +13,7 @@
     <div class="util">
       <div class="wrap">
         <span id="utilEmail">Skillcheck Cloud</span>
-        <a href="/api/auth/logout">Sign out</a>
+        <button class="btn-text util-signout" data-action="signout">Sign out</button>
       </div>
     </div>
 
@@ -31,7 +31,7 @@
         <div class="spacer"></div>
         <div class="right">
           <span id="planBadge" class="badge badge-outline">Free</span>
-          <a class="btn btn-outline-ink btn-sm" href="/api/auth/logout">Sign out</a>
+          <button class="btn btn-outline-ink btn-sm" data-action="signout">Sign out</button>
         </div>
       </div>
     </nav>
@@ -118,6 +118,6 @@
       </div>
     </footer>
 
-    <script src="/assets/app.js"></script>
+    <script type="module" src="/assets/app.js"></script>
   </body>
 </html>

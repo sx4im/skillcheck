@@ -3,8 +3,7 @@
 
 import assert from 'node:assert/strict';
 import { generateApiKey, hashApiKey, maskApiKey } from '../api/_lib/keys.js';
-import { createSessionToken, verifySessionToken } from '../api/_lib/session.js';
-import { createOrGetUserFromGithub, uidForApiKey, consumeRun, getRunsUsed, setPlan, rotateApiKey } from '../api/_lib/users.js';
+import { getOrCreateUser, uidForApiKey, consumeRun, getRunsUsed, setPlan, rotateApiKey } from '../api/_lib/users.js';
 import { FREE_RUNS } from '../api/_lib/config.js';
 
 let passed = 0;
@@ -18,18 +17,14 @@ assert.notEqual(hashApiKey(key), key, 'hash is not the raw key');
 assert.ok(maskApiKey(key).includes('…') && maskApiKey(key).startsWith('sk_live_'), 'mask hides middle');
 ok('keys: generate / hash / mask');
 
-// --- session ---
-const token = createSessionToken({ uid: 'abc' });
-assert.equal(verifySessionToken(token).uid, 'abc', 'round-trips uid');
-assert.equal(verifySessionToken(token + 'x'), null, 'rejects tampered token');
-assert.equal(verifySessionToken('garbage'), null, 'rejects garbage');
-ok('session: sign / verify / tamper');
-
-// --- users + run metering ---
-const user = await createOrGetUserFromGithub({ ghId: 'gh-1', email: 'a@b.com', name: 'A' });
+// --- users keyed by Clerk user id ---
+const user = await getOrCreateUser({ userId: 'clerk_user_1', email: 'a@b.com', name: 'A' });
+assert.equal(user.uid, 'clerk_user_1', 'uid is the Clerk user id');
 assert.ok(user.apiKey.startsWith('sk_live_'), 'issued an api key');
 assert.equal(await uidForApiKey(user.apiKey), user.uid, 'key resolves to uid');
-assert.equal((await createOrGetUserFromGithub({ ghId: 'gh-1' })).uid, user.uid, 'returning user is stable');
+const again = await getOrCreateUser({ userId: 'clerk_user_1' });
+assert.equal(again.uid, user.uid, 'returning user is stable');
+assert.equal(again.apiKey, user.apiKey, 'key is preserved across sign-ins');
 ok('users: create / lookup / idempotent');
 
 // 10 distinct runs allowed and counted

@@ -1,13 +1,11 @@
-// User records + run metering.
+// User records + run metering. The uid is the Clerk user id.
 //
 // Store layout:
-//   user:<uid>          JSON { uid, ghId, email, name, plan, apiKey, createdAt }
-//   ghid:<ghId>         -> uid                  (find a returning GitHub user)
+//   user:<uid>          JSON { uid, email, name, plan, apiKey, createdAt }
 //   key:<sha256(key)>   -> uid                  (proxy authenticates by this)
 //   runsused:<uid>      integer                 (atomic INCR per consumed run)
 //   run:<uid>:<runId>   short-lived marker      (dedupes the many calls in one run)
 
-import { randomUUID } from 'node:crypto';
 import { kvGet, kvSet, kvDel, kvIncr } from './store.js';
 import { generateApiKey, hashApiKey } from './keys.js';
 import { FREE_RUNS, PRO_RUN_LIMIT } from './config.js';
@@ -31,17 +29,12 @@ export async function uidForApiKey(key) {
   return kvGet(`key:${hashApiKey(key)}`);
 }
 
-export async function createOrGetUserFromGithub({ ghId, email, name }) {
-  const existingUid = await kvGet(`ghid:${ghId}`);
-  if (existingUid) {
-    const existing = await getUser(existingUid);
-    if (existing) return existing;
-  }
-  const uid = randomUUID();
+export async function getOrCreateUser({ userId, email, name }) {
+  const existing = await getUser(userId);
+  if (existing) return existing;
   const apiKey = generateApiKey();
   const user = {
-    uid,
-    ghId: String(ghId),
+    uid: userId,
     email: email || '',
     name: name || '',
     plan: 'free',
@@ -49,8 +42,7 @@ export async function createOrGetUserFromGithub({ ghId, email, name }) {
     createdAt: new Date().toISOString()
   };
   await saveUser(user);
-  await kvSet(`ghid:${ghId}`, uid);
-  await kvSet(`key:${hashApiKey(apiKey)}`, uid);
+  await kvSet(`key:${hashApiKey(apiKey)}`, userId);
   return user;
 }
 

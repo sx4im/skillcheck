@@ -43,7 +43,7 @@ The quick run shows a blue/white result card in the terminal. It does not write 
 
 ## Cloud Setup
 
-The hosted option lets users run checks without any model-provider key of their own. Deploy the **`dashboard/`** folder on Vercel: users sign in with GitHub, get a Skillcheck API key with 10 free runs, and the CLI proxies through your server-side NVIDIA key (after the free runs they upgrade via Stripe). Full click-by-click walkthrough in **`dashboard/SETUP.md`**.
+The hosted option lets users run checks without any model-provider key of their own. Deploy the **`dashboard/`** folder on Vercel: users sign in with Google or GitHub (via Clerk), get a Skillcheck API key with 10 free runs, and the CLI proxies through your server-side NVIDIA key (after the free runs they upgrade via Stripe). Full click-by-click walkthrough in **`dashboard/SETUP.md`**.
 
 Once deployed, the CLI connects with:
 

@@ -1,22 +1,23 @@
 # Skillcheck Dashboard
 
-The hosted Skillcheck Cloud app: users sign in with GitHub, get a Skillcheck API key with **10 free runs**, and the CLI proxies through here to your server-side NVIDIA key. After the free runs, they upgrade via Stripe.
+The hosted Skillcheck Cloud app: users sign in with **Google or GitHub (via Clerk)**, get a Skillcheck API key with **10 free runs**, and the CLI proxies through here to your server-side NVIDIA key. After the free runs, they upgrade via Stripe.
 
-Zero-dependency, zero-build — static HTML/CSS/JS plus Vercel serverless functions. **Deploy this folder on Vercel.**
+Static HTML/CSS/JS + Vercel serverless functions. The only dependency is `@clerk/backend` (server-side token verification). **Deploy this folder on Vercel.**
 
 ```
 dashboard/
-  index.html            Landing page (sign in, pricing)        — HP-style design (see ../DESIGN.md)
+  index.html            Landing page (HP design, Framer Motion) — buttons open Clerk on click
   app.html              Signed-in dashboard (key, usage, preview)
-  assets/               styles.css, app.js, landing.js
+  sso-callback.html     Clerk OAuth redirect handler
+  assets/               styles.css, app.js, landing.js, auth.js (Clerk), motion.js (Framer Motion)
   api/
+    config.js           GET  /api/config            (browser-safe: Clerk publishable key)
     health.js           GET  /api/health
-    me.js               GET  /api/me              (session → account)
-    auth/login,callback,logout.js                 GitHub OAuth
+    me.js               GET  /api/me                (Clerk session → account, auto-creates)
     key/rotate.js       POST /api/key/rotate
-    chat/completions.js POST /api/chat/completions (the metered proxy the CLI hits)
-    billing/checkout,confirm.js                   Stripe upgrade
-    _lib/               config, store (Upstash), session, keys, users, nvidia, stripe
+    chat/completions.js POST /api/chat/completions  (the metered proxy the CLI hits)
+    billing/checkout,confirm.js                     Stripe upgrade
+    _lib/               config, clerk, store (Upstash), keys, users, nvidia, stripe, http
   test/                 smoke.mjs + proxy.mjs (run with `npm test`)
   .env.example          every variable, documented
   SETUP.md              full click-by-click deploy + API-key guide
@@ -24,9 +25,13 @@ dashboard/
 
 ## Quick start
 
-1. Read **[SETUP.md](SETUP.md)** — it walks through NVIDIA, Upstash, GitHub OAuth, Stripe, and the Vercel deploy.
+1. Read **[SETUP.md](SETUP.md)** — it walks through NVIDIA, Clerk, Upstash, Stripe, and the Vercel deploy.
 2. Deploy on Vercel with **Root Directory = `dashboard`** and **Framework = Other**.
 3. The CLI connects with `SKILLCHECK_API_URL=https://your-app.vercel.app/api` and `SKILLCHECK_TOKEN=sk_live_…`.
+
+## Auth
+
+Clerk handles sign-in. The static frontend loads ClerkJS lazily (only when a user clicks a sign-in / get-key button — the landing page never auto-redirects) and sends the Clerk session token to the dashboard's own endpoints. The backend verifies it with `@clerk/backend`. Enable Google, GitHub, or any other provider in the Clerk dashboard — no code change.
 
 ## How metering works
 
@@ -34,5 +39,6 @@ A "run" is one `skillcheck check`. The CLI tags every model call in a run with t
 
 ```bash
 cd dashboard
+npm install       # @clerk/backend
 npm test          # logic + proxy integration smoke tests (offline)
 ```

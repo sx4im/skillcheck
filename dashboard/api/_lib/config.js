@@ -11,13 +11,14 @@ export const NVIDIA_BASE_URL = (clean(process.env.NVIDIA_BASE_URL) || 'https://i
 export const DEFAULT_MODEL =
   clean(process.env.SKILLCHECK_MODEL) || clean(process.env.DEFAULT_MODEL) || 'qwen/qwen3-next-80b-a3b-instruct';
 
-// --- Auth (GitHub OAuth + signed session cookie) ---
-export const AUTH_SECRET = clean(process.env.AUTH_SECRET);
-export const GITHUB_ID = clean(process.env.AUTH_GITHUB_ID) || clean(process.env.GITHUB_CLIENT_ID);
-export const GITHUB_SECRET = clean(process.env.AUTH_GITHUB_SECRET) || clean(process.env.GITHUB_CLIENT_SECRET);
+// --- Auth: Clerk (hosted sign-in with Google, GitHub, etc.) ---
+// Publishable key is safe to expose to the browser; secret key stays server-side.
+export const CLERK_PUBLISHABLE_KEY = clean(process.env.CLERK_PUBLISHABLE_KEY) || clean(process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY);
+export const CLERK_SECRET_KEY = clean(process.env.CLERK_SECRET_KEY);
+export const clerkEnabled = Boolean(CLERK_PUBLISHABLE_KEY && CLERK_SECRET_KEY);
 
 // Pepper used when hashing issued API keys before storing them.
-export const TOKEN_PEPPER = clean(process.env.TOKEN_PEPPER) || AUTH_SECRET || 'skillcheck-dev-pepper';
+export const TOKEN_PEPPER = clean(process.env.TOKEN_PEPPER) || CLERK_SECRET_KEY || 'skillcheck-dev-pepper';
 
 // --- Quota ---
 export const FREE_RUNS = Number(process.env.FREE_RUNS || 10);
