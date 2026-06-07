@@ -1,5 +1,15 @@
-export type SkillFormat = 'SKILL.md' | 'AGENTS.md' | '.cursorrules' | 'CLAUDE.md';
+export type SkillFormat = 'SKILL.md' | 'AGENTS.md' | '.cursorrules' | 'CLAUDE.md' | 'markdown';
 export type CriterionType = 'rubric' | 'deterministic';
+
+// Progress reporting for a long eval run, so the CLI can show real phases
+// (generating tasks, running trials N/M, grading N/M) instead of a fake bar.
+export type ProgressPhase = 'generating' | 'running' | 'grading' | 'scoring';
+export interface ProgressUpdate {
+  phase: ProgressPhase;
+  completed?: number;
+  total?: number;
+}
+export type ProgressReporter = (update: ProgressUpdate) => void;
 
 export interface NormalizedSkill {
   name: string;

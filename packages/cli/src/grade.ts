@@ -3,7 +3,7 @@ import type { JsonCache } from './cache.js';
 import type { NvidiaConfig } from './env.js';
 import { gradeDeterministically } from './deterministic.js';
 import { hashJson } from './hash.js';
-import type { GeneratedTask, GradedOutput, TrialOutput } from './types.js';
+import type { GeneratedTask, GradedOutput, ProgressReporter, TrialOutput } from './types.js';
 
 interface GradePayload {
   score: number;
@@ -55,12 +55,16 @@ export async function gradeOutputs(
   outputs: TrialOutput[],
   config: NvidiaConfig,
   client: NvidiaNimClient,
-  cache: JsonCache
+  cache: JsonCache,
+  onProgress?: ProgressReporter
 ): Promise<GradedOutput[]> {
   const taskById = new Map(tasks.map((task) => [task.id, task]));
   const shuffled = seededShuffle(outputs, hashJson(outputs.map((output) => output.transcriptHash)));
   const graded = new Map<string, GradedOutput>();
   const debug = process.env.SKILLCHECK_DEBUG === '1';
+  const total = shuffled.length;
+  let completed = 0;
+  onProgress?.({ phase: 'grading', completed, total });
 
   for (const output of shuffled) {
     const task = taskById.get(output.taskId);
@@ -73,6 +77,8 @@ export async function gradeOutputs(
         ...output,
         ...grade
       });
+      completed += 1;
+      onProgress?.({ phase: 'grading', completed, total });
       continue;
     }
 
@@ -135,6 +141,8 @@ export async function gradeOutputs(
       reason: grade.reason,
       pass: grade.score >= 0.5
     });
+    completed += 1;
+    onProgress?.({ phase: 'grading', completed, total });
   }
 
   return outputs.map((output) => {

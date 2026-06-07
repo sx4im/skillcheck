@@ -10,7 +10,7 @@ import { gradeOutputs } from './grade.js';
 import { normalizeSkill } from './normalize.js';
 import { runTrials } from './run.js';
 import { scorePairedObservations, type PairedObservation } from './score.js';
-import type { GeneratedTask, GradedOutput, TaskBreakdown } from './types.js';
+import type { GeneratedTask, GradedOutput, ProgressReporter, TaskBreakdown } from './types.js';
 
 export interface EvalOptions {
   inputPath: string;
@@ -24,6 +24,7 @@ export interface EvalOptions {
   taskSuite?: string;
   sourceLabel?: string;
   saveArtifacts?: boolean;
+  onProgress?: ProgressReporter;
 }
 
 function applyModelOverrides(config: NvidiaConfig, options: EvalOptions): NvidiaConfig {
@@ -117,6 +118,8 @@ export async function evalSkill(options: EvalOptions): Promise<unknown> {
   const client = new NvidiaNimClient(config, { defaultHeaders: { 'x-skillcheck-run': runId } });
   const cache = new JsonCache();
 
+  const onProgress = options.onProgress;
+  onProgress?.({ phase: 'generating' });
   const tasks = options.taskSuite
     ? parseTaskSuite(await readFile(options.taskSuite, 'utf8')).slice(0, options.tasks)
     : await generateTasks({ domain: skill.domain, count: options.tasks }, config, client, cache);
@@ -127,8 +130,9 @@ export async function evalSkill(options: EvalOptions): Promise<unknown> {
     await writeJson(taskSuitePath, tasks);
   }
 
-  const outputs = await runTrials(skill, tasks, options.trials, config, client, cache);
-  const graded = await gradeOutputs(tasks, outputs, config, client, cache);
+  const outputs = await runTrials(skill, tasks, options.trials, config, client, cache, onProgress);
+  const graded = await gradeOutputs(tasks, outputs, config, client, cache, onProgress);
+  onProgress?.({ phase: 'scoring' });
   const score = scorePairedObservations(pairedObservations(graded));
   const breakdowns = taskBreakdowns(tasks, graded);
   const withSkillTokens = graded.filter((item) => item.arm === 'with_skill').map((item) => item.promptTokens);

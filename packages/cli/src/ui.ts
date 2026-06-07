@@ -3,8 +3,12 @@ import path from 'node:path';
 import process from 'node:process';
 import readline from 'node:readline';
 import { createInterface } from 'node:readline/promises';
+import type { ProgressUpdate } from './types.js';
 
-const SUPPORTED_SKILL_FILES = ['SKILL.md', 'AGENTS.md', 'CLAUDE.md', '.cursorrules'];
+// Conventional skill filenames, shown only as hints. The actual rule is simple:
+// Skillcheck analyzes Markdown (.md) files.
+const CONVENTIONAL_SKILL_FILES = ['SKILL.md', 'AGENTS.md', 'CLAUDE.md'];
+const isMarkdownFile = (filePath: string): boolean => path.extname(filePath).toLowerCase() === '.md';
 const useColor = () => process.stdout.isTTY && process.env.NO_COLOR !== '1';
 const color = (code: string, value: string): string => (useColor() ? `\x1b[${code}m${value}\x1b[0m` : value);
 const blue = (value: string): string => color('38;5;33', value);
@@ -46,7 +50,7 @@ export function printHelpUi(): void {
   console.log(`  ${white('skillcheck')} ${blue('check')} path/to/SKILL.md`);
   console.log(`  ${white('skillcheck')} path/to/skill-folder\n`);
   console.log(`${blue('Supported inputs')}`);
-  console.log(`  ${SUPPORTED_SKILL_FILES.join(', ')} or a folder containing one\n`);
+  console.log(`  Any Markdown (.md) file — e.g. ${CONVENTIONAL_SKILL_FILES.join(', ')} — or a folder containing one\n`);
   console.log(`${blue('Commands')}`);
   console.log(`  skillcheck setup`);
   console.log(`  skillcheck check <path> [--tasks N] [--trials K] [--output file.json] [--json]`);
@@ -110,52 +114,43 @@ export function printKeyPromptHint(webUrl: string): void {
 }
 
 export function supportedSkillFilesText(): string {
-  return SUPPORTED_SKILL_FILES.join(', ');
+  return `a Markdown (.md) file (e.g. ${CONVENTIONAL_SKILL_FILES.join(', ')}), or a folder containing one`;
 }
 
-async function fileExists(filePath: string): Promise<boolean> {
+async function directoryHasMarkdown(dirPath: string): Promise<boolean> {
   try {
-    const stats = await stat(filePath);
-    return stats.isFile();
-  } catch (error) {
-    if ((error as NodeJS.ErrnoException).code === 'ENOENT') {
-      return false;
-    }
-    throw error;
+    const entries = await readdir(dirPath, { withFileTypes: true });
+    return entries.some((entry) => entry.isFile() && isMarkdownFile(entry.name));
+  } catch {
+    return false;
   }
-}
-
-async function directoryHasSkillFile(dirPath: string): Promise<boolean> {
-  for (const fileName of SUPPORTED_SKILL_FILES) {
-    if (await fileExists(path.join(dirPath, fileName))) {
-      return true;
-    }
-  }
-  return false;
-}
-
-function isSupportedSkillFile(filePath: string): boolean {
-  return SUPPORTED_SKILL_FILES.includes(path.basename(filePath));
 }
 
 export async function validateSkillInput(inputPath: string): Promise<string> {
   try {
     const resolved = path.resolve(inputPath);
     const stats = await stat(resolved);
-    if (stats.isDirectory() && (await directoryHasSkillFile(resolved))) {
-      return inputPath;
+    if (stats.isDirectory()) {
+      if (await directoryHasMarkdown(resolved)) {
+        return inputPath;
+      }
+      throw new Error(`That folder has no .md file. Skillcheck only checks Markdown (.md) files — open a folder that contains one, or pick a .md file directly.`);
     }
-    if (stats.isFile() && isSupportedSkillFile(resolved)) {
-      return inputPath;
+    if (stats.isFile()) {
+      if (isMarkdownFile(resolved)) {
+        return inputPath;
+      }
+      throw new Error(`Skillcheck only checks Markdown (.md) files. "${path.basename(resolved)}" is not a .md file.`);
     }
   } catch (error) {
-    if ((error as NodeJS.ErrnoException).code !== 'ENOENT') {
-      throw error;
+    const code = (error as NodeJS.ErrnoException).code;
+    if (code === 'ENOENT') {
+      throw new Error(`This path does not exist. Please give me ${supportedSkillFilesText()}.`);
     }
-    throw new Error(`This path does not exist. Please give me a path to ${supportedSkillFilesText()}, or a folder containing one.`);
+    throw error;
   }
 
-  throw new Error(`That is not a skill file. Please give me a path to ${supportedSkillFilesText()}, or a folder containing one.`);
+  throw new Error(`Please give me ${supportedSkillFilesText()}.`);
 }
 
 async function listPickerEntries(currentDir: string): Promise<PickerEntry[]> {
@@ -167,22 +162,24 @@ async function listPickerEntries(currentDir: string): Promise<PickerEntry[]> {
       .map(async (entry): Promise<PickerEntry> => {
         const fullPath = path.join(currentDir, entry.name);
         if (entry.isDirectory()) {
-          const runnable = await directoryHasSkillFile(fullPath);
+          // Folders are for navigation only — never selectable. Hint when one
+          // holds a .md so the user knows where to go.
+          const hasMd = await directoryHasMarkdown(fullPath);
           return {
             label: `${entry.name}/`,
             fullPath,
             kind: 'directory',
-            runnable,
-            note: runnable ? 'skill folder' : 'folder'
+            runnable: false,
+            note: hasMd ? 'folder · has .md' : 'folder'
           };
         }
-        const runnable = entry.isFile() && isSupportedSkillFile(fullPath);
+        const isMd = entry.isFile() && isMarkdownFile(entry.name);
         return {
           label: entry.name,
           fullPath,
           kind: 'file',
-          runnable,
-          note: runnable ? 'skill file' : 'not a skill'
+          runnable: isMd,
+          note: isMd ? 'markdown' : 'not .md'
         };
       })
   );
@@ -196,10 +193,11 @@ async function listPickerEntries(currentDir: string): Promise<PickerEntry[]> {
       note: 'back'
     },
     ...mapped.sort((a, b) => {
+      // Folders first (to drill into), then selectable .md files, then the rest.
       if (a.kind !== b.kind) {
         return a.kind === 'directory' ? -1 : 1;
       }
-      if (a.runnable !== b.runnable) {
+      if (a.kind === 'file' && a.runnable !== b.runnable) {
         return a.runnable ? -1 : 1;
       }
       return a.label.localeCompare(b.label);
@@ -215,9 +213,9 @@ function visibleWindow<T>(items: T[], selected: number, size: number): { items: 
 function renderPicker(currentDir: string, entries: PickerEntry[], selected: number, message?: string): void {
   process.stdout.write('\x1b[2J\x1b[H');
   printBanner();
-  console.log(`${blue('Select a skill file or folder')}`);
+  console.log(`${blue('Pick a Markdown (.md) skill file')}`);
   console.log(`${dim('Current folder:')} ${currentDir}`);
-  console.log(dim('Use arrows, Enter to open/select, q to quit.\n'));
+  console.log(dim('↑/↓ move · Enter opens a folder or selects a .md file · q quits\n'));
 
   if (message) {
     console.log(`${red(message)}\n`);
@@ -226,9 +224,19 @@ function renderPicker(currentDir: string, entries: PickerEntry[], selected: numb
   const window = visibleWindow(entries, selected, 12);
   for (const [index, entry] of window.items.entries()) {
     const realIndex = window.offset + index;
-    const pointer = realIndex === selected ? blue('>') : ' ';
-    const label = realIndex === selected ? white(entry.label) : entry.runnable ? blue(entry.label) : entry.label;
-    const note = entry.runnable ? blue(entry.note) : dim(entry.note);
+    const isSelected = realIndex === selected;
+    const pointer = isSelected ? blue('>') : ' ';
+    let label: string;
+    if (isSelected) {
+      label = white(entry.label);
+    } else if (entry.kind === 'directory' || entry.kind === 'parent') {
+      label = blue(entry.label); // navigable
+    } else if (entry.runnable) {
+      label = green(entry.label); // selectable .md
+    } else {
+      label = dim(entry.label);
+    }
+    const note = entry.runnable ? green(entry.note) : dim(entry.note);
     console.log(`${pointer} ${label.padEnd(34)} ${note}`);
   }
   console.log('');
@@ -281,12 +289,8 @@ export async function selectSkillPath(startDir = process.cwd()): Promise<string>
       if (!entry) {
         continue;
       }
-      if (entry.kind === 'parent') {
-        currentDir = entry.fullPath;
-        selected = 0;
-        continue;
-      }
-      if (entry.kind === 'directory' && !entry.runnable) {
+      if (entry.kind === 'parent' || entry.kind === 'directory') {
+        // Folders are always navigated into — never selected as the result.
         currentDir = entry.fullPath;
         selected = 0;
         continue;
@@ -295,7 +299,7 @@ export async function selectSkillPath(startDir = process.cwd()): Promise<string>
         process.stdout.write('\x1b[2J\x1b[H');
         return entry.fullPath;
       }
-      message = `That is not a skill file. Select ${supportedSkillFilesText()}, or a folder containing one.`;
+      message = 'We only check Markdown (.md) files. Open a folder to find one, or pick a .md file.';
     }
   } finally {
     process.stdin.setRawMode(wasRaw);
@@ -304,36 +308,76 @@ export async function selectSkillPath(startDir = process.cwd()): Promise<string>
   }
 }
 
-function progressLine(percent: number): string {
-  const width = 32;
-  const filled = Math.round((width * percent) / 100);
-  const bar = `${'#'.repeat(filled)}${'-'.repeat(width - filled)}`;
-  return `${blue('Analyzing skill')} ${white(`[${bar}]`)} ${String(percent).padStart(3, ' ')}%`;
+const SPINNER_FRAMES = ['⠋', '⠙', '⠹', '⠸', '⠼', '⠴', '⠦', '⠧', '⠇', '⠏'];
+
+function phaseLabel(update: ProgressUpdate): string {
+  switch (update.phase) {
+    case 'generating':
+      return 'Generating evaluation tasks';
+    case 'running':
+      return 'Running trials';
+    case 'grading':
+      return 'Grading outputs';
+    case 'scoring':
+      return 'Scoring results';
+    default:
+      return 'Working';
+  }
 }
 
-export function startProgress(): { finish: () => void; fail: () => void } {
+function formatElapsed(ms: number): string {
+  const seconds = Math.floor(ms / 1000);
+  const minutes = Math.floor(seconds / 60);
+  return minutes > 0 ? `${minutes}m ${String(seconds % 60).padStart(2, '0')}s` : `${seconds}s`;
+}
+
+export interface ProgressController {
+  update: (event: ProgressUpdate) => void;
+  finish: () => void;
+  fail: () => void;
+}
+
+// A live, phase-aware indicator. Unlike the old fake bar that crept to 94% and
+// then sat there looking frozen during slow model calls, this shows the real
+// phase (generating / running N/M / grading N/M) plus elapsed time, so a long
+// reasoning-model run clearly reads as "working", not "stuck".
+export function startProgress(): ProgressController {
   if (!process.stdout.isTTY) {
-    return { finish: () => undefined, fail: () => undefined };
+    return { update: () => undefined, finish: () => undefined, fail: () => undefined };
   }
 
-  let percent = 0;
+  const startedAt = Date.now();
+  let frame = 0;
+  let current: ProgressUpdate = { phase: 'generating' };
+
   const render = () => {
-    process.stdout.write(`\r\x1b[2K${progressLine(percent)}`);
+    const spinner = blue(SPINNER_FRAMES[frame % SPINNER_FRAMES.length]!);
+    const label = white(phaseLabel(current));
+    const count =
+      typeof current.completed === 'number' && typeof current.total === 'number'
+        ? dim(` ${current.completed}/${current.total}`)
+        : '';
+    const elapsed = dim(` · ${formatElapsed(Date.now() - startedAt)}`);
+    process.stdout.write(`\r\x1b[2K${spinner} ${label}${count}${elapsed}`);
   };
+
   const timer = setInterval(() => {
-    percent = Math.min(94, percent + 2);
+    frame += 1;
     render();
-  }, 400);
+  }, 120);
 
   process.stdout.write('\x1b[?25l');
   render();
 
   return {
+    update: (event: ProgressUpdate) => {
+      current = event;
+      render();
+    },
     finish: () => {
       clearInterval(timer);
-      percent = 100;
-      render();
-      process.stdout.write('\n\x1b[?25h');
+      process.stdout.write(`\r\x1b[2K${green('✓')} ${white('Analysis complete')} ${dim(`· ${formatElapsed(Date.now() - startedAt)}`)}\n`);
+      process.stdout.write('\x1b[?25h');
     },
     fail: () => {
       clearInterval(timer);

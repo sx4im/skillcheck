@@ -1,6 +1,6 @@
 {
   "name": "@sx4im/skillcheck",
-  "version": "0.2.3",
+  "version": "0.2.4",
   "description": "Measure whether agent skills improve task performance.",
   "type": "module",
   "license": "MIT",
@@ -38,7 +38,8 @@
     "m0": "tsx packages/cli/bin/skillcheck.ts m0",
     "site:build": "next build packages/site",
     "test": "vitest run",
-    "typecheck": "tsc -p tsconfig.json --noEmit && tsc -p tsconfig.test.json --noEmit"
+    "typecheck": "tsc -p tsconfig.json --noEmit && tsc -p tsconfig.test.json --noEmit",
+    "prepublishOnly": "npm run build && npm test"
   },
   "engines": {
     "node": ">=20"

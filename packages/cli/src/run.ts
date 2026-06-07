@@ -3,7 +3,7 @@ import type { NvidiaNimClient } from './adapters/nvidia-nim.js';
 import type { JsonCache } from './cache.js';
 import type { NvidiaConfig } from './env.js';
 import { hashJson } from './hash.js';
-import type { GeneratedTask, NormalizedSkill, TrialOutput } from './types.js';
+import type { GeneratedTask, NormalizedSkill, ProgressReporter, TrialOutput } from './types.js';
 
 function messagesForArm(skill: NormalizedSkill, task: GeneratedTask, withSkill: boolean): ChatCompletionMessageParam[] {
   if (!withSkill) {
@@ -67,20 +67,30 @@ export async function runTrials(
   trials: number,
   config: NvidiaConfig,
   client: NvidiaNimClient,
-  cache: JsonCache
+  cache: JsonCache,
+  onProgress?: ProgressReporter
 ): Promise<TrialOutput[]> {
   const outputs: TrialOutput[] = [];
   const debug = process.env.SKILLCHECK_DEBUG === '1';
+  const total = tasks.length * trials * 2; // two arms (with/without skill) per trial
+  let completed = 0;
+  const tick = () => {
+    completed += 1;
+    onProgress?.({ phase: 'running', completed, total });
+  };
+  onProgress?.({ phase: 'running', completed, total });
   for (const task of tasks) {
     for (let trial = 1; trial <= trials; trial += 1) {
       if (debug) {
         console.error(`[skillcheck] run ${task.id} trial ${trial}/${trials} with_skill`);
       }
       outputs.push(await runOne(skill, task, trial, 'with_skill', config, client, cache));
+      tick();
       if (debug) {
         console.error(`[skillcheck] run ${task.id} trial ${trial}/${trials} no_skill`);
       }
       outputs.push(await runOne(skill, task, trial, 'no_skill', config, client, cache));
+      tick();
     }
   }
   return outputs;

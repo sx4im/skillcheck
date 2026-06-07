@@ -10,31 +10,60 @@ const SUPPORTED_FILES: Array<{ file: string; format: SkillFormat }> = [
   { file: '.cursorrules', format: '.cursorrules' }
 ];
 
+function formatForFile(filePath: string): SkillFormat | undefined {
+  const basename = path.basename(filePath);
+  const known = SUPPORTED_FILES.find((candidate) => candidate.file === basename);
+  if (known) {
+    return known.format;
+  }
+  // Any Markdown file is accepted as a generic skill document.
+  if (path.extname(basename).toLowerCase() === '.md') {
+    return 'markdown';
+  }
+  return undefined;
+}
+
+async function firstMarkdownInDir(dirPath: string): Promise<{ filePath: string; format: SkillFormat } | undefined> {
+  // Prefer the conventional skill files, then fall back to the first *.md by name.
+  for (const candidate of SUPPORTED_FILES) {
+    const filePath = path.join(dirPath, candidate.file);
+    try {
+      if ((await stat(filePath)).isFile()) {
+        return { filePath, format: candidate.format };
+      }
+    } catch (error) {
+      if ((error as NodeJS.ErrnoException).code !== 'ENOENT') {
+        throw error;
+      }
+    }
+  }
+
+  const entries = await readdir(dirPath, { withFileTypes: true });
+  const markdown = entries
+    .filter((entry) => entry.isFile() && path.extname(entry.name).toLowerCase() === '.md')
+    .map((entry) => entry.name)
+    .sort();
+  if (markdown[0]) {
+    return { filePath: path.join(dirPath, markdown[0]), format: 'markdown' };
+  }
+  return undefined;
+}
+
 async function resolveSkillFile(inputPath: string): Promise<{ filePath: string; format: SkillFormat }> {
   const stats = await stat(inputPath);
   if (stats.isDirectory()) {
-    for (const candidate of SUPPORTED_FILES) {
-      const filePath = path.join(inputPath, candidate.file);
-      try {
-        const candidateStats = await stat(filePath);
-        if (candidateStats.isFile()) {
-          return { filePath, format: candidate.format };
-        }
-      } catch (error) {
-        if ((error as NodeJS.ErrnoException).code !== 'ENOENT') {
-          throw error;
-        }
-      }
+    const found = await firstMarkdownInDir(inputPath);
+    if (!found) {
+      throw new Error(`No .md file found in ${inputPath}. Skillcheck only analyzes Markdown (.md) skill files.`);
     }
-    throw new Error(`No supported skill file found in ${inputPath}`);
+    return found;
   }
 
-  const basename = path.basename(inputPath);
-  const supported = SUPPORTED_FILES.find((candidate) => candidate.file === basename);
-  if (!supported) {
-    throw new Error(`Unsupported skill file: ${inputPath}`);
+  const format = formatForFile(inputPath);
+  if (!format) {
+    throw new Error(`Skillcheck only analyzes Markdown (.md) files. "${path.basename(inputPath)}" is not a .md file.`);
   }
-  return { filePath: inputPath, format: supported.format };
+  return { filePath: inputPath, format };
 }
 
 function extractFrontMatter(text: string): Record<string, string> {

@@ -216,7 +216,10 @@ async function runCheck(options: CheckOptions, showBanner = true): Promise<void>
   const progress = options.json ? undefined : startProgress();
   let result: unknown;
   try {
-    result = await evalSkill(options.evalOptions);
+    result = await evalSkill({
+      ...options.evalOptions,
+      onProgress: progress ? (event) => progress.update(event) : undefined
+    });
     progress?.finish();
   } catch (error) {
     progress?.fail();

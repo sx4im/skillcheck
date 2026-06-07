@@ -1,3 +1,6 @@
+import { mkdtemp, writeFile } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
+import path from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { parseCheckOptions } from '../src/cli.js';
 import { formatResultCard, validateSkillInput } from '../src/ui.js';
@@ -61,7 +64,21 @@ describe('friendly CLI check command', () => {
     expect(summary).toContain('Saved JSON      skillcheck-results/docs-skill.json');
   });
 
-  it('rejects paths that are not supported skill files', async () => {
-    await expect(validateSkillInput('/tmp/not-a-skill.md')).rejects.toThrow(/Please give me a path to/);
+  it('accepts any .md file', async () => {
+    const dir = await mkdtemp(path.join(tmpdir(), 'skillcheck-validate-'));
+    const md = path.join(dir, 'my-skill.md');
+    await writeFile(md, '# My Skill\n\nDo the thing.\n');
+    await expect(validateSkillInput(md)).resolves.toBe(md);
+  });
+
+  it('rejects files that are not Markdown', async () => {
+    const dir = await mkdtemp(path.join(tmpdir(), 'skillcheck-validate-'));
+    const txt = path.join(dir, 'notes.txt');
+    await writeFile(txt, 'not markdown');
+    await expect(validateSkillInput(txt)).rejects.toThrow(/only checks Markdown/i);
+  });
+
+  it('rejects a missing path', async () => {
+    await expect(validateSkillInput('/tmp/does-not-exist-skillcheck.md')).rejects.toThrow(/does not exist/i);
   });
 });
