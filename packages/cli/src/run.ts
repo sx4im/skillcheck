@@ -34,12 +34,16 @@ async function runOne(
   // so trials 2..K silently read trial 1's cached output. That collapses K
   // independent stochastic samples (temperature 0.7) into one replicated K times
   // and makes the paired-bootstrap CI ~sqrt(K) too narrow (pseudo-replication).
-  const response = await cache.getOrSet('runner', { model: config.runnerModel, temperature: 0.7, maxTokens: 1200, promptVersion: 1, trial, messages }, () =>
+  // Reasoning models (e.g. minimax-m2.7) spend ~500-600 tokens thinking before the
+  // answer, so the budget must cover reasoning + a full response or the answer is
+  // truncated. maxTokens is part of the cache key, so this also invalidates any
+  // answers captured under the old tighter budget.
+  const response = await cache.getOrSet('runner', { model: config.runnerModel, temperature: 0.7, maxTokens: 2048, promptVersion: 1, trial, messages }, () =>
     client.complete({
       model: config.runnerModel,
       messages,
       temperature: 0.7,
-      maxTokens: 1200
+      maxTokens: 2048
     })
   );
   const transcriptHash = `sha256:${hashJson({ taskId: task.id, trial, arm, messages, output: response.content })}`;

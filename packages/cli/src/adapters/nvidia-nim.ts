@@ -161,11 +161,10 @@ export class NvidiaNimClient {
 
     for (let attempt = 0; attempt < this.maxAttempts; attempt += 1) {
       try {
-        const extraBody = request.chatTemplateKwargs
-          ? {
-              chat_template_kwargs: request.chatTemplateKwargs
-            }
-          : undefined;
+        // NOTE: do not send `extra_body`. It is a Python-SDK convenience field, not a
+        // real OpenAI/NVIDIA parameter — NVIDIA NIM rejects it with
+        // "400 Validation: Unsupported parameter(s): `extra_body`". chat_template_kwargs
+        // is passed as a real top-level field, which NIM accepts.
         const requestBody = {
           model: request.model,
           messages: request.messages,
@@ -173,7 +172,6 @@ export class NvidiaNimClient {
           max_tokens: request.maxTokens,
           response_format: request.responseFormat ? { type: request.responseFormat } : undefined,
           chat_template_kwargs: request.chatTemplateKwargs,
-          extra_body: extraBody,
           stream: false
         };
         const response = (await this.runSerializedRequest(() =>
