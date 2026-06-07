@@ -28,15 +28,22 @@
   --r-pill: 9999px;
 
   --lift: 0 2px 8px rgba(26, 26, 26, 0.08);
+  --lift-hover: 0 8px 24px rgba(26, 26, 26, 0.12);
   --modal: 0 8px 24px rgba(26, 26, 26, 0.12);
 
   --max: 1100px;
   --font: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+
+  --transition-fast: 150ms ease;
+  --transition-smooth: 300ms cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 * { box-sizing: border-box; }
 
-html { -webkit-text-size-adjust: 100%; }
+html {
+  -webkit-text-size-adjust: 100%;
+  scroll-behavior: smooth;
+}
 
 body {
   margin: 0;
@@ -46,6 +53,7 @@ body {
   font-size: 16px;
   line-height: 1.4;
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 h1, h2, h3 { font-weight: 500; line-height: 1.0; margin: 0; }
@@ -76,16 +84,26 @@ a:hover { text-decoration: underline; }
 
 /* ---------- Top nav ---------- */
 .nav {
-  background: var(--canvas); height: 64px;
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(12px) saturate(180%);
+  -webkit-backdrop-filter: blur(12px) saturate(180%);
+  height: 64px;
   border-bottom: 1px solid var(--hairline);
   position: sticky; top: 0; z-index: 20;
+  transition: box-shadow var(--transition-smooth);
 }
+.nav.scrolled { box-shadow: var(--lift); }
 .nav .wrap { display: flex; align-items: center; height: 64px; gap: 24px; }
 .brand { display: inline-flex; align-items: center; gap: 10px; color: var(--ink); font-weight: 600; font-size: 20px; }
 .brand:hover { text-decoration: none; }
 .brand .mark { display: inline-block; }
 .nav .links { display: flex; gap: 4px; margin-left: 8px; }
-.nav .links a { color: var(--ink); padding: 8px 16px; font-size: 16px; }
+.nav .links a {
+  color: var(--ink); padding: 8px 16px; font-size: 16px;
+  border-radius: var(--r-md);
+  transition: background var(--transition-fast), color var(--transition-fast);
+}
+.nav .links a:hover { background: var(--cloud); text-decoration: none; }
 .nav .spacer { flex: 1; }
 .nav .right { display: flex; align-items: center; gap: 16px; }
 
@@ -96,11 +114,18 @@ a:hover { text-decoration: underline; }
   font-size: 14px; font-weight: 600; letter-spacing: 0.7px; text-transform: uppercase;
   border: 1px solid transparent; cursor: pointer; background: none;
   font-family: var(--font); white-space: nowrap; text-decoration: none;
+  transition: all var(--transition-smooth);
+  will-change: transform, box-shadow;
 }
-.btn:hover { text-decoration: none; }
+.btn:hover {
+  text-decoration: none;
+  transform: translateY(-1px);
+  box-shadow: var(--lift-hover);
+}
+.btn:active { transform: translateY(0); }
 .btn-primary { background: var(--primary); color: var(--on-primary); }
 .btn-primary:hover { background: var(--primary-deep); }
-.btn-primary:disabled { background: var(--steel); cursor: not-allowed; }
+.btn-primary:disabled { background: var(--steel); cursor: not-allowed; transform: none; box-shadow: none; }
 .btn-ink { background: var(--ink); color: var(--on-primary); }
 .btn-ink:hover { background: var(--ink-soft); }
 .btn-outline { background: var(--canvas); color: var(--primary); border-color: var(--primary); }
@@ -109,6 +134,7 @@ a:hover { text-decoration: underline; }
 .btn-outline-ink:hover { background: var(--cloud); }
 .btn-sm { height: 36px; padding: 0 16px; font-size: 12.6px; }
 .btn-text { color: var(--primary); font-weight: 500; text-transform: none; letter-spacing: 0; padding: 4px 0; height: auto; }
+.btn-text:hover { transform: none; box-shadow: none; }
 
 /* ---------- Bands ---------- */
 .band-cloud { background: var(--cloud); }
@@ -137,8 +163,15 @@ a:hover { text-decoration: underline; }
 .card {
   background: var(--canvas); border-radius: var(--r-xl); padding: 24px;
   box-shadow: var(--lift); border: 1px solid var(--hairline);
+  transition: transform var(--transition-smooth), box-shadow var(--transition-smooth);
+  will-change: transform, box-shadow;
+}
+.card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--lift-hover);
 }
 .card.flat { box-shadow: none; }
+.card.flat:hover { transform: none; box-shadow: none; }
 .card .num {
   width: 32px; height: 32px; border-radius: var(--r-pill); background: var(--primary);
   color: var(--on-primary); display: grid; place-items: center; font-weight: 600; margin-bottom: 16px;
@@ -148,7 +181,16 @@ a:hover { text-decoration: underline; }
 
 /* ---------- Pricing ---------- */
 .tiers { display: grid; grid-template-columns: repeat(2, 1fr); gap: 24px; max-width: 720px; margin: 0 auto; }
-.tier { background: var(--canvas); border-radius: var(--r-xl); padding: 32px; box-shadow: var(--lift); border: 1px solid var(--hairline); }
+.tier {
+  background: var(--canvas); border-radius: var(--r-xl); padding: 32px;
+  box-shadow: var(--lift); border: 1px solid var(--hairline);
+  transition: transform var(--transition-smooth), box-shadow var(--transition-smooth);
+  will-change: transform, box-shadow;
+}
+.tier:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--lift-hover);
+}
 .tier-featured { border-top: 3px solid var(--primary); }
 .tier .name { font-size: 24px; font-weight: 500; }
 .tier .price { font-size: 44px; font-weight: 500; margin: 12px 0 4px; }
@@ -256,12 +298,35 @@ input:focus, textarea:focus { outline: none; border-color: var(--ink); }
 }
 
 /* Hide animated elements before reveal. If motion can't load, JS removes `.anim`
-   from <html> so nothing stays hidden. */
+   from <html> so nothing stays hidden. We keep opacity at 0.08 instead of 0
+   so the page does not look completely blank while motion loads. */
 .anim [data-motion] > *,
 .anim [data-reveal],
-.anim [data-reveal-children] > * { opacity: 0; }
+.anim [data-reveal-children] > * { opacity: 0.08; transition: opacity 0.3s ease; }
 @media (prefers-reduced-motion: reduce) {
   .anim [data-motion] > *,
   .anim [data-reveal],
   .anim [data-reveal-children] > * { opacity: 1; }
+}
+
+/* ---------- Format tags ---------- */
+.tag {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  color: var(--primary);
+  background: var(--primary-soft);
+  border-radius: var(--r-md);
+  padding: 4px 10px;
+  margin-bottom: 12px;
+}
+
+/* ---------- User avatar ---------- */
+.user-avatar {
+  width: 32px; height: 32px; border-radius: var(--r-pill);
+  background: var(--primary); color: var(--on-primary);
+  display: grid; place-items: center; font-size: 12px; font-weight: 700;
+  cursor: default; user-select: none;
 }

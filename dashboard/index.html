@@ -13,6 +13,11 @@
       // Hide animated elements before paint; landing.js / motion.js reveal them
       // (and remove this class if motion can't load, so nothing stays hidden).
       document.documentElement.classList.add('anim');
+      // Fallback: never leave content hidden if CDN is slow or motion fails silently.
+      // motion.js will cancel this once it successfully initialises.
+      window.__motionRevealTimeout = setTimeout(function () {
+        document.documentElement.classList.remove('anim');
+      }, 1200);
     </script>
   </head>
   <body>
@@ -36,13 +41,20 @@
         </a>
         <div class="links">
           <a href="#how">How it works</a>
+          <a href="#features">Features</a>
+          <a href="#formats">Formats</a>
           <a href="#pricing">Pricing</a>
           <a href="https://github.com/sx4im/skillcheck">Docs</a>
         </div>
         <div class="spacer"></div>
-        <div class="right">
+        <div class="right" id="navSignedOut">
           <button class="btn-text" data-action="signin">Sign in</button>
           <button class="btn btn-primary btn-sm" data-action="signup">Get started</button>
+        </div>
+        <div class="right" id="navSignedIn" style="display:none; gap: 12px; align-items: center;">
+          <a class="btn btn-primary btn-sm" href="/app.html">Dashboard</a>
+          <div class="user-avatar" id="userAvatar" title="User menu"></div>
+          <button class="btn-text" data-action="signout">Sign out</button>
         </div>
       </div>
     </nav>
@@ -63,17 +75,6 @@
           <div class="cta-row">
             <button class="btn btn-primary" data-action="signup">Get your API key</button>
             <a class="btn btn-outline-ink" href="https://github.com/sx4im/skillcheck/blob/main/METHODOLOGY.md">View the methodology</a>
-          </div>
-          <div class="provider-row">
-            <span class="provider-label">Or continue with</span>
-            <button class="btn-provider" data-provider="oauth_github" aria-label="Continue with GitHub">
-              <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 .5A11.5 11.5 0 0 0 .5 12a11.5 11.5 0 0 0 7.86 10.92c.575.106.785-.25.785-.555 0-.274-.01-1-.015-1.965-3.197.695-3.872-1.54-3.872-1.54-.523-1.33-1.277-1.684-1.277-1.684-1.044-.713.079-.699.079-.699 1.154.081 1.761 1.185 1.761 1.185 1.026 1.758 2.693 1.25 3.35.956.104-.743.401-1.25.73-1.538-2.553-.29-5.238-1.277-5.238-5.683 0-1.255.448-2.281 1.184-3.085-.119-.29-.513-1.46.112-3.045 0 0 .966-.31 3.165 1.178a11 11 0 0 1 5.76 0c2.198-1.489 3.163-1.178 3.163-1.178.626 1.585.232 2.755.114 3.045.737.804 1.183 1.83 1.183 3.085 0 4.417-2.69 5.39-5.25 5.674.413.355.78 1.057.78 2.131 0 1.539-.014 2.78-.014 3.158 0 .308.207.667.79.554A11.5 11.5 0 0 0 23.5 12 11.5 11.5 0 0 0 12 .5" /></svg>
-              GitHub
-            </button>
-            <button class="btn-provider" data-provider="oauth_google" aria-label="Continue with Google">
-              <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path fill="#4285F4" d="M23.52 12.27c0-.86-.08-1.69-.22-2.49H12v4.71h6.47a5.53 5.53 0 0 1-2.4 3.63v3h3.88c2.27-2.09 3.57-5.17 3.57-8.85" /><path fill="#34A853" d="M12 24c3.24 0 5.96-1.07 7.95-2.9l-3.88-3c-1.08.72-2.45 1.15-4.07 1.15-3.13 0-5.78-2.11-6.73-4.96H1.27v3.09A12 12 0 0 0 12 24" /><path fill="#FBBC05" d="M5.27 14.29A7.2 7.2 0 0 1 4.89 12c0-.8.14-1.57.38-2.29V6.62H1.27A12 12 0 0 0 0 12c0 1.94.46 3.77 1.27 5.38z" /><path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.44-3.44C17.95 1.19 15.24 0 12 0A12 12 0 0 0 1.27 6.62l3.99 3.09C6.22 6.86 8.87 4.75 12 4.75" /></svg>
-              Google
-            </button>
           </div>
           <div style="margin-top:36px; max-width:620px">
             <div class="code" id="installCode">npm install -g @sx4im/skillcheck
@@ -104,6 +105,84 @@ skillcheck check ./SKILL.md<button class="copy" data-copy="installCode">Copy</bu
             <div class="num">3</div>
             <h3>Run skillcheck</h3>
             <p>Paste two commands, point the CLI at your key, and measure any SKILL.md, AGENTS.md, CLAUDE.md, or .cursorrules.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="features">
+      <div class="wrap">
+        <div data-reveal style="text-align:center">
+          <div class="eyebrow">What you get</div>
+          <h2>Evidence, not anecdotes</h2>
+          <p class="muted" style="max-width:560px; margin:12px auto 0">Skillcheck produces numbers you can cite. Every run is reproducible, every score has a confidence interval, and every skill gets a verdict.</p>
+        </div>
+        <div class="grid grid-3" data-reveal-children style="margin-top:40px">
+          <div class="card">
+            <h3>Forced-injection A/B</h3>
+            <p>We inject your skill as a system prompt and run the same tasks twice — with and without the skill. The delta is your effect in percentage points.</p>
+          </div>
+          <div class="card">
+            <h3>Blind grading</h3>
+            <p>A separate grader model scores outputs without knowing which arm produced them. No self-evaluation bias, no cherry-picking.</p>
+          </div>
+          <div class="card">
+            <h3>Bootstrap CI</h3>
+            <p>We resample 1,000 times to build a 95% confidence interval. If it does not overlap zero, the skill <em>helps</em>.</p>
+          </div>
+          <div class="card">
+            <h3>Rot detection</h3>
+            <p>Re-run the same skill on new model releases. If the verdict flips from <em>helps</em> to <em>placebo</em>, you know the skill rotted.</p>
+          </div>
+          <div class="card">
+            <h3>Reproducible</h3>
+            <p>Every result commits the skill hash, task suite, model version, and config. Anyone can re-run and verify the number.</p>
+          </div>
+          <div class="card">
+            <h3>Token-aware</h3>
+            <p>We count the extra tokens the skill costs and compute value-per-1k-tokens. A big effect that burns context is not always a win.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="band-cloud section" id="formats">
+      <div class="wrap">
+        <div data-reveal style="text-align:center">
+          <div class="eyebrow">Supported formats</div>
+          <h2>One command for every skill file</h2>
+          <p class="muted" style="max-width:560px; margin:12px auto 0">Drop any supported skill file and Skillcheck normalises it into a common shape for evaluation.</p>
+        </div>
+        <div class="grid grid-3" data-reveal-children style="margin-top:40px">
+          <div class="card">
+            <div class="tag">SKILL.md</div>
+            <h3>SKILL.md</h3>
+            <p>The Anthropic skill-creator format. Extracts instructions, domain, and bundled assets into a normalised skill object.</p>
+          </div>
+          <div class="card">
+            <div class="tag">AGENTS.md</div>
+            <h3>AGENTS.md</h3>
+            <p>The multi-agent format with role definitions and routing rules. Each role is evaluated independently.</p>
+          </div>
+          <div class="card">
+            <div class="tag">CLAUDE.md</div>
+            <h3>CLAUDE.md</h3>
+            <p>The Claude-specific project context format. Injected as system context during the runner phase.</p>
+          </div>
+          <div class="card">
+            <div class="tag">.cursorrules</div>
+            <h3>.cursorrules</h3>
+            <p>Cursor IDE rules files. Parsed as instruction sets and evaluated for code-generation and reasoning tasks.</p>
+          </div>
+          <div class="card">
+            <div class="tag">URL</div>
+            <h3>Remote URL</h3>
+            <p>Point the CLI at a raw GitHub URL or gist. Skillcheck fetches, normalises, and evaluates without a local clone.</p>
+          </div>
+          <div class="card">
+            <div class="tag">FOLDER</div>
+            <h3>Directory scan</h3>
+            <p>Pass a folder path and Skillcheck discovers all supported skill files inside, evaluating each one.</p>
           </div>
         </div>
       </div>

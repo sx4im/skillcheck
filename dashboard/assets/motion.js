@@ -12,12 +12,21 @@ export async function initMotion() {
 
   try {
     const { animate, inView, stagger } = await import('https://cdn.jsdelivr.net/npm/motion@11.18.0/+esm');
-    const ease = [0.16, 1, 0.3, 1];
+    const ease = [0.16, 1, 0.3, 1]; // smooth spring-like ease
+    // Cancel the HTML fallback timeout — motion loaded successfully.
+    if (window.__motionRevealTimeout) {
+      clearTimeout(window.__motionRevealTimeout);
+      delete window.__motionRevealTimeout;
+    }
 
-    // Hero: staggered fade + rise on load.
+    // Hero: staggered fade + rise + slight scale on load.
     const hero = document.querySelector('[data-motion="hero"]');
     if (hero) {
-      animate(hero.children, { opacity: [0, 1], y: [18, 0] }, { delay: stagger(0.08), duration: 0.6, ease });
+      animate(hero.children, {
+        opacity: [0, 1],
+        y: [24, 0],
+        scale: [0.98, 1]
+      }, { delay: stagger(0.1), duration: 0.7, ease });
     }
 
     // Single elements that reveal on scroll.
@@ -25,7 +34,11 @@ export async function initMotion() {
       inView(
         el,
         () => {
-          animate(el, { opacity: [0, 1], y: [20, 0] }, { duration: 0.6, ease });
+          animate(el, {
+            opacity: [0, 1],
+            y: [28, 0],
+            scale: [0.98, 1]
+          }, { duration: 0.7, ease });
         },
         { amount: 0.2 }
       );
@@ -36,7 +49,11 @@ export async function initMotion() {
       inView(
         grid,
         () => {
-          animate(grid.children, { opacity: [0, 1], y: [20, 0] }, { delay: stagger(0.1), duration: 0.6, ease });
+          animate(grid.children, {
+            opacity: [0, 1],
+            y: [28, 0],
+            scale: [0.98, 1]
+          }, { delay: stagger(0.12), duration: 0.7, ease });
         },
         { amount: 0.15 }
       );

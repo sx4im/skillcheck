@@ -1,10 +1,18 @@
 // Landing-page module: wires Clerk auth buttons, copy buttons, the footer year,
-// and the Framer Motion entrance/scroll animations.
-import { bindAuthButtons } from './auth.js';
+// the Framer Motion entrance/scroll animations, nav scroll shadow, and signed-in state.
+import { bindAuthButtons, currentUser } from './auth.js';
 import { initMotion } from './motion.js';
 
 const year = document.getElementById('year');
 if (year) year.textContent = String(new Date().getFullYear());
+
+// Nav shadow on scroll
+const nav = document.querySelector('.nav');
+if (nav) {
+  window.addEventListener('scroll', function () {
+    nav.classList.toggle('scrolled', window.scrollY > 4);
+  }, { passive: true });
+}
 
 function copyText(text, done) {
   if (navigator.clipboard && navigator.clipboard.writeText) {
@@ -35,3 +43,24 @@ document.querySelectorAll('.copy').forEach(function (btn) {
 
 bindAuthButtons();
 initMotion();
+
+// Signed-in state: swap navbar and set avatar
+(async function checkSession() {
+  try {
+    const user = await currentUser();
+    const signedOut = document.getElementById('navSignedOut');
+    const signedIn = document.getElementById('navSignedIn');
+    const avatar = document.getElementById('userAvatar');
+    if (user && signedOut && signedIn) {
+      signedOut.style.display = 'none';
+      signedIn.style.display = 'flex';
+      if (avatar) {
+        const name = [user.firstName, user.lastName].filter(Boolean).join(' ') || user.username || 'U';
+        avatar.textContent = name.slice(0, 2).toUpperCase();
+        avatar.title = name;
+      }
+    }
+  } catch {
+    // Not signed in — keep default state
+  }
+})();
