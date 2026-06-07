@@ -6,6 +6,48 @@
 
 let clerkPromise = null;
 
+// Derive the Clerk Frontend API host from the publishable key. The key is
+// `pk_(test|live)_<base64url("<host>$")>`, so decoding the middle segment yields
+// e.g. "verified-lioness-0.clerk.accounts.dev". That lets us load ClerkJS from
+// Clerk's own CDN — the same origin the browser already uses for sign-in.
+function frontendApiFromKey(publishableKey) {
+  const encoded = String(publishableKey || '').replace(/^pk_(test|live)_/, '').replace(/-/g, '+').replace(/_/g, '/');
+  let decoded = '';
+  try { decoded = atob(encoded); } catch (e) { decoded = ''; }
+  return decoded.replace(/\$+$/, '');
+}
+
+// Load ClerkJS from Clerk's official hosted bundle (clerk.browser.js) instead of
+// a third-party ESM CDN. The jsdelivr "+esm" build of clerk-js is a ~3 MB
+// on-the-fly transform that intermittently takes 6–15s+ or hangs the import
+// entirely — which froze the whole dashboard on "Loading…" and left sign-out
+// unwired. Clerk's own CDN is fast (~0.2s) and same-origin with the FAPI.
+function loadClerkFromCdn(publishableKey) {
+  return new Promise((resolve, reject) => {
+    if (window.Clerk) return resolve(window.Clerk);
+    const host = frontendApiFromKey(publishableKey);
+    if (!host) return reject(new Error('Could not determine the Clerk frontend API from the publishable key.'));
+    const script = document.createElement('script');
+    script.async = true;
+    script.crossOrigin = 'anonymous';
+    script.setAttribute('data-clerk-loader', '1');
+    script.setAttribute('data-clerk-publishable-key', publishableKey);
+    script.src = `https://${host}/npm/@clerk/clerk-js@5/dist/clerk.browser.js`;
+    script.addEventListener('load', () => {
+      let clerk = window.Clerk;
+      if (!clerk) return reject(new Error('Clerk loaded but window.Clerk is unavailable.'));
+      // Depending on the bundle, window.Clerk is either the constructor or a
+      // ready instance (when data-clerk-publishable-key is present).
+      if (typeof clerk === 'function') {
+        try { clerk = new clerk(publishableKey); window.Clerk = clerk; } catch (e) { return reject(e); }
+      }
+      resolve(clerk);
+    });
+    script.addEventListener('error', () => reject(new Error('Failed to load the Clerk script from its CDN.')));
+    document.head.appendChild(script);
+  });
+}
+
 export async function getClerk() {
   if (clerkPromise) return clerkPromise;
   clerkPromise = (async () => {
@@ -13,11 +55,12 @@ export async function getClerk() {
     if (!config.clerkPublishableKey) {
       throw new Error('Sign-in is not configured yet. Set CLERK_PUBLISHABLE_KEY on the server.');
     }
-    const { Clerk } = await import('https://cdn.jsdelivr.net/npm/@clerk/clerk-js@5/+esm');
-    const clerk = new Clerk(config.clerkPublishableKey);
+    const clerk = await loadClerkFromCdn(config.clerkPublishableKey);
     await clerk.load();
     return clerk;
   })();
+  // Reset on failure so a later call (e.g. after a refresh) can retry cleanly.
+  clerkPromise.catch(() => { clerkPromise = null; });
   return clerkPromise;
 }
 

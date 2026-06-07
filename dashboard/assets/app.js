@@ -240,11 +240,40 @@ function waitForUser(clerk, timeoutMs) {
   });
 }
 
+// Sign out must work even if Clerk never finishes loading (a blocked or slow
+// CDN used to freeze the whole boot before sign-out was wired). Attach a
+// resilient handler immediately: best-effort Clerk sign-out, but always leave.
+function wireResilientSignout() {
+  document.querySelectorAll('[data-action="signout"]').forEach(function (el) {
+    el.addEventListener('click', function (ev) {
+      ev.preventDefault();
+      let left = false;
+      const leave = function () { if (!left) { left = true; location.href = '/'; } };
+      try {
+        getClerk().then(function (c) { try { c.signOut({ redirectUrl: '/' }); } catch (e) { leave(); } }, leave);
+      } catch (e) { leave(); }
+      setTimeout(leave, 1500);
+    });
+  });
+}
+
 // --- boot: require a Clerk session, otherwise go back to the landing page ---
 (async function () {
+  wireResilientSignout();
+
   let clerk;
-  try { clerk = await getClerk(); } catch (e) { location.href = '/'; return; }
-  const user = await waitForUser(clerk, 5000);
+  try {
+    clerk = await withTimeout(getClerk(), 12000, 'CLERK_UNAVAILABLE');
+  } catch (e) {
+    showLoadError(
+      'Could not load the sign-in service. If you use Brave, Safari, or strict privacy mode, ' +
+      'allow this site (disable Shields) and refresh — or open it in Chrome/Firefox. ' +
+      'You can still use Sign out above.'
+    );
+    return;
+  }
+  let user;
+  try { user = await waitForUser(clerk, 5000); } catch (e) { user = clerk.user || null; }
   if (!user) { location.href = '/'; return; }
   bindAuthButtons();
   await maybeConfirmUpgrade();
