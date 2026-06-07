@@ -59,9 +59,14 @@ describe('friendly CLI check command', () => {
 
     expect(summary).toContain('Skill           Docs Skill');
     expect(summary).toContain('HELPS');
-    expect(summary).toContain('25.0 pp');
-    expect(summary).toContain('[5.0, 45.0] pp');
+    expect(summary).toContain('The skill HELPED');
+    expect(summary).toContain('+25.0 pp');
+    expect(summary).toContain('+5.0 pp to +45.0 pp');
     expect(summary).toContain('Saved JSON      skillcheck-results/docs-skill.json');
+    // +25pp effect -> 75/100 satisfaction -> "Good"
+    expect(summary).toContain('Satisfaction');
+    expect(summary).toContain('75/100');
+    expect(summary).toContain('GOOD');
   });
 
   it('accepts any .md file', async () => {

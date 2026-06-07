@@ -135,10 +135,24 @@ async function listAssets(skillFilePath: string): Promise<string[]> {
   }
 }
 
+function nameFromPath(filePath: string, format: SkillFormat): string {
+  const base = path.basename(filePath);
+  if (format === 'markdown') {
+    // A user-named file (e.g. frontend-design.md) is more meaningful than its
+    // parent folder — turn "frontend-design.md" into "frontend design".
+    const stem = base.replace(/\.md$/i, '').replace(/[-_]+/g, ' ').trim();
+    return stem || path.basename(path.dirname(filePath)) || base;
+  }
+  // Conventional files (SKILL.md, AGENTS.md, …) take their identity from the folder.
+  return path.basename(path.dirname(filePath)) || base;
+}
+
 export async function normalizeSkill(inputPath: string): Promise<NormalizedSkill> {
   const { filePath, format } = await resolveSkillFile(inputPath);
   const instructions = await readFile(filePath, 'utf8');
-  const name = firstHeading(instructions) || path.basename(path.dirname(filePath)) || path.basename(filePath);
+  // Prefer a declared name (front matter), then the first heading, then the path.
+  const name =
+    extractFrontMatter(instructions).name || firstHeading(instructions) || nameFromPath(filePath, format);
 
   return {
     name,

@@ -457,10 +457,6 @@ function formatPercent(value: unknown): string {
   return typeof value === 'number' ? `${(value * 100).toFixed(1)}%` : 'n/a';
 }
 
-function formatNumber(value: unknown): string {
-  return typeof value === 'number' ? value.toFixed(1) : 'n/a';
-}
-
 function verdictColor(verdict: string): string {
   if (verdict === 'helps') {
     return green(verdict.toUpperCase());
@@ -475,34 +471,88 @@ function boxLine(label: string, value: string): string {
   return `${blue('|')} ${white(label.padEnd(15))} ${value}`;
 }
 
+// Map the measured effect (percentage-point change in pass rate) to a 0–100
+// quality score: 50 = no effect, +1pp = +1 point. So a skill needs ~+11pp to be
+// "Good" and ~+31pp to be "Excellent"; one that hurts drops below 50.
+function satisfactionScore(effectPp: number): number {
+  return Math.max(0, Math.min(100, Math.round(50 + effectPp)));
+}
+
+function satisfactionBand(score: number): { label: string; paint: (s: string) => string } {
+  if (score <= 10) return { label: 'Very bad', paint: red };
+  if (score <= 30) return { label: 'Bad', paint: red };
+  if (score <= 50) return { label: 'Normal', paint: yellow };
+  if (score <= 60) return { label: 'Decent', paint: yellow };
+  if (score <= 80) return { label: 'Good', paint: green };
+  return { label: 'Excellent', paint: green };
+}
+
+function satisfactionBar(score: number, paint: (s: string) => string): string {
+  const width = 24;
+  const filled = Math.max(0, Math.min(width, Math.round((width * score) / 100)));
+  return `${paint('█'.repeat(filled))}${dim('░'.repeat(width - filled))}`;
+}
+
+function plainVerdict(verdict: string, withPass: unknown, noPass: unknown): string {
+  const w = typeof withPass === 'number' ? `${Math.round(withPass * 100)}%` : 'n/a';
+  const n = typeof noPass === 'number' ? `${Math.round(noPass * 100)}%` : 'n/a';
+  if (verdict === 'helps') return `The skill HELPED — model passed ${w} of tasks with it vs ${n} without.`;
+  if (verdict === 'harms') return `The skill HURT — model passed ${w} of tasks with it vs ${n} without.`;
+  return `No measurable difference — ${w} passed with the skill, ${n} without.`;
+}
+
+function signedPp(value: unknown): string {
+  if (typeof value !== 'number') return 'n/a';
+  return `${value >= 0 ? '+' : ''}${value.toFixed(1)} pp`;
+}
+
 export function formatResultCard(result: unknown, outputPath?: string): string {
   const root = asRecord(result);
   const skill = asRecord(root.skill);
   const config = asRecord(root.config);
   const score = asRecord(root.result);
   const ci = Array.isArray(score.ci_pp) ? score.ci_pp : [];
+  const ciLow = typeof ci[0] === 'number' ? ci[0] : undefined;
+  const ciHigh = typeof ci[1] === 'number' ? ci[1] : undefined;
   const ciText =
-    typeof ci[0] === 'number' && typeof ci[1] === 'number'
-      ? `[${ci[0].toFixed(1)}, ${ci[1].toFixed(1)}] pp`
+    ciLow !== undefined && ciHigh !== undefined
+      ? `${signedPp(ciLow)} to ${signedPp(ciHigh)}`
       : 'n/a';
+  const inconclusive =
+    ciLow !== undefined && ciHigh !== undefined && ciLow < 0 && ciHigh > 0 && ciHigh - ciLow > 40;
+
   const verdict = String(score.verdict ?? 'unknown');
+  const effectPp = typeof score.effect_pp === 'number' ? score.effect_pp : 0;
+  const sat = satisfactionScore(effectPp);
+  const band = satisfactionBand(sat);
+  const border = blue('+------------------------------------------------------+');
+
   const lines = [
-    blue('+-----------------------------------------------+'),
+    border,
     `${blue('|')} ${white('SKILLCHECK RESULT')}`,
-    blue('+-----------------------------------------------+'),
+    border,
     boxLine('Skill', String(skill.name ?? 'unknown')),
+    boxLine('Run size', `${String(config.tasks ?? 'n/a')} tasks × ${String(config.trials ?? 'n/a')} trials`),
+    `${blue('|')}`,
     boxLine('Verdict', verdictColor(verdict)),
-    boxLine('Effect', `${formatNumber(score.effect_pp)} pp`),
-    boxLine('Confidence', ciText),
-    boxLine('With skill', formatPercent(score.with_skill_pass)),
-    boxLine('Without skill', formatPercent(score.no_skill_pass)),
-    boxLine('Token cost', `${String(score.token_overhead ?? 'n/a')} tokens`),
-    boxLine('Run size', `${String(config.tasks ?? 'n/a')} tasks x ${String(config.trials ?? 'n/a')} trials`)
+    `${blue('|')} ${dim(plainVerdict(verdict, score.with_skill_pass, score.no_skill_pass))}`,
+    `${blue('|')}`,
+    boxLine('With skill', `${formatPercent(score.with_skill_pass)} of tasks passed`),
+    boxLine('Without skill', `${formatPercent(score.no_skill_pass)} of tasks passed`),
+    boxLine('Skill effect', `${signedPp(score.effect_pp)} ${dim('change in pass rate')}`),
+    boxLine('Confidence', `${ciText} ${dim('(95% range)')}`)
   ];
+  if (inconclusive) {
+    lines.push(`${blue('|')} ${yellow('Wide range = inconclusive. Run "Strong" or more tasks.')}`);
+  }
+  lines.push(boxLine('Token cost', `+${String(score.token_overhead ?? 'n/a')} ${dim('tokens to include the skill')}`));
   if (outputPath) {
     lines.push(boxLine('Saved JSON', outputPath));
   }
-  lines.push(blue('+-----------------------------------------------+'));
+  lines.push(border);
+  lines.push(`${blue('|')} ${white('Satisfaction'.padEnd(15))} ${band.paint(`${sat}/100`)}  ${band.paint(band.label.toUpperCase())}`);
+  lines.push(`${blue('|')} ${satisfactionBar(sat, band.paint)}`);
+  lines.push(border);
   return lines.join('\n');
 }
 
