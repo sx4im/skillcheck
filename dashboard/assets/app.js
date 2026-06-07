@@ -9,12 +9,32 @@ const state = { fullKey: '', revealed: false, plan: 'free' };
 
 const yearEl = $('year'); if (yearEl) yearEl.textContent = String(new Date().getFullYear());
 
+function withTimeout(promise, ms, code) {
+  return Promise.race([
+    promise,
+    new Promise(function (_, reject) { setTimeout(function () { reject(new Error(code)); }, ms); })
+  ]);
+}
+
 // --- auth-scoped fetch for the dashboard's own endpoints ---
 async function authFetch(path, options = {}) {
-  const token = await getToken();
+  // Minting a Clerk session token requires the browser to reach Clerk's frontend
+  // API. With development keys that is a third-party request to *.clerk.accounts.dev,
+  // which Brave/Safari/strict-privacy modes can block — leaving getToken() hanging
+  // forever. Cap it so we surface an actionable error instead of an endless spinner.
+  let token = null;
+  try {
+    token = await withTimeout(getToken(), 9000, 'SESSION_UNAVAILABLE');
+  } catch (e) {
+    throw new Error('SESSION_UNAVAILABLE');
+  }
   const headers = Object.assign({ accept: 'application/json' }, options.headers || {});
   if (token) headers['authorization'] = 'Bearer ' + token;
-  const res = await fetch(path, Object.assign({}, options, { headers }));
+  const res = await withTimeout(
+    fetch(path, Object.assign({}, options, { headers })),
+    20000,
+    'REQUEST_TIMEOUT'
+  );
   if (res.status === 401) { location.href = '/'; throw new Error('unauthorized'); }
   return res;
 }
@@ -228,5 +248,20 @@ function waitForUser(clerk, timeoutMs) {
   if (!user) { location.href = '/'; return; }
   bindAuthButtons();
   await maybeConfirmUpgrade();
-  try { await loadMe(); } catch (e) { showLoadError('Something went wrong loading your account. Please refresh.'); }
+  try {
+    await loadMe();
+  } catch (e) {
+    const code = e && e.message;
+    if (code === 'SESSION_UNAVAILABLE') {
+      showLoadError(
+        'Could not reach the sign-in service to load your session. This usually means a privacy browser is blocking it. ' +
+        'In Brave, click the Shields icon and turn Shields OFF for this site (or allow clerk.accounts.dev), then refresh. ' +
+        'Chrome and Firefox work without changes.'
+      );
+    } else if (code === 'REQUEST_TIMEOUT') {
+      showLoadError('The request to load your account timed out. Please refresh to try again.');
+    } else if (code !== 'unauthorized') {
+      showLoadError('Something went wrong loading your account. Please refresh.');
+    }
+  }
 })();
