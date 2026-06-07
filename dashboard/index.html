@@ -10,14 +10,8 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="/assets/styles.css" />
     <script>
-      // Hide animated elements before paint; landing.js / motion.js reveal them
-      // (and remove this class if motion can't load, so nothing stays hidden).
-      document.documentElement.classList.add('anim');
-      // Fallback: never leave content hidden if CDN is slow or motion fails silently.
-      // motion.js will cancel this once it successfully initialises.
-      window.__motionRevealTimeout = setTimeout(function () {
-        document.documentElement.classList.remove('anim');
-      }, 600);
+      // Motion animations run via inline styles from motion.js.
+      // No CSS opacity hiding — content is always fully visible.
     </script>
   </head>
   <body>

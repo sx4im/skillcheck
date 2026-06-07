@@ -297,16 +297,14 @@ input:focus, textarea:focus { outline: none; border-color: var(--ink); }
   background: #fdecee; border: 1px solid #f0c4cc; color: var(--error); border-radius: var(--r-md); font-size: 14px;
 }
 
-/* Hide animated elements before reveal. If motion can't load, JS removes `.anim`
-   from <html> so nothing stays hidden. We keep opacity at 0.25 so the page
-   is faint but readable while motion loads, then animates to full opacity. */
-.anim [data-motion] > *,
-.anim [data-reveal],
-.anim [data-reveal-children] > * { opacity: 0.25; transition: opacity 0.4s ease; }
+/* Animations are handled by motion.js via inline styles.
+   No CSS opacity hiding — content is always fully visible.
+   If motion.js loads, it adds transform/opacity animations on top.
+   If it fails, the page is still readable. */
 @media (prefers-reduced-motion: reduce) {
-  .anim [data-motion] > *,
-  .anim [data-reveal],
-  .anim [data-reveal-children] > * { opacity: 1; }
+  [data-motion] > *,
+  [data-reveal],
+  [data-reveal-children] > * { transition: none; }
 }
 
 /* ---------- Format tags ---------- */

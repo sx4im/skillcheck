@@ -49,7 +49,7 @@
             <div class="card">
               <h3>Skillcheck API key</h3>
               <div class="keyfield" style="margin-top:12px">
-                <code id="apiKey">sk_live_…</code>
+                <code id="apiKey">chk_live_…</code>
                 <button class="btn btn-outline-ink btn-sm" id="revealBtn">Reveal</button>
                 <button class="btn btn-primary btn-sm" id="copyKeyBtn">Copy</button>
               </div>
@@ -83,32 +83,7 @@
           </div>
         </div>
 
-        <div class="card" style="margin-top:24px">
-          <h3>Quick check in the browser</h3>
-          <p class="muted" style="margin-top:8px">
-            Runs your task once with and once without the skill so you can see the contrast. This preview does not consume a run —
-            for the real verdict (N tasks × K trials, blind grading, bootstrap CI) use <code>skillcheck check</code>.
-          </p>
-          <label for="skill">Skill instructions</label>
-          <textarea id="skill" placeholder="Paste the body of your SKILL.md here…"></textarea>
-          <label for="task">Task prompt</label>
-          <textarea id="task" placeholder="A concrete task the skill should help with…" style="min-height:64px"></textarea>
-          <div style="margin-top:16px; display:flex; gap:12px; align-items:center; flex-wrap:wrap">
-            <button class="btn btn-ink" id="runBtn">Run with vs without skill</button>
-            <span id="runStatus" class="status"></span>
-          </div>
-          <div class="preview-grid">
-            <div class="arm">
-              <h4>With skill</h4>
-              <div id="withBody" class="body"></div>
-            </div>
-            <div class="arm">
-              <h4>Without skill</h4>
-              <div id="noBody" class="body"></div>
-            </div>
-          </div>
-          <p class="fine" id="overhead" style="margin-top:10px"></p>
-        </div>
+        <!-- Skillcheck dashboard: API key + usage only -->
       </div>
     </main>
 

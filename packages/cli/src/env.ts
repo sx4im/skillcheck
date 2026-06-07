@@ -3,7 +3,7 @@ import { getConfiguredApiUrl, getConfiguredToken } from './config.js';
 
 dotenv.config();
 
-const DEFAULT_MODEL = 'qwen/qwen3-next-80b-a3b-instruct';
+const DEFAULT_MODEL = 'minimaxai/minimax-m2.7';
 
 export interface NvidiaConfig {
   apiKey: string;
