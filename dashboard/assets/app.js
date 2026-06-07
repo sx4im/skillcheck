@@ -1,6 +1,5 @@
-// Skillcheck dashboard logic. Requires a Clerk session: account endpoints are
-// called with the Clerk session token; the in-browser preview uses the issued
-// chk_ key (the proxy is key-based, not Clerk-based).
+// Skillcheck dashboard logic. Requires a Clerk session: the account endpoints
+// (/api/me, /api/key/rotate, /api/billing/*) are called with the Clerk session token.
 import { getClerk, getToken, bindAuthButtons } from './auth.js';
 
 const $ = (id) => document.getElementById(id);
@@ -142,11 +141,21 @@ async function maybeConfirmUpgrade() {
 }
 
 // --- events ---
-$('revealBtn').addEventListener('click', function () { state.revealed = !state.revealed; renderKey(); });
-$('copyKeyBtn').addEventListener('click', function () { copyText(state.fullKey, function () { flash($('copyKeyBtn')); }); });
-$('copyCmd').addEventListener('click', function () { copyText($('commandsText').textContent, function () { flash($('copyCmd')); }); });
+// Null-safe binding: the dashboard HTML may omit optional controls (the live
+// preview was removed, for instance). Referencing a missing element with a bare
+// $('id').addEventListener throws at module-evaluation time, which would abort
+// the ENTIRE script before the boot runs — leaving the page stuck on "Loading…"
+// and sign-out unwired. on() simply skips anything that isn't on the page.
+function on(id, event, handler) {
+  const el = $(id);
+  if (el) el.addEventListener(event, handler);
+}
 
-$('rotateBtn').addEventListener('click', function () {
+on('revealBtn', 'click', function () { state.revealed = !state.revealed; renderKey(); });
+on('copyKeyBtn', 'click', function () { copyText(state.fullKey, function () { flash($('copyKeyBtn')); }); });
+on('copyCmd', 'click', function () { copyText($('commandsText').textContent, function () { flash($('copyCmd')); }); });
+
+on('rotateBtn', 'click', function () {
   if (!confirm('Rotate your API key? The current key stops working immediately.')) return;
   authFetch(apiBase + '/key/rotate', { method: 'POST' })
     .then(function (r) { return r.json(); })
@@ -155,7 +164,7 @@ $('rotateBtn').addEventListener('click', function () {
     });
 });
 
-$('upgradeBtn').addEventListener('click', function () {
+on('upgradeBtn', 'click', function () {
   $('upgradeBtn').disabled = true;
   authFetch(apiBase + '/billing/checkout', { method: 'POST' })
     .then(function (r) { return r.json(); })
@@ -164,54 +173,6 @@ $('upgradeBtn').addEventListener('click', function () {
       else { $('upgradeBtn').disabled = false; $('upgradeNote').textContent = (data.error && data.error.message) || 'Could not start checkout.'; }
     })
     .catch(function () { $('upgradeBtn').disabled = false; });
-});
-
-// --- live preview (uses the chk_ key, not the Clerk token) ---
-function extractContent(data) {
-  const m = data && data.choices && data.choices[0] && data.choices[0].message;
-  if (!m) return '';
-  return m.content || m.reasoning_content || m.refusal || '';
-}
-function callModel(messages, runId) {
-  const headers = { 'content-type': 'application/json', authorization: 'Bearer ' + state.fullKey };
-  // Tag both arms of a preview with the same run id so they meter as ONE run.
-  if (runId) headers['x-skillcheck-run'] = runId;
-  return fetch(apiBase + '/chat/completions', {
-    method: 'POST',
-    headers: headers,
-    body: JSON.stringify({ model: 'minimaxai/minimax-m2.7', messages: messages, temperature: 0.7, max_tokens: 1200, stream: false })
-  }).then(function (r) {
-    return r.text().then(function (text) {
-      if (!r.ok) throw new Error('HTTP ' + r.status + ': ' + text.slice(0, 200));
-      let data; try { data = JSON.parse(text); } catch (e) { throw new Error('Non-JSON response'); }
-      return { content: extractContent(data), usage: data.usage || {} };
-    });
-  });
-}
-$('runBtn').addEventListener('click', function () {
-  const skill = $('skill').value.trim();
-  const task = $('task').value.trim();
-  const status = $('runStatus');
-  if (!skill || !task) { status.className = 'status err'; status.textContent = 'Add both a skill and a task.'; return; }
-  const withMessages = [
-    { role: 'system', content: 'You are completing an evaluation task. Apply the following skill instructions when relevant.\n\n' + skill },
-    { role: 'user', content: task }
-  ];
-  const noMessages = [{ role: 'user', content: task }];
-  $('runBtn').disabled = true;
-  status.className = 'status'; status.textContent = 'Running both arms…';
-  $('withBody').textContent = ''; $('noBody').textContent = ''; $('overhead').textContent = '';
-  const runId = 'preview-' + Date.now() + '-' + Math.random().toString(16).slice(2);
-  Promise.all([callModel(withMessages, runId), callModel(noMessages, runId)])
-    .then(function (res) {
-      $('withBody').textContent = res[0].content || '(empty)';
-      $('noBody').textContent = res[1].content || '(empty)';
-      const overhead = (res[0].usage.prompt_tokens || 0) - (res[1].usage.prompt_tokens || 0);
-      $('overhead').textContent = 'Token cost of injecting the skill: ' + (overhead > 0 ? '+' + overhead : overhead) + ' prompt tokens.';
-      status.className = 'status ok'; status.textContent = 'Done.';
-    })
-    .catch(function (e) { status.className = 'status err'; status.textContent = e.message; })
-    .then(function () { $('runBtn').disabled = false; });
 });
 
 // Right after a sign-in/sign-up redirect the Clerk handshake can still be
