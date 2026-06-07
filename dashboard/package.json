@@ -3,9 +3,12 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "description": "Skillcheck Cloud dashboard + metered proxy (zero-dependency, deploys on Vercel).",
+  "description": "Skillcheck Cloud dashboard + metered proxy. Clerk auth, deploys on Vercel.",
   "engines": {
     "node": ">=20"
+  },
+  "dependencies": {
+    "@clerk/backend": "^3.5.0"
   },
   "scripts": {
     "test": "node test/smoke.mjs && node test/proxy.mjs"

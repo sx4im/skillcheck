@@ -1,16 +1,21 @@
 import { sendJson, methodNotAllowed } from './_lib/http.js';
-import { getSession } from './_lib/session.js';
-import { getUser, getRunsUsed, runLimitFor } from './_lib/users.js';
+import { getClerkUserId, fetchClerkProfile } from './_lib/clerk.js';
+import { getUser, getOrCreateUser, getRunsUsed, runLimitFor } from './_lib/users.js';
 import { billingEnabled, FREE_RUNS } from './_lib/config.js';
 import { maskApiKey } from './_lib/keys.js';
 
 export default async function handler(req, res) {
   if (req.method !== 'GET') return methodNotAllowed(res, 'GET');
-  const session = getSession(req);
-  if (!session || !session.uid) return sendJson(res, 401, { error: { message: 'Not signed in' } });
 
-  const user = await getUser(session.uid);
-  if (!user) return sendJson(res, 401, { error: { message: 'Account not found' } });
+  const userId = await getClerkUserId(req);
+  if (!userId) return sendJson(res, 401, { error: { message: 'Not signed in' } });
+
+  // First request after sign-in creates the account and issues the API key.
+  let user = await getUser(userId);
+  if (!user) {
+    const profile = await fetchClerkProfile(userId);
+    user = await getOrCreateUser({ userId, email: profile.email, name: profile.name });
+  }
 
   const runsUsed = await getRunsUsed(user.uid);
   const limit = runLimitFor(user.plan);

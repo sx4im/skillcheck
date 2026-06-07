@@ -9,12 +9,17 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="/assets/styles.css" />
+    <script>
+      // Hide animated elements before paint; landing.js / motion.js reveal them
+      // (and remove this class if motion can't load, so nothing stays hidden).
+      document.documentElement.classList.add('anim');
+    </script>
   </head>
   <body>
     <div class="util">
       <div class="wrap">
         <span>Skillcheck Cloud — forced-injection A/B evaluation for agent skills</span>
-        <a href="/api/auth/login">Sign in</a>
+        <span class="util-promo">10 free runs · no credit card</span>
       </div>
     </div>
 
@@ -36,41 +41,59 @@
         </div>
         <div class="spacer"></div>
         <div class="right">
-          <a class="btn btn-primary" href="/api/auth/login">Sign in with GitHub</a>
+          <button class="btn-text" data-action="signin">Sign in</button>
+          <button class="btn btn-primary btn-sm" data-action="signup">Get started</button>
         </div>
       </div>
     </nav>
 
+    <div id="authError" class="auth-error" role="alert"></div>
+
     <header class="hero section">
       <div class="chevrons"></div>
       <div class="wrap">
-        <div class="eyebrow">Agent skill evaluation</div>
-        <h1>Does your skill actually help?</h1>
-        <p class="lead">
-          Skillcheck runs a forced-injection A/B test: your runner model solves generated tasks
-          with and without the skill, grades blind, and returns an effect in percentage points
-          with a confidence interval. Sign in, get an API key, and check any skill from the CLI.
-        </p>
-        <div class="cta-row">
-          <a class="btn btn-primary" href="/api/auth/login">Get your API key</a>
-          <a class="btn btn-outline-ink" href="https://github.com/sx4im/skillcheck/blob/main/METHODOLOGY.md">View the methodology</a>
-        </div>
-        <div style="margin-top:40px; max-width:620px">
-          <div class="code" id="installCode">npm install -g @sx4im/skillcheck
+        <div data-motion="hero">
+          <div class="eyebrow">Agent skill evaluation</div>
+          <h1>Does your skill actually help?</h1>
+          <p class="lead">
+            Skillcheck runs a forced-injection A/B test: your runner model solves generated tasks
+            with and without the skill, grades blind, and returns an effect in percentage points
+            with a confidence interval. Sign in, get an API key, and check any skill from the CLI.
+          </p>
+          <div class="cta-row">
+            <button class="btn btn-primary" data-action="signup">Get your API key</button>
+            <a class="btn btn-outline-ink" href="https://github.com/sx4im/skillcheck/blob/main/METHODOLOGY.md">View the methodology</a>
+          </div>
+          <div class="provider-row">
+            <span class="provider-label">Or continue with</span>
+            <button class="btn-provider" data-provider="oauth_github" aria-label="Continue with GitHub">
+              <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 .5A11.5 11.5 0 0 0 .5 12a11.5 11.5 0 0 0 7.86 10.92c.575.106.785-.25.785-.555 0-.274-.01-1-.015-1.965-3.197.695-3.872-1.54-3.872-1.54-.523-1.33-1.277-1.684-1.277-1.684-1.044-.713.079-.699.079-.699 1.154.081 1.761 1.185 1.761 1.185 1.026 1.758 2.693 1.25 3.35.956.104-.743.401-1.25.73-1.538-2.553-.29-5.238-1.277-5.238-5.683 0-1.255.448-2.281 1.184-3.085-.119-.29-.513-1.46.112-3.045 0 0 .966-.31 3.165 1.178a11 11 0 0 1 5.76 0c2.198-1.489 3.163-1.178 3.163-1.178.626 1.585.232 2.755.114 3.045.737.804 1.183 1.83 1.183 3.085 0 4.417-2.69 5.39-5.25 5.674.413.355.78 1.057.78 2.131 0 1.539-.014 2.78-.014 3.158 0 .308.207.667.79.554A11.5 11.5 0 0 0 23.5 12 11.5 11.5 0 0 0 12 .5" /></svg>
+              GitHub
+            </button>
+            <button class="btn-provider" data-provider="oauth_google" aria-label="Continue with Google">
+              <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path fill="#4285F4" d="M23.52 12.27c0-.86-.08-1.69-.22-2.49H12v4.71h6.47a5.53 5.53 0 0 1-2.4 3.63v3h3.88c2.27-2.09 3.57-5.17 3.57-8.85" /><path fill="#34A853" d="M12 24c3.24 0 5.96-1.07 7.95-2.9l-3.88-3c-1.08.72-2.45 1.15-4.07 1.15-3.13 0-5.78-2.11-6.73-4.96H1.27v3.09A12 12 0 0 0 12 24" /><path fill="#FBBC05" d="M5.27 14.29A7.2 7.2 0 0 1 4.89 12c0-.8.14-1.57.38-2.29V6.62H1.27A12 12 0 0 0 0 12c0 1.94.46 3.77 1.27 5.38z" /><path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.44-3.44C17.95 1.19 15.24 0 12 0A12 12 0 0 0 1.27 6.62l3.99 3.09C6.22 6.86 8.87 4.75 12 4.75" /></svg>
+              Google
+            </button>
+          </div>
+          <div style="margin-top:36px; max-width:620px">
+            <div class="code" id="installCode">npm install -g @sx4im/skillcheck
 skillcheck check ./SKILL.md<button class="copy" data-copy="installCode">Copy</button></div>
+          </div>
         </div>
       </div>
     </header>
 
     <section class="band-cloud section" id="how">
       <div class="wrap">
-        <div class="eyebrow">How it works</div>
-        <h2>Three steps to a verdict</h2>
-        <div class="grid grid-3" style="margin-top:40px">
+        <div data-reveal>
+          <div class="eyebrow">How it works</div>
+          <h2>Three steps to a verdict</h2>
+        </div>
+        <div class="grid grid-3" data-reveal-children style="margin-top:40px">
           <div class="card">
             <div class="num">1</div>
-            <h3>Sign in with GitHub</h3>
-            <p>No setup, no credit card. We create your account and issue a Skillcheck API key tied to it.</p>
+            <h3>Sign in</h3>
+            <p>Continue with Google or GitHub. We create your account and issue a Skillcheck API key tied to it.</p>
           </div>
           <div class="card">
             <div class="num">2</div>
@@ -88,9 +111,11 @@ skillcheck check ./SKILL.md<button class="copy" data-copy="installCode">Copy</bu
 
     <section class="section" id="pricing">
       <div class="wrap" style="text-align:center">
-        <div class="eyebrow">Pricing</div>
-        <h2>Start free. Upgrade when it pays off.</h2>
-        <div class="tiers" style="margin-top:40px; text-align:left">
+        <div data-reveal>
+          <div class="eyebrow">Pricing</div>
+          <h2>Start free. Upgrade when it pays off.</h2>
+        </div>
+        <div class="tiers" data-reveal style="margin-top:40px; text-align:left">
           <div class="tier">
             <div class="name">Free</div>
             <div class="price">$0</div>
@@ -100,7 +125,7 @@ skillcheck check ./SKILL.md<button class="copy" data-copy="installCode">Copy</bu
               <li>Blind grading + bootstrap CI</li>
               <li>Community support</li>
             </ul>
-            <a class="btn btn-outline" href="/api/auth/login" style="width:100%">Get started</a>
+            <button class="btn btn-outline" data-action="signup" style="width:100%">Get started</button>
           </div>
           <div class="tier tier-featured">
             <div class="name">Pro</div>
@@ -111,7 +136,7 @@ skillcheck check ./SKILL.md<button class="copy" data-copy="installCode">Copy</bu
               <li>Corpus &amp; rot reporting</li>
               <li>Priority model capacity</li>
             </ul>
-            <a class="btn btn-primary" href="/api/auth/login" style="width:100%">Upgrade after sign-in</a>
+            <button class="btn btn-primary" data-action="signup" style="width:100%">Upgrade after sign-in</button>
           </div>
         </div>
         <p class="fine" style="margin-top:20px">Price shown is an example — set your own in Stripe. Upgrade lives in your dashboard after sign-in.</p>
@@ -119,10 +144,10 @@ skillcheck check ./SKILL.md<button class="copy" data-copy="installCode">Copy</bu
     </section>
 
     <section class="band-ink section">
-      <div class="wrap" style="text-align:center">
+      <div class="wrap" style="text-align:center" data-reveal>
         <h2>Ready to measure your skills?</h2>
-        <p class="lead" style="color:#c9d3ea; margin:16px auto 28px">Sign in with GitHub and get your API key in seconds.</p>
-        <a class="btn btn-primary" href="/api/auth/login">Get your API key</a>
+        <p class="lead" style="color:#c9d3ea; margin:16px auto 28px">Sign in with Google or GitHub and get your API key in seconds.</p>
+        <button class="btn btn-primary" data-action="signup">Get your API key</button>
       </div>
     </section>
 
@@ -146,7 +171,7 @@ skillcheck check ./SKILL.md<button class="copy" data-copy="installCode">Copy</bu
             <div class="stack">
               <a href="#how">How it works</a>
               <a href="#pricing">Pricing</a>
-              <a href="/api/auth/login">Sign in</a>
+              <button class="btn-text footer-link" data-action="signin">Sign in</button>
             </div>
           </div>
           <div>
@@ -162,6 +187,6 @@ skillcheck check ./SKILL.md<button class="copy" data-copy="installCode">Copy</bu
       </div>
     </footer>
 
-    <script src="/assets/landing.js"></script>
+    <script type="module" src="/assets/landing.js"></script>
   </body>
 </html>

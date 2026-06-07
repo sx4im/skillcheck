@@ -24,7 +24,7 @@ globalThis.fetch = async (url, init) => {
   return realFetch(url, init);
 };
 
-const { createOrGetUserFromGithub } = await import('../api/_lib/users.js');
+const { getOrCreateUser } = await import('../api/_lib/users.js');
 const handler = (await import('../api/chat/completions.js')).default;
 
 function mockRes() {
@@ -55,7 +55,7 @@ async function call(key, runId) {
   return { status: res.statusCode, json, headers: res.headers };
 }
 
-const user = await createOrGetUserFromGithub({ ghId: 'proxy-1', email: 'p@x.com', name: 'P' });
+const user = await getOrCreateUser({ userId: 'clerk_proxy_1', email: 'p@x.com', name: 'P' });
 
 // 1. Missing key → 401
 assert.equal((await call('', 'r1')).status, 401, 'missing key rejected');
