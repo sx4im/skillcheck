@@ -9,7 +9,7 @@ function clean(value) {
 export const NVIDIA_API_KEY = clean(process.env.NVIDIA_API_KEY);
 export const NVIDIA_BASE_URL = (clean(process.env.NVIDIA_BASE_URL) || 'https://integrate.api.nvidia.com/v1').replace(/\/+$/, '');
 export const DEFAULT_MODEL =
-  clean(process.env.SKILLCHECK_MODEL) || clean(process.env.DEFAULT_MODEL) || 'minimaxai/minimax-m2.7';
+  clean(process.env.SKILLCHECK_MODEL) || clean(process.env.DEFAULT_MODEL) || 'nvidia/nemotron-3-nano-omni-30b-a3b-reasoning';
 
 // --- Auth: Clerk (hosted sign-in with Google, GitHub, etc.) ---
 // Publishable key is safe to expose to the browser; secret key stays server-side.

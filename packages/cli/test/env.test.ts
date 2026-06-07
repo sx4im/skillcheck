@@ -36,9 +36,9 @@ describe('loadNvidiaConfig', () => {
 
     expect(config.apiKey).toBe('nvidia-key');
     expect(config.baseUrl).toBe('https://integrate.api.nvidia.com/v1');
-    expect(config.generatorModel).toBe('minimaxai/minimax-m2.7');
-    expect(config.graderModel).toBe('minimaxai/minimax-m2.7');
-    expect(config.runnerModel).toBe('minimaxai/minimax-m2.7');
+    expect(config.generatorModel).toBe('nvidia/nemotron-3-nano-omni-30b-a3b-reasoning');
+    expect(config.graderModel).toBe('nvidia/nemotron-3-nano-omni-30b-a3b-reasoning');
+    expect(config.runnerModel).toBe('nvidia/nemotron-3-nano-omni-30b-a3b-reasoning');
   });
 
   it('uses hosted proxy mode without requiring NVIDIA_API_KEY', () => {

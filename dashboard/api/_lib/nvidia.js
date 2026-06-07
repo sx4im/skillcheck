@@ -8,11 +8,8 @@ import { NVIDIA_API_KEY, NVIDIA_BASE_URL, DEFAULT_MODEL } from './config.js';
 // tokens, so the ceiling sits comfortably above that.
 const MAX_OUTPUT_TOKENS = 16000;
 const DEFAULT_OUTPUT_TOKENS = 1024;
-// The pinned model is a reasoning model that always emits ~500-600 reasoning
-// tokens BEFORE the answer. A request with a tiny budget (e.g. the grader's 240)
-// would spend it all on reasoning and return empty `content`, so floor the
-// budget to guarantee the answer has room to land.
-const MIN_OUTPUT_TOKENS = 1024;
+// Small floor so a tiny budget never truncates a direct answer.
+const MIN_OUTPUT_TOKENS = 512;
 
 // Python-SDK-only conveniences that NVIDIA NIM rejects ("Unsupported parameter(s)").
 const INVALID_UPSTREAM_FIELDS = ['extra_body', 'extra_headers', 'extra_query'];
@@ -42,7 +39,10 @@ export async function forwardChatCompletion(body) {
     model: DEFAULT_MODEL,
     stream: false,
     n: 1,
-    max_tokens: clampMaxTokens(safe.max_tokens)
+    max_tokens: clampMaxTokens(safe.max_tokens),
+    // The hosted tier pins reasoning OFF for speed + cost (the model thinks by
+    // default). A caller can still override by sending its own chat_template_kwargs.
+    chat_template_kwargs: { enable_thinking: false, ...(safe.chat_template_kwargs || {}) }
   };
   // Drop fields NVIDIA NIM rejects, so older CLIs that still send extra_body work.
   for (const field of INVALID_UPSTREAM_FIELDS) delete payload[field];

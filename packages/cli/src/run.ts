@@ -34,10 +34,9 @@ async function runOne(
   // so trials 2..K silently read trial 1's cached output. That collapses K
   // independent stochastic samples (temperature 0.7) into one replicated K times
   // and makes the paired-bootstrap CI ~sqrt(K) too narrow (pseudo-replication).
-  // Reasoning models (e.g. minimax-m2.7) spend ~500-600 tokens thinking before the
-  // answer, so the budget must cover reasoning + a full response or the answer is
-  // truncated. maxTokens is part of the cache key, so this also invalidates any
-  // answers captured under the old tighter budget.
+  // Reasoning is disabled (enable_thinking:false), so output is direct. 2048 is a
+  // generous cap for a full answer; it is part of the cache key, so changing it
+  // invalidates answers captured under the old budget.
   const response = await cache.getOrSet('runner', { model: config.runnerModel, temperature: 0.7, maxTokens: 2048, promptVersion: 1, trial, messages }, () =>
     client.complete({
       model: config.runnerModel,

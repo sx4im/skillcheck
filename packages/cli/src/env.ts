@@ -3,7 +3,7 @@ import { getConfiguredApiUrl, getConfiguredToken } from './config.js';
 
 dotenv.config();
 
-const DEFAULT_MODEL = 'minimaxai/minimax-m2.7';
+const DEFAULT_MODEL = 'nvidia/nemotron-3-nano-omni-30b-a3b-reasoning';
 
 export interface NvidiaConfig {
   apiKey: string;
@@ -51,7 +51,7 @@ export function loadNvidiaConfig(): NvidiaConfig {
     throw new Error('Request timeout must be a positive number when set');
   }
 
-  const requestDelayMs = Number(process.env.NVIDIA_REQUEST_DELAY_MS?.trim() || 5000);
+  const requestDelayMs = Number(process.env.NVIDIA_REQUEST_DELAY_MS?.trim() || 750);
   if (!Number.isFinite(requestDelayMs) || requestDelayMs < 0) {
     throw new Error('Request delay must be a non-negative number when set');
   }

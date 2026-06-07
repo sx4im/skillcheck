@@ -24,6 +24,7 @@ import {
   printKeyPromptHint,
   promptText,
   selectSkillPath,
+  selectEffort,
   startProgress,
   validateSkillInput
 } from './ui.js';
@@ -235,7 +236,11 @@ async function runCheck(options: CheckOptions, showBanner = true): Promise<void>
 async function runInteractiveCheck(): Promise<void> {
   await ensureCloudConfigured(false);
   const selectedPath = await selectSkillPath();
-  await runCheck(parseCheckOptions(['node', 'skillcheck', 'check', selectedPath]), false);
+  const effort = await selectEffort();
+  const options = parseCheckOptions(['node', 'skillcheck', 'check', selectedPath]);
+  options.evalOptions.tasks = effort.tasks;
+  options.evalOptions.trials = effort.trials;
+  await runCheck(options, false);
 }
 
 export async function main(argv: string[]): Promise<void> {

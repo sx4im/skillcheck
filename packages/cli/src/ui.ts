@@ -308,6 +308,69 @@ export async function selectSkillPath(startDir = process.cwd()): Promise<string>
   }
 }
 
+interface EffortLevel {
+  key: string;
+  name: string;
+  tasks: number;
+  trials: number;
+}
+
+// Calls per run = 1 generator + (tasks × trials × 2 arms) runner + the same many
+// grader calls. nemotron with reasoning off averages ~1.2s/call; add the inter-
+// request delay and occasional retry → ~2.5s/call is a safe estimate.
+const SECONDS_PER_CALL = 2.5;
+
+function callsFor(tasks: number, trials: number): number {
+  return 1 + tasks * trials * 4;
+}
+
+function estimateLabel(tasks: number, trials: number): string {
+  const seconds = callsFor(tasks, trials) * SECONDS_PER_CALL;
+  if (seconds < 60) {
+    return `~${Math.max(15, Math.round(seconds / 10) * 10)} sec`;
+  }
+  const minutes = seconds / 60;
+  const low = Math.max(1, Math.floor(minutes));
+  const high = Math.ceil(minutes + 0.5);
+  return low === high ? `~${low} min` : `~${low}–${high} min`;
+}
+
+const EFFORT_LEVELS: EffortLevel[] = [
+  { key: '1', name: 'Low', tasks: 2, trials: 1 },
+  { key: '2', name: 'Medium', tasks: 3, trials: 2 },
+  { key: '3', name: 'Strong', tasks: 5, trials: 3 }
+];
+
+export interface EffortChoice {
+  tasks: number;
+  trials: number;
+  label: string;
+  estimate: string;
+}
+
+// Ask how thorough the check should be, showing an estimated time for each level.
+// Non-interactive callers never reach this (they pass --tasks/--trials).
+export async function selectEffort(): Promise<EffortChoice> {
+  const defaultLevel = EFFORT_LEVELS[1]!; // Medium
+  if (!process.stdin.isTTY || !process.stdout.isTTY) {
+    return { tasks: defaultLevel.tasks, trials: defaultLevel.trials, label: defaultLevel.name, estimate: estimateLabel(defaultLevel.tasks, defaultLevel.trials) };
+  }
+
+  console.log(`${blue('How thorough should the check be?')}`);
+  for (const level of EFFORT_LEVELS) {
+    const scope = `${level.tasks} tasks × ${level.trials} trial${level.trials > 1 ? 's' : ''}`;
+    const estimate = blue(`[${estimateLabel(level.tasks, level.trials)}]`);
+    const recommended = level.name === 'Medium' ? dim('  (recommended)') : '';
+    console.log(`  ${white(`${level.key})`)} ${white(level.name.padEnd(7))} ${dim(scope.padEnd(18))} ${estimate}${recommended}`);
+  }
+
+  const answer = await promptText('\nChoose 1–3 (Enter for Medium): ');
+  const chosen = EFFORT_LEVELS.find((level) => level.key === answer.trim()) ?? defaultLevel;
+  const estimate = estimateLabel(chosen.tasks, chosen.trials);
+  console.log(`${dim('Starting')} ${white(chosen.name)} ${dim('check')} ${blue(`[${estimate}]`)}\n`);
+  return { tasks: chosen.tasks, trials: chosen.trials, label: chosen.name, estimate };
+}
+
 const SPINNER_FRAMES = ['⠋', '⠙', '⠹', '⠸', '⠼', '⠴', '⠦', '⠧', '⠇', '⠏'];
 
 function phaseLabel(update: ProgressUpdate): string {

@@ -161,17 +161,20 @@ export class NvidiaNimClient {
 
     for (let attempt = 0; attempt < this.maxAttempts; attempt += 1) {
       try {
-        // NOTE: do not send `extra_body`. It is a Python-SDK convenience field, not a
-        // real OpenAI/NVIDIA parameter — NVIDIA NIM rejects it with
-        // "400 Validation: Unsupported parameter(s): `extra_body`". chat_template_kwargs
-        // is passed as a real top-level field, which NIM accepts.
+        // Reasoning is disabled by default for every call: the runner/generator/grader
+        // all want fast, direct output, not chain-of-thought. nemotron honours
+        // `chat_template_kwargs.enable_thinking=false` (verified). A caller can opt
+        // back in by passing its own chatTemplateKwargs.
+        // NOTE: send `chat_template_kwargs` as a real TOP-LEVEL field. Do NOT wrap it in
+        // `extra_body` — that is a Python-SDK convenience, not a real parameter, and
+        // NVIDIA NIM rejects it ("400 Validation: Unsupported parameter(s): extra_body").
         const requestBody = {
           model: request.model,
           messages: request.messages,
           temperature: request.temperature,
           max_tokens: request.maxTokens,
           response_format: request.responseFormat ? { type: request.responseFormat } : undefined,
-          chat_template_kwargs: request.chatTemplateKwargs,
+          chat_template_kwargs: { enable_thinking: false, ...(request.chatTemplateKwargs ?? {}) },
           stream: false
         };
         const response = (await this.runSerializedRequest(() =>

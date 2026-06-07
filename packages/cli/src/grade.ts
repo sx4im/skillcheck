@@ -102,12 +102,8 @@ export async function gradeOutputs(
           client.complete({
             model: config.graderModel,
             temperature: 0,
-            // Reasoning models (e.g. minimax-m2.7) always emit ~500-600 reasoning
-            // tokens before the answer; a tight budget leaves `content` empty. Give
-            // the JSON verdict room to land after the reasoning.
-            maxTokens: 1536,
+            maxTokens: 1024,
             responseFormat: 'json_object',
-            chatTemplateKwargs: { thinking: false },
             messages: [
               {
                 role: 'system',

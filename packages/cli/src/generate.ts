@@ -89,7 +89,6 @@ export async function generateTasks(
           temperature: 0.4,
           maxTokens: 8000,
           responseFormat: 'json_object',
-          chatTemplateKwargs: { thinking: false },
           messages: [
             {
               role: 'system',
