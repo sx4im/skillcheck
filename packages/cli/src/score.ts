@@ -5,6 +5,10 @@ export interface PairedObservation {
 
 export interface ScoreSummary {
   effectPp: number;
+  // Bootstrap mean effect (pp). Unlike the observed effect — which is quantized to
+  // 100/N by the sample size — this averages many resamples, so it varies smoothly
+  // and gives the satisfaction score continuous, granular values.
+  meanEffectPp: number;
   ciPp: [number, number];
   verdict: 'helps' | 'placebo' | 'harms';
   withSkillPass: number;
@@ -66,6 +70,7 @@ export function scorePairedObservations(
     bootstrapEffects.push(total / observations.length);
   }
 
+  const meanEffect = bootstrapEffects.reduce((sum, value) => sum + value, 0) / bootstrapEffects.length;
   bootstrapEffects.sort((a, b) => a - b);
   const lower = toPp(quantile(bootstrapEffects, 0.025));
   const upper = toPp(quantile(bootstrapEffects, 0.975));
@@ -73,6 +78,7 @@ export function scorePairedObservations(
 
   return {
     effectPp: toPp(effect),
+    meanEffectPp: toPp(meanEffect),
     ciPp: [lower, upper],
     verdict,
     withSkillPass: Number(withSkillPass.toFixed(4)),

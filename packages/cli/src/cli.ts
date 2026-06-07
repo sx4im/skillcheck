@@ -13,7 +13,7 @@ import { evalSkill, type EvalOptions } from './eval.js';
 import { runM0Gate } from './m0/run.js';
 import { runRot, type RotOptions } from './rot.js';
 import {
-  formatResultCard,
+  printResultCard,
   printHelpUi,
   printBanner,
   printSetupIntro,
@@ -230,7 +230,7 @@ async function runCheck(options: CheckOptions, showBanner = true): Promise<void>
     console.log(JSON.stringify(result, null, 2));
     return;
   }
-  console.log(formatResultCard(result, options.output));
+  await printResultCard(result, options.output);
 }
 
 async function runInteractiveCheck(): Promise<void> {

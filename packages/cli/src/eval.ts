@@ -145,6 +145,9 @@ export async function evalSkill(options: EvalOptions): Promise<unknown> {
   const noSkillTokens = graded.filter((item) => item.arm === 'no_skill').map((item) => item.promptTokens);
   const tokenOverhead = Math.max(0, Math.round(mean(withSkillTokens) - mean(noSkillTokens)));
   const valuePer1kTokens = tokenOverhead === 0 ? 0 : Number((score.effectPp / (tokenOverhead / 1000)).toFixed(2));
+  // 0–100 quality score: 50 = no effect. Built from the bootstrap mean effect so
+  // it varies smoothly rather than snapping to coarse multiples of the sample step.
+  const satisfaction = Math.max(0, Math.min(100, Number((50 + score.meanEffectPp).toFixed(1))));
   const runDate = new Date().toISOString().slice(0, 10);
 
   const result = {
@@ -168,6 +171,8 @@ export async function evalSkill(options: EvalOptions): Promise<unknown> {
     },
     result: {
       effect_pp: score.effectPp,
+      mean_effect_pp: score.meanEffectPp,
+      satisfaction,
       ci_pp: score.ciPp,
       verdict: score.verdict,
       with_skill_pass: score.withSkillPass,

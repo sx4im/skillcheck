@@ -1,160 +1,137 @@
 # skillcheck
 
-Measure whether an agent skill actually improves task performance.
+**Measure whether an agent skill actually improves a model's task performance.**
 
-`skillcheck` runs a forced-injection A/B evaluation: the runner model solves generated tasks with and without the skill instructions, then the result is scored as an effect in percentage points with a bootstrap confidence interval.
+Drop in a `SKILL.md` (or any `.md`) and `skillcheck` runs a controlled A/B test: it
+generates fresh tasks for the skill's domain, has the model solve them **with** and
+**without** the skill instructions, grades both blind, and reports the effect with a
+bootstrap confidence interval and a 0–100 quality score.
 
-## Status
+```
+$ skillcheck
 
-- M0-M4 gates have passed and are recorded in `BUILD-LOG.md`.
-- M5 completed a 20-skill launch corpus in `results/launch/20260605T110514Z-qwen-next`.
-- Published on npm as `@sx4im/skillcheck`.
++------------------------------------------------------+
+| SKILLCHECK RESULT
++------------------------------------------------------+
+| Skill           API Documentation
+| Run size        5 tasks × 3 trials
+|
+| Verdict         HELPS
+| The skill HELPED — model passed 80% of tasks with it vs 55% without.
+|
+| With skill      80.0% of tasks passed
+| Without skill   55.0% of tasks passed
+| Skill effect    +25.0 pp change in pass rate
+| Confidence      +8.0 pp to +42.0 pp (95% range)
+| Token cost      +480 tokens to include the skill
++------------------------------------------------------+
+| Satisfaction    ██████████████████░░░░░░  75.0/100  GOOD
++------------------------------------------------------+
+```
 
-## One-Line Install
+## Install
 
 ```bash
 npm install -g @sx4im/skillcheck
 ```
 
-Requires Node.js 20 or newer.
+Requires Node.js 20+.
 
-## Usage
+## Quick start
 
 ```bash
 skillcheck
 ```
 
-On first run, Skillcheck asks for your Skillcheck API URL and saves it locally. Then it opens the interactive picker. Select `SKILL.md`, `AGENTS.md`, `CLAUDE.md`, `.cursorrules`, or a folder containing one.
+On first run it asks for your Skillcheck API key (grab a free one from the dashboard —
+the URL is built in). The key is verified, then an interactive picker opens. Navigate
+folders with the arrow keys and pick any `.md` file. Choose an effort level and you get
+a result card.
 
-Change the saved API URL later:
+You can also point it straight at a file or folder:
 
 ```bash
-skillcheck setup
+skillcheck check ./SKILL.md
+skillcheck ./my-skill-folder            # a folder containing a .md
 ```
 
-You can also pass a path directly:
+Skip the prompt entirely with an environment variable:
 
 ```bash
-skillcheck check path/to/SKILL.md
-skillcheck path/to/skill-folder
-```
-
-The quick run shows a blue/white result card in the terminal. It does not write a results folder unless you explicitly pass `--output`.
-
-## Cloud Setup
-
-The hosted option lets users run checks without any model-provider key of their own. Deploy the **`dashboard/`** folder on Vercel: users sign in with Google or GitHub (via Clerk), get a Skillcheck API key with 10 free runs, and the CLI proxies through your server-side NVIDIA key (after the free runs they upgrade via Stripe). Full click-by-click walkthrough in **`dashboard/SETUP.md`**.
-
-Once deployed, users just run `skillcheck` and paste the API key from your dashboard when prompted — the hosted URL is built into the CLI, so there is no URL to configure. The key is verified before it is saved, then the file picker opens.
-
-Power users can skip the prompt:
-
-```bash
-export SKILLCHECK_TOKEN=chk_live_...   # from your dashboard (https://dashboard-skillcheck.vercel.app/app.html)
+export SKILLCHECK_TOKEN=chk_live_...
 skillcheck check ./SKILL.md
 ```
 
-Other references: `dashboard.md` is a drop-in single-file connect page for users who run their own proxy; `docs/skillcheck-cloud.md` documents the OpenAI-compatible API contract and a minimal proxy; `docs/skillcheck-cloud-build-plan.md` is the deeper multi-service architecture.
+## Effort levels
 
-## Local Development
+The interactive run asks how thorough to be — more tasks/trials means a tighter
+confidence interval but a longer run:
 
-```bash
-npm ci
-npm run build
-node dist/bin/skillcheck.js --help
-```
+| Level  | Tasks × trials | Typical time |
+|--------|----------------|--------------|
+| Low    | 2 × 1          | seconds      |
+| Medium | 3 × 2          | ~1–2 min     |
+| Strong | 5 × 3          | ~2–4 min     |
+
+For scripted runs, set it explicitly: `skillcheck check ./SKILL.md --tasks 5 --trials 3`.
+
+## Reading the result
+
+- **Verdict** — `HELPS` / `PLACEBO` / `HARMS`, decided by whether the confidence
+  interval clears zero. `PLACEBO` means *no measurable difference*, not necessarily a
+  bad skill.
+- **Skill effect** — the change in pass rate, in percentage points (pp).
+- **Confidence** — the 95% range for the true effect. A **wide** range means the run was
+  inconclusive; re-run at a higher effort for a clearer signal.
+- **Satisfaction** — a 0–100 quality score where **50 = no effect**:
+
+  | Score | Band | Score | Band |
+  |-------|------|-------|------|
+  | ≤10 | Very bad | 51–60 | Decent |
+  | 11–30 | Bad | 61–80 | Good |
+  | 31–50 | Normal | 81–100 | Excellent |
+
+Each run is independent — tasks and model outputs are generated fresh every time and
+nothing is cached locally, so results vary run to run.
 
 ## Commands
 
-Friendly skill check:
-
 ```bash
-skillcheck check path/to/SKILL.md
+skillcheck                                  # interactive: pick a file, pick effort, run
+skillcheck check <path> [--tasks N] [--trials K] [--output file.json] [--json]
+skillcheck setup                            # re-enter / change your API key
+skillcheck eval <path> [...]                # raw JSON evaluator (no result card)
+skillcheck verify <result.json> [--sample n]
 ```
 
-You can also omit `check` when the argument is an existing path:
+## Self-hosting the model
+
+Skillcheck runs on a hosted model behind a metered proxy so end users never need their
+own provider key. The `dashboard/` folder is a deployable Vercel app (Clerk sign-in,
+free-tier metering, optional Stripe upgrade) that issues API keys and forwards to your
+server-side NVIDIA NIM key. See **[`dashboard/SETUP.md`](dashboard/SETUP.md)** for the
+deploy walkthrough.
+
+To run against your own NVIDIA key directly (no proxy), set `NVIDIA_API_KEY` — see
+[`.env.example`](.env.example) for all options (model, timeouts, rate-limit delay).
+
+## How it works
+
+The task generator only sees the skill's declared **domain**, never the skill body, so it
+can't leak the instructions into the tasks. The model is then run with and without forced
+skill injection, and a **blind** grader scores each output without knowing which arm it
+came from. The effect and its confidence interval come from a paired bootstrap. Full
+details in [`METHODOLOGY.md`](METHODOLOGY.md).
+
+## Development
 
 ```bash
-skillcheck path/to/skill-folder
+npm ci
+npm run build      # compile to dist/
+npm test           # vitest
+npm run typecheck
 ```
 
-Run a stronger check:
+## License
 
-```bash
-skillcheck check path/to/SKILL.md --tasks 10 --trials 3
-```
-
-Advanced raw JSON evaluator:
-
-```bash
-skillcheck eval path/to/SKILL.md --tasks 10 --trials 3 --output results/my-run.json
-```
-
-Verify a published result:
-
-```bash
-skillcheck verify results/my-run.json --sample 3
-```
-
-Run the launch corpus:
-
-```bash
-skillcheck corpus run --corpus corpus/launch-20.json --results results/launch/$(date -u +%Y%m%dT%H%M%SZ) --tasks 10 --trials 3 --concurrency 1
-```
-
-Regenerate the launch-only rot report used by the leaderboard:
-
-```bash
-skillcheck rot --results results/launch/20260605T110514Z-qwen-next --output results/rot/report.json
-```
-
-Build the static leaderboard:
-
-```bash
-npm run site:build
-```
-
-By default, the leaderboard reads the launch directory pointed to by `results/launch/latest-qwen-next-dir.txt`. Override with `SKILLCHECK_RESULTS_DIR` when you want to render a different result set.
-
-## Methodology
-
-The generator receives only the declared skill domain, never the full skill body. The runner is evaluated with and without forced skill injection. The grader is blind to arm labels, and deterministic assertions run before LLM grading when available.
-
-Forced injection is the v1 default. It measures whether the skill content helps when injected; it does not test trigger reliability. See `METHODOLOGY.md`.
-
-## Launch Findings
-
-The M5 launch corpus measured 20 pinned seed skills:
-
-- `helps`: 3 / 20, 15%.
-- `placebo`: 11 / 20, 55%.
-- `harms`: 6 / 20, 30%.
-
-See `FINDINGS-DRAFT.md` for the current draft write-up and caveats.
-
-## Release
-
-Do not publish from this repo until `RELEASE-CHECKLIST.md` is complete and M5 final verification has passed.
-
-To publish the public npm package, log in with the npm account that should own `skillcheck`, then run one of the publish flows below.
-
-With npm WebAuthn/security-key 2FA enabled:
-
-```bash
-npm login
-npm publish --access public
-npm view @sx4im/skillcheck version
-npx --yes @sx4im/skillcheck@latest --help
-```
-
-With an authenticator-app OTP:
-
-```bash
-npm publish --access public --otp=123456
-```
-
-Replace `123456` with the current 6-digit npm two-factor authentication code.
-
-Without account 2FA, create a granular access token on npm with `Bypass two-factor authentication` enabled and `Read and write` access to all packages, then publish with that token.
-
-If the package name is still free, `npm publish` creates/registers `@sx4im/skillcheck` automatically.
+MIT

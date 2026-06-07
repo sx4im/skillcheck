@@ -63,9 +63,9 @@ describe('friendly CLI check command', () => {
     expect(summary).toContain('+25.0 pp');
     expect(summary).toContain('+5.0 pp to +45.0 pp');
     expect(summary).toContain('Saved JSON      skillcheck-results/docs-skill.json');
-    // +25pp effect -> 75/100 satisfaction -> "Good"
+    // +25pp effect (no satisfaction field) -> falls back to 75.0/100 -> "Good"
     expect(summary).toContain('Satisfaction');
-    expect(summary).toContain('75/100');
+    expect(summary).toContain('75.0/100');
     expect(summary).toContain('GOOD');
   });
 

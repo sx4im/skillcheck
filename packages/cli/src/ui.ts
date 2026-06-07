@@ -471,11 +471,17 @@ function boxLine(label: string, value: string): string {
   return `${blue('|')} ${white(label.padEnd(15))} ${value}`;
 }
 
-// Map the measured effect (percentage-point change in pass rate) to a 0–100
-// quality score: 50 = no effect, +1pp = +1 point. So a skill needs ~+11pp to be
-// "Good" and ~+31pp to be "Excellent"; one that hurts drops below 50.
-function satisfactionScore(effectPp: number): number {
-  return Math.max(0, Math.min(100, Math.round(50 + effectPp)));
+const RESULT_BORDER = '+------------------------------------------------------+';
+
+// Satisfaction: a 0–100 quality score where 50 = no effect. Read from the result
+// (computed from the smooth bootstrap mean effect, so it varies granularly instead
+// of snapping to coarse sample steps); fall back to 50 + observed effect.
+function satisfactionFromResult(score: Record<string, unknown>): number {
+  if (typeof score.satisfaction === 'number') {
+    return Math.max(0, Math.min(100, score.satisfaction));
+  }
+  const effect = typeof score.effect_pp === 'number' ? score.effect_pp : 0;
+  return Math.max(0, Math.min(100, 50 + effect));
 }
 
 function satisfactionBand(score: number): { label: string; paint: (s: string) => string } {
@@ -493,6 +499,17 @@ function satisfactionBar(score: number, paint: (s: string) => string): string {
   return `${paint('█'.repeat(filled))}${dim('░'.repeat(width - filled))}`;
 }
 
+// One satisfaction line. The bar + number are coloured by the CURRENT value's band
+// (so during the animation it sweeps red→yellow→green as it fills); the trailing
+// label shows the FINAL band.
+function satisfactionLine(finalScore: number, atScore: number): string {
+  const current = satisfactionBand(atScore);
+  const settled = satisfactionBand(finalScore);
+  const bar = satisfactionBar(atScore, current.paint);
+  const number = current.paint(`${atScore.toFixed(1).padStart(5)}/100`);
+  return `${blue('|')} ${white('Satisfaction'.padEnd(15))} ${bar} ${number}  ${settled.paint(settled.label.toUpperCase())}`;
+}
+
 function plainVerdict(verdict: string, withPass: unknown, noPass: unknown): string {
   const w = typeof withPass === 'number' ? `${Math.round(withPass * 100)}%` : 'n/a';
   const n = typeof noPass === 'number' ? `${Math.round(noPass * 100)}%` : 'n/a';
@@ -506,7 +523,7 @@ function signedPp(value: unknown): string {
   return `${value >= 0 ? '+' : ''}${value.toFixed(1)} pp`;
 }
 
-export function formatResultCard(result: unknown, outputPath?: string): string {
+function resultHeaderLines(result: unknown, outputPath?: string): string[] {
   const root = asRecord(result);
   const skill = asRecord(root.skill);
   const config = asRecord(root.config);
@@ -515,17 +532,11 @@ export function formatResultCard(result: unknown, outputPath?: string): string {
   const ciLow = typeof ci[0] === 'number' ? ci[0] : undefined;
   const ciHigh = typeof ci[1] === 'number' ? ci[1] : undefined;
   const ciText =
-    ciLow !== undefined && ciHigh !== undefined
-      ? `${signedPp(ciLow)} to ${signedPp(ciHigh)}`
-      : 'n/a';
+    ciLow !== undefined && ciHigh !== undefined ? `${signedPp(ciLow)} to ${signedPp(ciHigh)}` : 'n/a';
   const inconclusive =
     ciLow !== undefined && ciHigh !== undefined && ciLow < 0 && ciHigh > 0 && ciHigh - ciLow > 40;
-
   const verdict = String(score.verdict ?? 'unknown');
-  const effectPp = typeof score.effect_pp === 'number' ? score.effect_pp : 0;
-  const sat = satisfactionScore(effectPp);
-  const band = satisfactionBand(sat);
-  const border = blue('+------------------------------------------------------+');
+  const border = blue(RESULT_BORDER);
 
   const lines = [
     border,
@@ -550,10 +561,44 @@ export function formatResultCard(result: unknown, outputPath?: string): string {
     lines.push(boxLine('Saved JSON', outputPath));
   }
   lines.push(border);
-  lines.push(`${blue('|')} ${white('Satisfaction'.padEnd(15))} ${band.paint(`${sat}/100`)}  ${band.paint(band.label.toUpperCase())}`);
-  lines.push(`${blue('|')} ${satisfactionBar(sat, band.paint)}`);
-  lines.push(border);
-  return lines.join('\n');
+  return lines;
+}
+
+export function formatResultCard(result: unknown, outputPath?: string): string {
+  const score = asRecord(asRecord(result).result);
+  const sat = satisfactionFromResult(score);
+  return [...resultHeaderLines(result, outputPath), satisfactionLine(sat, sat), blue(RESULT_BORDER)].join('\n');
+}
+
+function easeOutCubic(t: number): number {
+  return 1 - Math.pow(1 - t, 3);
+}
+function sleep(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+// Render the result card, smoothly animating the satisfaction bar to its level on
+// an interactive terminal. Non-interactive output is the static card.
+export async function printResultCard(result: unknown, outputPath?: string): Promise<void> {
+  const score = asRecord(asRecord(result).result);
+  const finalScore = satisfactionFromResult(score);
+
+  if (!process.stdout.isTTY) {
+    console.log(formatResultCard(result, outputPath));
+    return;
+  }
+
+  console.log(resultHeaderLines(result, outputPath).join('\n'));
+  process.stdout.write('\x1b[?25l');
+  const frames = 32;
+  for (let i = 0; i <= frames; i += 1) {
+    const at = finalScore * easeOutCubic(i / frames);
+    process.stdout.write(`\r\x1b[2K${satisfactionLine(finalScore, at)}`);
+    await sleep(26);
+  }
+  process.stdout.write(`\r\x1b[2K${satisfactionLine(finalScore, finalScore)}\n`);
+  process.stdout.write('\x1b[?25h');
+  console.log(blue(RESULT_BORDER));
 }
 
 export function sanitizeCliError(error: unknown): string {

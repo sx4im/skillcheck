@@ -28,8 +28,6 @@
   },
   "files": [
     "dist",
-    "docs",
-    "examples",
     "README.md",
     "METHODOLOGY.md"
   ],
