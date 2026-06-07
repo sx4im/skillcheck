@@ -298,11 +298,11 @@ input:focus, textarea:focus { outline: none; border-color: var(--ink); }
 }
 
 /* Hide animated elements before reveal. If motion can't load, JS removes `.anim`
-   from <html> so nothing stays hidden. We keep opacity at 0.08 instead of 0
-   so the page does not look completely blank while motion loads. */
+   from <html> so nothing stays hidden. We keep opacity at 0.25 so the page
+   is faint but readable while motion loads, then animates to full opacity. */
 .anim [data-motion] > *,
 .anim [data-reveal],
-.anim [data-reveal-children] > * { opacity: 0.08; transition: opacity 0.3s ease; }
+.anim [data-reveal-children] > * { opacity: 0.25; transition: opacity 0.4s ease; }
 @media (prefers-reduced-motion: reduce) {
   .anim [data-motion] > *,
   .anim [data-reveal],
