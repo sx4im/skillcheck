@@ -25,6 +25,10 @@ export interface EvalOptions {
   sourceLabel?: string;
   saveArtifacts?: boolean;
   onProgress?: ProgressReporter;
+  // Reuse a local disk cache of model calls across runs. Off by default so every
+  // `skillcheck check` runs fresh and writes nothing to disk; batch flows (corpus)
+  // opt in for resumability.
+  useCache?: boolean;
 }
 
 function applyModelOverrides(config: NvidiaConfig, options: EvalOptions): NvidiaConfig {
@@ -116,7 +120,9 @@ export async function evalSkill(options: EvalOptions): Promise<unknown> {
   // every model call in this run shares it and the whole check counts as one run.
   const runId = randomUUID();
   const client = new NvidiaNimClient(config, { defaultHeaders: { 'x-skillcheck-run': runId } });
-  const cache = new JsonCache();
+  // Fresh by default: a disabled cache neither reads nor writes, so repeating the
+  // same skill at the same effort always re-runs from scratch and leaves no files.
+  const cache = options.useCache ? new JsonCache() : JsonCache.disabled();
 
   const onProgress = options.onProgress;
   onProgress?.({ phase: 'generating' });

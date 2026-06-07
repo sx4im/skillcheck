@@ -273,7 +273,8 @@ export async function runCorpus(options: CorpusRunOptions): Promise<CorpusRunRep
       trials: options.trials,
       mode: 'forced',
       runner: options.runner,
-      sourceLabel: sourceLabel(manifest, skill)
+      sourceLabel: sourceLabel(manifest, skill),
+      useCache: true
     });
 
     entries[index] = entry;
