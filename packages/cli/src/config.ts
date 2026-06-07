@@ -7,6 +7,85 @@ export interface SkillcheckUserConfig {
   token?: string;
 }
 
+// Skillcheck Cloud's hosted endpoints. The CLI ships with these baked in so a
+// user only ever needs to paste their API key — never a URL. Both are
+// overridable via env for self-hosted deployments.
+export const DEFAULT_CLOUD_API_URL = 'https://dashboard-skillcheck.vercel.app/api';
+export const DEFAULT_CLOUD_WEB_URL = 'https://dashboard-skillcheck.vercel.app/app.html';
+
+export function cloudApiUrl(): string {
+  return getConfiguredApiUrl() ?? DEFAULT_CLOUD_API_URL;
+}
+
+export function cloudWebUrl(): string {
+  return process.env.SKILLCHECK_WEB_URL?.trim() || DEFAULT_CLOUD_WEB_URL;
+}
+
+export interface CloudKeyVerification {
+  valid: boolean;
+  plan?: string;
+  email?: string;
+  runsUsed?: number;
+  runsLimit?: number | null;
+  /** Distinguishes a rejected key (reachable, said no) from an unreachable cloud. */
+  reachable: boolean;
+  message?: string;
+}
+
+// Authenticate a pasted key against the hosted /key/verify endpoint. This does
+// NOT consume a run. `reachable:false` means we never got a verdict (network
+// down), so callers can treat it differently from an outright rejection.
+export async function verifyCloudKey(apiUrl: string, token: string): Promise<CloudKeyVerification> {
+  const base = apiUrl.trim().replace(/\/+$/, '');
+  let response: Response;
+  try {
+    response = await fetch(`${base}/key/verify`, {
+      method: 'POST',
+      headers: { authorization: `Bearer ${token}`, 'content-type': 'application/json' },
+      body: '{}'
+    });
+  } catch (error) {
+    return { valid: false, reachable: false, message: error instanceof Error ? error.message : String(error) };
+  }
+
+  let data: Record<string, unknown> = {};
+  try {
+    data = (await response.json()) as Record<string, unknown>;
+  } catch {
+    data = {};
+  }
+
+  if (response.ok && data.valid === true) {
+    const limit = data.runsLimit;
+    return {
+      valid: true,
+      reachable: true,
+      plan: typeof data.plan === 'string' ? data.plan : undefined,
+      email: typeof data.email === 'string' ? data.email : undefined,
+      runsUsed: typeof data.runsUsed === 'number' ? data.runsUsed : undefined,
+      runsLimit: typeof limit === 'number' ? limit : null
+    };
+  }
+
+  // The key-check endpoint is missing — almost always an older deployment that
+  // predates /api/key/verify. Don't reject a possibly-valid key; flag it as
+  // "unavailable" so the user gets an actionable message instead of "rejected".
+  if (response.status === 404 || response.status === 405) {
+    return {
+      valid: false,
+      reachable: false,
+      message: 'Skillcheck Cloud is missing the key-check endpoint (redeploy the dashboard so /api/key/verify ships).'
+    };
+  }
+
+  const errorRecord = (data.error as Record<string, unknown> | undefined) ?? {};
+  const message =
+    typeof errorRecord.message === 'string'
+      ? errorRecord.message
+      : `The key was not accepted (HTTP ${response.status}).`;
+  return { valid: false, reachable: true, message };
+}
+
 function configDir(): string {
   if (process.env.SKILLCHECK_CONFIG_DIR?.trim()) {
     return process.env.SKILLCHECK_CONFIG_DIR.trim();

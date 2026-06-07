@@ -27,7 +27,7 @@ dashboard/
 
 1. Read **[SETUP.md](SETUP.md)** — it walks through NVIDIA, Clerk, Upstash, Stripe, and the Vercel deploy.
 2. Deploy on Vercel with **Root Directory = `dashboard`** and **Framework = Other**.
-3. The CLI connects with `SKILLCHECK_API_URL=https://your-app.vercel.app/api` and `SKILLCHECK_TOKEN=sk_live_…`.
+3. The CLI connects by pasting the `chk_live_…` key when `skillcheck` prompts for it (the hosted URL is baked in), or via `SKILLCHECK_TOKEN=chk_live_…`.
 
 ## Auth
 

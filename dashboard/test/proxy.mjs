@@ -61,7 +61,7 @@ const user = await getOrCreateUser({ userId: 'clerk_proxy_1', email: 'p@x.com', 
 assert.equal((await call('', 'r1')).status, 401, 'missing key rejected');
 
 // 2. Invalid key → 401
-assert.equal((await call('sk_live_nope', 'r1')).status, 401, 'invalid key rejected');
+assert.equal((await call('chk_live_nope', 'r1')).status, 401, 'invalid key rejected');
 
 // 3. Ten valid runs forward and succeed
 for (let i = 1; i <= 10; i += 1) {
@@ -81,7 +81,15 @@ assert.equal(over.status, 402, '11th run blocked');
 assert.equal(over.json.error.type, 'quota_exceeded', '402 type');
 assert.match(over.json.error.upgrade_url, /\/app\.html$/, 'upgrade url present');
 
-// 6. Preview (no run id) still forwards and is not gated
-assert.equal((await call(user.apiKey, '')).status, 200, 'preview forwards');
+// 6. SECURITY: dropping the run-id header is NOT a way around the quota.
+//    The user is over quota, so a no-run-id call must still be blocked.
+const bypass = await call(user.apiKey, '');
+assert.equal(bypass.status, 402, 'no run id does not bypass the quota');
+
+// 7. A no-run-id call from a fresh user forwards and consumes a single run.
+const user2 = await getOrCreateUser({ userId: 'clerk_proxy_2', email: 'q@x.com', name: 'Q' });
+const fresh = await call(user2.apiKey, '');
+assert.equal(fresh.status, 200, 'no-run-id call forwards when under quota');
+assert.equal(fresh.headers['x-skillcheck-runs-used'], '1', 'no-run-id call consumes a run');
 
 console.log('Proxy integration checks passed (upstream calls:', upstreamCalls + ').');

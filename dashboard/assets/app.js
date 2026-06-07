@@ -1,6 +1,6 @@
 // Skillcheck dashboard logic. Requires a Clerk session: account endpoints are
 // called with the Clerk session token; the in-browser preview uses the issued
-// sk_live_ key (the proxy is key-based, not Clerk-based).
+// chk_ key (the proxy is key-based, not Clerk-based).
 import { getClerk, getToken, bindAuthButtons } from './auth.js';
 
 const $ = (id) => document.getElementById(id);
@@ -42,11 +42,12 @@ function renderKey() {
   $('revealBtn').textContent = state.revealed ? 'Hide' : 'Reveal';
 }
 function renderCommands() {
+  // The hosted URL is baked into the CLI, so users only need their key. Setting
+  // SKILLCHECK_TOKEN skips the prompt and goes straight to the file picker.
   $('commandsText').textContent =
     'npm install -g @sx4im/skillcheck\n' +
-    'export SKILLCHECK_API_URL=' + apiBase + '\n' +
     'export SKILLCHECK_TOKEN=' + state.fullKey + '\n' +
-    'skillcheck check ./SKILL.md';
+    'skillcheck';
 }
 function renderUsage(me) {
   const used = me.runsUsed || 0;
@@ -86,9 +87,28 @@ function render(me) {
   renderKey(); renderCommands(); renderUsage(me); renderPlan(me);
 }
 
+function showLoadError(message) {
+  const loading = $('loading');
+  if (loading) {
+    loading.style.display = 'block';
+    loading.textContent = message;
+  }
+}
+
 async function loadMe() {
   const res = await authFetch(apiBase + '/me');
-  render(await res.json());
+  if (!res.ok) {
+    let detail = 'HTTP ' + res.status;
+    try { const body = await res.json(); if (body && body.error && body.error.message) detail = body.error.message; } catch (e) {}
+    showLoadError('Could not load your account: ' + detail + '. Please refresh, or sign out and back in.');
+    return;
+  }
+  const me = await res.json();
+  if (!me || !me.apiKey) {
+    showLoadError('Your account loaded but no API key was issued. This usually means the server is missing its storage (Upstash) configuration. Please try again shortly.');
+    return;
+  }
+  render(me);
 }
 
 async function maybeConfirmUpgrade() {
@@ -126,17 +146,20 @@ $('upgradeBtn').addEventListener('click', function () {
     .catch(function () { $('upgradeBtn').disabled = false; });
 });
 
-// --- live preview (uses the sk_live_ key, not the Clerk token) ---
+// --- live preview (uses the chk_ key, not the Clerk token) ---
 function extractContent(data) {
   const m = data && data.choices && data.choices[0] && data.choices[0].message;
   if (!m) return '';
   return m.content || m.reasoning_content || m.refusal || '';
 }
-function callModel(messages) {
+function callModel(messages, runId) {
+  const headers = { 'content-type': 'application/json', authorization: 'Bearer ' + state.fullKey };
+  // Tag both arms of a preview with the same run id so they meter as ONE run.
+  if (runId) headers['x-skillcheck-run'] = runId;
   return fetch(apiBase + '/chat/completions', {
     method: 'POST',
-    headers: { 'content-type': 'application/json', authorization: 'Bearer ' + state.fullKey },
-    body: JSON.stringify({ model: 'qwen/qwen3-next-80b-a3b-instruct', messages: messages, temperature: 0.7, max_tokens: 1200, stream: false })
+    headers: headers,
+    body: JSON.stringify({ model: 'minimaxai/minimax-m2.7', messages: messages, temperature: 0.7, max_tokens: 1200, stream: false })
   }).then(function (r) {
     return r.text().then(function (text) {
       if (!r.ok) throw new Error('HTTP ' + r.status + ': ' + text.slice(0, 200));
@@ -158,7 +181,8 @@ $('runBtn').addEventListener('click', function () {
   $('runBtn').disabled = true;
   status.className = 'status'; status.textContent = 'Running both arms…';
   $('withBody').textContent = ''; $('noBody').textContent = ''; $('overhead').textContent = '';
-  Promise.all([callModel(withMessages), callModel(noMessages)])
+  const runId = 'preview-' + Date.now() + '-' + Math.random().toString(16).slice(2);
+  Promise.all([callModel(withMessages, runId), callModel(noMessages, runId)])
     .then(function (res) {
       $('withBody').textContent = res[0].content || '(empty)';
       $('noBody').textContent = res[1].content || '(empty)';
@@ -170,12 +194,39 @@ $('runBtn').addEventListener('click', function () {
     .then(function () { $('runBtn').disabled = false; });
 });
 
+// Right after a sign-in/sign-up redirect the Clerk handshake can still be
+// settling, so clerk.user is briefly null. Wait for it (listener + short poll)
+// before deciding the visitor is signed out — otherwise we bounce them to the
+// landing page and the key never appears on the first visit.
+function waitForUser(clerk, timeoutMs) {
+  if (clerk.user) return Promise.resolve(clerk.user);
+  return new Promise(function (resolve) {
+    let settled = false;
+    let unsub = function () {};
+    function finish(user) {
+      if (settled) return;
+      settled = true;
+      try { unsub(); } catch (e) {}
+      resolve(user || null);
+    }
+    try { unsub = clerk.addListener(function (res) { if (res && res.user) finish(res.user); }); } catch (e) {}
+    const start = Date.now();
+    (function tick() {
+      if (settled) return;
+      if (clerk.user) return finish(clerk.user);
+      if (Date.now() - start >= timeoutMs) return finish(null);
+      setTimeout(tick, 150);
+    })();
+  });
+}
+
 // --- boot: require a Clerk session, otherwise go back to the landing page ---
 (async function () {
   let clerk;
   try { clerk = await getClerk(); } catch (e) { location.href = '/'; return; }
-  if (!clerk.user) { location.href = '/'; return; }
+  const user = await waitForUser(clerk, 5000);
+  if (!user) { location.href = '/'; return; }
   bindAuthButtons();
   await maybeConfirmUpgrade();
-  try { await loadMe(); } catch (e) { /* authFetch handles 401 redirect */ }
+  try { await loadMe(); } catch (e) { showLoadError('Something went wrong loading your account. Please refresh.'); }
 })();

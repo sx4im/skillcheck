@@ -71,24 +71,28 @@ export function runLimitFor(plan) {
 
 // Meter one inbound request against the user's run quota.
 // A "run" is one `skillcheck check`, which fires many model calls sharing one
-// x-skillcheck-run id; only the first call of a new id consumes a slot.
+// x-skillcheck-run id; only the first call of a new id consumes a slot, so the
+// dozens of calls in a single run are charged once.
+//
+// SECURITY: the quota is ALWAYS enforced. A request that omits the run id is not
+// a free pass — it simply cannot be deduped, so it is charged as its own run.
+// (Previously a missing id was treated as "unmetered/allow", which let anyone
+// with a free key make unlimited model calls by dropping the header.)
 // Returns { allowed, counted, used, limit, reason? }.
 export async function consumeRun(uid, runId, plan) {
   const limit = runLimitFor(plan);
   const used = await getRunsUsed(uid);
 
-  if (!runId) {
-    // Unmetered request (e.g. the dashboard's in-browser preview): allow, no charge.
-    return { allowed: true, counted: false, used, limit };
-  }
-
-  const isNewRun = (await kvSet(`run:${uid}:${runId}`, '1', { nx: true, ex: 86400 })) === 'OK';
-  if (!isNewRun) {
-    return { allowed: true, counted: false, used, limit };
+  if (runId) {
+    const isNewRun = (await kvSet(`run:${uid}:${runId}`, '1', { nx: true, ex: 86400 })) === 'OK';
+    if (!isNewRun) {
+      // A later call of an already-counted run: let it through without re-charging.
+      return { allowed: true, counted: false, used, limit };
+    }
   }
 
   if (used >= limit) {
-    await kvDel(`run:${uid}:${runId}`); // reject without consuming the slot
+    if (runId) await kvDel(`run:${uid}:${runId}`); // reject without consuming the slot
     return { allowed: false, counted: false, used, limit, reason: 'quota_exceeded' };
   }
 

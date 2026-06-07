@@ -6,9 +6,9 @@ This is the complete, click-by-click guide to deploy the dashboard and wire up e
 
 ```
 User → signs in with Google or GitHub (via Clerk) on your dashboard
-     → gets a Skillcheck API key (sk_live_…) with 10 free runs
+     → gets a Skillcheck API key (chk_live_…) with 10 free runs
      → pastes it into the skillcheck CLI
-CLI  → calls https://your-app.vercel.app/api/chat/completions  (Bearer sk_live_…)
+CLI  → calls https://your-app.vercel.app/api/chat/completions  (Bearer chk_live_…)
 Proxy→ authenticates the key, meters the run, then calls NVIDIA with YOUR server key
      → after 10 runs, returns 402 and the user upgrades (Stripe)
 ```
@@ -30,11 +30,11 @@ Your NVIDIA key lives **only** on Vercel as an environment variable. It is never
 ## Step 1 — NVIDIA API key (the upstream model)
 
 1. Go to <https://build.nvidia.com>, sign in.
-2. Open any model (e.g. **qwen/qwen3-next-80b-a3b-instruct**).
+2. Open any model (e.g. **minimaxai/minimax-m2.7**).
 3. Click **Get API Key** / **Generate Key**. It looks like `nvapi-…`.
 4. Save it. You will paste it as `NVIDIA_API_KEY` in Step 5.
 
-> The dashboard pins all hosted requests to `SKILLCHECK_MODEL` (default `qwen/qwen3-next-80b-a3b-instruct`) for cost control.
+> The dashboard pins all hosted requests to `SKILLCHECK_MODEL` (default `minimaxai/minimax-m2.7`) for cost control.
 
 ## Step 2 — Clerk (sign-in with Google + GitHub)
 
@@ -83,7 +83,7 @@ openssl rand -base64 32   # → TOKEN_PEPPER
 |---|---|---|
 | `NVIDIA_API_KEY` | `nvapi-…` from Step 1 | Yes |
 | `NVIDIA_BASE_URL` | `https://integrate.api.nvidia.com/v1` | No (default) |
-| `SKILLCHECK_MODEL` | `qwen/qwen3-next-80b-a3b-instruct` | No (default) |
+| `SKILLCHECK_MODEL` | `minimaxai/minimax-m2.7` | No (default) |
 | `CLERK_PUBLISHABLE_KEY` | from Step 2 | Yes |
 | `CLERK_SECRET_KEY` | from Step 2 | Yes |
 | `UPSTASH_REDIS_REST_URL` | from Step 3 | Yes |
@@ -101,14 +101,12 @@ openssl rand -base64 32   # → TOKEN_PEPPER
 
 1. Visit `https://YOUR-APP.vercel.app`. The landing page loads normally — it does **not** redirect to sign-in until you click a button.
 2. Click **Get your API key** (or **Continue with Google / GitHub**) → complete Clerk sign-in.
-3. You land on the dashboard with a `sk_live_…` key, usage `0 / 10`, and quickstart commands.
+3. You land on the dashboard with a `chk_live_…` key, usage `0 / 10`, and quickstart commands.
 4. In a terminal:
 
    ```bash
    npm install -g @sx4im/skillcheck
-   export SKILLCHECK_API_URL=https://YOUR-APP.vercel.app/api
-   export SKILLCHECK_TOKEN=sk_live_...        # your key from the dashboard
-   skillcheck check ./SKILL.md
+   skillcheck                # paste your chk_live_ key when asked, then pick a skill file
    ```
 
 5. Reload the dashboard — **Usage** should tick up by 1. That confirms: Clerk auth → key → metered proxy → NVIDIA all work.
@@ -130,16 +128,18 @@ Skip this to launch a free-only beta; the Upgrade button stays hidden until both
 ## Connecting the CLI (what your users do)
 
 ```bash
-# Interactive
-skillcheck setup     # paste the API URL, then the API key
+# Interactive (recommended): the hosted URL is built into the CLI, so users
+# only paste their key. It is verified before saving, then the file picker opens.
+skillcheck                # or: skillcheck setup
 
-# Or environment variables
-export SKILLCHECK_API_URL=https://YOUR-APP.vercel.app/api
-export SKILLCHECK_TOKEN=sk_live_...
+# Or non-interactive via environment variable
+export SKILLCHECK_TOKEN=chk_live_...
 skillcheck check ./SKILL.md
 ```
 
 When free runs run out, the CLI prints a clear message with your dashboard URL to upgrade.
+
+> Self-hosting under a different domain? Point the CLI at it with `export SKILLCHECK_API_URL=https://your-domain/api` (and optionally `SKILLCHECK_WEB_URL` for the "grab your key" link).
 
 ## Operating it
 
@@ -151,7 +151,7 @@ When free runs run out, the CLI prints a clear message with your dashboard URL t
 ## Security notes
 
 - `NVIDIA_API_KEY`, `STRIPE_SECRET_KEY`, `UPSTASH_*`, `CLERK_SECRET_KEY` live only in Vercel env vars — never commit them.
-- Dashboard endpoints (`/api/me`, `/api/key/rotate`, `/api/billing/*`) require a verified Clerk session token. The CLI proxy (`/api/chat/completions`) is authenticated by the `sk_live_` key, not Clerk.
+- Dashboard endpoints (`/api/me`, `/api/key/rotate`, `/api/billing/*`) require a verified Clerk session token. The CLI-facing endpoints (`/api/chat/completions`, `/api/key/verify`) are authenticated by the `chk_live_` key, not Clerk.
 - API keys are stored so the dashboard can show them to their owner, and indexed by `sha256(key + TOKEN_PEPPER)` for proxy lookup. They grant only metered access to your proxy and are revocable by rotation.
 
 ## Troubleshooting

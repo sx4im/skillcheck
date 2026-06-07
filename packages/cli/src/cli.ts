@@ -1,6 +1,13 @@
 import { existsSync } from 'node:fs';
 import { NvidiaNimClient } from './adapters/nvidia-nim.js';
-import { getConfiguredApiUrl, loadUserConfig, normalizeApiUrl, saveUserConfig } from './config.js';
+import {
+  cloudApiUrl,
+  cloudWebUrl,
+  getConfiguredToken,
+  loadUserConfig,
+  saveUserConfig,
+  verifyCloudKey
+} from './config.js';
 import { runCorpus, type CorpusRunOptions } from './corpus.js';
 import { evalSkill, type EvalOptions } from './eval.js';
 import { runM0Gate } from './m0/run.js';
@@ -10,6 +17,11 @@ import {
   printHelpUi,
   printBanner,
   printSetupIntro,
+  printKeyChecking,
+  printKeyVerified,
+  printKeyRejected,
+  printKeyUnreachable,
+  printKeyPromptHint,
   promptText,
   selectSkillPath,
   startProgress,
@@ -21,29 +33,51 @@ function printHelp(): void {
   printHelpUi();
 }
 
+// First-run onboarding. The CLI demands a Skillcheck Cloud API key, points the
+// user at the website to grab one, authenticates the pasted key against the
+// hosted /key/verify endpoint, and only saves it once it is confirmed valid.
+// The hosted URL is baked in (config.cloudApiUrl), so the user never types a URL.
 async function ensureCloudConfigured(force = false): Promise<void> {
-  if (!force && getConfiguredApiUrl()) {
+  // Maintainer/dev mode: a direct NVIDIA key bypasses the hosted proxy entirely.
+  if (process.env.NVIDIA_API_KEY?.trim()) {
+    return;
+  }
+  if (!force && getConfiguredToken()) {
     return;
   }
   if (!process.stdin.isTTY || !process.stdout.isTTY) {
-    throw new Error('Skillcheck setup is required. Run `skillcheck setup` in an interactive terminal.');
+    throw new Error(
+      `Skillcheck needs an API key. Run \`skillcheck setup\` in an interactive terminal, or set SKILLCHECK_TOKEN. Get a key at ${cloudWebUrl()}`
+    );
   }
 
+  const apiUrl = cloudApiUrl();
+  const webUrl = cloudWebUrl();
+
   printBanner();
-  printSetupIntro();
+  printSetupIntro(webUrl);
+
   for (;;) {
-    const value = await promptText('Skillcheck API URL: ');
-    try {
-      const apiUrl = normalizeApiUrl(value);
+    const keyInput = await promptText('Paste your Skillcheck API key: ');
+    if (!keyInput) {
+      printKeyPromptHint(webUrl);
+      continue;
+    }
+
+    printKeyChecking();
+    const check = await verifyCloudKey(apiUrl, keyInput);
+
+    if (check.valid) {
       const current = loadUserConfig();
-      const keyInput = await promptText('Skillcheck API key (press Enter to skip): ');
-      const next = keyInput ? { ...current, apiUrl, token: keyInput } : { ...current, apiUrl };
-      const filePath = saveUserConfig(next);
-      console.log(`Saved Skillcheck settings to ${filePath}\n`);
+      const savedPath = saveUserConfig({ ...current, apiUrl, token: keyInput });
+      printKeyVerified(check, savedPath);
       return;
-    } catch (error) {
-      const message = error instanceof Error ? error.message : String(error);
-      console.log(`${message}\n`);
+    }
+
+    if (check.reachable) {
+      printKeyRejected(check.message ?? 'The key was not accepted.', webUrl);
+    } else {
+      printKeyUnreachable(check.message ?? 'Network error.');
     }
   }
 }

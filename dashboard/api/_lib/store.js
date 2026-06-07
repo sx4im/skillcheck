@@ -9,6 +9,20 @@ import { UPSTASH_URL, UPSTASH_TOKEN } from './config.js';
 
 export const usingRedis = Boolean(UPSTASH_URL && UPSTASH_TOKEN);
 
+// On Vercel each function invocation can run in a different (and short-lived)
+// instance, so the in-memory fallback below does NOT persist: an API key minted
+// by /api/me in one instance won't be found by the proxy in another, and the key
+// looks "invalid". This is the #1 cause of issued keys not working in prod. Warn
+// loudly once so the misconfiguration is visible in the logs.
+export const storeDurable = usingRedis;
+if (!usingRedis && (process.env.VERCEL || process.env.NODE_ENV === 'production')) {
+  console.warn(
+    '[skillcheck] WARNING: UPSTASH_REDIS_REST_URL/TOKEN are not set. ' +
+      'Running on an ephemeral in-memory store — issued API keys will NOT persist ' +
+      'across serverless invocations and will appear invalid. Configure Upstash Redis.'
+  );
+}
+
 const mem = globalThis.__skillcheckMem || (globalThis.__skillcheckMem = { kv: new Map(), exp: new Map() });
 
 async function upstash(command) {

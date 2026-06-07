@@ -65,10 +65,48 @@ export async function promptText(question: string): Promise<string> {
   }
 }
 
-export function printSetupIntro(): void {
-  console.log(`${blue('First-time setup')}`);
-  console.log('Paste your Skillcheck API URL and API key from the dashboard, then Skillcheck opens the file picker.');
-  console.log(`${dim('Example URL:')} https://your-app.vercel.app/api\n`);
+export function printSetupIntro(webUrl: string): void {
+  console.log(`${blue('Connect Skillcheck Cloud')}`);
+  console.log('Skillcheck runs on our hosted model. Grab your free API key here:\n');
+  console.log(`  ${white(webUrl)}\n`);
+  console.log(dim('Sign in with Google or GitHub, copy the key that starts with "chk_live_",'));
+  console.log(dim('then paste it below. After it is verified, Skillcheck opens the file picker.\n'));
+}
+
+export function printKeyChecking(): void {
+  process.stdout.write(`${dim('Verifying your key…')} `);
+}
+
+export function printKeyVerified(info: { plan?: string; runsUsed?: number; runsLimit?: number | null }, savedPath: string): void {
+  const plan = info.plan === 'pro' ? 'Pro' : 'Free';
+  let usage = '';
+  if (info.runsLimit === null || info.runsLimit === undefined) {
+    if (info.plan === 'pro') {
+      usage = ' · unlimited runs';
+    }
+  } else {
+    const left = Math.max(0, info.runsLimit - (info.runsUsed ?? 0));
+    usage = ` · ${left} of ${info.runsLimit} runs left`;
+  }
+  console.log(green('verified.'));
+  console.log(`${dim(`${plan} plan${usage}`)}`);
+  console.log(`${dim('Saved to')} ${savedPath}\n`);
+}
+
+export function printKeyRejected(message: string, webUrl: string): void {
+  console.log(red('not accepted.'));
+  console.log(`${red(message)}`);
+  console.log(`${dim('Get a fresh key at')} ${white(webUrl)}\n`);
+}
+
+export function printKeyUnreachable(message: string): void {
+  console.log(yellow('could not reach Skillcheck Cloud.'));
+  console.log(`${dim(message)}`);
+  console.log(`${dim('Check your connection and try again, or press Ctrl+C to cancel.')}\n`);
+}
+
+export function printKeyPromptHint(webUrl: string): void {
+  console.log(`${dim('Paste the key from')} ${white(webUrl)}\n`);
 }
 
 export function supportedSkillFilesText(): string {

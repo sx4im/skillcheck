@@ -4,7 +4,7 @@
 // The frontend (ClerkJS) calls `clerk.session.getToken()` and sends it as
 // `Authorization: Bearer <token>` to the dashboard's own endpoints (/api/me etc.).
 // The CLI-facing proxy (/api/chat/completions) is NOT Clerk-authed — it uses the
-// issued sk_live_ key instead.
+// issued chk_ API key instead.
 
 import { verifyToken } from '@clerk/backend';
 import { CLERK_SECRET_KEY } from './config.js';

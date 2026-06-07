@@ -185,7 +185,7 @@ ANONYMOUS_DAILY_LIMIT=20
 
 PROVIDER_BASE_URL=https://integrate.api.nvidia.com/v1
 PROVIDER_API_KEY=...
-DEFAULT_MODEL=qwen/qwen3-next-80b-a3b-instruct
+DEFAULT_MODEL=minimaxai/minimax-m2.7
 
 REQUEST_TIMEOUT_MS=120000
 REQUEST_DELAY_MS=5000

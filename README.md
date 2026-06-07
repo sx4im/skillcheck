@@ -45,14 +45,14 @@ The quick run shows a blue/white result card in the terminal. It does not write 
 
 The hosted option lets users run checks without any model-provider key of their own. Deploy the **`dashboard/`** folder on Vercel: users sign in with Google or GitHub (via Clerk), get a Skillcheck API key with 10 free runs, and the CLI proxies through your server-side NVIDIA key (after the free runs they upgrade via Stripe). Full click-by-click walkthrough in **`dashboard/SETUP.md`**.
 
-Once deployed, the CLI connects with:
+Once deployed, users just run `skillcheck` and paste the API key from your dashboard when prompted — the hosted URL is built into the CLI, so there is no URL to configure. The key is verified before it is saved, then the file picker opens.
+
+Power users can skip the prompt:
 
 ```bash
-export SKILLCHECK_API_URL=https://your-app.vercel.app/api
-export SKILLCHECK_TOKEN=sk_live_...   # from your dashboard
+export SKILLCHECK_TOKEN=chk_live_...   # from your dashboard (https://dashboard-skillcheck.vercel.app/app.html)
+skillcheck check ./SKILL.md
 ```
-
-Or run `skillcheck setup` and paste the URL and key when prompted.
 
 Other references: `dashboard.md` is a drop-in single-file connect page for users who run their own proxy; `docs/skillcheck-cloud.md` documents the OpenAI-compatible API contract and a minimal proxy; `docs/skillcheck-cloud-build-plan.md` is the deeper multi-service architecture.
 

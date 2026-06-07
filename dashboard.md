@@ -222,7 +222,7 @@ The complete dashboard follows. It is identical to [`examples/dashboard/index.ht
     </div>
 
     <script>
-      var DEFAULT_MODEL = 'qwen/qwen3-next-80b-a3b-instruct';
+      var DEFAULT_MODEL = 'minimaxai/minimax-m2.7';
       var KEY_URL = 'skillcheck.apiUrl';
       var KEY_TOKEN = 'skillcheck.token';
 
