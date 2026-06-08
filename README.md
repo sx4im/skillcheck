@@ -1,6 +1,14 @@
 # skillcheck
 
+[![npm version](https://img.shields.io/npm/v/@sx4im/skillcheck)](https://www.npmjs.com/package/@sx4im/skillcheck)
+[![npm downloads](https://img.shields.io/npm/dm/@sx4im/skillcheck)](https://www.npmjs.com/package/@sx4im/skillcheck)
+[![CI](https://github.com/sx4im/skillcheck/actions/workflows/rot.yml/badge.svg)](https://github.com/sx4im/skillcheck/actions)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
+[![Node](https://img.shields.io/badge/node-%E2%89%A520-brightgreen)](https://nodejs.org)
+
 **Measure whether an agent skill actually improves a model's task performance.**
+
+Most published SKILL.md files have never actually been tested, so you can't tell whether they help your model or are just decoration.
 
 Drop in a `SKILL.md` (or any `.md`) and `skillcheck` runs a controlled A/B test: it
 generates fresh tasks for the skill's domain, has the model solve them **with** and
@@ -33,6 +41,9 @@ $ skillcheck
 
 ```bash
 npm install -g @sx4im/skillcheck
+
+# or run it without installing:
+npx @sx4im/skillcheck
 ```
 
 Requires Node.js 20+.
