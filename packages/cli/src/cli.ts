@@ -5,6 +5,7 @@ import {
   cloudWebUrl,
   getConfiguredToken,
   loadUserConfig,
+  logoutUser,
   saveUserConfig,
   verifyCloudKey
 } from './config.js';
@@ -22,6 +23,7 @@ import {
   printKeyRejected,
   printKeyUnreachable,
   printKeyPromptHint,
+  printLogout,
   promptText,
   selectSkillPath,
   selectEffort,
@@ -256,8 +258,13 @@ export async function main(argv: string[]): Promise<void> {
     return;
   }
 
-  if (command === 'setup' || command === 'config') {
+  if (command === 'setup' || command === 'config' || command === 'login') {
     await ensureCloudConfigured(true);
+    return;
+  }
+
+  if (command === 'logout' || command === 'signout') {
+    printLogout(logoutUser());
     return;
   }
 

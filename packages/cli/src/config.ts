@@ -12,6 +12,7 @@ export interface SkillcheckUserConfig {
 // overridable via env for self-hosted deployments.
 export const DEFAULT_CLOUD_API_URL = 'https://dashboard-skillcheck.vercel.app/api';
 export const DEFAULT_CLOUD_WEB_URL = 'https://dashboard-skillcheck.vercel.app/app.html';
+export const DEFAULT_CLOUD_PRICING_URL = 'https://dashboard-skillcheck.vercel.app/#pricing';
 
 export function cloudApiUrl(): string {
   return getConfiguredApiUrl() ?? DEFAULT_CLOUD_API_URL;
@@ -19,6 +20,11 @@ export function cloudApiUrl(): string {
 
 export function cloudWebUrl(): string {
   return process.env.SKILLCHECK_WEB_URL?.trim() || DEFAULT_CLOUD_WEB_URL;
+}
+
+// Where a user goes to add more runs once their free credits are gone.
+export function cloudPricingUrl(): string {
+  return process.env.SKILLCHECK_PRICING_URL?.trim() || DEFAULT_CLOUD_PRICING_URL;
 }
 
 export interface CloudKeyVerification {
@@ -150,4 +156,28 @@ export function getConfiguredApiUrl(): string | undefined {
 
 export function getConfiguredToken(): string | undefined {
   return process.env.SKILLCHECK_TOKEN?.trim() || process.env.SKILLCHECK_API_KEY?.trim() || loadUserConfig().token;
+}
+
+export interface LogoutResult {
+  /** True if a saved key was actually present and has now been removed. */
+  removed: boolean;
+  /** True if a key is still active via an environment variable (we can't clear that). */
+  envOverride: boolean;
+  path: string;
+}
+
+// Sign the user out of Skillcheck Cloud by deleting the saved API key. Any custom
+// apiUrl is kept so a self-hosted deployment stays pointed at the right place; only
+// the credential is dropped. A key set through SKILLCHECK_TOKEN/SKILLCHECK_API_KEY
+// lives in the environment, not this file, so we can only tell the user about it.
+export function logoutUser(): LogoutResult {
+  const current = loadUserConfig();
+  const removed = Boolean(current.token);
+  const next: SkillcheckUserConfig = {};
+  if (current.apiUrl) {
+    next.apiUrl = current.apiUrl;
+  }
+  const path = saveUserConfig(next);
+  const envOverride = Boolean(process.env.SKILLCHECK_TOKEN?.trim() || process.env.SKILLCHECK_API_KEY?.trim());
+  return { removed, envOverride, path };
 }

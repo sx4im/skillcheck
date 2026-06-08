@@ -3,6 +3,7 @@ import path from 'node:path';
 import process from 'node:process';
 import readline from 'node:readline';
 import { createInterface } from 'node:readline/promises';
+import { cloudPricingUrl } from './config.js';
 import type { ProgressUpdate } from './types.js';
 
 // Conventional skill filenames, shown only as hints. The actual rule is simple:
@@ -12,12 +13,22 @@ const isMarkdownFile = (filePath: string): boolean => path.extname(filePath).toL
 const useColor = () => process.stdout.isTTY && process.env.NO_COLOR !== '1';
 const color = (code: string, value: string): string => (useColor() ? `\x1b[${code}m${value}\x1b[0m` : value);
 const blue = (value: string): string => color('38;5;33', value);
-const deepBlue = (value: string): string => color('1;38;5;18', value);
-const white = (value: string): string => color('1;37', value);
+const white = (value: string): string => color('1;97', value);
 const dim = (value: string): string => color('2', value);
 const red = (value: string): string => color('1;31', value);
 const green = (value: string): string => color('1;32', value);
 const yellow = (value: string): string => color('1;33', value);
+// The banner wordmark: a solid blue chip (same hue as the border) with bright-white
+// text — a "filled" badge that reads clearly on both light and dark terminals. The
+// old dark-blue ASCII art (256-colour 18) was nearly invisible on dark backgrounds.
+const badge = (value: string): string => color('1;97;48;5;33', value);
+
+// Visible width of a string, ignoring ANSI colour codes — used to pad box rows so
+// the blue border lines up no matter how the inner text is coloured.
+const ANSI_PATTERN = /\x1b\[[0-9;]*m/g;
+function visibleLength(value: string): number {
+  return value.replace(ANSI_PATTERN, '').length;
+}
 
 interface PickerEntry {
   label: string;
@@ -33,15 +44,29 @@ interface Keypress {
   ctrl?: boolean;
 }
 
+// Rounded box-drawing characters for the modern bordered banner.
+const BOX = { tl: '╭', tr: '╮', bl: '╰', br: '╯', h: '─', v: '│' } as const;
+const BANNER_WIDTH = 48; // inner width, between the side padding spaces
+
+function bannerRow(inner: string): string {
+  const pad = Math.max(0, BANNER_WIDTH - visibleLength(inner));
+  return `${blue(BOX.v)}  ${inner}${' '.repeat(pad)}  ${blue(BOX.v)}`;
+}
+
+// A clean, modern banner: a blue rounded border around a white-filled wordmark and
+// a one-line, plain-English explanation of what the tool does.
 export function printBanner(): void {
-  console.log(
-    deepBlue(`  ____  _    _ _ _      _               _
- / ___|| | _(_) | | ___| |__   ___  ___| | __
- \\___ \\| |/ / | | |/ __| '_ \\ / _ \\/ __| |/ /
-  ___) |   <| | | | (__| | | |  __/ (__|   <
- |____/|_|\\_\\_|_|_|\\___|_| |_|\\___|\\___|_|\\_\\`)
-  );
-  console.log(white('  Drop a skill file. Get a verdict.\n'));
+  const top = blue(BOX.tl + BOX.h.repeat(BANNER_WIDTH + 4) + BOX.tr);
+  const bottom = blue(BOX.bl + BOX.h.repeat(BANNER_WIDTH + 4) + BOX.br);
+  console.log('');
+  console.log(top);
+  console.log(bannerRow(''));
+  console.log(bannerRow(`${badge('  SKILLCHECK  ')}`));
+  console.log(bannerRow(white('Is your skill actually helping the model?')));
+  console.log(bannerRow(dim('Drop in a skill file and find out in minutes.')));
+  console.log(bannerRow(''));
+  console.log(bottom);
+  console.log('');
 }
 
 export function printHelpUi(): void {
@@ -52,7 +77,8 @@ export function printHelpUi(): void {
   console.log(`${blue('Supported inputs')}`);
   console.log(`  Any Markdown (.md) file — e.g. ${CONVENTIONAL_SKILL_FILES.join(', ')} — or a folder containing one\n`);
   console.log(`${blue('Commands')}`);
-  console.log(`  skillcheck setup`);
+  console.log(`  skillcheck setup            ${dim('connect your free API key')}`);
+  console.log(`  skillcheck logout           ${dim('remove your saved API key')}`);
   console.log(`  skillcheck check <path> [--tasks N] [--trials K] [--output file.json] [--json]`);
   console.log(`  skillcheck eval <path> [--tasks N] [--trials K] [--output file.json]`);
   console.log(`  skillcheck verify <result.json> [--sample n]`);
@@ -70,11 +96,12 @@ export async function promptText(question: string): Promise<string> {
 }
 
 export function printSetupIntro(webUrl: string): void {
-  console.log(`${blue('Connect Skillcheck Cloud')}`);
-  console.log('Skillcheck runs on our hosted model. Grab your free API key here:\n');
-  console.log(`  ${white(webUrl)}\n`);
-  console.log(dim('Sign in with Google or GitHub, copy the key that starts with "chk_live_",'));
-  console.log(dim('then paste it below. After it is verified, Skillcheck opens the file picker.\n'));
+  console.log(`${blue('First, connect your free account.')} ${dim('(about 30 seconds)')}\n`);
+  console.log(`  ${white('1.')} Open this page in your web browser:`);
+  console.log(`     ${white(webUrl)}`);
+  console.log(`  ${white('2.')} Sign in with Google or GitHub ${dim('— free, includes 10 checks')}`);
+  console.log(`  ${white('3.')} Copy your key ${dim('(it starts with')} ${green('chk_live_')}${dim(')')}`);
+  console.log(`  ${white('4.')} Paste it here below.\n`);
 }
 
 export function printKeyChecking(): void {
@@ -83,18 +110,24 @@ export function printKeyChecking(): void {
 
 export function printKeyVerified(info: { plan?: string; runsUsed?: number; runsLimit?: number | null }, savedPath: string): void {
   const plan = info.plan === 'pro' ? 'Pro' : 'Free';
+  const limited = !(info.runsLimit === null || info.runsLimit === undefined);
+  const left = limited ? Math.max(0, (info.runsLimit as number) - (info.runsUsed ?? 0)) : null;
   let usage = '';
-  if (info.runsLimit === null || info.runsLimit === undefined) {
-    if (info.plan === 'pro') {
-      usage = ' · unlimited runs';
-    }
-  } else {
-    const left = Math.max(0, info.runsLimit - (info.runsUsed ?? 0));
+  if (!limited && info.plan === 'pro') {
+    usage = ' · unlimited runs';
+  } else if (left !== null) {
     usage = ` · ${left} of ${info.runsLimit} runs left`;
   }
   console.log(green('verified.'));
-  console.log(`${dim(`${plan} plan${usage}`)}`);
-  console.log(`${dim('Saved to')} ${savedPath}\n`);
+  console.log(`${green('✓')} ${white("You're all set!")} ${dim(`${plan} plan${usage}`)}`);
+  console.log(`${dim('Key saved to')} ${savedPath}`);
+  if (left !== null && left <= 0) {
+    console.log('');
+    console.log(formatQuotaUpsell());
+  } else if (left !== null && left <= 2) {
+    console.log(`${yellow(`Only ${left} free run${left === 1 ? '' : 's'} left.`)} ${dim('Get more at')} ${white(cloudPricingUrl())}`);
+  }
+  console.log('');
 }
 
 export function printKeyRejected(message: string, webUrl: string): void {
@@ -213,9 +246,10 @@ function visibleWindow<T>(items: T[], selected: number, size: number): { items: 
 function renderPicker(currentDir: string, entries: PickerEntry[], selected: number, message?: string): void {
   process.stdout.write('\x1b[2J\x1b[H');
   printBanner();
-  console.log(`${blue('Pick a Markdown (.md) skill file')}`);
+  console.log(`${blue('Step 1 of 2')}  ${white('Choose the skill file you want to check')}`);
+  console.log(`${dim('Pick any')} ${green('green .md file')}${dim('. Open a')} ${blue('blue folder')} ${dim('to look inside it.')}`);
   console.log(`${dim('Current folder:')} ${currentDir}`);
-  console.log(dim('↑/↓ move · Enter opens a folder or selects a .md file · q quits\n'));
+  console.log(dim('↑/↓ move  ·  Enter = open folder / choose file  ·  q = quit\n'));
 
   if (message) {
     console.log(`${red(message)}\n`);
@@ -356,7 +390,8 @@ export async function selectEffort(): Promise<EffortChoice> {
     return { tasks: defaultLevel.tasks, trials: defaultLevel.trials, label: defaultLevel.name, estimate: estimateLabel(defaultLevel.tasks, defaultLevel.trials) };
   }
 
-  console.log(`${blue('How thorough should the check be?')}`);
+  console.log(`${blue('Step 2 of 2')}  ${white('How thorough should the check be?')}`);
+  console.log(dim('More tasks = a more confident answer, but it takes a little longer.'));
   for (const level of EFFORT_LEVELS) {
     const scope = `${level.tasks} tasks × ${level.trials} trial${level.trials > 1 ? 's' : ''}`;
     const estimate = blue(`[${estimateLabel(level.tasks, level.trials)}]`);
@@ -601,6 +636,34 @@ export async function printResultCard(result: unknown, outputPath?: string): Pro
   console.log(blue(RESULT_BORDER));
 }
 
+// A friendly "you're out of free runs" block that points the user at the pricing
+// page to add more. Shown both on first connect (if their balance is already 0)
+// and when a run is refused mid-check for quota reasons.
+export function formatQuotaUpsell(): string {
+  const url = cloudPricingUrl();
+  const rule = blue('─'.repeat(48));
+  return [
+    rule,
+    `${white("You've used all your free Skillcheck runs.")}`,
+    dim('Thanks for trying Skillcheck! To keep checking skills,'),
+    dim('upgrade to the Pro plan for more runs:'),
+    '',
+    `  ${white(url)}`,
+    rule
+  ].join('\n');
+}
+
+// Did this failure happen because the account ran out of free runs? Matches the
+// proxy's 402 quota_exceeded shape as well as any HTTP 402 surfaced by the SDK.
+function isQuotaError(error: unknown): boolean {
+  const raw = error instanceof Error ? error.message : String(error);
+  const status =
+    typeof error === 'object' && error !== null && 'status' in error
+      ? (error as { status?: unknown }).status
+      : undefined;
+  return status === 402 || /quota[_ ]?exceeded|payment required|free .*runs|used all|\b402\b/i.test(raw);
+}
+
 export function sanitizeCliError(error: unknown): string {
   const raw = error instanceof Error ? error.message : String(error);
   if (/quota[_ ]?exceeded|payment required|free .*runs|\b402\b/i.test(raw)) {
@@ -617,5 +680,23 @@ export function sanitizeCliError(error: unknown): string {
 }
 
 export function formatFatalError(error: unknown): string {
+  if (isQuotaError(error)) {
+    return `${yellow('Out of free runs')}\n${formatQuotaUpsell()}`;
+  }
   return `${red('Skillcheck stopped')}\n${sanitizeCliError(error)}`;
+}
+
+// Confirmation printed by `skillcheck logout` after the saved key is cleared.
+export function printLogout(result: { removed: boolean; envOverride: boolean; path: string }): void {
+  if (result.removed) {
+    console.log(`${green('✓')} ${white('Signed out.')} ${dim('Your saved API key was removed.')}`);
+  } else {
+    console.log(`${dim('You were already signed out — no saved API key to remove.')}`);
+  }
+  if (result.envOverride) {
+    console.log(
+      `${yellow('Note:')} ${dim('a key is still set via SKILLCHECK_TOKEN in your environment; unset it to fully sign out.')}`
+    );
+  }
+  console.log(`${dim('Sign in again any time with')} ${white('skillcheck setup')}${dim('.')}`);
 }

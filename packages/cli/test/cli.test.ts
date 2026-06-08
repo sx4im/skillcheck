@@ -1,9 +1,10 @@
 import { mkdtemp, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
-import { describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { parseCheckOptions } from '../src/cli.js';
-import { formatResultCard, validateSkillInput } from '../src/ui.js';
+import { loadUserConfig, logoutUser, saveUserConfig } from '../src/config.js';
+import { formatFatalError, formatResultCard, validateSkillInput } from '../src/ui.js';
 
 describe('friendly CLI check command', () => {
   it('uses quick defaults without saving a result by default', () => {
@@ -85,5 +86,57 @@ describe('friendly CLI check command', () => {
 
   it('rejects a missing path', async () => {
     await expect(validateSkillInput('/tmp/does-not-exist-skillcheck.md')).rejects.toThrow(/does not exist/i);
+  });
+});
+
+describe('logout', () => {
+  let prevConfigDir: string | undefined;
+  let prevToken: string | undefined;
+
+  beforeEach(async () => {
+    prevConfigDir = process.env.SKILLCHECK_CONFIG_DIR;
+    prevToken = process.env.SKILLCHECK_TOKEN;
+    delete process.env.SKILLCHECK_TOKEN;
+    process.env.SKILLCHECK_CONFIG_DIR = await mkdtemp(path.join(tmpdir(), 'skillcheck-logout-'));
+  });
+
+  afterEach(() => {
+    if (prevConfigDir === undefined) delete process.env.SKILLCHECK_CONFIG_DIR;
+    else process.env.SKILLCHECK_CONFIG_DIR = prevConfigDir;
+    if (prevToken === undefined) delete process.env.SKILLCHECK_TOKEN;
+    else process.env.SKILLCHECK_TOKEN = prevToken;
+  });
+
+  it('removes a saved key but keeps a custom apiUrl', () => {
+    saveUserConfig({ apiUrl: 'https://example.test/api', token: 'chk_live_seed' });
+    const result = logoutUser();
+    expect(result.removed).toBe(true);
+    expect(result.envOverride).toBe(false);
+    expect(loadUserConfig()).toEqual({ apiUrl: 'https://example.test/api' });
+  });
+
+  it('reports nothing to remove when no key is saved', () => {
+    expect(logoutUser().removed).toBe(false);
+  });
+
+  it('flags an env-var key that logout cannot clear', () => {
+    saveUserConfig({ token: 'chk_live_seed' });
+    process.env.SKILLCHECK_TOKEN = 'chk_live_env';
+    expect(logoutUser().envOverride).toBe(true);
+  });
+});
+
+describe('quota upsell', () => {
+  it('shows the pricing link when a run is refused for quota', () => {
+    const error = Object.assign(new Error("You've used all 10 free Skillcheck runs."), { status: 402 });
+    const message = formatFatalError(error);
+    expect(message).toContain('Out of free runs');
+    expect(message).toContain('#pricing');
+  });
+
+  it('keeps the generic failure message for non-quota errors', () => {
+    const message = formatFatalError(new Error('Some other failure'));
+    expect(message).toContain('Skillcheck stopped');
+    expect(message).not.toContain('#pricing');
   });
 });

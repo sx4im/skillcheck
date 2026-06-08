@@ -111,6 +111,7 @@ nothing is cached locally, so results vary run to run.
 skillcheck                                  # interactive: pick a file, pick effort, run
 skillcheck check <path> [--tasks N] [--trials K] [--output file.json] [--json]
 skillcheck setup                            # re-enter / change your API key
+skillcheck logout                           # remove your saved API key
 skillcheck eval <path> [...]                # raw JSON evaluator (no result card)
 skillcheck verify <result.json> [--sample n]
 ```
