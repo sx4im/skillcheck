@@ -727,6 +727,29 @@ export function formatFatalError(error: unknown): string {
   return `${red('Skillcheck stopped')}\n${sanitizeCliError(error)}`;
 }
 
+// Shown when a newer version is published to npm, just before we ask whether to
+// update. Mirrors the friendly "update available" notice of other modern CLIs.
+export function printUpdateAvailable(current: string, latest: string): void {
+  const rule = blue('─'.repeat(48));
+  console.log('');
+  console.log(rule);
+  console.log(`${white('Update available')}   ${dim(`v${current}`)} ${blue('→')} ${green(`v${latest}`)}`);
+  console.log(dim('A newer version of Skillcheck is available.'));
+  console.log(rule);
+}
+
+export function printUpdateApplied(latest: string): void {
+  console.log(`${green('✓')} ${white(`Updated to v${latest}.`)} ${dim('Re-run skillcheck to use the new version.')}\n`);
+}
+
+export function printUpdateSkipped(latest: string): void {
+  console.log(`${dim('Skipped. Update any time with')} ${white('npm install -g @sx4im/skillcheck')}${dim(`  (v${latest})`)}\n`);
+}
+
+export function printUpdateFailed(): void {
+  console.log(`${yellow('Could not update automatically.')} ${dim('Run')} ${white('npm install -g @sx4im/skillcheck')} ${dim('yourself.')}\n`);
+}
+
 // Confirmation printed by `skillcheck logout` after the saved key is cleared.
 export function printLogout(result: { removed: boolean; envOverride: boolean; path: string }): void {
   if (result.removed) {

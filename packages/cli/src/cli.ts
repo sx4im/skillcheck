@@ -30,11 +30,16 @@ import {
   startProgress,
   validateSkillInput
 } from './ui.js';
+import { currentVersion, maybeNotifyUpdate } from './update.js';
 import { verifyResult } from './verify.js';
 
 function printHelp(): void {
   printHelpUi();
 }
+
+// Commands that emit machine-readable output or run unattended — never interrupt
+// these with the interactive "update available?" prompt.
+const MACHINE_COMMANDS = new Set(['eval', 'm0', 'corpus', 'rot', 'verify']);
 
 // First-run onboarding. The CLI demands a Skillcheck Cloud API key, points the
 // user at the website to grab one, authenticates the pasted key against the
@@ -251,6 +256,17 @@ export async function main(argv: string[]): Promise<void> {
   if (command === '--help' || command === '-h') {
     printHelp();
     return;
+  }
+
+  if (command === '--version' || command === '-v' || command === 'version') {
+    console.log(currentVersion());
+    return;
+  }
+
+  // Offer an update when a newer version is on npm — but only for interactive,
+  // human-facing invocations (skipped for --json and machine commands).
+  if (!argv.includes('--json') && !MACHINE_COMMANDS.has(command ?? '')) {
+    await maybeNotifyUpdate();
   }
 
   if (!command) {

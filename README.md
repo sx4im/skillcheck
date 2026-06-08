@@ -48,6 +48,9 @@ npx @sx4im/skillcheck
 
 Requires Node.js 20+.
 
+Skillcheck checks npm for a newer version about once a day and offers to update you
+(like the Codex and Gemini CLIs). To turn that off, set `SKILLCHECK_NO_UPDATE_CHECK=1`.
+
 ## Quick start
 
 ```bash
@@ -114,6 +117,7 @@ skillcheck setup                            # re-enter / change your API key
 skillcheck logout                           # remove your saved API key
 skillcheck eval <path> [...]                # raw JSON evaluator (no result card)
 skillcheck verify <result.json> [--sample n]
+skillcheck --version                        # print the installed version
 ```
 
 ## Self-hosting the model

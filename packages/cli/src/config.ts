@@ -109,6 +109,12 @@ export function userConfigPath(): string {
   return path.join(configDir(), 'config.json');
 }
 
+// Where the once-a-day "is there a newer version?" check caches its result, so the
+// CLI doesn't hit the npm registry on every single run.
+export function updateCachePath(): string {
+  return path.join(configDir(), 'update-check.json');
+}
+
 export function normalizeApiUrl(value: string): string {
   const trimmed = value.trim().replace(/\/+$/, '');
   if (!trimmed) {

@@ -5,6 +5,7 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { parseCheckOptions } from '../src/cli.js';
 import { loadUserConfig, logoutUser, saveUserConfig } from '../src/config.js';
 import { formatFatalError, formatResultCard, validateSkillInput } from '../src/ui.js';
+import { currentVersion, isNewerVersion } from '../src/update.js';
 
 describe('friendly CLI check command', () => {
   it('uses quick defaults without saving a result by default', () => {
@@ -138,5 +139,28 @@ describe('quota upsell', () => {
     const message = formatFatalError(new Error('Some other failure'));
     expect(message).toContain('Skillcheck stopped');
     expect(message).not.toContain('#pricing');
+  });
+});
+
+describe('update notifier', () => {
+  it('detects a strictly newer release across each version field', () => {
+    expect(isNewerVersion('0.3.2', '0.3.1')).toBe(true);
+    expect(isNewerVersion('0.4.0', '0.3.9')).toBe(true);
+    expect(isNewerVersion('1.0.0', '0.9.9')).toBe(true);
+  });
+
+  it('does not flag the same or an older version', () => {
+    expect(isNewerVersion('0.3.1', '0.3.1')).toBe(false);
+    expect(isNewerVersion('0.3.0', '0.3.1')).toBe(false);
+    expect(isNewerVersion('0.2.9', '0.3.0')).toBe(false);
+  });
+
+  it('ignores prerelease suffixes when comparing', () => {
+    expect(isNewerVersion('0.3.1', '0.3.1-beta.1')).toBe(false);
+    expect(isNewerVersion('0.3.2', '0.3.1-beta.1')).toBe(true);
+  });
+
+  it('reports this package\'s own version', () => {
+    expect(currentVersion()).toMatch(/^\d+\.\d+\.\d+/);
   });
 });
