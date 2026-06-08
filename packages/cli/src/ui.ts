@@ -18,17 +18,8 @@ const dim = (value: string): string => color('2', value);
 const red = (value: string): string => color('1;31', value);
 const green = (value: string): string => color('1;32', value);
 const yellow = (value: string): string => color('1;33', value);
-// The banner wordmark: a solid blue chip (same hue as the border) with bright-white
-// text — a "filled" badge that reads clearly on both light and dark terminals. The
-// old dark-blue ASCII art (256-colour 18) was nearly invisible on dark backgrounds.
-const badge = (value: string): string => color('1;97;48;5;33', value);
 
-// Visible width of a string, ignoring ANSI colour codes — used to pad box rows so
-// the blue border lines up no matter how the inner text is coloured.
-const ANSI_PATTERN = /\x1b\[[0-9;]*m/g;
-function visibleLength(value: string): number {
-  return value.replace(ANSI_PATTERN, '').length;
-}
+type Paint = (value: string) => string;
 
 interface PickerEntry {
   label: string;
@@ -44,29 +35,75 @@ interface Keypress {
   ctrl?: boolean;
 }
 
-// Rounded box-drawing characters for the modern bordered banner.
-const BOX = { tl: '╭', tr: '╮', bl: '╰', br: '╯', h: '─', v: '│' } as const;
-const BANNER_WIDTH = 48; // inner width, between the side padding spaces
+// Big "ANSI Shadow" block-letter glyphs (6 rows tall) for the hero wordmark. Only the
+// letters in SKILL / CHECK are defined. `█` is the solid fill; `═ ║ ╔ ╗ ╚ ╝` form the
+// outline. We paint fill and outline separately to get the reference look: a colour-
+// filled letter with a bright outline — the old dark-blue ASCII art was invisible.
+const GLYPH_ROWS = 6;
+const OUTLINE_CHARS = new Set(['═', '║', '╔', '╗', '╚', '╝']);
+const GLYPHS: Record<string, string[]> = {
+  S: ['███████╗', '██╔════╝', '███████╗', '╚════██║', '███████║', '╚══════╝'],
+  K: ['██╗  ██╗', '██║ ██╔╝', '█████╔╝ ', '██╔═██╗ ', '██║  ██╗', '╚═╝  ╚═╝'],
+  I: ['██╗', '██║', '██║', '██║', '██║', '╚═╝'],
+  L: ['██╗     ', '██║     ', '██║     ', '██║     ', '███████╗', '╚══════╝'],
+  C: [' ██████╗', '██╔════╝', '██║     ', '██║     ', '╚██████╗', ' ╚═════╝'],
+  H: ['██╗  ██╗', '██║  ██║', '███████║', '██╔══██║', '██║  ██║', '╚═╝  ╚═╝'],
+  E: ['███████╗', '██╔════╝', '█████╗  ', '██╔══╝  ', '███████╗', '╚══════╝']
+};
 
-function bannerRow(inner: string): string {
-  const pad = Math.max(0, BANNER_WIDTH - visibleLength(inner));
-  return `${blue(BOX.v)}  ${inner}${' '.repeat(pad)}  ${blue(BOX.v)}`;
+// Colour a single rendered row: runs of `█` get the fill colour, the outline glyphs
+// get the outline colour, spaces are left untouched. Run-grouped so the output stays
+// compact instead of one escape sequence per character.
+function paintBlocks(line: string, fill: Paint, outline: Paint): string {
+  const chars = Array.from(line);
+  const classOf = (c: string): 'fill' | 'outline' | 'space' =>
+    c === '█' ? 'fill' : OUTLINE_CHARS.has(c) ? 'outline' : 'space';
+  let out = '';
+  let i = 0;
+  while (i < chars.length) {
+    const kind = classOf(chars[i]!);
+    let j = i;
+    while (j < chars.length && classOf(chars[j]!) === kind) {
+      j += 1;
+    }
+    const run = chars.slice(i, j).join('');
+    out += kind === 'fill' ? fill(run) : kind === 'outline' ? outline(run) : run;
+    i = j;
+  }
+  return out;
 }
 
-// A clean, modern banner: a blue rounded border around a white-filled wordmark and
-// a one-line, plain-English explanation of what the tool does.
+// Render a word as GLYPH_ROWS coloured lines, glyphs separated by one space column.
+function renderWord(word: string, fill: Paint, outline: Paint): string[] {
+  const rows: string[] = [];
+  for (let r = 0; r < GLYPH_ROWS; r += 1) {
+    const row = Array.from(word)
+      .map((ch) => GLYPHS[ch]?.[r] ?? '')
+      .join(' ');
+    rows.push(paintBlocks(row, fill, outline));
+  }
+  return rows;
+}
+
+// The hero wordmark: "SKILL" in solid white over "CHECK" in blue with a white outline,
+// then a one-line, plain-English tagline. Returned as lines so the file picker can
+// embed the very same banner in its full-screen frame.
+export function bannerLines(): string[] {
+  const indent = '  ';
+  const lines: string[] = [''];
+  for (const line of renderWord('SKILL', white, white)) {
+    lines.push(indent + line);
+  }
+  for (const line of renderWord('CHECK', blue, white)) {
+    lines.push(indent + line);
+  }
+  lines.push(`${indent}${white('Is your skill actually helping the model?')}`);
+  lines.push('');
+  return lines;
+}
+
 export function printBanner(): void {
-  const top = blue(BOX.tl + BOX.h.repeat(BANNER_WIDTH + 4) + BOX.tr);
-  const bottom = blue(BOX.bl + BOX.h.repeat(BANNER_WIDTH + 4) + BOX.br);
-  console.log('');
-  console.log(top);
-  console.log(bannerRow(''));
-  console.log(bannerRow(`${badge('  SKILLCHECK  ')}`));
-  console.log(bannerRow(white('Is your skill actually helping the model?')));
-  console.log(bannerRow(dim('Drop in a skill file and find out in minutes.')));
-  console.log(bannerRow(''));
-  console.log(bottom);
-  console.log('');
+  console.log(bannerLines().join('\n'));
 }
 
 export function printHelpUi(): void {
@@ -244,18 +281,21 @@ function visibleWindow<T>(items: T[], selected: number, size: number): { items: 
 }
 
 function renderPicker(currentDir: string, entries: PickerEntry[], selected: number, message?: string): void {
-  process.stdout.write('\x1b[2J\x1b[H');
-  printBanner();
-  console.log(`${blue('Step 1 of 2')}  ${white('Choose the skill file you want to check')}`);
-  console.log(`${dim('Pick any')} ${green('green .md file')}${dim('. Open a')} ${blue('blue folder')} ${dim('to look inside it.')}`);
-  console.log(`${dim('Current folder:')} ${currentDir}`);
-  console.log(dim('↑/↓ move  ·  Enter = open folder / choose file  ·  q = quit\n'));
+  // Build the whole screen as one string and write it once, so the big hero banner
+  // redraws cleanly on every keypress instead of flickering line by line.
+  const out: string[] = [...bannerLines()];
+  out.push(`${blue('Step 1 of 2')}  ${white('Choose the skill file you want to check')}`);
+  out.push(`${dim('Pick any')} ${green('green .md file')}${dim('. Open a')} ${blue('blue folder')} ${dim('to look inside it.')}`);
+  out.push(`${dim('Current folder:')} ${currentDir}`);
+  out.push(dim('↑/↓ move  ·  Enter = open folder / choose file  ·  q = quit'));
+  out.push('');
 
   if (message) {
-    console.log(`${red(message)}\n`);
+    out.push(`${red(message)}`);
+    out.push('');
   }
 
-  const window = visibleWindow(entries, selected, 12);
+  const window = visibleWindow(entries, selected, 10);
   for (const [index, entry] of window.items.entries()) {
     const realIndex = window.offset + index;
     const isSelected = realIndex === selected;
@@ -271,9 +311,10 @@ function renderPicker(currentDir: string, entries: PickerEntry[], selected: numb
       label = dim(entry.label);
     }
     const note = entry.runnable ? green(entry.note) : dim(entry.note);
-    console.log(`${pointer} ${label.padEnd(34)} ${note}`);
+    out.push(`${pointer} ${label.padEnd(34)} ${note}`);
   }
-  console.log('');
+  out.push('');
+  process.stdout.write(`\x1b[2J\x1b[H${out.join('\n')}\n`);
 }
 
 function readKey(): Promise<{ input: string; key: Keypress }> {
