@@ -2,7 +2,6 @@ import { spawnSync } from 'node:child_process';
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 import process from 'node:process';
-import { fileURLToPath } from 'node:url';
 import { updateCachePath } from './config.js';
 import {
   printUpdateApplied,
@@ -11,6 +10,9 @@ import {
   printUpdateSkipped,
   promptText
 } from './ui.js';
+import { currentVersion } from './version.js';
+
+export { currentVersion } from './version.js';
 
 const PKG_NAME = '@sx4im/skillcheck';
 // Only hit the registry once a day; in between we decide from the cached result.
@@ -23,36 +25,6 @@ interface UpdateCache {
   latest?: string;
   /** A version the user explicitly declined, so we don't nag again for that one. */
   skipped?: string;
-}
-
-// Find this package's own package.json by name, walking up from the compiled module.
-// Works the same whether running from dist/ (published) or source (dev/tsx).
-function readSelfPackage(): { version?: string } {
-  let dir = path.dirname(fileURLToPath(import.meta.url));
-  for (let i = 0; i < 6; i += 1) {
-    try {
-      const pkg = JSON.parse(readFileSync(path.join(dir, 'package.json'), 'utf8')) as {
-        name?: string;
-        version?: string;
-      };
-      if (pkg.name === PKG_NAME) {
-        return pkg;
-      }
-    } catch {
-      // keep walking up
-    }
-    const parent = path.dirname(dir);
-    if (parent === dir) {
-      break;
-    }
-    dir = parent;
-  }
-  return {};
-}
-
-export function currentVersion(): string {
-  const version = readSelfPackage().version;
-  return typeof version === 'string' && version ? version : '0.0.0';
 }
 
 function coreParts(version: string): number[] {
@@ -114,8 +86,12 @@ function saveCache(cache: UpdateCache): void {
 }
 
 // Run the global install. Inherits stdio so the user sees npm's own progress.
+// On Windows npm is npm.cmd, which spawnSync only resolves through a shell.
 function runGlobalUpdate(): boolean {
-  const result = spawnSync('npm', ['install', '-g', `${PKG_NAME}@latest`], { stdio: 'inherit' });
+  const result = spawnSync('npm', ['install', '-g', `${PKG_NAME}@latest`], {
+    stdio: 'inherit',
+    shell: process.platform === 'win32'
+  });
   return result.status === 0;
 }
 

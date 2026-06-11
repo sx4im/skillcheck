@@ -3,7 +3,13 @@ import Link from 'next/link';
 import { loadResult, loadResults } from '../../../lib/results';
 
 export async function generateStaticParams() {
-  return (await loadResults()).map((result) => ({ id: result.id }));
+  const results = await loadResults();
+  if (results.length === 0) {
+    // `output: export` refuses a dynamic route with zero pages (fresh clones
+    // have no results/). Emit one placeholder that renders the 404 boundary.
+    return [{ id: '_none' }];
+  }
+  return results.map((result) => ({ id: result.id }));
 }
 
 export default async function SkillDetailPage({ params }: { params: Promise<{ id: string }> }) {

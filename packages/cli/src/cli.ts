@@ -17,6 +17,7 @@ import {
   printResultCard,
   printHelpUi,
   printBanner,
+  printCheckHeader,
   printSetupIntro,
   printKeyChecking,
   printKeyVerified,
@@ -24,7 +25,7 @@ import {
   printKeyUnreachable,
   printKeyPromptHint,
   printLogout,
-  promptText,
+  promptSecret,
   selectSkillPath,
   selectEffort,
   startProgress,
@@ -66,7 +67,7 @@ async function ensureCloudConfigured(force = false): Promise<void> {
   printSetupIntro(webUrl);
 
   for (;;) {
-    const keyInput = await promptText('Paste your Skillcheck API key: ');
+    const keyInput = await promptSecret('Paste your Skillcheck API key: ');
     if (!keyInput) {
       printKeyPromptHint(webUrl);
       continue;
@@ -90,6 +91,12 @@ async function ensureCloudConfigured(force = false): Promise<void> {
   }
 }
 
+// Upper bounds keep a typo like `--tasks 300` from turning one metered run into
+// hundreds of model calls. Generous enough for every documented workflow.
+const MAX_TASKS = 50;
+const MAX_TRIALS = 10;
+const MAX_CONCURRENCY = 8;
+
 function readOption(argv: string[], name: string): string | undefined {
   const index = argv.indexOf(name);
   if (index === -1) {
@@ -102,7 +109,7 @@ function readOption(argv: string[], name: string): string | undefined {
   return value;
 }
 
-function readNumberOption(argv: string[], name: string, fallback: number): number {
+function readNumberOption(argv: string[], name: string, fallback: number, max?: number): number {
   const value = readOption(argv, name);
   if (value === undefined) {
     return fallback;
@@ -110,6 +117,9 @@ function readNumberOption(argv: string[], name: string, fallback: number): numbe
   const parsed = Number(value);
   if (!Number.isInteger(parsed) || parsed <= 0) {
     throw new Error(`${name} must be a positive integer`);
+  }
+  if (max !== undefined && parsed > max) {
+    throw new Error(`${name} must be at most ${max}`);
   }
   return parsed;
 }
@@ -130,11 +140,39 @@ function hasFlag(argv: string[], name: string): boolean {
   return argv.includes(name);
 }
 
+// Reject mistyped options (e.g. --task instead of --tasks) instead of silently
+// ignoring them and running with defaults the user did not ask for.
+function assertKnownOptions(argv: string[], firstIndex: number, valueOptions: string[], flags: string[] = []): void {
+  for (let i = Math.max(firstIndex, 0); i < argv.length; i += 1) {
+    const token = argv[i]!;
+    if (!token.startsWith('--')) {
+      continue;
+    }
+    if (flags.includes(token)) {
+      continue;
+    }
+    if (!valueOptions.includes(token)) {
+      throw new Error(`Unknown option ${token}. Valid options: ${[...valueOptions, ...flags].join(', ')}`);
+    }
+    i += 1; // skip this option's value
+  }
+}
+
 function parseEvalOptions(argv: string[], inputIndex = 3): EvalOptions {
   const inputPath = argv[inputIndex];
   if (!inputPath || inputPath.startsWith('--')) {
     throw new Error('Usage: skillcheck eval <path> [--tasks N] [--trials K] [--output file.json]');
   }
+  assertKnownOptions(argv, inputIndex + 1, [
+    '--tasks',
+    '--trials',
+    '--output',
+    '--mode',
+    '--runner',
+    '--grader',
+    '--generator',
+    '--task-suite'
+  ]);
 
   const mode = readOption(argv, '--mode') ?? 'forced';
   if (mode !== 'forced') {
@@ -144,8 +182,8 @@ function parseEvalOptions(argv: string[], inputIndex = 3): EvalOptions {
   return {
     inputPath,
     output: readOption(argv, '--output'),
-    tasks: readNumberOption(argv, '--tasks', 10),
-    trials: readNumberOption(argv, '--trials', 3),
+    tasks: readNumberOption(argv, '--tasks', 10, MAX_TASKS),
+    trials: readNumberOption(argv, '--trials', 3, MAX_TRIALS),
     mode,
     runner: readOption(argv, '--runner'),
     grader: readOption(argv, '--grader'),
@@ -168,13 +206,20 @@ export function parseCheckOptions(argv: string[], inputIndex = 3): CheckOptions 
     );
   }
 
+  assertKnownOptions(
+    argv,
+    inputIndex + 1,
+    ['--tasks', '--trials', '--output', '--runner', '--grader', '--generator', '--task-suite'],
+    ['--json']
+  );
+
   const output = readOption(argv, '--output');
   return {
     evalOptions: {
       inputPath,
       output,
-      tasks: readNumberOption(argv, '--tasks', 3),
-      trials: readNumberOption(argv, '--trials', 2),
+      tasks: readNumberOption(argv, '--tasks', 3, MAX_TASKS),
+      trials: readNumberOption(argv, '--trials', 2, MAX_TRIALS),
       mode: 'forced',
       runner: readOption(argv, '--runner'),
       grader: readOption(argv, '--grader'),
@@ -188,17 +233,19 @@ export function parseCheckOptions(argv: string[], inputIndex = 3): CheckOptions 
 }
 
 function parseRotOptions(argv: string[]): RotOptions {
+  assertKnownOptions(argv, 3, ['--results', '--output', '--model', '--corpus', '--tasks', '--trials']);
   return {
     resultsDir: readOption(argv, '--results') ?? 'results',
     output: readOption(argv, '--output') ?? 'results/rot/report.json',
     model: readOption(argv, '--model'),
     corpus: readOption(argv, '--corpus'),
-    tasks: readNumberOption(argv, '--tasks', 10),
-    trials: readNumberOption(argv, '--trials', 3)
+    tasks: readNumberOption(argv, '--tasks', 10, MAX_TASKS),
+    trials: readNumberOption(argv, '--trials', 3, MAX_TRIALS)
   };
 }
 
 function parseCorpusRunOptions(argv: string[]): CorpusRunOptions {
+  assertKnownOptions(argv, 4, ['--corpus', '--results', '--tasks', '--trials', '--concurrency', '--runner', '--limit']);
   const corpus = readOption(argv, '--corpus');
   if (!corpus) {
     throw new Error('Usage: skillcheck corpus run --corpus corpus.json [--results dir]');
@@ -207,20 +254,23 @@ function parseCorpusRunOptions(argv: string[]): CorpusRunOptions {
   return {
     corpus,
     outputDir: readOption(argv, '--results') ?? 'results/corpus',
-    tasks: readNumberOption(argv, '--tasks', 10),
-    trials: readNumberOption(argv, '--trials', 3),
-    concurrency: readNumberOption(argv, '--concurrency', 2),
+    tasks: readNumberOption(argv, '--tasks', 10, MAX_TASKS),
+    trials: readNumberOption(argv, '--trials', 3, MAX_TRIALS),
+    concurrency: readNumberOption(argv, '--concurrency', 2, MAX_CONCURRENCY),
     runner: readOption(argv, '--runner'),
     limit: readOptionalNumberOption(argv, '--limit')
   };
 }
 
-async function runCheck(options: CheckOptions, showBanner = true): Promise<void> {
-  if (showBanner && !options.json) {
-    printBanner();
-  }
+// Direct invocations (`skillcheck check ./SKILL.md`) get a compact one-line
+// header; the interactive flow already showed the hero banner, so it passes
+// 'none'. Validation runs first so a bad path fails before any UI is drawn.
+async function runCheck(options: CheckOptions, header: 'compact' | 'none' = 'compact'): Promise<void> {
   await validateSkillInput(options.evalOptions.inputPath);
   await ensureCloudConfigured(false);
+  if (header === 'compact' && !options.json) {
+    printCheckHeader(options.evalOptions.inputPath, options.evalOptions.tasks, options.evalOptions.trials);
+  }
   const progress = options.json ? undefined : startProgress();
   let result: unknown;
   try {
@@ -247,7 +297,7 @@ async function runInteractiveCheck(): Promise<void> {
   const options = parseCheckOptions(['node', 'skillcheck', 'check', selectedPath]);
   options.evalOptions.tasks = effort.tasks;
   options.evalOptions.trials = effort.trials;
-  await runCheck(options, false);
+  await runCheck(options, 'none');
 }
 
 export async function main(argv: string[]): Promise<void> {
@@ -307,9 +357,10 @@ export async function main(argv: string[]): Promise<void> {
     if (!resultPath || resultPath.startsWith('--')) {
       throw new Error('Usage: skillcheck verify <result.json> [--sample n]');
     }
+    assertKnownOptions(argv, 4, ['--sample']);
     const result = await verifyResult({
       resultPath,
-      sample: readNumberOption(argv, '--sample', 3)
+      sample: readNumberOption(argv, '--sample', 3, MAX_TASKS)
     });
     console.log(JSON.stringify(result, null, 2));
     return;
@@ -336,5 +387,12 @@ export async function main(argv: string[]): Promise<void> {
     return;
   }
 
-  throw new Error(`Unknown command: ${command}`);
+  // A path-shaped argument that doesn't exist deserves a file error, not a
+  // baffling "unknown command".
+  const looksLikePath =
+    !command.startsWith('-') && (command.includes('/') || command.includes('\\') || command.startsWith('.') || /\.md$/i.test(command));
+  if (looksLikePath) {
+    throw new Error(`Path not found: ${command}\nGive me a Markdown (.md) skill file, or a folder containing one.`);
+  }
+  throw new Error(`Unknown command: ${command}\nRun \`skillcheck --help\` to see available commands.`);
 }

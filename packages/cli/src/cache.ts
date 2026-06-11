@@ -30,7 +30,11 @@ export class JsonCache {
     try {
       return JSON.parse(await readFile(file, 'utf8')) as T;
     } catch (error) {
-      if ((error as NodeJS.ErrnoException).code !== 'ENOENT') {
+      // A missing entry is a normal miss. A corrupted entry (e.g. a partial
+      // write from an interrupted run) must also be a miss — recompute and
+      // overwrite it instead of poisoning every future run with a crash.
+      const code = (error as NodeJS.ErrnoException).code;
+      if (code !== 'ENOENT' && !(error instanceof SyntaxError)) {
         throw error;
       }
     }

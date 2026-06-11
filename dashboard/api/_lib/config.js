@@ -8,8 +8,11 @@ function clean(value) {
 // --- Upstream model provider (the ONE secret that must never reach the browser/CLI) ---
 export const NVIDIA_API_KEY = clean(process.env.NVIDIA_API_KEY);
 export const NVIDIA_BASE_URL = (clean(process.env.NVIDIA_BASE_URL) || 'https://integrate.api.nvidia.com/v1').replace(/\/+$/, '');
+// Default mirrors the CLI's choice (see packages/cli/src/env.ts): gpt-oss-120b is
+// the strongest model in NIM's fast lane with dependable JSON mode. Override with
+// the SKILLCHECK_MODEL env var on the deployment.
 export const DEFAULT_MODEL =
-  clean(process.env.SKILLCHECK_MODEL) || clean(process.env.DEFAULT_MODEL) || 'nvidia/nemotron-3-nano-omni-30b-a3b-reasoning';
+  clean(process.env.SKILLCHECK_MODEL) || clean(process.env.DEFAULT_MODEL) || 'openai/gpt-oss-120b';
 
 // --- Auth: Clerk (hosted sign-in with Google, GitHub, etc.) ---
 // Publishable key is safe to expose to the browser; secret key stays server-side.

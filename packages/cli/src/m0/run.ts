@@ -12,7 +12,9 @@ import { M0_SKILL, M0_TASKS, type M0Task } from './hardcoded.js';
 
 const K_TRIALS = 3;
 const TEMPERATURE = 0.7;
-const MAX_TOKENS = 16;
+// Room for models with built-in reasoning (gpt-oss) to think before the terse
+// final answer; the pass regex still demands exactly VALID/INVALID as output.
+const MAX_TOKENS = 512;
 
 interface ArmResult {
   taskId: string;

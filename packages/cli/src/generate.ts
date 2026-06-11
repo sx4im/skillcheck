@@ -104,10 +104,23 @@ export async function generateTasks(
 
     try {
       const generated = validateTasks(extractJsonPayload(response.content), generatedCount);
-      return seededShuffle(generated, `${input.domain}:${config.generatorModel}`).slice(0, input.count).map((task, index) => ({
+      const selected = seededShuffle(generated, `${input.domain}:${config.generatorModel}`).slice(0, input.count).map((task, index) => ({
         ...task,
         id: `t${String(index + 1).padStart(3, '0')}`
       }));
+      // A short batch is retried like a parse failure (the attempt number busts
+      // the cache key). On the last attempt a partial batch still beats failing
+      // the whole run — callers report the actual count, not the requested one.
+      if (selected.length >= input.count) {
+        return selected;
+      }
+      lastError = new Error(`Generator produced only ${selected.length} of ${input.count} tasks`);
+      if (attempt === 3 && selected.length > 0) {
+        if (process.env.SKILLCHECK_DEBUG === '1') {
+          console.error(`[skillcheck] continuing with ${selected.length}/${input.count} generated tasks`);
+        }
+        return selected;
+      }
     } catch (error) {
       lastError = error;
       if (process.env.SKILLCHECK_DEBUG === '1') {

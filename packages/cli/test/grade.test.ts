@@ -108,4 +108,98 @@ describe('gradeOutputs', () => {
     expect(graded[0]?.pass).toBe(true);
     expect(graded[0]?.reason).toContain('non-json grader response');
   });
+
+  it('does not count a negated pass-word as a pass in the non-JSON fallback', async () => {
+    const cacheDir = await mkdtemp(path.join(tmpdir(), 'skillcheck-grade-cache-'));
+    const client = {
+      complete: async () => ({
+        content: 'The output does not pass the criterion; it fails to meet the requirement.',
+        model: 'grader',
+        usage: { promptTokens: 1, completionTokens: 1, totalTokens: 2 }
+      })
+    } as unknown as NvidiaNimClient;
+    const config = {
+      baseUrl: 'https://example.test',
+      apiKey: 'test',
+      timeoutMs: 1000,
+      requestDelayMs: 0,
+      maxAttempts: 8,
+      maxRetryDelayMs: 60000,
+      generatorModel: 'generator',
+      graderModel: 'grader',
+      runnerModel: 'runner'
+    } satisfies NvidiaConfig;
+    const tasks: GeneratedTask[] = [
+      {
+        id: 't001',
+        prompt: 'Do the task',
+        criterionType: 'rubric',
+        criterion: 'Output must satisfy the task.'
+      }
+    ];
+    const outputs: TrialOutput[] = [
+      {
+        taskId: 't001',
+        trial: 1,
+        arm: 'with_skill',
+        output: 'An unrelated answer.',
+        model: 'runner',
+        promptTokens: 1,
+        completionTokens: 1,
+        totalTokens: 2,
+        transcriptHash: 'sha256:test-negated'
+      }
+    ];
+
+    const graded = await gradeOutputs(tasks, outputs, config, client, new JsonCache(cacheDir));
+
+    expect(graded[0]?.pass).toBe(false);
+  });
+
+  it('honours an explicit score marker even when negation words appear', async () => {
+    const cacheDir = await mkdtemp(path.join(tmpdir(), 'skillcheck-grade-cache-'));
+    const client = {
+      complete: async () => ({
+        content: 'score: 1 — the output is correct and does not contain errors.',
+        model: 'grader',
+        usage: { promptTokens: 1, completionTokens: 1, totalTokens: 2 }
+      })
+    } as unknown as NvidiaNimClient;
+    const config = {
+      baseUrl: 'https://example.test',
+      apiKey: 'test',
+      timeoutMs: 1000,
+      requestDelayMs: 0,
+      maxAttempts: 8,
+      maxRetryDelayMs: 60000,
+      generatorModel: 'generator',
+      graderModel: 'grader',
+      runnerModel: 'runner'
+    } satisfies NvidiaConfig;
+    const tasks: GeneratedTask[] = [
+      {
+        id: 't001',
+        prompt: 'Do the task',
+        criterionType: 'rubric',
+        criterion: 'Output must satisfy the task.'
+      }
+    ];
+    const outputs: TrialOutput[] = [
+      {
+        taskId: 't001',
+        trial: 1,
+        arm: 'with_skill',
+        output: 'A correct answer.',
+        model: 'runner',
+        promptTokens: 1,
+        completionTokens: 1,
+        totalTokens: 2,
+        transcriptHash: 'sha256:test-score-marker'
+      }
+    ];
+
+    const graded = await gradeOutputs(tasks, outputs, config, client, new JsonCache(cacheDir));
+
+    expect(graded[0]?.pass).toBe(true);
+  });
 });

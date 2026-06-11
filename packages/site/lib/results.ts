@@ -109,7 +109,17 @@ function resultKey(result: Omit<LeaderboardResult, 'id' | 'filePath' | 'rot'>): 
 }
 
 async function listJsonFiles(dir: string): Promise<string[]> {
-  const entries = await readdir(dir, { withFileTypes: true });
+  // results/ is git-ignored, so a fresh clone has none — an empty leaderboard,
+  // not a build crash.
+  let entries;
+  try {
+    entries = await readdir(dir, { withFileTypes: true });
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code === 'ENOENT') {
+      return [];
+    }
+    throw error;
+  }
   const files = await Promise.all(
     entries.map(async (entry) => {
       const fullPath = path.join(dir, entry.name);

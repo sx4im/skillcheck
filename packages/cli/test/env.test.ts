@@ -36,9 +36,9 @@ describe('loadNvidiaConfig', () => {
 
     expect(config.apiKey).toBe('nvidia-key');
     expect(config.baseUrl).toBe('https://integrate.api.nvidia.com/v1');
-    expect(config.generatorModel).toBe('nvidia/nemotron-3-nano-omni-30b-a3b-reasoning');
-    expect(config.graderModel).toBe('nvidia/nemotron-3-nano-omni-30b-a3b-reasoning');
-    expect(config.runnerModel).toBe('nvidia/nemotron-3-nano-omni-30b-a3b-reasoning');
+    expect(config.generatorModel).toBe('openai/gpt-oss-120b');
+    expect(config.graderModel).toBe('openai/gpt-oss-120b');
+    expect(config.runnerModel).toBe('openai/gpt-oss-120b');
   });
 
   it('uses hosted proxy mode without requiring NVIDIA_API_KEY', () => {
@@ -65,10 +65,35 @@ describe('loadNvidiaConfig', () => {
     expect(config.apiKey).toBe('proxy-user-token');
   });
 
-  it('uses a generic cloud setup error when no provider is configured', () => {
+  it('falls back to the hosted cloud URL when only a token is configured', () => {
+    // The documented headless flow: SKILLCHECK_TOKEN=… skillcheck check …
+    // on a machine that never ran `skillcheck setup`.
+    resetProviderEnv();
+    process.env.SKILLCHECK_TOKEN = 'chk_live_token';
+
+    const config = loadNvidiaConfig();
+
+    expect(config.apiKey).toBe('chk_live_token');
+    expect(config.baseUrl).toBe('https://dashboard-skillcheck.vercel.app/api');
+  });
+
+  it('lets a direct NVIDIA key bypass a configured proxy URL', () => {
+    resetProviderEnv();
+    process.env.NVIDIA_API_KEY = 'nvidia-key';
+    process.env.SKILLCHECK_API_URL = 'https://proxy.example.com/v1';
+    process.env.SKILLCHECK_TOKEN = 'chk_live_token';
+
+    const config = loadNvidiaConfig();
+
+    expect(config.apiKey).toBe('nvidia-key');
+    expect(config.baseUrl).toBe('https://integrate.api.nvidia.com/v1');
+  });
+
+  it('uses an actionable setup error when no provider is configured', () => {
     resetProviderEnv();
 
     expect(() => loadNvidiaConfig()).toThrow(/Skillcheck Cloud is not connected/);
-    expect(() => loadNvidiaConfig()).toThrow(/SKILLCHECK_API_URL/);
+    expect(() => loadNvidiaConfig()).toThrow(/skillcheck setup/);
+    expect(() => loadNvidiaConfig()).toThrow(/SKILLCHECK_TOKEN/);
   });
 });

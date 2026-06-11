@@ -129,6 +129,9 @@ export async function evalSkill(options: EvalOptions): Promise<unknown> {
   const tasks = options.taskSuite
     ? parseTaskSuite(await readFile(options.taskSuite, 'utf8')).slice(0, options.tasks)
     : await generateTasks({ domain: skill.domain, count: options.tasks }, config, client, cache);
+  if (tasks.length === 0) {
+    throw new Error('No evaluation tasks available — the task suite is empty.');
+  }
   const taskSuiteHash = hashJson({ skill: skill.versionHash, tasks });
   const shouldSaveArtifacts = options.saveArtifacts ?? true;
   const taskSuitePath = options.taskSuite ?? (shouldSaveArtifacts ? `results/tasks/${taskSuiteHash}.json` : undefined);
@@ -165,7 +168,8 @@ export async function evalSkill(options: EvalOptions): Promise<unknown> {
       grader_version: config.graderModel,
       generator_model: config.generatorModel,
       trials: options.trials,
-      tasks: options.tasks,
+      // Actual task count — the generator may deliver fewer than requested.
+      tasks: tasks.length,
       temperature: 0.7,
       mode: 'forced-injection'
     },

@@ -42,4 +42,37 @@ describe('generateTasks', () => {
     expect(tasks).toHaveLength(1);
     expect(tasks[0]?.prompt).toMatch(/thing/);
   });
+
+  it('retries a short batch, then accepts a partial one on the final attempt', async () => {
+    const cacheDir = await mkdtemp(path.join(tmpdir(), 'skillcheck-generate-cache-'));
+    let calls = 0;
+    const shortBatch =
+      '{"tasks":[{"id":"t1","prompt":"Only one task","criterion":"Output must satisfy the task"}]}';
+    const client = {
+      complete: async () => {
+        calls += 1;
+        return {
+          content: shortBatch, // always fewer than the 3 requested
+          model: 'generator',
+          usage: { promptTokens: 1, completionTokens: 1, totalTokens: 2 }
+        };
+      }
+    } as unknown as NvidiaNimClient;
+    const config = {
+      baseUrl: 'https://example.test',
+      apiKey: 'test',
+      timeoutMs: 1000,
+      requestDelayMs: 0,
+      maxAttempts: 8,
+      maxRetryDelayMs: 60000,
+      generatorModel: 'generator',
+      graderModel: 'grader',
+      runnerModel: 'runner'
+    } satisfies NvidiaConfig;
+
+    const tasks = await generateTasks({ domain: 'short batches', count: 3 }, config, client, new JsonCache(cacheDir));
+
+    expect(calls).toBe(3); // tried three times for the full count
+    expect(tasks).toHaveLength(1); // then settled for what it got
+  });
 });

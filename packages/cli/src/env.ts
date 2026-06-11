@@ -1,9 +1,17 @@
 import dotenv from 'dotenv';
-import { getConfiguredApiUrl, getConfiguredToken } from './config.js';
+import { DEFAULT_CLOUD_API_URL, getConfiguredApiUrl, getConfiguredToken } from './config.js';
 
 dotenv.config();
 
-const DEFAULT_MODEL = 'nvidia/nemotron-3-nano-omni-30b-a3b-reasoning';
+// Default model for all three roles (generator / runner / grader).
+// Chosen by live benchmark across the NIM catalog (2026-06): gpt-oss-120b is the
+// only large model served from NIM's fast lane (≈1–5 s/call) AND reliable in
+// strict JSON mode. MiniMax M2.7, DeepSeek V4, Qwen3-Next and Llama 3.3 70B all
+// queued 60–110+ s per call; Qwen 3.5's NIM endpoint rejects response_format.
+// nvidia/nemotron-3-nano-omni-30b-a3b-reasoning remains the low-latency
+// alternative (sub-second calls, weaker grading/generation) via SKILLCHECK_MODEL.
+const DEFAULT_MODEL = 'openai/gpt-oss-120b';
+const DEFAULT_NVIDIA_BASE_URL = 'https://integrate.api.nvidia.com/v1';
 
 export interface NvidiaConfig {
   apiKey: string;
@@ -22,18 +30,26 @@ function readEnv(name: string): string | undefined {
   return value || undefined;
 }
 
-function resolveApiKey(proxyUrl: string | undefined): string {
+// Resolve which endpoint and credential this process talks to.
+// Direct mode (NVIDIA_API_KEY) always bypasses the hosted proxy — even when a
+// proxy URL was saved by an earlier `skillcheck setup`. Hosted mode works with
+// just a token: the baked-in cloud URL is assumed, so the documented
+// `SKILLCHECK_TOKEN=… skillcheck check …` flow works on a fresh machine.
+function resolveEndpoint(): { apiKey: string; baseUrl: string } {
   const nvidiaApiKey = readEnv('NVIDIA_API_KEY');
   if (nvidiaApiKey) {
-    return nvidiaApiKey;
+    return { apiKey: nvidiaApiKey, baseUrl: readEnv('NVIDIA_BASE_URL') ?? DEFAULT_NVIDIA_BASE_URL };
   }
 
+  const proxyUrl = getConfiguredApiUrl();
   const proxyApiKey = getConfiguredToken();
-  if (proxyUrl) {
-    return proxyApiKey ?? 'skillcheck-cloud';
+  if (proxyUrl || proxyApiKey) {
+    return { apiKey: proxyApiKey ?? 'skillcheck-cloud', baseUrl: proxyUrl ?? DEFAULT_CLOUD_API_URL };
   }
 
-  throw new Error('Skillcheck Cloud is not connected for this workspace. Set SKILLCHECK_API_URL or try again later.');
+  throw new Error(
+    'Skillcheck Cloud is not connected. Run `skillcheck setup` to connect your API key, or set SKILLCHECK_TOKEN (hosted) / NVIDIA_API_KEY (direct). Self-hosted proxies use SKILLCHECK_API_URL.'
+  );
 }
 
 function resolveModel(role: 'GENERATOR' | 'GRADER' | 'RUNNER'): string {
@@ -66,11 +82,11 @@ export function loadNvidiaConfig(): NvidiaConfig {
     throw new Error('Retry delay cap must be a positive number when set');
   }
 
-  const proxyUrl = getConfiguredApiUrl();
+  const endpoint = resolveEndpoint();
 
   return {
-    apiKey: resolveApiKey(proxyUrl),
-    baseUrl: proxyUrl ?? readEnv('NVIDIA_BASE_URL') ?? 'https://integrate.api.nvidia.com/v1',
+    apiKey: endpoint.apiKey,
+    baseUrl: endpoint.baseUrl,
     timeoutMs,
     requestDelayMs,
     maxAttempts,

@@ -59,16 +59,31 @@ describe('friendly CLI check command', () => {
       'skillcheck-results/docs-skill.json'
     );
 
-    expect(summary).toContain('Skill           Docs Skill');
+    expect(summary).toMatch(/Skill\s+Docs Skill/);
     expect(summary).toContain('HELPS');
     expect(summary).toContain('The skill HELPED');
     expect(summary).toContain('+25.0 pp');
     expect(summary).toContain('+5.0 pp to +45.0 pp');
-    expect(summary).toContain('Saved JSON      skillcheck-results/docs-skill.json');
+    expect(summary).toMatch(/Saved JSON\s+skillcheck-results\/docs-skill\.json/);
     // +25pp effect (no satisfaction field) -> falls back to 75.0/100 -> "Good"
     expect(summary).toContain('Satisfaction');
     expect(summary).toContain('75.0/100');
     expect(summary).toContain('GOOD');
+  });
+
+  it('rejects mistyped options instead of silently ignoring them', () => {
+    expect(() => parseCheckOptions(['node', 'skillcheck', 'check', './SKILL.md', '--task', '5'])).toThrow(
+      /Unknown option --task/
+    );
+  });
+
+  it('caps tasks and trials at sane bounds', () => {
+    expect(() => parseCheckOptions(['node', 'skillcheck', 'check', './SKILL.md', '--tasks', '300'])).toThrow(
+      /--tasks must be at most 50/
+    );
+    expect(() => parseCheckOptions(['node', 'skillcheck', 'check', './SKILL.md', '--trials', '99'])).toThrow(
+      /--trials must be at most 10/
+    );
   });
 
   it('accepts any .md file', async () => {

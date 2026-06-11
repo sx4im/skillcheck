@@ -37,6 +37,29 @@ describe('JsonCache', () => {
     expect(calls).toBe(2);
   });
 
+  it('treats a corrupted cache file as a miss and repairs it', async () => {
+    // A partial write (e.g. Ctrl+C mid-run) must not poison future runs.
+    const cacheDir = await mkdtemp(path.join(tmpdir(), 'skillcheck-cache-'));
+    const cache = new JsonCache(cacheDir);
+    let calls = 0;
+    const factory = async () => {
+      calls += 1;
+      return { value: calls };
+    };
+
+    await cache.getOrSet('ns', { key: 1 }, factory);
+    const { readdir, writeFile, readFile } = await import('node:fs/promises');
+    const files = await readdir(path.join(cacheDir, 'ns'));
+    const file = path.join(cacheDir, 'ns', files[0]!);
+    await writeFile(file, '{"value": 1'); // truncated JSON
+
+    const repaired = await cache.getOrSet('ns', { key: 1 }, factory);
+
+    expect(repaired).toEqual({ value: 2 });
+    expect(calls).toBe(2);
+    expect(JSON.parse(await readFile(file, 'utf8'))).toEqual({ value: 2 });
+  });
+
   it('disabled() always calls the factory and never reuses a value', async () => {
     // This is what `verify` relies on: every call hits the model fresh.
     const cache = JsonCache.disabled();

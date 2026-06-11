@@ -28,10 +28,22 @@ function parseGrade(text: string): GradePayload {
     };
   }
 
+  // Last-resort heuristic for a grader that ignored JSON mode. An explicit
+  // score marker wins outright; otherwise pass-words only count when the text
+  // carries no negation ("does not pass", "fails to meet" must grade 0).
   const lower = trimmed.toLowerCase();
-  const score = /\b(score|grade)\s*[:=]\s*1\b/.test(lower) || /\b(pass|passes|meets)\b/.test(lower) ? 1 : 0;
+  let score: number;
+  if (/\b(score|grade)\s*[:=]\s*1\b/.test(lower)) {
+    score = 1;
+  } else if (/\b(score|grade)\s*[:=]\s*0\b/.test(lower)) {
+    score = 0;
+  } else {
+    const positive = /\b(pass|passes|passed|meets|met|satisfies|satisfied)\b/.test(lower);
+    const negated = /\b(not|no|never|fail|fails|failed|cannot|can't|doesn'?t|don'?t|isn'?t|wasn'?t|unmet|unsatisfied)\b/.test(lower);
+    score = positive && !negated ? 1 : 0;
+  }
   return {
-    score: Math.max(0, Math.min(1, score)),
+    score,
     reason: `non-json grader response: ${trimmed.slice(0, 160)}`
   };
 }

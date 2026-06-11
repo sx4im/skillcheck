@@ -66,7 +66,9 @@ async function resolveSkillFile(inputPath: string): Promise<{ filePath: string; 
   return { filePath: inputPath, format };
 }
 
-function extractFrontMatter(text: string): Record<string, string> {
+function extractFrontMatter(rawText: string): Record<string, string> {
+  // Normalize CRLF so skills authored on Windows parse the same as LF files.
+  const text = rawText.replace(/\r\n/g, '\n');
   if (!text.startsWith('---\n')) {
     return {};
   }

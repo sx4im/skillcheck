@@ -52,6 +52,19 @@ describe('normalizeSkill', () => {
     expect(skill.domain).toBe('Next.js app development');
   });
 
+  it('parses front matter in CRLF (Windows) files', async () => {
+    const dir = await mkdtemp(path.join(tmpdir(), 'skillcheck-normalize-'));
+    await writeFile(
+      path.join(dir, 'SKILL.md'),
+      `---\r\nname: CRLF Skill\r\ndescription: Windows line endings\r\n---\r\n# Heading\r\n\r\nBody.\r\n`
+    );
+
+    const skill = await normalizeSkill(dir);
+
+    expect(skill.name).toBe('CRLF Skill');
+    expect(skill.domain).toBe('Windows line endings');
+  });
+
   it('uses only the heading when no domain is declared', async () => {
     const dir = await mkdtemp(path.join(tmpdir(), 'skillcheck-normalize-'));
     await writeFile(

@@ -163,8 +163,9 @@ export class NvidiaNimClient {
       try {
         // Reasoning is disabled by default for every call: the runner/generator/grader
         // all want fast, direct output, not chain-of-thought. nemotron honours
-        // `chat_template_kwargs.enable_thinking=false` (verified). A caller can opt
-        // back in by passing its own chatTemplateKwargs.
+        // `chat_template_kwargs.enable_thinking=false` (verified); gpt-oss accepts and
+        // ignores it (its reasoning lands in reasoning_content, never the answer). A
+        // caller can opt back in by passing its own chatTemplateKwargs.
         // NOTE: send `chat_template_kwargs` as a real TOP-LEVEL field. Do NOT wrap it in
         // `extra_body` — that is a Python-SDK convenience, not a real parameter, and
         // NVIDIA NIM rejects it ("400 Validation: Unsupported parameter(s): extra_body").
