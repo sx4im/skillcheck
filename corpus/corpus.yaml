@@ -12,3 +12,8 @@ skills:
     path: by-language/typescript/CLAUDE.md
   - id: python
     path: by-language/python/CLAUDE.md
+  - id: x-twitter-scraper
+    source: Xquik x-twitter-scraper
+    repo: https://github.com/Xquik-dev/x-twitter-scraper.git
+    commit: e3fd5758acb668965d11732fe734d73465c04603
+    path: skills/x-twitter-scraper/SKILL.md
