@@ -158,8 +158,31 @@ export function saveUserConfig(config: SkillcheckUserConfig): string {
   return filePath;
 }
 
+// The hosted cloud moved from dashboard-skillcheck.vercel.app to
+// www.skillcheck.page, and the apex domain redirects to www. Redirects strip
+// the Authorization header in Node's fetch, so any saved config or env
+// override still pointing at a legacy host would authenticate as "no key".
+// Those URLs are migrated to the current host transparently.
+const LEGACY_CLOUD_HOSTS = new Set(['dashboard-skillcheck.vercel.app', 'skillcheck.page']);
+
+function migrateLegacyApiUrl(url: string | undefined): string | undefined {
+  if (!url) {
+    return url;
+  }
+  try {
+    const parsed = new URL(url);
+    if (LEGACY_CLOUD_HOSTS.has(parsed.hostname)) {
+      parsed.hostname = 'www.skillcheck.page';
+      return parsed.toString().replace(/\/+$/, '');
+    }
+  } catch {
+    // Not parseable as a URL; leave it for downstream validation to report.
+  }
+  return url;
+}
+
 export function getConfiguredApiUrl(): string | undefined {
-  return process.env.SKILLCHECK_API_URL?.trim() || loadUserConfig().apiUrl;
+  return migrateLegacyApiUrl(process.env.SKILLCHECK_API_URL?.trim() || loadUserConfig().apiUrl);
 }
 
 export function getConfiguredToken(): string | undefined {

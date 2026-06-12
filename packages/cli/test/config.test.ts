@@ -45,4 +45,28 @@ describe('user config', () => {
 
     expect(getConfiguredApiUrl()).toBe('https://env.example.com/v1');
   });
+
+  // The old hosts now redirect to www.skillcheck.page, and redirects strip the
+  // Authorization header in Node's fetch, so stale URLs would authenticate as
+  // "no key". They must be migrated, not followed.
+  it('migrates saved configs pointing at the legacy vercel.app host', () => {
+    isolateConfig();
+    saveUserConfig({ apiUrl: 'https://dashboard-skillcheck.vercel.app/api' });
+
+    expect(getConfiguredApiUrl()).toBe('https://www.skillcheck.page/api');
+  });
+
+  it('migrates the apex domain to www (apex redirects too)', () => {
+    isolateConfig();
+    process.env.SKILLCHECK_API_URL = 'https://skillcheck.page/api';
+
+    expect(getConfiguredApiUrl()).toBe('https://www.skillcheck.page/api');
+  });
+
+  it('leaves self-hosted URLs untouched', () => {
+    isolateConfig();
+    saveUserConfig({ apiUrl: 'https://my-fork.vercel.app/api' });
+
+    expect(getConfiguredApiUrl()).toBe('https://my-fork.vercel.app/api');
+  });
 });
