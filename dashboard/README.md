@@ -20,12 +20,11 @@ dashboard/
     _lib/               config, clerk, store (Upstash), keys, users, nvidia, stripe, http
   test/                 smoke.mjs + proxy.mjs (run with `npm test`)
   .env.example          every variable, documented
-  SETUP.md              full click-by-click deploy + API-key guide
 ```
 
 ## Quick start
 
-1. Read **[SETUP.md](SETUP.md)** — it walks through NVIDIA, Clerk, Upstash, Stripe, and the Vercel deploy.
+1. Set the environment variables listed in `.env.example` (NVIDIA, Clerk, Upstash, optional Stripe) in your Vercel project.
 2. Deploy on Vercel with **Root Directory = `dashboard`** and **Framework = Other**.
 3. The CLI connects by pasting the `chk_live_…` key when `skillcheck` prompts for it (the hosted URL is baked in), or via `SKILLCHECK_TOKEN=chk_live_…`.
 

@@ -317,7 +317,7 @@ Skillcheck's hosted tier runs behind a metered proxy so end users never need a
 provider key. The [`dashboard/`](dashboard/) folder is a deployable Vercel app
 (Clerk sign-in, free-tier metering, optional Stripe upgrade) that issues
 `chk_live_…` keys and forwards completions to your server-side NVIDIA key. See
-[`dashboard/SETUP.md`](dashboard/SETUP.md) for the walkthrough.
+the [`dashboard/README.md`](dashboard/README.md) for deployment notes.
 
 To skip the proxy entirely, set `NVIDIA_API_KEY` (see
 [`.env.example`](.env.example)).

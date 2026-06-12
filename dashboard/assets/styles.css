@@ -75,8 +75,8 @@ code {
    is lifted one layer up. The sticky nav is excluded so it keeps its own
    positioning. Band backgrounds are slightly translucent so the doodles stay
    visible across the whole page while cards remain solid and readable. */
-#bg { position: fixed; inset: 0; z-index: 0; pointer-events: none; }
-body > :not(#bg):not(.nav) { position: relative; z-index: 1; }
+#bg, #bg3d { position: fixed; inset: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none; }
+body > :not(#bg):not(#bg3d):not(.nav) { position: relative; z-index: 1; }
 
 .wrap { max-width: var(--max); margin: 0 auto; padding: 0 24px; }
 .section { padding: 96px 0; position: relative; }

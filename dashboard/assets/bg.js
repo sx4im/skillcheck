@@ -1,7 +1,6 @@
-// Ambient background: an engineering grid with light beams traveling along
-// its lines (cyan, blue, indigo) and a soft spotlight that drifts toward the
-// pointer. The 21st.dev "background beams" genre, tuned to the SkillCheck
-// motorsport system: black floor, machined lines, brand tricolor energy.
+// Ambient background floor: a faint engineering grid plus a soft spotlight
+// that drifts toward the pointer. The scroll-driven 3D hero object
+// (assets/hero3d.js) provides the page's motion; this layer stays calm.
 // Self initializing: creates its own <canvas>, so pages opt in with one
 // script tag. Honors prefers-reduced-motion (static grid only) and pauses
 // while the tab is hidden. Zero dependencies.
@@ -9,8 +8,6 @@
 const reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 const CELL = 44; // grid pitch, matches the design system rhythm
-const BEAM_COLORS = ['34, 211, 238', '28, 105, 212', '99, 102, 241'];
-
 export function initBackground() {
   const canvas = document.createElement('canvas');
   canvas.id = 'bg';
@@ -64,25 +61,6 @@ export function initBackground() {
   paintGrid();
   window.addEventListener('resize', function () { resize(); paintGrid(); drawFrame(); }, { passive: true });
 
-  // --- beams: light pulses running along grid lines ---
-  let beams = [];
-  function spawnBeam() {
-    const horizontal = Math.random() < 0.5;
-    const lanes = Math.floor((horizontal ? height : width) / CELL);
-    if (lanes <= 2) return;
-    const lane = (1 + Math.floor(Math.random() * (lanes - 1))) * CELL + 0.5;
-    const forward = Math.random() < 0.5;
-    beams.push({
-      horizontal,
-      lane,
-      forward,
-      pos: forward ? -40 : (horizontal ? width : height) + 40,
-      speed: (2.2 + Math.random() * 3.4) * (forward ? 1 : -1),
-      len: 90 + Math.random() * 180,
-      color: BEAM_COLORS[Math.floor(Math.random() * BEAM_COLORS.length)],
-      alpha: 0.5 + Math.random() * 0.4
-    });
-  }
 
   // --- soft spotlight that eases toward the pointer ---
   let targetX = width * 0.7;
@@ -106,28 +84,6 @@ export function initBackground() {
     ctx.fillStyle = spot;
     ctx.fillRect(0, 0, width, height);
 
-    // Beams
-    for (const b of beams) {
-      const tail = b.pos - b.len * Math.sign(b.speed);
-      const grad = b.horizontal
-        ? ctx.createLinearGradient(tail, 0, b.pos, 0)
-        : ctx.createLinearGradient(0, tail, 0, b.pos);
-      grad.addColorStop(0, `rgba(${b.color}, 0)`);
-      grad.addColorStop(1, `rgba(${b.color}, ${b.alpha})`);
-      ctx.fillStyle = grad;
-      if (b.horizontal) {
-        ctx.fillRect(Math.min(tail, b.pos), b.lane - 0.75, Math.abs(b.pos - tail), 1.5);
-      } else {
-        ctx.fillRect(b.lane - 0.75, Math.min(tail, b.pos), 1.5, Math.abs(b.pos - tail));
-      }
-      // Bright head
-      ctx.fillStyle = `rgba(${b.color}, ${Math.min(1, b.alpha + 0.3)})`;
-      if (b.horizontal) {
-        ctx.fillRect(b.pos - 1.5, b.lane - 1.5, 3, 3);
-      } else {
-        ctx.fillRect(b.lane - 1.5, b.pos - 1.5, 3, 3);
-      }
-    }
   }
 
   if (reduceMotion) {
@@ -141,19 +97,9 @@ export function initBackground() {
     if (running) requestAnimationFrame(tick);
   });
 
-  let nextBeamAt = 0;
-  function tick(now) {
+  function tick() {
     if (!running) return;
 
-    if (now > nextBeamAt && beams.length < 9) {
-      spawnBeam();
-      nextBeamAt = now + 420 + Math.random() * 700;
-    }
-    for (const b of beams) b.pos += b.speed;
-    beams = beams.filter(function (b) {
-      const limit = b.horizontal ? width : height;
-      return b.forward ? b.pos - b.len < limit + 60 : b.pos + b.len > -60;
-    });
 
     // Ease the spotlight toward the pointer.
     spotX += (targetX - spotX) * 0.04;
