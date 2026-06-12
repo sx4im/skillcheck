@@ -56,7 +56,7 @@ export async function getClerk() {
       throw new Error('Sign-in is not configured yet. Set CLERK_PUBLISHABLE_KEY on the server.');
     }
     const clerk = await loadClerkFromCdn(config.clerkPublishableKey);
-    await clerk.load();
+    await clerk.load({ appearance: CLERK_APPEARANCE });
     return clerk;
   })();
   // Reset on failure so a later call (e.g. after a refresh) can retry cleanly.
@@ -65,6 +65,23 @@ export async function getClerk() {
 }
 
 const appUrl = () => `${location.origin}/app.html`;
+
+// Clerk UI styled to the SkillCheck system: dark surfaces, zero border
+// radius, Inter. Applied to clerk.load() and to every opened component so
+// no Clerk surface ships with rounded consumer-tech corners.
+const CLERK_APPEARANCE = {
+  variables: {
+    colorPrimary: '#1c69d4',
+    colorBackground: '#1a1a1a',
+    colorText: '#ffffff',
+    colorTextSecondary: '#bbbbbb',
+    colorInputBackground: '#0d0d0d',
+    colorInputText: '#ffffff',
+    colorDanger: '#e22718',
+    borderRadius: '0px',
+    fontFamily: "'Inter', -apple-system, sans-serif"
+  }
+};
 
 function reportError(error) {
   const message = error && error.message ? error.message : 'Sign-in failed. Please try again.';
@@ -82,7 +99,12 @@ function reportError(error) {
 export async function openSignIn() {
   try {
     const clerk = await getClerk();
-    clerk.redirectToSignIn({ signInForceRedirectUrl: appUrl(), signUpForceRedirectUrl: appUrl() });
+    if (typeof clerk.openSignIn === 'function') {
+      // In-page modal keeps users on skillcheck.page and inherits our theme.
+      clerk.openSignIn({ appearance: CLERK_APPEARANCE, forceRedirectUrl: appUrl(), signUpForceRedirectUrl: appUrl() });
+    } else {
+      clerk.redirectToSignIn({ signInForceRedirectUrl: appUrl(), signUpForceRedirectUrl: appUrl() });
+    }
   } catch (error) {
     reportError(error);
   }
@@ -91,7 +113,11 @@ export async function openSignIn() {
 export async function openSignUp() {
   try {
     const clerk = await getClerk();
-    clerk.redirectToSignUp({ signInForceRedirectUrl: appUrl(), signUpForceRedirectUrl: appUrl() });
+    if (typeof clerk.openSignUp === 'function') {
+      clerk.openSignUp({ appearance: CLERK_APPEARANCE, forceRedirectUrl: appUrl(), signInForceRedirectUrl: appUrl() });
+    } else {
+      clerk.redirectToSignUp({ signInForceRedirectUrl: appUrl(), signUpForceRedirectUrl: appUrl() });
+    }
   } catch (error) {
     reportError(error);
   }

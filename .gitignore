@@ -13,3 +13,6 @@ packages/site/node_modules/
 .vercel/
 dashboard/.vercel/
 .DS_Store
+
+# Internal design references, not part of the open-source release
+DESIGN.md

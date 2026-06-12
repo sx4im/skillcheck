@@ -71,6 +71,13 @@ code {
 ::selection { background: rgba(28, 105, 212, 0.45); color: #fff; }
 :focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
 
+/* Ambient doodle canvas (assets/bg.js) sits behind everything; page content
+   is lifted one layer up. The sticky nav is excluded so it keeps its own
+   positioning. Band backgrounds are slightly translucent so the doodles stay
+   visible across the whole page while cards remain solid and readable. */
+#bg { position: fixed; inset: 0; z-index: 0; pointer-events: none; }
+body > :not(#bg):not(.nav) { position: relative; z-index: 1; }
+
 .wrap { max-width: var(--max); margin: 0 auto; padding: 0 24px; }
 .section { padding: 96px 0; position: relative; }
 .muted { color: var(--muted); }
@@ -109,7 +116,7 @@ html.js .reveal.in {
 }
 
 /* ---------- Utility strip (dashboard top bar) ---------- */
-.util { background: var(--canvas); border-bottom: 1px solid var(--hairline-strong); font-size: 13px; color: var(--muted); }
+.util { background: rgba(0, 0, 0, 0.8); border-bottom: 1px solid var(--hairline-strong); font-size: 13px; color: var(--muted); }
 .util .wrap { display: flex; align-items: center; justify-content: space-between; height: 38px; }
 .util .btn-text, .util-signout { color: var(--body); font-size: 12px; padding: 0; }
 .util .btn-text:hover { color: var(--ink); }
@@ -117,7 +124,9 @@ html.js .reveal.in {
 /* ---------- Navigation ---------- */
 .nav {
   position: sticky; top: 0; z-index: 40;
-  background: var(--canvas);
+  background: rgba(0, 0, 0, 0.78);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   border-bottom: 1px solid transparent;
   transition: border-color var(--fast);
 }
@@ -161,7 +170,7 @@ html.js .reveal.in {
 .btn-text:hover { color: var(--ink); }
 
 /* ---------- Hero ---------- */
-.hero { padding: 96px 0 104px; background: var(--canvas); }
+.hero { padding: 96px 0 104px; }
 .hero .wrap { display: grid; grid-template-columns: 1.02fr 0.98fr; gap: 64px; align-items: center; }
 .hero-pill {
   display: inline-flex; align-items: center; gap: 10px;
@@ -215,7 +224,7 @@ html.js .reveal.in {
 .t-bar .val { color: #2fbf5f; font-weight: 700; min-width: 96px; text-align: right; }
 
 /* ---------- Stats: spec cells ---------- */
-.stats { border-top: 1px solid var(--hairline-strong); border-bottom: 1px solid var(--hairline-strong); background: var(--canvas); }
+.stats { border-top: 1px solid var(--hairline-strong); border-bottom: 1px solid var(--hairline-strong); }
 .stats .wrap { display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; padding-top: 48px; padding-bottom: 48px; }
 .stat { background: var(--surface-soft); border: 1px solid var(--hairline-strong); padding: 28px 24px; text-align: left; }
 .stat .n { font-size: 32px; font-weight: 700; letter-spacing: -0.5px; color: var(--ink); line-height: 1.15; }
@@ -328,7 +337,7 @@ html.js .reveal.in {
 .faq .a a { color: var(--body-strong); text-decoration: underline; }
 
 /* ---------- CTA band ---------- */
-.cta-band { text-align: center; background: var(--canvas); }
+.cta-band { text-align: center; }
 .cta-band h2 { font-size: 40px; }
 .cta-band p { color: var(--body); margin: 20px auto 36px; max-width: 480px; font-size: 17px; font-weight: 300; }
 
@@ -347,7 +356,13 @@ html.js .reveal.in {
 .code .copy:hover { background: var(--ink); color: var(--canvas); border-color: var(--ink); }
 
 /* ---------- Footer ---------- */
-.footer { background: var(--canvas); border-top: 1px solid var(--hairline-strong); padding: 64px 0 40px; }
+.band {
+  background: rgba(10, 10, 10, 0.78);
+  border-top: 1px solid var(--hairline-strong);
+  border-bottom: 1px solid var(--hairline-strong);
+}
+
+.footer { background: rgba(0, 0, 0, 0.82); border-top: 1px solid var(--hairline-strong); padding: 64px 0 40px; }
 .footer a { color: var(--muted); font-size: 14px; font-weight: 300; }
 .footer a:hover { color: var(--ink); }
 .footer .cols { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 40px; }
