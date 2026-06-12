@@ -231,6 +231,11 @@ bindAuthButtons();
     if (user && signedOut && signedIn) {
       signedOut.style.display = 'none';
       signedIn.style.display = 'flex';
+      // Signed-in visitors: the primary CTAs lead to the dashboard, so label
+      // them honestly instead of "get your key".
+      document.querySelectorAll('.hero [data-action="signup"], .cta-band [data-action="signup"]').forEach(function (btn) {
+        btn.textContent = 'Open your dashboard';
+      });
       if (avatar) {
         const name = [user.firstName, user.lastName].filter(Boolean).join(' ') || user.username || 'U';
         avatar.textContent = name.slice(0, 2).toUpperCase();

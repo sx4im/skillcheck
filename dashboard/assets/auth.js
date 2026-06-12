@@ -99,6 +99,12 @@ function reportError(error) {
 export async function openSignIn() {
   try {
     const clerk = await getClerk();
+    // Already signed in: the modal would be a no-op (single-session app), so
+    // go straight to the dashboard where the key and usage live.
+    if (clerk.user) {
+      location.href = appUrl();
+      return;
+    }
     if (typeof clerk.openSignIn === 'function') {
       // In-page modal keeps users on skillcheck.page and inherits our theme.
       clerk.openSignIn({ appearance: CLERK_APPEARANCE, forceRedirectUrl: appUrl(), signUpForceRedirectUrl: appUrl() });
@@ -113,6 +119,10 @@ export async function openSignIn() {
 export async function openSignUp() {
   try {
     const clerk = await getClerk();
+    if (clerk.user) {
+      location.href = appUrl();
+      return;
+    }
     if (typeof clerk.openSignUp === 'function') {
       clerk.openSignUp({ appearance: CLERK_APPEARANCE, forceRedirectUrl: appUrl(), signInForceRedirectUrl: appUrl() });
     } else {
