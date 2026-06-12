@@ -63,6 +63,7 @@ $ skillcheck
 - [Model choice](#model-choice)
 - [Self-hosting](#self-hosting)
 - [Development](#development)
+- [Star history](#star-history)
 - [License](#license)
 
 ## Install
@@ -193,7 +194,7 @@ skillcheck setup                            # connect / change your API key
 skillcheck logout                           # remove your saved API key
 skillcheck eval <path> [--tasks N] [--trials K] [--output file.json]   # raw JSON evaluator
 skillcheck verify <result.json> [--sample n]  # independently re-measure a published result
-skillcheck corpus run --corpus corpus.yaml [--results dir]             # batch-evaluate many skills
+skillcheck corpus run --corpus corpus.json [--results dir]             # batch-evaluate many skills
 skillcheck rot [--results dir] [--output report.json]                  # detect skills that stopped helping
 skillcheck --version
 ```
@@ -289,8 +290,8 @@ All three roles (task generator, runner, blind grader) default to
 **`openai/gpt-oss-120b`**, selected by live benchmarking of the NIM catalog
 (MiniMax M2.7, DeepSeek V4 Flash, Qwen3-Next/3.5, Llama 3.3 70B, Nemotron Nano):
 
-- **It's the only large model in the fast lane.** A Medium check makes ~25
-  sequential model calls; a Strong check ~60, so per-call latency dominates UX.
+- **It's the only large model in the fast lane.** A Standard check makes ~25
+  sequential model calls; a Thorough check ~60, so per-call latency dominates UX.
   gpt-oss-120b answers in ~1–5 s on NIM. The other large models (MiniMax M2.7,
   DeepSeek V4, Qwen3-Next, Llama 3.3) queue for 60–110+ seconds *per call* on the
   shared endpoint — a single check would take hours.
@@ -334,6 +335,18 @@ The CLI lives in [`packages/cli`](packages/cli) (`bin/skillcheck.ts` → `src/cl
 `packages/site` is the static leaderboard site; `dashboard/` is the hosted cloud.
 A scheduled [rot workflow](.github/workflows/rot.yml) re-runs the corpus weekly and
 opens a PR when a skill's verdict regresses.
+
+## Star history
+
+If Skillcheck saved you from shipping a placebo skill, a ⭐ helps other people find it.
+
+<a href="https://www.star-history.com/#sx4im/skillcheck&Date">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=sx4im/skillcheck&type=Date&theme=dark" />
+    <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=sx4im/skillcheck&type=Date" />
+    <img alt="Star History Chart" src="https://api.star-history.com/svg?repos=sx4im/skillcheck&type=Date" />
+  </picture>
+</a>
 
 ## License
 
