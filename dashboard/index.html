@@ -119,6 +119,7 @@
     </script>
   </head>
   <body>
+    <div class="stripe" aria-hidden="true"></div>
     <nav class="nav" aria-label="Main">
       <div class="wrap">
         <a class="brand" href="/" aria-label="SkillCheck home">
@@ -158,12 +159,10 @@
     <div id="authError" class="auth-error" role="alert"></div>
 
     <header class="hero">
-      <div class="hero-bg" aria-hidden="true"></div>
-      <div class="hero-grid" aria-hidden="true"></div>
       <div class="wrap">
         <div>
           <span class="hero-pill reveal"><span class="dot" aria-hidden="true"></span> Open source. 10 free runs, no credit card.</span>
-          <h1 class="reveal" style="--d:60ms">Is your skill <span class="grad-text">actually helping</span> the model?</h1>
+          <h1 class="reveal" style="--d:60ms">Is your skill actually helping the model?</h1>
           <p class="lead reveal" style="--d:120ms">
             Thousands of SKILL.md files are published. Almost none are tested.
             SkillCheck runs a blind A/B experiment on any agent skill and hands you
@@ -228,7 +227,7 @@
       </div>
     </section>
 
-    <section class="section" id="how" style="background:var(--bg-raise); border-top:1px solid var(--hairline); border-bottom:1px solid var(--hairline)">
+    <section class="section" id="how" style="background:var(--surface-soft); border-top:1px solid var(--hairline-strong); border-bottom:1px solid var(--hairline-strong)">
       <div class="wrap">
         <div class="section-head center reveal">
           <span class="eyebrow">How it works</span>
@@ -308,7 +307,7 @@
       </div>
     </section>
 
-    <section class="section" id="result" style="background:var(--bg-raise); border-top:1px solid var(--hairline); border-bottom:1px solid var(--hairline)">
+    <section class="section" id="result" style="background:var(--surface-soft); border-top:1px solid var(--hairline-strong); border-bottom:1px solid var(--hairline-strong)">
       <div class="wrap">
         <div class="section-head reveal">
           <span class="eyebrow">The result</span>
@@ -374,7 +373,7 @@
       </div>
     </section>
 
-    <section class="section" id="faq" style="background:var(--bg-raise); border-top:1px solid var(--hairline); border-bottom:1px solid var(--hairline)">
+    <section class="section" id="faq" style="background:var(--surface-soft); border-top:1px solid var(--hairline-strong); border-bottom:1px solid var(--hairline-strong)">
       <div class="wrap">
         <div class="section-head center reveal">
           <span class="eyebrow">FAQ</span>
@@ -410,9 +409,8 @@
     </section>
 
     <section class="section cta-band">
-      <div class="glow" aria-hidden="true"></div>
       <div class="wrap reveal">
-        <h2>Stop shipping <span class="grad-text">placebo</span> skills</h2>
+        <h2>Stop shipping placebo skills</h2>
         <p>Sign in with Google or GitHub, grab your key, and get your first verdict in about two minutes.</p>
         <div class="cta-row" style="justify-content:center">
           <button class="btn btn-primary" data-action="signup">Get your free API key</button>
@@ -424,6 +422,7 @@ skillcheck check ./SKILL.md<button class="copy" data-copy="installCode" aria-lab
       </div>
     </section>
 
+    <div class="stripe" aria-hidden="true"></div>
     <footer class="footer">
       <div class="wrap">
         <div class="cols">

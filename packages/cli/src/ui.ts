@@ -103,42 +103,69 @@ function renderWord(word: string, fillFor: (row: number) => Paint, outline: Pain
   return rows;
 }
 
+// Compact 5-row solid block glyphs for narrow terminals. No outline/shadow
+// characters: pure fills, 6 columns per letter (2 for I), so the full
+// one-line "SKILL  CHECK" fits a standard 80-column terminal.
+const COMPACT_ROWS = 5;
+const COMPACT_GLYPHS: Record<string, string[]> = {
+  S: ['██████', '██    ', '██████', '    ██', '██████'],
+  K: ['██  ██', '██ ██ ', '████  ', '██ ██ ', '██  ██'],
+  I: ['██', '██', '██', '██', '██'],
+  L: ['██    ', '██    ', '██    ', '██    ', '██████'],
+  C: ['██████', '██    ', '██    ', '██    ', '██████'],
+  H: ['██  ██', '██  ██', '██████', '██  ██', '██  ██'],
+  E: ['██████', '██    ', '████  ', '██    ', '██████']
+};
+
 // Plain (unpainted) column width of a rendered glyph word, including the one
 // space column between glyphs.
-function wordWidth(word: string): number {
+function wordWidth(glyphs: Record<string, string[]>, word: string): number {
   return Array.from(word).reduce(
-    (sum, ch, index) => sum + Array.from(GLYPHS[ch]?.[0] ?? '').length + (index > 0 ? 1 : 0),
+    (sum, ch, index) => sum + Array.from(glyphs[ch]?.[0] ?? '').length + (index > 0 ? 1 : 0),
     0
   );
 }
 
-// The hero wordmark: "SKILL" in solid white and "CHECK" in the brand gradient with a
-// white outline, side by side on one line. Terminals too narrow for the full
-// wordmark get the stacked two-line fallback instead of wrapped glyph soup.
-// Returned as lines so the file picker can embed the very same banner in its
-// full-screen frame.
+function renderCompactWord(word: string, fillFor: (row: number) => Paint): string[] {
+  const rows: string[] = [];
+  for (let r = 0; r < COMPACT_ROWS; r += 1) {
+    const row = Array.from(word)
+      .map((ch) => COMPACT_GLYPHS[ch]?.[r] ?? '')
+      .join(' ');
+    rows.push(paintBlocks(row, fillFor(r), fillFor(r)));
+  }
+  return rows;
+}
+
+// The hero wordmark: "SKILL" in solid white and "CHECK" in the brand gradient,
+// ALWAYS side by side on one line. Three tiers by terminal width: the full
+// ANSI-Shadow letters, the compact solid letters (fits 80 columns), and a
+// plain styled text line for very narrow terminals. SKILL and CHECK are never
+// stacked on separate lines. Returned as lines so the file picker can embed
+// the very same banner in its full-screen frame.
 export function bannerLines(): string[] {
   const indent = '  ';
   const gap = '  ';
   const lines: string[] = [''];
-  const skillRows = renderWord('SKILL', () => paint.bold, paint.bold);
-  const checkRows = renderWord('CHECK', (row) => paint.brand(row / (GLYPH_ROWS - 1)), paint.bold);
-
-  const oneLineWidth = indent.length + wordWidth('SKILL') + gap.length + wordWidth('CHECK');
   const columns = process.stdout.columns;
-  const fitsOneLine = columns === undefined || columns >= oneLineWidth;
 
-  if (fitsOneLine) {
+  const bigWidth = indent.length + wordWidth(GLYPHS, 'SKILL') + gap.length + wordWidth(GLYPHS, 'CHECK');
+  const compactWidth = indent.length + wordWidth(COMPACT_GLYPHS, 'SKILL') + gap.length + wordWidth(COMPACT_GLYPHS, 'CHECK');
+
+  if (columns === undefined || columns >= bigWidth) {
+    const skillRows = renderWord('SKILL', () => paint.bold, paint.bold);
+    const checkRows = renderWord('CHECK', (row) => paint.brand(row / (GLYPH_ROWS - 1)), paint.bold);
     for (let r = 0; r < GLYPH_ROWS; r += 1) {
       lines.push(indent + skillRows[r]! + gap + checkRows[r]!);
     }
+  } else if (columns >= compactWidth) {
+    const skillRows = renderCompactWord('SKILL', () => paint.bold);
+    const checkRows = renderCompactWord('CHECK', (row) => paint.brand(row / (COMPACT_ROWS - 1)));
+    for (let r = 0; r < COMPACT_ROWS; r += 1) {
+      lines.push(indent + skillRows[r]! + gap + checkRows[r]!);
+    }
   } else {
-    for (const line of skillRows) {
-      lines.push(indent + line);
-    }
-    for (const line of checkRows) {
-      lines.push(indent + line);
-    }
+    lines.push(`${indent}${paint.bold('SKILL')}${paint.brand(0.5)('CHECK')}`);
   }
   lines.push(`${indent}${paint.bold('Is your skill actually helping the model?')}`);
   lines.push(`${indent}${paint.dim(`v${currentVersion()} ${SYM.dot} ${REPO_URL}`)}`);

@@ -228,7 +228,7 @@ function wireResilientSignout() {
   } catch (e) {
     showLoadError(
       'Could not load the sign-in service. If you use Brave, Safari, or strict privacy mode, ' +
-      'allow this site (disable Shields) and refresh — or open it in Chrome/Firefox. ' +
+      'allow this site (disable Shields) and refresh, or open it in Chrome/Firefox. ' +
       'You can still use Sign out above.'
     );
     return;
