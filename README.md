@@ -1,10 +1,14 @@
-# skillcheck
+<div align="center">
+  <img src=".github/assets/skillcheck-wordmark.svg" alt="SKILLCHECK — is your skill actually helping the model?" width="760">
+</div>
 
-[![npm version](https://img.shields.io/npm/v/@sx4im/skillcheck)](https://www.npmjs.com/package/@sx4im/skillcheck)
-[![npm downloads](https://img.shields.io/npm/dm/@sx4im/skillcheck)](https://www.npmjs.com/package/@sx4im/skillcheck)
-[![CI](https://github.com/sx4im/skillcheck/actions/workflows/rot.yml/badge.svg)](https://github.com/sx4im/skillcheck/actions)
-[![License: MIT](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
-[![Node](https://img.shields.io/badge/node-%E2%89%A520-brightgreen)](https://nodejs.org)
+<p align="center">
+  <a href="https://www.npmjs.com/package/@sx4im/skillcheck"><img src="https://img.shields.io/npm/v/@sx4im/skillcheck" alt="npm version"></a>
+  <a href="https://www.npmjs.com/package/@sx4im/skillcheck"><img src="https://img.shields.io/npm/dm/@sx4im/skillcheck" alt="npm downloads"></a>
+  <a href="https://github.com/sx4im/skillcheck/actions"><img src="https://github.com/sx4im/skillcheck/actions/workflows/rot.yml/badge.svg" alt="CI"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue" alt="License: MIT"></a>
+  <a href="https://nodejs.org"><img src="https://img.shields.io/badge/node-%E2%89%A520-brightgreen" alt="Node ≥20"></a>
+</p>
 
 **Measure whether an agent skill actually improves a model's task performance.**
 
@@ -132,37 +136,39 @@ methodology in [`METHODOLOGY.md`](METHODOLOGY.md).
 How a check flows from your terminal to the result card:
 
 ```mermaid
-flowchart TD
+flowchart LR
     subgraph CLI["skillcheck CLI (local)"]
+        direction TB
         A["User input<br/>skillcheck check ./SKILL.md"] --> B{API key<br/>configured?}
-        B -- no --> C["Interactive setup<br/>paste key → verified via /key/verify → saved to ~/.config/skillcheck"]
+        B -- no --> C["Interactive setup<br/>masked key → verified → saved"]
         B -- yes --> D
         C --> D["Normalize skill<br/>name · domain · instructions"]
         D --> E["Generate tasks<br/>domain only — never the skill body"]
         E --> F["Run trials<br/>each task × K trials × 2 arms"]
         F --> G["Blind grading<br/>shuffled outputs · temp 0 · JSON verdict"]
-        G --> H["Paired bootstrap<br/>1000 resamples → effect, 95% CI, verdict"]
+        G --> H["Paired bootstrap<br/>1000 resamples → effect · 95% CI · verdict"]
         H --> I{Output mode}
         I -->|terminal| J["Result card<br/>+ animated satisfaction bar"]
-        I -->|"--json or --output"| K["JSON result<br/>reproducible: task suite + transcript hashes"]
+        I -->|"--json / --output"| K["JSON result<br/>task suite + transcript hashes"]
     end
 
     subgraph Cloud["Skillcheck Cloud (dashboard/, Vercel)"]
-        P["Metered proxy /api/chat/completions<br/>authenticates chk_live key · counts 1 run per check<br/>pins model · caps max_tokens"]
+        direction TB
+        P["Metered proxy<br/>/api/chat/completions<br/>authenticates chk_live key<br/>counts 1 run per check<br/>pins model · caps max_tokens"]
         V["/api/key/verify"]
-        P2["NVIDIA key stays server-side"]
+        S["NVIDIA key<br/>stays server-side"]
+        P ~~~ V ~~~ S
     end
 
     subgraph NIM["NVIDIA NIM"]
+        direction TB
         M["openai/gpt-oss-120b<br/>default for all three roles"]
     end
 
-    C -.-> V
-    E -->|model calls| P
-    F -->|model calls| P
-    G -->|model calls| P
-    P --> M
-    E -.->|"direct mode (NVIDIA_API_KEY)"| M
+    CLI ==>|"model calls<br/>(generate · run · grade)"| Cloud
+    CLI -.->|"setup: key verify"| Cloud
+    Cloud ==>|server-side key| NIM
+    CLI -.->|"direct mode<br/>(NVIDIA_API_KEY)"| NIM
 
     style CLI fill:#0b2942,stroke:#2d7dd2,color:#e8f0fe
     style Cloud fill:#102a12,stroke:#3fa34d,color:#e8f5e9

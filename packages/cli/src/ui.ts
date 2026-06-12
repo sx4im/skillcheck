@@ -103,17 +103,42 @@ function renderWord(word: string, fillFor: (row: number) => Paint, outline: Pain
   return rows;
 }
 
-// The hero wordmark: "SKILL" in solid white over "CHECK" in the brand gradient with a
-// white outline, then the tagline and a dim version line. Returned as lines so the
-// file picker can embed the very same banner in its full-screen frame.
+// Plain (unpainted) column width of a rendered glyph word, including the one
+// space column between glyphs.
+function wordWidth(word: string): number {
+  return Array.from(word).reduce(
+    (sum, ch, index) => sum + Array.from(GLYPHS[ch]?.[0] ?? '').length + (index > 0 ? 1 : 0),
+    0
+  );
+}
+
+// The hero wordmark: "SKILL" in solid white and "CHECK" in the brand gradient with a
+// white outline, side by side on one line. Terminals too narrow for the full
+// wordmark get the stacked two-line fallback instead of wrapped glyph soup.
+// Returned as lines so the file picker can embed the very same banner in its
+// full-screen frame.
 export function bannerLines(): string[] {
   const indent = '  ';
+  const gap = '  ';
   const lines: string[] = [''];
-  for (const line of renderWord('SKILL', () => paint.bold, paint.bold)) {
-    lines.push(indent + line);
-  }
-  for (const line of renderWord('CHECK', (row) => paint.brand(row / (GLYPH_ROWS - 1)), paint.bold)) {
-    lines.push(indent + line);
+  const skillRows = renderWord('SKILL', () => paint.bold, paint.bold);
+  const checkRows = renderWord('CHECK', (row) => paint.brand(row / (GLYPH_ROWS - 1)), paint.bold);
+
+  const oneLineWidth = indent.length + wordWidth('SKILL') + gap.length + wordWidth('CHECK');
+  const columns = process.stdout.columns;
+  const fitsOneLine = columns === undefined || columns >= oneLineWidth;
+
+  if (fitsOneLine) {
+    for (let r = 0; r < GLYPH_ROWS; r += 1) {
+      lines.push(indent + skillRows[r]! + gap + checkRows[r]!);
+    }
+  } else {
+    for (const line of skillRows) {
+      lines.push(indent + line);
+    }
+    for (const line of checkRows) {
+      lines.push(indent + line);
+    }
   }
   lines.push(`${indent}${paint.bold('Is your skill actually helping the model?')}`);
   lines.push(`${indent}${paint.dim(`v${currentVersion()} ${SYM.dot} ${REPO_URL}`)}`);
