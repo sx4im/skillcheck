@@ -4,4 +4,4 @@ Disallow: /app.html
 Disallow: /sso-callback.html
 Disallow: /api/
 
-Sitemap: https://skillcheck.page/sitemap.xml
+Sitemap: https://www.skillcheck.page/sitemap.xml
