@@ -74,7 +74,7 @@ describe('loadNvidiaConfig', () => {
     const config = loadNvidiaConfig();
 
     expect(config.apiKey).toBe('chk_live_token');
-    expect(config.baseUrl).toBe('https://dashboard-skillcheck.vercel.app/api');
+    expect(config.baseUrl).toBe('https://skillcheck.page/api');
   });
 
   it('lets a direct NVIDIA key bypass a configured proxy URL', () => {

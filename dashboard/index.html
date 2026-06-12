@@ -3,47 +3,149 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Skillcheck — does your agent skill actually help?</title>
-    <meta name="description" content="Measure whether an agent skill improves task performance. Sign in, get an API key with 10 free runs, and check any SKILL.md from the CLI." />
+    <script>document.documentElement.classList.add('js');</script>
+
+    <title>SkillCheck: A/B Test Your Agent Skills | Does Your SKILL.md Actually Help?</title>
+    <meta name="description" content="SkillCheck runs a blind A/B test on any SKILL.md, AGENTS.md, or CLAUDE.md and tells you if it helps the model, hurts it, or does nothing. 10 free runs, results in about 2 minutes." />
+    <link rel="canonical" href="https://skillcheck.page/" />
+    <meta name="robots" content="index, follow, max-image-preview:large" />
+    <meta name="theme-color" content="#0b1220" />
+    <meta name="author" content="sx4im" />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="SkillCheck" />
+    <meta property="og:title" content="SkillCheck: A/B Test Your Agent Skills" />
+    <meta property="og:description" content="Find out if your SKILL.md actually helps the model or is just a placebo. Blind grading, confidence intervals, one clear verdict." />
+    <meta property="og:url" content="https://skillcheck.page/" />
+    <meta property="og:image" content="https://skillcheck.page/assets/og.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="SkillCheck wordmark with the three verdicts: HELPS, PLACEBO, HARMS" />
+
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="SkillCheck: A/B Test Your Agent Skills" />
+    <meta name="twitter:description" content="Find out if your SKILL.md actually helps the model or is just a placebo. Blind grading, confidence intervals, one clear verdict." />
+    <meta name="twitter:image" content="https://skillcheck.page/assets/og.png" />
+
+    <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml" />
+    <link rel="icon" href="/assets/icon-32.png" type="image/png" sizes="32x32" />
+    <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png" />
+    <link rel="manifest" href="/site.webmanifest" />
+
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="/assets/styles.css" />
-    <script>
-      // Motion animations run via inline styles from motion.js.
-      // No CSS opacity hiding — content is always fully visible.
+
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@type": "Organization",
+          "@id": "https://skillcheck.page/#org",
+          "name": "SkillCheck",
+          "url": "https://skillcheck.page/",
+          "logo": "https://skillcheck.page/assets/icon-512.png",
+          "sameAs": [
+            "https://github.com/sx4im/skillcheck",
+            "https://www.npmjs.com/package/@sx4im/skillcheck"
+          ]
+        },
+        {
+          "@type": "WebSite",
+          "@id": "https://skillcheck.page/#website",
+          "url": "https://skillcheck.page/",
+          "name": "SkillCheck",
+          "description": "A/B testing for agent skills. Find out if your SKILL.md actually helps the model.",
+          "publisher": { "@id": "https://skillcheck.page/#org" }
+        },
+        {
+          "@type": "SoftwareApplication",
+          "name": "SkillCheck",
+          "url": "https://skillcheck.page/",
+          "image": "https://skillcheck.page/assets/icon-512.png",
+          "applicationCategory": "DeveloperApplication",
+          "operatingSystem": "Windows, macOS, Linux",
+          "description": "SkillCheck runs a blind A/B test on agent skill files (SKILL.md, AGENTS.md, CLAUDE.md) and reports whether the skill helps the model, with bootstrap confidence intervals and a 0 to 100 quality score.",
+          "downloadUrl": "https://www.npmjs.com/package/@sx4im/skillcheck",
+          "softwareHelp": "https://github.com/sx4im/skillcheck#readme",
+          "offers": [
+            { "@type": "Offer", "name": "Free", "price": "0", "priceCurrency": "USD", "description": "10 free SkillCheck runs, full CLI" },
+            { "@type": "Offer", "name": "Pro", "price": "19", "priceCurrency": "USD", "description": "Unlimited SkillCheck runs, one-time payment" }
+          ],
+          "publisher": { "@id": "https://skillcheck.page/#org" }
+        }
+      ]
+    }
+    </script>
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "What is SkillCheck?",
+          "acceptedAnswer": { "@type": "Answer", "text": "SkillCheck is an open source CLI and cloud service that measures whether an agent skill file actually improves a model's task performance. It runs a controlled A/B experiment instead of relying on intuition: the same tasks are solved with and without your skill, graded blind, and scored with a bootstrap confidence interval." }
+        },
+        {
+          "@type": "Question",
+          "name": "How does SkillCheck test a skill?",
+          "acceptedAnswer": { "@type": "Answer", "text": "SkillCheck reads your skill's declared domain and generates fresh evaluation tasks from the domain only, so tasks can never leak the skill's instructions. Each task runs in two arms, with and without the skill injected as a system prompt. A separate grader model scores every output blind, then a 1,000 iteration paired bootstrap produces the effect size, a 95% confidence interval, and one verdict: HELPS, PLACEBO, or HARMS." }
+        },
+        {
+          "@type": "Question",
+          "name": "Which skill files can I check?",
+          "acceptedAnswer": { "@type": "Answer", "text": "Any Markdown skill file: SKILL.md, AGENTS.md, CLAUDE.md, or any other .md file. You can also point SkillCheck at a folder that contains one and pick the file interactively." }
+        },
+        {
+          "@type": "Question",
+          "name": "Do I need my own model API key?",
+          "acceptedAnswer": { "@type": "Answer", "text": "No. Sign in with Google or GitHub and SkillCheck Cloud issues you a free API key with 10 runs included. The model provider key stays on the server and never reaches your terminal. Power users can set NVIDIA_API_KEY to run fully direct instead." }
+        },
+        {
+          "@type": "Question",
+          "name": "What does a PLACEBO verdict mean?",
+          "acceptedAnswer": { "@type": "Answer", "text": "PLACEBO means the 95% confidence interval for the skill's effect overlaps zero: no measurable difference between running with and without the skill. It does not always mean the skill is bad, but it does mean you are paying tokens for an effect you cannot demonstrate." }
+        },
+        {
+          "@type": "Question",
+          "name": "Is SkillCheck open source?",
+          "acceptedAnswer": { "@type": "Answer", "text": "Yes. The CLI, the evaluation methodology, and this dashboard are MIT licensed and developed in the open at github.com/sx4im/skillcheck." }
+        }
+      ]
+    }
     </script>
   </head>
   <body>
-    <div class="util">
+    <nav class="nav" aria-label="Main">
       <div class="wrap">
-        <span>Skillcheck Cloud — forced-injection A/B evaluation for agent skills</span>
-        <span class="util-promo">10 free runs · no credit card</span>
-      </div>
-    </div>
-
-    <nav class="nav">
-      <div class="wrap">
-        <a class="brand" href="/">
+        <a class="brand" href="/" aria-label="SkillCheck home">
           <span class="mark" aria-hidden="true">
-            <svg width="26" height="18" viewBox="0 0 26 18" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M4 0H12L8 18H0L4 0Z" fill="#024ad8" />
-              <path d="M16 0H24L20 18H12L16 0Z" fill="#296ef9" />
+            <svg width="24" height="18" viewBox="0 0 52 38" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <defs>
+                <linearGradient id="gnav-a" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#22d3ee"/><stop offset="1" stop-color="#3b82f6"/></linearGradient>
+                <linearGradient id="gnav-b" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#3b82f6"/><stop offset="1" stop-color="#6366f1"/></linearGradient>
+              </defs>
+              <path d="M9 0h13l-9 38H0L9 0Z" fill="url(#gnav-a)"/>
+              <path d="M27 0h13l-9 38H18L27 0Z" fill="url(#gnav-b)"/>
             </svg>
           </span>
-          Skillcheck
+          SkillCheck
         </a>
         <div class="links">
           <a href="#how">How it works</a>
           <a href="#features">Features</a>
-          <a href="#formats">Formats</a>
+          <a href="#result">The result</a>
           <a href="#pricing">Pricing</a>
-          <a href="https://github.com/sx4im/skillcheck">Docs</a>
+          <a href="#faq">FAQ</a>
+          <a href="https://github.com/sx4im/skillcheck" rel="noopener">Docs</a>
         </div>
         <div class="spacer"></div>
         <div class="right" id="navSignedOut">
           <button class="btn-text" data-action="signin">Sign in</button>
-          <button class="btn btn-primary btn-sm" data-action="signup">Get started</button>
+          <button class="btn btn-primary btn-sm" data-action="signup">Get started free</button>
         </div>
         <div class="right" id="navSignedIn" style="display:none; gap: 12px; align-items: center;">
           <a class="btn btn-primary btn-sm" href="/app.html">Dashboard</a>
@@ -55,50 +157,109 @@
 
     <div id="authError" class="auth-error" role="alert"></div>
 
-    <header class="hero section">
-      <div class="chevrons"></div>
+    <header class="hero">
+      <div class="hero-bg" aria-hidden="true"></div>
+      <div class="hero-grid" aria-hidden="true"></div>
       <div class="wrap">
-        <div data-motion="hero">
-          <div class="eyebrow">Agent skill evaluation</div>
-          <h1>Does your skill actually help?</h1>
-          <p class="lead">
-            Skillcheck runs a forced-injection A/B test: your runner model solves generated tasks
-            with and without the skill, grades blind, and returns an effect in percentage points
-            with a confidence interval. Sign in, get an API key, and check any skill from the CLI.
+        <div>
+          <span class="hero-pill reveal"><span class="dot" aria-hidden="true"></span> Open source. 10 free runs, no credit card.</span>
+          <h1 class="reveal" style="--d:60ms">Is your skill <span class="grad-text">actually helping</span> the model?</h1>
+          <p class="lead reveal" style="--d:120ms">
+            Thousands of SKILL.md files are published. Almost none are tested.
+            SkillCheck runs a blind A/B experiment on any agent skill and hands you
+            a verdict with a confidence interval, in about two minutes.
           </p>
-          <div class="cta-row">
-            <button class="btn btn-primary" data-action="signup">Get your API key</button>
-            <a class="btn btn-outline-ink" href="https://github.com/sx4im/skillcheck/blob/main/METHODOLOGY.md">View the methodology</a>
+          <div class="cta-row reveal" style="--d:180ms">
+            <button class="btn btn-primary" data-action="signup">Get your free API key</button>
+            <a class="btn btn-outline" href="https://github.com/sx4im/skillcheck" rel="noopener">Star on GitHub</a>
           </div>
-          <div style="margin-top:36px; max-width:620px">
-            <div class="code" id="installCode">npm install -g @sx4im/skillcheck
-skillcheck check ./SKILL.md<button class="copy" data-copy="installCode">Copy</button></div>
+          <p class="hero-note reveal" style="--d:240ms">
+            <strong>npx @sx4im/skillcheck</strong> to try it without installing anything.
+          </p>
+        </div>
+        <div class="reveal" style="--d:200ms">
+          <div class="terminal" id="terminal" aria-hidden="true">
+            <div class="terminal-bar">
+              <span class="tl"></span><span class="tl"></span><span class="tl"></span>
+              <span class="title">skillcheck</span>
+            </div>
+            <div class="terminal-body" id="terminalBody"></div>
           </div>
         </div>
       </div>
     </header>
 
-    <section class="band-cloud section" id="how">
+    <section class="stats" aria-label="SkillCheck by the numbers">
       <div class="wrap">
-        <div data-reveal>
-          <div class="eyebrow">How it works</div>
-          <h2>Three steps to a verdict</h2>
+        <div class="stat reveal"><div class="n" data-count="2">2</div><div class="l">arms per task: with and without the skill</div></div>
+        <div class="stat reveal" style="--d:80ms"><div class="n" data-count="1000">1,000</div><div class="l">bootstrap resamples behind every verdict</div></div>
+        <div class="stat reveal" style="--d:160ms"><div class="n">95%</div><div class="l">confidence interval on the measured effect</div></div>
+        <div class="stat reveal" style="--d:240ms"><div class="n" data-count="10">10</div><div class="l">free runs on every new account</div></div>
+      </div>
+    </section>
+
+    <section class="section" id="problem">
+      <div class="wrap">
+        <div class="section-head reveal">
+          <span class="eyebrow">The problem</span>
+          <h2>Skills ship on vibes</h2>
+          <p>
+            A skill file changes your agent's behavior on every single request.
+            Yet almost nobody measures whether that change is an improvement.
+          </p>
         </div>
-        <div class="grid grid-3" data-reveal-children style="margin-top:40px">
-          <div class="card">
-            <div class="num">1</div>
-            <h3>Sign in</h3>
-            <p>Continue with Google or GitHub. We create your account and issue a Skillcheck API key tied to it.</p>
+        <div class="grid grid-3" style="margin-top:48px">
+          <div class="card reveal">
+            <div class="icon" aria-hidden="true">?</div>
+            <h3>Untested by default</h3>
+            <p>Skills get written, committed, and shared without a single controlled comparison. "It feels better" is the entire QA process.</p>
           </div>
-          <div class="card">
-            <div class="num">2</div>
-            <h3>Get 10 free runs</h3>
-            <p>Your key includes 10 free <code>skillcheck check</code> runs. The model provider key stays on our server — never in your terminal.</p>
+          <div class="card reveal" style="--d:100ms">
+            <div class="icon" aria-hidden="true">$</div>
+            <h3>Placebo tax</h3>
+            <p>Every skill costs prompt tokens on every call. A skill that does nothing still bills you for the privilege, forever.</p>
           </div>
-          <div class="card">
-            <div class="num">3</div>
-            <h3>Run skillcheck</h3>
-            <p>Paste two commands, point the CLI at your key, and measure any SKILL.md, AGENTS.md, CLAUDE.md, or .cursorrules.</p>
+          <div class="card reveal" style="--d:200ms">
+            <div class="icon" aria-hidden="true">!</div>
+            <h3>Silent rot</h3>
+            <p>Models change underneath you. A skill that helped six months ago can quietly become useless, or start hurting, after an upgrade.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="how" style="background:var(--bg-raise); border-top:1px solid var(--hairline); border-bottom:1px solid var(--hairline)">
+      <div class="wrap">
+        <div class="section-head center reveal">
+          <span class="eyebrow">How it works</span>
+          <h2>A drug trial for your skill</h2>
+          <p>One command runs the whole experiment. No setup, no harness, no notebooks.</p>
+        </div>
+        <div class="pipeline">
+          <div class="step reveal">
+            <div class="pin" aria-hidden="true">1</div>
+            <h3>Normalize</h3>
+            <p>Your skill file is parsed and its declared domain extracted from front matter or the first heading.</p>
+          </div>
+          <div class="step reveal" style="--d:60ms">
+            <div class="pin" aria-hidden="true">2</div>
+            <h3>Generate tasks</h3>
+            <p>A generator model writes fresh evaluation tasks from the domain only. It never sees the skill body, so tasks cannot leak its instructions.</p>
+          </div>
+          <div class="step reveal" style="--d:120ms">
+            <div class="pin" aria-hidden="true">3</div>
+            <h3>Run both arms</h3>
+            <p>Every task runs with the skill injected as a system prompt, and again without it. Same model, same temperature, same everything else.</p>
+          </div>
+          <div class="step reveal" style="--d:180ms">
+            <div class="pin" aria-hidden="true">4</div>
+            <h3>Grade blind</h3>
+            <p>A separate grader scores each output against the task's pass criterion at temperature 0. It never knows which arm produced the output.</p>
+          </div>
+          <div class="step reveal" style="--d:240ms">
+            <div class="pin" aria-hidden="true">5</div>
+            <h3>Score the difference</h3>
+            <p>A 1,000 iteration paired bootstrap turns the pass rates into an effect size, a 95% confidence interval, and one verdict: <code>HELPS</code>, <code>PLACEBO</code>, or <code>HARMS</code>.</p>
           </div>
         </div>
       </div>
@@ -106,121 +267,160 @@ skillcheck check ./SKILL.md<button class="copy" data-copy="installCode">Copy</bu
 
     <section class="section" id="features">
       <div class="wrap">
-        <div data-reveal style="text-align:center">
-          <div class="eyebrow">What you get</div>
+        <div class="section-head center reveal">
+          <span class="eyebrow">What you get</span>
           <h2>Evidence, not anecdotes</h2>
-          <p class="muted" style="max-width:560px; margin:12px auto 0">Skillcheck produces numbers you can cite. Every run is reproducible, every score has a confidence interval, and every skill gets a verdict.</p>
+          <p>SkillCheck produces numbers you can put in a PR description. Every run is reproducible and every score carries its uncertainty.</p>
         </div>
-        <div class="grid grid-3" data-reveal-children style="margin-top:40px">
-          <div class="card">
+        <div class="grid grid-3" style="margin-top:48px">
+          <div class="card reveal">
             <h3>Forced-injection A/B</h3>
-            <p>We inject your skill as a system prompt and run the same tasks twice — with and without the skill. The delta is your effect in percentage points.</p>
+            <p>The same tasks run twice, with and without your skill. The delta in pass rate is the skill's measured effect in percentage points.</p>
           </div>
-          <div class="card">
+          <div class="card reveal" style="--d:60ms">
             <h3>Blind grading</h3>
-            <p>A separate grader model scores outputs without knowing which arm produced them. No self-evaluation bias, no cherry-picking.</p>
+            <p>Outputs are shuffled before grading, so the grader cannot favor either arm. No self-evaluation bias, no cherry-picking.</p>
           </div>
-          <div class="card">
-            <h3>Bootstrap CI</h3>
-            <p>We resample 1,000 times to build a 95% confidence interval. If it does not overlap zero, the skill <em>helps</em>.</p>
+          <div class="card reveal" style="--d:120ms">
+            <h3>Bootstrap confidence</h3>
+            <p>1,000 paired resamples build a 95% interval around the effect. The verdict only says HELPS when the interval clears zero.</p>
           </div>
-          <div class="card">
+          <div class="card reveal" style="--d:0ms">
             <h3>Rot detection</h3>
-            <p>Re-run the same skill on new model releases. If the verdict flips from <em>helps</em> to <em>placebo</em>, you know the skill rotted.</p>
+            <p>Re-run saved results against new model releases. If a verdict flips from HELPS to PLACEBO, you know the skill rotted before your users do.</p>
           </div>
-          <div class="card">
-            <h3>Reproducible</h3>
-            <p>Every result commits the skill hash, task suite, model version, and config. Anyone can re-run and verify the number.</p>
+          <div class="card reveal" style="--d:60ms">
+            <h3>Reproducible by design</h3>
+            <p>Every result records the skill hash, task suite, model versions, and transcript hashes. Anyone can re-run and verify the number.</p>
           </div>
-          <div class="card">
-            <h3>Token-aware</h3>
-            <p>We count the extra tokens the skill costs and compute value-per-1k-tokens. A big effect that burns context is not always a win.</p>
+          <div class="card reveal" style="--d:120ms">
+            <h3>Token aware</h3>
+            <p>SkillCheck counts the prompt tokens your skill adds and reports value per 1k tokens. A small win that triples your context is not a win.</p>
           </div>
+        </div>
+        <div class="chips reveal" aria-label="Supported skill formats">
+          <span class="chip">SKILL.md</span>
+          <span class="chip">AGENTS.md</span>
+          <span class="chip">CLAUDE.md</span>
+          <span class="chip">any *.md file</span>
+          <span class="chip">whole folders</span>
         </div>
       </div>
     </section>
 
-    <section class="band-cloud section" id="formats">
+    <section class="section" id="result" style="background:var(--bg-raise); border-top:1px solid var(--hairline); border-bottom:1px solid var(--hairline)">
       <div class="wrap">
-        <div data-reveal style="text-align:center">
-          <div class="eyebrow">Supported formats</div>
-          <h2>One command for every skill file</h2>
-          <p class="muted" style="max-width:560px; margin:12px auto 0">Drop any supported skill file and Skillcheck normalises it into a common shape for evaluation.</p>
+        <div class="section-head reveal">
+          <span class="eyebrow">The result</span>
+          <h2>One card. One answer.</h2>
+          <p>No dashboards to interpret. The CLI prints a single result card that says whether the skill earned its place in your prompt.</p>
         </div>
-        <div class="grid grid-3" data-reveal-children style="margin-top:40px">
-          <div class="card">
-            <div class="tag">SKILL.md</div>
-            <h3>SKILL.md</h3>
-            <p>The Anthropic skill-creator format. Extracts instructions, domain, and bundled assets into a normalised skill object.</p>
+        <div class="anatomy">
+          <div class="result-card reveal" role="img" aria-label="Example SkillCheck result card showing a HELPS verdict">
+            <div class="row"><span class="k">Skill</span><span class="v">api-documentation</span></div>
+            <div class="row"><span class="k">Run size</span><span class="v">5 tasks × 3 trials</span></div>
+            <div class="hr"></div>
+            <div class="row"><span class="k">Verdict</span><span><span class="badge-helps">HELPS</span></span></div>
+            <div class="row"><span class="k">With skill</span><span class="v">80.0% of tasks passed</span></div>
+            <div class="row"><span class="k">Without skill</span><span class="v">55.0% of tasks passed</span></div>
+            <div class="row"><span class="k">Skill effect</span><span class="v">+25.0 pp <span class="dim">change in pass rate</span></span></div>
+            <div class="row"><span class="k">Confidence</span><span class="v">+8.0 pp to +42.0 pp <span class="dim">(95%)</span></span></div>
+            <div class="row"><span class="k">Token cost</span><span class="v">+480 <span class="dim">tokens per call</span></span></div>
+            <div class="hr"></div>
+            <div class="row"><span class="k">Satisfaction</span><span class="v t-ok">75.0/100 GOOD</span></div>
           </div>
-          <div class="card">
-            <div class="tag">AGENTS.md</div>
-            <h3>AGENTS.md</h3>
-            <p>The multi-agent format with role definitions and routing rules. Each role is evaluated independently.</p>
-          </div>
-          <div class="card">
-            <div class="tag">CLAUDE.md</div>
-            <h3>CLAUDE.md</h3>
-            <p>The Claude-specific project context format. Injected as system context during the runner phase.</p>
-          </div>
-          <div class="card">
-            <div class="tag">.cursorrules</div>
-            <h3>.cursorrules</h3>
-            <p>Cursor IDE rules files. Parsed as instruction sets and evaluated for code-generation and reasoning tasks.</p>
-          </div>
-          <div class="card">
-            <div class="tag">URL</div>
-            <h3>Remote URL</h3>
-            <p>Point the CLI at a raw GitHub URL or gist. Skillcheck fetches, normalises, and evaluates without a local clone.</p>
-          </div>
-          <div class="card">
-            <div class="tag">FOLDER</div>
-            <h3>Directory scan</h3>
-            <p>Pass a folder path and Skillcheck discovers all supported skill files inside, evaluating each one.</p>
-          </div>
+          <ul class="legend">
+            <li class="reveal"><span class="t">Verdict</span><span class="d">HELPS, PLACEBO, or HARMS, decided by whether the 95% interval clears zero. No interval, no claim.</span></li>
+            <li class="reveal" style="--d:60ms"><span class="t">Skill effect</span><span class="d">The change in pass rate, in percentage points. This is the number to quote in your PR.</span></li>
+            <li class="reveal" style="--d:120ms"><span class="t">Token cost</span><span class="d">What the skill adds to every prompt. Weigh it against the effect before shipping.</span></li>
+            <li class="reveal" style="--d:180ms"><span class="t">Satisfaction</span><span class="d">A 0 to 100 quality score where 50 means no effect. Quick to read, backed by the bootstrap.</span></li>
+          </ul>
         </div>
       </div>
     </section>
 
     <section class="section" id="pricing">
       <div class="wrap" style="text-align:center">
-        <div data-reveal>
-          <div class="eyebrow">Pricing</div>
+        <div class="section-head center reveal">
+          <span class="eyebrow">Pricing</span>
           <h2>Start free. Upgrade when it pays off.</h2>
+          <p>Ten runs is enough to test a real skill at two effort levels. Go unlimited when SkillCheck earns a place in your workflow.</p>
         </div>
-        <div class="tiers" data-reveal style="margin-top:40px; text-align:left">
-          <div class="tier">
+        <div class="tiers">
+          <div class="tier reveal">
             <div class="name">Free</div>
             <div class="price">$0</div>
             <ul>
-              <li>10 Skillcheck runs included</li>
+              <li>10 SkillCheck runs included</li>
               <li>Full CLI: check, eval, verify</li>
-              <li>Blind grading + bootstrap CI</li>
-              <li>Community support</li>
+              <li>Blind grading and bootstrap CI</li>
+              <li>No credit card required</li>
             </ul>
             <button class="btn btn-outline" data-action="signup" style="width:100%">Get started</button>
           </div>
-          <div class="tier tier-featured">
+          <div class="tier tier-featured reveal" style="--d:100ms">
             <div class="name">Pro</div>
-            <div class="price">$19 <small>/ one-time</small></div>
+            <div class="price">$19 <small>one-time</small></div>
             <ul>
               <li>Everything in Free</li>
-              <li>Unlimited Skillcheck runs</li>
-              <li>Corpus &amp; rot reporting</li>
+              <li>Unlimited SkillCheck runs</li>
+              <li>Corpus and rot reporting</li>
               <li>Priority model capacity</li>
             </ul>
             <button class="btn btn-primary" data-action="signup" style="width:100%">Upgrade after sign-in</button>
           </div>
         </div>
-        <p class="fine" style="margin-top:20px">Price shown is an example — set your own in Stripe. Upgrade lives in your dashboard after sign-in.</p>
+        <p class="fine" style="margin-top:22px">Upgrade lives in your dashboard once you are signed in.</p>
       </div>
     </section>
 
-    <section class="band-ink section">
-      <div class="wrap" style="text-align:center" data-reveal>
-        <h2>Ready to measure your skills?</h2>
-        <p class="lead" style="color:#c9d3ea; margin:16px auto 28px">Sign in with Google or GitHub and get your API key in seconds.</p>
-        <button class="btn btn-primary" data-action="signup">Get your API key</button>
+    <section class="section" id="faq" style="background:var(--bg-raise); border-top:1px solid var(--hairline); border-bottom:1px solid var(--hairline)">
+      <div class="wrap">
+        <div class="section-head center reveal">
+          <span class="eyebrow">FAQ</span>
+          <h2>Questions, answered</h2>
+        </div>
+        <div class="faq reveal">
+          <details>
+            <summary>What is SkillCheck?</summary>
+            <div class="a">SkillCheck is an open source CLI and cloud service that measures whether an agent skill file actually improves a model's task performance. It runs a controlled A/B experiment instead of relying on intuition: the same tasks are solved with and without your skill, graded blind, and scored with a bootstrap confidence interval.</div>
+          </details>
+          <details>
+            <summary>How does SkillCheck test a skill?</summary>
+            <div class="a">SkillCheck reads your skill's declared domain and generates fresh evaluation tasks from the domain only, so tasks can never leak the skill's instructions. Each task runs in two arms, with and without the skill injected as a system prompt. A separate grader model scores every output blind, then a 1,000 iteration paired bootstrap produces the effect size, a 95% confidence interval, and one verdict: HELPS, PLACEBO, or HARMS.</div>
+          </details>
+          <details>
+            <summary>Which skill files can I check?</summary>
+            <div class="a">Any Markdown skill file: SKILL.md, AGENTS.md, CLAUDE.md, or any other .md file. You can also point SkillCheck at a folder that contains one and pick the file interactively.</div>
+          </details>
+          <details>
+            <summary>Do I need my own model API key?</summary>
+            <div class="a">No. Sign in with Google or GitHub and SkillCheck Cloud issues you a free API key with 10 runs included. The model provider key stays on the server and never reaches your terminal. Power users can set <code>NVIDIA_API_KEY</code> to run fully direct instead.</div>
+          </details>
+          <details>
+            <summary>What does a PLACEBO verdict mean?</summary>
+            <div class="a">PLACEBO means the 95% confidence interval for the skill's effect overlaps zero: no measurable difference between running with and without the skill. It does not always mean the skill is bad, but it does mean you are paying tokens for an effect you cannot demonstrate.</div>
+          </details>
+          <details>
+            <summary>Is SkillCheck open source?</summary>
+            <div class="a">Yes. The CLI, the evaluation methodology, and this dashboard are MIT licensed and developed in the open at <a href="https://github.com/sx4im/skillcheck" rel="noopener">github.com/sx4im/skillcheck</a>.</div>
+          </details>
+        </div>
+      </div>
+    </section>
+
+    <section class="section cta-band">
+      <div class="glow" aria-hidden="true"></div>
+      <div class="wrap reveal">
+        <h2>Stop shipping <span class="grad-text">placebo</span> skills</h2>
+        <p>Sign in with Google or GitHub, grab your key, and get your first verdict in about two minutes.</p>
+        <div class="cta-row" style="justify-content:center">
+          <button class="btn btn-primary" data-action="signup">Get your free API key</button>
+        </div>
+        <div style="margin-top:34px; max-width:560px; margin-left:auto; margin-right:auto; text-align:left">
+          <div class="code" id="installCode">npm install -g @sx4im/skillcheck
+skillcheck check ./SKILL.md<button class="copy" data-copy="installCode" aria-label="Copy install commands">Copy</button></div>
+        </div>
       </div>
     </section>
 
@@ -228,21 +428,26 @@ skillcheck check ./SKILL.md<button class="copy" data-copy="installCode">Copy</bu
       <div class="wrap">
         <div class="cols">
           <div>
-            <a class="brand" href="/" style="color:#fff">
+            <a class="brand" href="/" aria-label="SkillCheck home">
               <span class="mark" aria-hidden="true">
-                <svg width="26" height="18" viewBox="0 0 26 18" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M4 0H12L8 18H0L4 0Z" fill="#024ad8" />
-                  <path d="M16 0H24L20 18H12L16 0Z" fill="#296ef9" />
+                <svg width="24" height="18" viewBox="0 0 52 38" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <defs>
+                    <linearGradient id="gft-a" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#22d3ee"/><stop offset="1" stop-color="#3b82f6"/></linearGradient>
+                    <linearGradient id="gft-b" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#3b82f6"/><stop offset="1" stop-color="#6366f1"/></linearGradient>
+                  </defs>
+                  <path d="M9 0h13l-9 38H0L9 0Z" fill="url(#gft-a)"/>
+                  <path d="M27 0h13l-9 38H18L27 0Z" fill="url(#gft-b)"/>
                 </svg>
               </span>
-              Skillcheck
+              SkillCheck
             </a>
-            <p style="color:#aab3c9; margin-top:12px; max-width:280px">Measure whether an agent skill actually improves task performance.</p>
+            <p class="footer-tagline">A/B testing for agent skills. Know whether your SKILL.md helps, hurts, or does nothing.</p>
           </div>
           <div>
             <h4>Product</h4>
             <div class="stack">
               <a href="#how">How it works</a>
+              <a href="#result">The result</a>
               <a href="#pricing">Pricing</a>
               <button class="btn-text footer-link" data-action="signin">Sign in</button>
             </div>
@@ -250,13 +455,24 @@ skillcheck check ./SKILL.md<button class="copy" data-copy="installCode">Copy</bu
           <div>
             <h4>Resources</h4>
             <div class="stack">
-              <a href="https://github.com/sx4im/skillcheck">GitHub</a>
-              <a href="https://github.com/sx4im/skillcheck/blob/main/METHODOLOGY.md">Methodology</a>
-              <a href="https://www.npmjs.com/package/@sx4im/skillcheck">npm</a>
+              <a href="https://github.com/sx4im/skillcheck" rel="noopener">GitHub</a>
+              <a href="https://github.com/sx4im/skillcheck/blob/main/METHODOLOGY.md" rel="noopener">Methodology</a>
+              <a href="https://www.npmjs.com/package/@sx4im/skillcheck" rel="noopener">npm package</a>
+            </div>
+          </div>
+          <div>
+            <h4>Get started</h4>
+            <div class="stack">
+              <button class="btn-text footer-link" data-action="signup">Create free account</button>
+              <a href="/app.html">Dashboard</a>
+              <a href="#faq">FAQ</a>
             </div>
           </div>
         </div>
-        <div class="legal">© <span id="year"></span> Skillcheck. Built on the @sx4im/skillcheck CLI.</div>
+        <div class="legal">
+          <span>© <span id="year"></span> SkillCheck. MIT licensed.</span>
+          <span>Built on the <a href="https://www.npmjs.com/package/@sx4im/skillcheck" rel="noopener">@sx4im/skillcheck</a> CLI.</span>
+        </div>
       </div>
     </footer>
 

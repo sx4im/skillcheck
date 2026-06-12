@@ -9,10 +9,12 @@ export interface SkillcheckUserConfig {
 
 // Skillcheck Cloud's hosted endpoints. The CLI ships with these baked in so a
 // user only ever needs to paste their API key — never a URL. Both are
-// overridable via env for self-hosted deployments.
-export const DEFAULT_CLOUD_API_URL = 'https://dashboard-skillcheck.vercel.app/api';
-export const DEFAULT_CLOUD_WEB_URL = 'https://dashboard-skillcheck.vercel.app/app.html';
-export const DEFAULT_CLOUD_PRICING_URL = 'https://dashboard-skillcheck.vercel.app/#pricing';
+// overridable via env for self-hosted deployments. The previous
+// dashboard-skillcheck.vercel.app domain permanently redirects here, so older
+// CLI releases and saved configs keep working.
+export const DEFAULT_CLOUD_API_URL = 'https://skillcheck.page/api';
+export const DEFAULT_CLOUD_WEB_URL = 'https://skillcheck.page/app.html';
+export const DEFAULT_CLOUD_PRICING_URL = 'https://skillcheck.page/#pricing';
 
 export function cloudApiUrl(): string {
   return getConfiguredApiUrl() ?? DEFAULT_CLOUD_API_URL;
