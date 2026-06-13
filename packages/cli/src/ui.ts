@@ -592,22 +592,28 @@ interface EffortLevel {
 }
 
 // Calls per run = 1 generator + (tasks × trials × 2 arms) runner + the same many
-// grader calls. gpt-oss-120b averages ~1–2s/call (grader ~1s, runner ~2s); add the
-// inter-request delay and occasional retry → ~3s/call is a safe estimate.
-const SECONDS_PER_CALL = 3;
+// grader calls, all issued sequentially with a ~750ms inter-request delay (see
+// env.ts). Wall-clock time is therefore a roughly fixed overhead (startup, skill
+// normalize, task generation, scoring + render) plus a per-call cost that
+// dominates as the run grows. These two constants are calibrated to observed
+// end-to-end runs on the hosted gpt-oss-120b (the default model) — a good deal
+// slower than a raw single call — and reproduce the measured times:
+// Quick ~2 min, Standard ~4 min, Thorough ~6–7 min.
+const BASE_SECONDS = 120;
+const SECONDS_PER_CALL = 4.8;
 
 function callsFor(tasks: number, trials: number): number {
   return 1 + tasks * trials * 4;
 }
 
 function estimateLabel(tasks: number, trials: number): string {
-  const seconds = callsFor(tasks, trials) * SECONDS_PER_CALL;
+  const seconds = BASE_SECONDS + callsFor(tasks, trials) * SECONDS_PER_CALL;
   if (seconds < 60) {
     return `~${Math.max(15, Math.round(seconds / 10) * 10)} sec`;
   }
   const minutes = seconds / 60;
   const low = Math.max(1, Math.floor(minutes));
-  const high = Math.ceil(minutes + 0.5);
+  const high = Math.max(low, Math.ceil(minutes));
   return low === high ? `~${low} min` : `~${low}–${high} min`;
 }
 
