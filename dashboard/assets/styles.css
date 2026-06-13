@@ -532,6 +532,10 @@ input:focus, textarea:focus { outline: none; border-color: var(--ink); }
 
 /* ---------- Responsive ---------- */
 @media (max-width: 980px) {
+  /* Below this the hero stacks to one column; the nav links (brand + 6 links +
+     2 buttons) also stop fitting on one 64px row and wrap/clip off-screen, so
+     collapse them here. They remain reachable in the footer. */
+  .nav .links { display: none; }
   .hero .wrap { grid-template-columns: 1fr; gap: 48px; }
   .hero h1 { font-size: 46px; }
   .anatomy { grid-template-columns: minmax(0, 1fr); gap: 40px; }
@@ -548,7 +552,6 @@ input:focus, textarea:focus { outline: none; border-color: var(--ink); }
   .cta-band h2 { font-size: 30px; }
   .section { padding: 64px 0; }
   .hero { padding: 56px 0 72px; }
-  .nav .links { display: none; }
   .nav .wrap { gap: 12px; }
   .nav .right { gap: 10px; }
   .nav .btn-text { white-space: nowrap; font-size: 11.5px; letter-spacing: 1.2px; }
