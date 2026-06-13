@@ -78,6 +78,16 @@ code {
 #bg { position: fixed; inset: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none; }
 body > :not(#bg):not(.nav) { position: relative; z-index: 1; }
 
+/* Dashboard (app.html): the dark ribbon render in assets/bg2.jpg sits fixed
+   behind the content, under a dark overlay that keeps the API-key card and
+   copy legible. No floating doodles here — this page stays focused. */
+.app-bg {
+  background:
+    linear-gradient(180deg, rgba(0,0,0,0.62) 0%, rgba(0,0,0,0.78) 60%, rgba(0,0,0,0.9) 100%),
+    url('/assets/bg2.jpg') center / cover no-repeat fixed,
+    var(--canvas);
+}
+
 .wrap { max-width: var(--max); margin: 0 auto; padding: 0 24px; }
 .section { padding: 96px 0; position: relative; }
 .muted { color: var(--muted); }
@@ -175,20 +185,23 @@ html.js .reveal.in {
    headline readable and fades the band into the page below. */
 .hero { padding: 96px 0 104px; position: relative; overflow: hidden; isolation: isolate; }
 .hero::before {
-  content: ''; position: absolute; inset: -6%; z-index: 0;
+  content: ''; position: absolute; inset: -3%; z-index: 0;
   background: url('/assets/bg.jpg') center / cover no-repeat;
-  animation: heroPan 26s ease-in-out infinite alternate;
+  animation: heroPan 28s ease-in-out infinite alternate;
   will-change: transform;
 }
+/* Light overlay: the render reads clearly across most of the hero, with just
+   enough darkening on the left to keep the headline and lead crisp, and a
+   fade to black at the bottom that blends into the next section. */
 .hero::after {
   content: ''; position: absolute; inset: 0; z-index: 1;
   background:
-    linear-gradient(90deg, rgba(0,0,0,0.94) 0%, rgba(0,0,0,0.74) 42%, rgba(0,0,0,0.5) 72%, rgba(0,0,0,0.66) 100%),
-    linear-gradient(180deg, rgba(0,0,0,0.35) 0%, rgba(0,0,0,0) 28%, rgba(0,0,0,0) 62%, rgba(0,0,0,0.96) 100%);
+    linear-gradient(90deg, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.82) 34%, rgba(0,0,0,0.5) 50%, rgba(0,0,0,0.12) 72%, rgba(0,0,0,0.28) 100%),
+    linear-gradient(180deg, rgba(0,0,0,0.12) 0%, rgba(0,0,0,0) 26%, rgba(0,0,0,0) 60%, rgba(0,0,0,0.92) 100%);
 }
 @keyframes heroPan {
-  from { transform: scale(1.02) translate3d(0, 0, 0); }
-  to { transform: scale(1.11) translate3d(-1.6%, -1.2%, 0); }
+  from { transform: scale(1) translate3d(0, 0, 0); }
+  to { transform: scale(1.06) translate3d(-1.2%, -1%, 0); }
 }
 @media (prefers-reduced-motion: reduce) {
   .hero::before { animation: none; }
