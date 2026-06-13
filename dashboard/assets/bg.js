@@ -1,9 +1,12 @@
 // Ambient line-art background for the landing sections below the hero: white
-// icon glyphs drawn as clean vector strokes (checks, diamonds, chevrons,
-// brackets, arrows…) floating upward, woven through a few smooth zigzag lines
+// icon glyphs drawn as clean vector strokes — checks, diamonds, chevrons,
+// brackets, arrows, code tags </>, terminal prompts >_, smiley/frowny faces,
+// hearts and stars — floating upward, woven through a few smooth zigzag lines
 // that undulate across the page. Everything is monochrome white at low alpha
 // so headlines and cards stay readable; brand color stays in the content.
-// The hero has its own image background that covers this layer.
+// (Deliberately line-art, not full-color emoji, so the layer never competes
+// with the copy on top of it.) The hero has its own image background that
+// covers this layer.
 //
 // Self initializing: creates a fixed full-screen <canvas> (#bg). Honors
 // prefers-reduced-motion (one static frame), pauses while the tab is hidden,
@@ -78,7 +81,71 @@ function iDot(ctx, s) {
   ctx.moveTo(0.18 * s, 0);
   ctx.arc(0, 0, 0.18 * s, 0, TWO_PI);
 }
-const ICONS = [iCheck, iCheck, iDiamond, iCircle, iPlus, iTriangle, iChevron, iHex, iArrow, iBracket, iDot];
+// Code tag </> — the developer's favorite doodle.
+function iCode(ctx, s) {
+  ctx.moveTo(-0.2 * s, -0.32 * s);
+  ctx.lineTo(-0.46 * s, 0);
+  ctx.lineTo(-0.2 * s, 0.32 * s);
+  ctx.moveTo(0.12 * s, -0.4 * s);
+  ctx.lineTo(-0.12 * s, 0.4 * s);
+  ctx.moveTo(0.2 * s, -0.32 * s);
+  ctx.lineTo(0.46 * s, 0);
+  ctx.lineTo(0.2 * s, 0.32 * s);
+}
+// Terminal prompt >_
+function iTerminal(ctx, s) {
+  ctx.moveTo(-0.46 * s, -0.3 * s);
+  ctx.lineTo(-0.12 * s, 0);
+  ctx.lineTo(-0.46 * s, 0.3 * s);
+  ctx.moveTo(0.04 * s, 0.34 * s);
+  ctx.lineTo(0.44 * s, 0.34 * s);
+}
+// Face helpers: a dot eye and an arc mouth. Each starts with a moveTo so the
+// subpath doesn't connect a stray line to the previous one in the same stroke.
+function eye(ctx, x, y, r) {
+  ctx.moveTo(x + r, y);
+  ctx.arc(x, y, r, 0, TWO_PI);
+}
+function mouth(ctx, cx, cy, r, start, end) {
+  ctx.moveTo(cx + Math.cos(start) * r, cy + Math.sin(start) * r);
+  ctx.arc(cx, cy, r, start, end);
+}
+// A round face with a smile :)
+function iSmile(ctx, s) {
+  ctx.moveTo(0.5 * s, 0);
+  ctx.arc(0, 0, 0.5 * s, 0, TWO_PI);
+  eye(ctx, -0.17 * s, -0.13 * s, 0.06 * s);
+  eye(ctx, 0.17 * s, -0.13 * s, 0.06 * s);
+  mouth(ctx, 0, 0.05 * s, 0.26 * s, 0.18 * Math.PI, 0.82 * Math.PI);
+}
+// ...and one with a frown :(
+function iFrown(ctx, s) {
+  ctx.moveTo(0.5 * s, 0);
+  ctx.arc(0, 0, 0.5 * s, 0, TWO_PI);
+  eye(ctx, -0.17 * s, -0.13 * s, 0.06 * s);
+  eye(ctx, 0.17 * s, -0.13 * s, 0.06 * s);
+  mouth(ctx, 0, 0.42 * s, 0.26 * s, 1.18 * Math.PI, 1.82 * Math.PI);
+}
+function iHeart(ctx, s) {
+  ctx.moveTo(0, 0.36 * s);
+  ctx.bezierCurveTo(-0.62 * s, -0.08 * s, -0.32 * s, -0.52 * s, 0, -0.16 * s);
+  ctx.bezierCurveTo(0.32 * s, -0.52 * s, 0.62 * s, -0.08 * s, 0, 0.36 * s);
+}
+function iStar(ctx, s) {
+  for (let i = 0; i < 10; i += 1) {
+    const r = i % 2 === 0 ? 0.56 * s : 0.24 * s;
+    const a = (Math.PI / 5) * i - Math.PI / 2;
+    const x = Math.cos(a) * r;
+    const y = Math.sin(a) * r;
+    if (i === 0) ctx.moveTo(x, y);
+    else ctx.lineTo(x, y);
+  }
+  ctx.closePath();
+}
+const ICONS = [
+  iCheck, iCheck, iDiamond, iCircle, iPlus, iTriangle, iChevron, iHex, iArrow, iBracket, iDot,
+  iCode, iCode, iTerminal, iSmile, iFrown, iHeart, iStar
+];
 
 export function initBackground() {
   const canvas = document.createElement('canvas');

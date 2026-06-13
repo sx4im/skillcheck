@@ -66,20 +66,79 @@ export async function getClerk() {
 
 const appUrl = () => `${location.origin}/app.html`;
 
-// Clerk UI styled to the SkillCheck system: dark surfaces, zero border
-// radius, Inter. Applied to clerk.load() and to every opened component so
-// no Clerk surface ships with rounded consumer-tech corners.
+// Clerk UI styled to the SkillCheck system: dark surfaces, zero border radius,
+// Inter. Applied to clerk.load() and to every opened component. The site is
+// dark-only, so the goal is HIGH CONTRAST on black — Clerk's defaults render
+// input borders and the social-button labels/icons nearly invisible on a dark
+// surface (black-on-black), so we set them explicitly.
+//   - colorNeutral white lifts every border/divider Clerk derives from it.
+//   - `elements` pins the field borders, social buttons, and the GitHub mark
+//     (inverted to white) so users can always see where to type and click.
 const CLERK_APPEARANCE = {
   variables: {
     colorPrimary: '#1c69d4',
     colorBackground: '#1a1a1a',
     colorText: '#ffffff',
-    colorTextSecondary: '#bbbbbb',
+    colorTextSecondary: '#c2c2c2',
     colorInputBackground: '#0d0d0d',
     colorInputText: '#ffffff',
+    colorNeutral: '#ffffff',
     colorDanger: '#e22718',
+    colorSuccess: '#0fa336',
     borderRadius: '0px',
     fontFamily: "'Inter', -apple-system, sans-serif"
+  },
+  elements: {
+    card: { backgroundColor: '#1a1a1a', border: '1px solid #3c3c3c', boxShadow: 'none' },
+    headerTitle: { color: '#ffffff' },
+    headerSubtitle: { color: '#bbbbbb' },
+
+    // Social sign-in: white label + a clearly visible border. The GitHub mark
+    // ships as a dark monochrome glyph (invisible on black), so invert just
+    // that provider's icon to white — Google's multicolor logo is left alone.
+    socialButtonsBlockButton: {
+      backgroundColor: '#0d0d0d',
+      border: '1px solid #5a5a5a',
+      color: '#ffffff',
+      '&:hover': { backgroundColor: '#1f1f1f', borderColor: '#ffffff' }
+    },
+    socialButtonsBlockButtonText: { color: '#ffffff', fontWeight: '600' },
+    socialButtonsProviderIcon__github: { filter: 'invert(1) brightness(2)' },
+
+    dividerLine: { backgroundColor: '#3c3c3c' },
+    dividerText: { color: '#7e7e7e' },
+
+    // The fix the screenshot needs most: input borders you can actually see,
+    // a white text colour, and a bright focus ring matching the site.
+    formFieldLabel: { color: '#ffffff', fontWeight: '600' },
+    formFieldInput: {
+      backgroundColor: '#0d0d0d',
+      border: '1px solid #5a5a5a',
+      color: '#ffffff',
+      '&:focus': { borderColor: '#ffffff', boxShadow: '0 0 0 1px #ffffff' },
+      '&:hover': { borderColor: '#7e7e7e' },
+      '&::placeholder': { color: '#7e7e7e' }
+    },
+    formFieldInputShowPasswordButton: { color: '#bbbbbb', '&:hover': { color: '#ffffff' } },
+    otpCodeFieldInput: { color: '#ffffff', border: '1px solid #5a5a5a' },
+
+    formButtonPrimary: {
+      backgroundColor: '#1c69d4',
+      color: '#ffffff',
+      fontWeight: '700',
+      textTransform: 'none',
+      border: '1px solid #1c69d4',
+      '&:hover': { backgroundColor: '#1857b0', borderColor: '#1857b0' }
+    },
+
+    footerActionText: { color: '#bbbbbb' },
+    footerActionLink: { color: '#ffffff', '&:hover': { color: '#22d3ee' } },
+    identityPreviewText: { color: '#ffffff' },
+    identityPreviewEditButton: { color: '#22d3ee' },
+    formFieldAction: { color: '#22d3ee' },
+    formResendCodeLink: { color: '#22d3ee' },
+    formFieldSuccessText: { color: '#0fa336' },
+    formFieldErrorText: { color: '#ff6b5e' }
   }
 };
 
