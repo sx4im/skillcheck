@@ -75,8 +75,8 @@ code {
    is lifted one layer up. The sticky nav is excluded so it keeps its own
    positioning. Band backgrounds are slightly translucent so the doodles stay
    visible across the whole page while cards remain solid and readable. */
-#bg, #bg3d { position: fixed; inset: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none; }
-body > :not(#bg):not(#bg3d):not(.nav) { position: relative; z-index: 1; }
+#bg { position: fixed; inset: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none; }
+body > :not(#bg):not(.nav) { position: relative; z-index: 1; }
 
 .wrap { max-width: var(--max); margin: 0 auto; padding: 0 24px; }
 .section { padding: 96px 0; position: relative; }
@@ -170,8 +170,30 @@ html.js .reveal.in {
 .btn-text:hover { color: var(--ink); }
 
 /* ---------- Hero ---------- */
-.hero { padding: 96px 0 104px; }
-.hero .wrap { display: grid; grid-template-columns: 1.02fr 0.98fr; gap: 64px; align-items: center; }
+/* Hero is the only section with a photographic background: the brand render
+   in assets/bg.jpg, slowly panning, under a dark gradient that keeps the
+   headline readable and fades the band into the page below. */
+.hero { padding: 96px 0 104px; position: relative; overflow: hidden; isolation: isolate; }
+.hero::before {
+  content: ''; position: absolute; inset: -6%; z-index: 0;
+  background: url('/assets/bg.jpg') center / cover no-repeat;
+  animation: heroPan 26s ease-in-out infinite alternate;
+  will-change: transform;
+}
+.hero::after {
+  content: ''; position: absolute; inset: 0; z-index: 1;
+  background:
+    linear-gradient(90deg, rgba(0,0,0,0.94) 0%, rgba(0,0,0,0.74) 42%, rgba(0,0,0,0.5) 72%, rgba(0,0,0,0.66) 100%),
+    linear-gradient(180deg, rgba(0,0,0,0.35) 0%, rgba(0,0,0,0) 28%, rgba(0,0,0,0) 62%, rgba(0,0,0,0.96) 100%);
+}
+@keyframes heroPan {
+  from { transform: scale(1.02) translate3d(0, 0, 0); }
+  to { transform: scale(1.11) translate3d(-1.6%, -1.2%, 0); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .hero::before { animation: none; }
+}
+.hero .wrap { display: grid; grid-template-columns: 1.02fr 0.98fr; gap: 64px; align-items: center; position: relative; z-index: 2; }
 .hero-pill {
   display: inline-flex; align-items: center; gap: 10px;
   border: 1px solid var(--hairline); padding: 8px 16px;
@@ -200,7 +222,10 @@ html.js .reveal.in {
   padding: 11px 14px; border-bottom: 1px solid var(--hairline-strong);
   background: var(--surface-card);
 }
-.terminal-bar .tl { width: 10px; height: 10px; border-radius: 9999px; background: var(--surface-elevated); }
+.terminal-bar .tl { width: 11px; height: 11px; border-radius: 9999px; background: var(--surface-elevated); }
+.terminal-bar .tl:nth-child(1) { background: #ff5f56; }
+.terminal-bar .tl:nth-child(2) { background: #ffbd2e; }
+.terminal-bar .tl:nth-child(3) { background: #27c93f; }
 .terminal-bar .title { margin-left: 8px; color: var(--muted); font-size: 11px; letter-spacing: 1px; text-transform: uppercase; }
 .terminal-body { padding: 18px 18px 20px; min-height: 332px; }
 .terminal-body .t-line { white-space: pre-wrap; word-break: break-word; min-height: 1.75em; }
