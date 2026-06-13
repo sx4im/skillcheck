@@ -74,6 +74,9 @@ const appUrl = () => `${location.origin}/app.html`;
 //   - colorNeutral white lifts every border/divider Clerk derives from it.
 //   - `elements` pins the field borders, social buttons, and the GitHub mark
 //     (inverted to white) so users can always see where to type and click.
+//   - `layout` keeps the form short — social logins as a row of icon buttons
+//     instead of stacked full-width blocks, and the optional First/Last name
+//     fields hidden — so it fits a phone screen without scrolling.
 const CLERK_APPEARANCE = {
   variables: {
     colorPrimary: '#1c69d4',
@@ -86,16 +89,33 @@ const CLERK_APPEARANCE = {
     colorDanger: '#e22718',
     colorSuccess: '#0fa336',
     borderRadius: '0px',
-    fontFamily: "'Inter', -apple-system, sans-serif"
+    fontFamily: "'Inter', -apple-system, sans-serif",
+    // Tighten the vertical rhythm so the whole form fits without scrolling.
+    spacingUnit: '0.8rem'
+  },
+  // Compact the form for mobile: social logins become a single row of icon
+  // buttons (not two stacked full-width blocks), and the optional name fields
+  // are hidden — so sign-up is just the icon row + email + password + button.
+  // Email/password still work; first/last name aren't required to sign up.
+  layout: {
+    socialButtonsVariant: 'iconButton',
+    socialButtonsPlacement: 'top',
+    showOptionalFields: false
   },
   elements: {
     card: { backgroundColor: '#1a1a1a', border: '1px solid #3c3c3c', boxShadow: 'none' },
     headerTitle: { color: '#ffffff' },
     headerSubtitle: { color: '#bbbbbb' },
 
-    // Social sign-in: white label + a clearly visible border. The GitHub mark
-    // ships as a dark monochrome glyph (invisible on black), so invert just
-    // that provider's icon to white — Google's multicolor logo is left alone.
+    // Social sign-in. We use the compact icon-button variant (see layout), so
+    // style that; the block-button styles are kept as a fallback. The GitHub
+    // mark ships as a dark monochrome glyph (invisible on black), so invert
+    // just that provider's icon to white — Google's multicolor logo is left alone.
+    socialButtonsIconButton: {
+      backgroundColor: '#0d0d0d',
+      border: '1px solid #5a5a5a',
+      '&:hover': { backgroundColor: '#1f1f1f', borderColor: '#ffffff' }
+    },
     socialButtonsBlockButton: {
       backgroundColor: '#0d0d0d',
       border: '1px solid #5a5a5a',
