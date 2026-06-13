@@ -27,7 +27,7 @@
   --warning: #f4b400;
   --error: #e22718;
 
-  --max: 1120px;
+  --max: 1280px;
   --font: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   --mono: ui-monospace, 'SFMono-Regular', Menlo, Consolas, 'Liberation Mono', monospace;
 
@@ -214,7 +214,7 @@ html.js .reveal.in {
 @media (prefers-reduced-motion: reduce) {
   .hero::before { animation: none; }
 }
-.hero .wrap { display: grid; grid-template-columns: 1.02fr 0.98fr; gap: 64px; align-items: center; position: relative; z-index: 2; }
+.hero .wrap { display: grid; grid-template-columns: 1.05fr 0.95fr; gap: 72px; align-items: center; position: relative; z-index: 2; }
 .hero-pill {
   display: inline-flex; align-items: center; gap: 10px;
   border: 1px solid var(--hairline); padding: 8px 16px;
@@ -222,8 +222,8 @@ html.js .reveal.in {
   color: var(--body-strong); margin-bottom: 28px;
 }
 .hero-pill .dot { width: 7px; height: 7px; background: var(--success); }
-.hero h1 { font-size: 60px; max-width: 560px; }
-.hero p.lead { font-size: 18px; font-weight: 300; line-height: 1.55; color: var(--body); max-width: 500px; margin-top: 24px; }
+.hero h1 { font-size: 64px; max-width: 620px; }
+.hero p.lead { font-size: 18px; font-weight: 300; line-height: 1.55; color: var(--body); max-width: 540px; margin-top: 24px; }
 .cta-row { display: flex; gap: 16px; margin-top: 40px; flex-wrap: wrap; align-items: center; }
 .hero-note { margin-top: 22px; font-size: 13px; color: var(--muted); letter-spacing: 0.5px; }
 .hero-note strong { color: var(--body-strong); font-weight: 600; }
