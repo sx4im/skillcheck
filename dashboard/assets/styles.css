@@ -409,6 +409,32 @@ html.js .reveal.in {
   border-bottom: 1px solid var(--hairline-strong);
 }
 
+/* ---------- Photographic section backgrounds ---------- */
+/* #how, #result and #faq drop the flat .band tint for an abstract brand
+   render. The id selectors override .band's background; the dark overlay is
+   strongest at the top/bottom so each image blends into the plain-black
+   sections around it, and stays dark enough mid-section that the step text,
+   legend, and FAQ headings keep full contrast. (.band's hairline borders are
+   not part of the shorthand, so they remain.) */
+#how {
+  background:
+    linear-gradient(180deg, rgba(0, 0, 0, 0.85) 0%, rgba(0, 0, 0, 0.62) 45%, rgba(0, 0, 0, 0.86) 100%),
+    url('/assets/howitworks.jpg') center / cover no-repeat,
+    var(--canvas);
+}
+#result {
+  background:
+    linear-gradient(180deg, rgba(0, 0, 0, 0.86) 0%, rgba(0, 0, 0, 0.7) 45%, rgba(0, 0, 0, 0.88) 100%),
+    url('/assets/result.jpg') center / cover no-repeat,
+    var(--canvas);
+}
+#faq {
+  background:
+    linear-gradient(180deg, rgba(0, 0, 0, 0.85) 0%, rgba(0, 0, 0, 0.66) 45%, rgba(0, 0, 0, 0.88) 100%),
+    url('/assets/faq.jpg') center / cover no-repeat,
+    var(--canvas);
+}
+
 .footer { background: rgba(0, 0, 0, 0.82); border-top: 1px solid var(--hairline-strong); padding: 64px 0 40px; }
 .footer a { color: var(--muted); font-size: 14px; font-weight: 300; }
 .footer a:hover { color: var(--ink); }
