@@ -1,12 +1,15 @@
 // Ambient line-art background for the landing sections below the hero: white
 // icon glyphs drawn as clean vector strokes — checks, diamonds, chevrons,
-// brackets, arrows, code tags </>, terminal prompts >_, smiley/frowny faces,
-// hearts and stars — floating upward, woven through a few smooth zigzag lines
-// that undulate across the page. Everything is monochrome white at low alpha
-// so headlines and cards stay readable; brand color stays in the content.
-// (Deliberately line-art, not full-color emoji, so the layer never competes
-// with the copy on top of it.) The hero has its own image background that
-// covers this layer.
+// brackets, arrows, code tags </>, terminal prompts >_, hearts, stars, a few
+// hand-drawn-style arrows (curve, squiggle, spiral, double-chevron) and a cast
+// of emoticon faces (smile, frown, wink, surprised, cool, X-eyes) — floating
+// upward, woven through a few smooth zigzag lines that undulate across the
+// page. The arrow + face families are original glyphs drawn in this house
+// style, inspired by (not copied from) the doodle reference sets.
+// Everything is monochrome white at low alpha so headlines and cards stay
+// readable; brand color stays in the content. (Deliberately line-art, not
+// full-color emoji, so the layer never competes with the copy on top of it.)
+// The hero has its own image background that covers this layer.
 //
 // Self initializing: creates a fixed full-screen <canvas> (#bg). Honors
 // prefers-reduced-motion (one static frame), pauses while the tab is hidden,
@@ -142,9 +145,109 @@ function iStar(ctx, s) {
   }
   ctx.closePath();
 }
+// --- Hand-drawn-style arrows & motion marks (inspired by the arrow set) ---
+// A chevron arrowhead at (x, y) pointing along `angle`, drawn as part of the
+// current path so the caller's single stroke covers it.
+function arrowHead(ctx, x, y, angle, len) {
+  ctx.moveTo(x + Math.cos(angle + Math.PI * 0.82) * len, y + Math.sin(angle + Math.PI * 0.82) * len);
+  ctx.lineTo(x, y);
+  ctx.lineTo(x + Math.cos(angle - Math.PI * 0.82) * len, y + Math.sin(angle - Math.PI * 0.82) * len);
+}
+// A rising swoosh arrow.
+function iCurveArrow(ctx, s) {
+  ctx.moveTo(-0.46 * s, 0.28 * s);
+  ctx.quadraticCurveTo(-0.1 * s, 0.34 * s, 0.4 * s, -0.3 * s);
+  arrowHead(ctx, 0.4 * s, -0.3 * s, Math.atan2(-0.64, 0.5), 0.2 * s);
+}
+// A wavy arrow skating to the right.
+function iSquiggleArrow(ctx, s) {
+  const steps = 30;
+  const x0 = -0.46 * s;
+  const x1 = 0.34 * s;
+  for (let i = 0; i <= steps; i += 1) {
+    const t = i / steps;
+    const x = x0 + (x1 - x0) * t;
+    const y = Math.sin(t * Math.PI * 3) * 0.15 * s;
+    if (i === 0) ctx.moveTo(x, y);
+    else ctx.lineTo(x, y);
+  }
+  arrowHead(ctx, x1, 0, 0, 0.2 * s);
+}
+// An open spiral / coil.
+function iSpiral(ctx, s) {
+  const steps = 46;
+  for (let i = 0; i <= steps; i += 1) {
+    const t = i / steps;
+    const a = t * 2.6 * TWO_PI;
+    const r = 0.07 * s + t * 0.46 * s;
+    const x = Math.cos(a) * r;
+    const y = Math.sin(a) * r;
+    if (i === 0) ctx.moveTo(x, y);
+    else ctx.lineTo(x, y);
+  }
+}
+// A double chevron » (fast-forward).
+function iChevrons(ctx, s) {
+  ctx.moveTo(-0.4 * s, -0.34 * s);
+  ctx.lineTo(-0.05 * s, 0);
+  ctx.lineTo(-0.4 * s, 0.34 * s);
+  ctx.moveTo(0.05 * s, -0.34 * s);
+  ctx.lineTo(0.4 * s, 0);
+  ctx.lineTo(0.05 * s, 0.34 * s);
+}
+
+// --- More emoticon faces (inspired by the emoji-doodle set) ---
+// An X eye for the dizzy/dead face.
+function cross(ctx, x, y, r) {
+  ctx.moveTo(x - r, y - r);
+  ctx.lineTo(x + r, y + r);
+  ctx.moveTo(x + r, y - r);
+  ctx.lineTo(x - r, y + r);
+}
+// A wink ;) — one open eye, one happy closed eye, a smile.
+function iWink(ctx, s) {
+  ctx.moveTo(0.5 * s, 0);
+  ctx.arc(0, 0, 0.5 * s, 0, TWO_PI);
+  eye(ctx, -0.17 * s, -0.12 * s, 0.06 * s);
+  mouth(ctx, 0.17 * s, -0.08 * s, 0.1 * s, 1.15 * Math.PI, 1.85 * Math.PI);
+  mouth(ctx, 0, 0.05 * s, 0.26 * s, 0.18 * Math.PI, 0.82 * Math.PI);
+}
+// A surprised face :o — wide eyes and a round mouth.
+function iSurprised(ctx, s) {
+  ctx.moveTo(0.5 * s, 0);
+  ctx.arc(0, 0, 0.5 * s, 0, TWO_PI);
+  eye(ctx, -0.17 * s, -0.14 * s, 0.075 * s);
+  eye(ctx, 0.17 * s, -0.14 * s, 0.075 * s);
+  ctx.moveTo(0.12 * s, 0.17 * s);
+  ctx.arc(0, 0.17 * s, 0.12 * s, 0, TWO_PI);
+}
+// A cool face B) — sunglasses (a brow bar with two hanging lenses) and a grin.
+function iCool(ctx, s) {
+  ctx.moveTo(0.5 * s, 0);
+  ctx.arc(0, 0, 0.5 * s, 0, TWO_PI);
+  ctx.moveTo(-0.34 * s, -0.16 * s);
+  ctx.lineTo(0.34 * s, -0.16 * s);
+  ctx.moveTo(-0.04 * s, -0.16 * s);
+  ctx.arc(-0.18 * s, -0.16 * s, 0.14 * s, 0, Math.PI);
+  ctx.moveTo(0.32 * s, -0.16 * s);
+  ctx.arc(0.18 * s, -0.16 * s, 0.14 * s, 0, Math.PI);
+  mouth(ctx, 0, 0.1 * s, 0.24 * s, 0.2 * Math.PI, 0.8 * Math.PI);
+}
+// A knocked-out face x_x — crossed eyes and a flat line mouth.
+function iDead(ctx, s) {
+  ctx.moveTo(0.5 * s, 0);
+  ctx.arc(0, 0, 0.5 * s, 0, TWO_PI);
+  cross(ctx, -0.17 * s, -0.12 * s, 0.08 * s);
+  cross(ctx, 0.17 * s, -0.12 * s, 0.08 * s);
+  ctx.moveTo(-0.13 * s, 0.2 * s);
+  ctx.lineTo(0.13 * s, 0.2 * s);
+}
+
 const ICONS = [
   iCheck, iCheck, iDiamond, iCircle, iPlus, iTriangle, iChevron, iHex, iArrow, iBracket, iDot,
-  iCode, iCode, iTerminal, iSmile, iFrown, iHeart, iStar
+  iCode, iCode, iTerminal, iHeart, iStar,
+  iCurveArrow, iSquiggleArrow, iSpiral, iChevrons,
+  iSmile, iFrown, iWink, iSurprised, iCool, iDead
 ];
 
 export function initBackground() {
