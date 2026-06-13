@@ -139,12 +139,14 @@ export function initBackground() {
   }
 
   function resize() {
-    width = window.innerWidth;
+    // Use the content width (excludes the scrollbar). window.innerWidth would
+    // include it, making the fixed canvas a few px wider than the viewport and
+    // forcing a horizontal scrollbar. Display size is left to CSS (#bg is
+    // width:100%); we only size the backing store here.
+    width = document.documentElement.clientWidth || window.innerWidth;
     height = window.innerHeight;
     canvas.width = Math.round(width * dpr);
     canvas.height = Math.round(height * dpr);
-    canvas.style.width = `${width}px`;
-    canvas.style.height = `${height}px`;
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     seed();
   }
@@ -152,8 +154,8 @@ export function initBackground() {
   let mouseX = 0;
   let mouseY = 0;
   window.addEventListener('mousemove', function (event) {
-    mouseX = (event.clientX / window.innerWidth - 0.5) * 2;
-    mouseY = (event.clientY / window.innerHeight - 0.5) * 2;
+    mouseX = (event.clientX / width - 0.5) * 2;
+    mouseY = (event.clientY / height - 0.5) * 2;
   }, { passive: true });
 
   function drawLine(line, time, scroll) {
