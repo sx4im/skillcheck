@@ -1,15 +1,15 @@
 // Ambient line-art background for the landing sections below the hero: white
-// icon glyphs drawn as clean vector strokes — checks, diamonds, chevrons,
-// brackets, arrows, code tags </>, terminal prompts >_, hearts, stars, a few
-// hand-drawn-style arrows (curve, squiggle, spiral, double-chevron) and a cast
-// of emoticon faces (smile, frown, wink, surprised, cool, X-eyes) — floating
-// upward, woven through a few smooth zigzag lines that undulate across the
-// page. The arrow + face families are original glyphs drawn in this house
-// style, inspired by (not copied from) the doodle reference sets.
-// Everything is monochrome white at low alpha so headlines and cards stay
-// readable; brand color stays in the content. (Deliberately line-art, not
-// full-color emoji, so the layer never competes with the copy on top of it.)
-// The hero has its own image background that covers this layer.
+// icon glyphs drawn as clean vector strokes — a restrained, technical set
+// (checks, diamonds, chevrons, brackets, arrows, code tags </>, terminal
+// prompts >_, plus a few hand-drawn-style motion marks: curve/squiggle arrow,
+// spiral, double-chevron) — drifting gently upward, woven through a few smooth
+// zigzag lines that undulate across the page. No emoji/emoticon glyphs: this
+// layer stays professional and quiet behind the copy.
+// Placement keeps a minimum gap between glyphs so they never overlap, motion
+// is a slow uniform drift with a fixed tilt (no spinning), and everything is
+// monochrome white at low alpha so headlines and cards stay readable; brand
+// color stays in the content. The hero has its own image background that
+// covers this layer.
 //
 // Self initializing: creates a fixed full-screen <canvas> (#bg). Honors
 // prefers-reduced-motion (one static frame), pauses while the tab is hidden,
@@ -103,48 +103,6 @@ function iTerminal(ctx, s) {
   ctx.moveTo(0.04 * s, 0.34 * s);
   ctx.lineTo(0.44 * s, 0.34 * s);
 }
-// Face helpers: a dot eye and an arc mouth. Each starts with a moveTo so the
-// subpath doesn't connect a stray line to the previous one in the same stroke.
-function eye(ctx, x, y, r) {
-  ctx.moveTo(x + r, y);
-  ctx.arc(x, y, r, 0, TWO_PI);
-}
-function mouth(ctx, cx, cy, r, start, end) {
-  ctx.moveTo(cx + Math.cos(start) * r, cy + Math.sin(start) * r);
-  ctx.arc(cx, cy, r, start, end);
-}
-// A round face with a smile :)
-function iSmile(ctx, s) {
-  ctx.moveTo(0.5 * s, 0);
-  ctx.arc(0, 0, 0.5 * s, 0, TWO_PI);
-  eye(ctx, -0.17 * s, -0.13 * s, 0.06 * s);
-  eye(ctx, 0.17 * s, -0.13 * s, 0.06 * s);
-  mouth(ctx, 0, 0.05 * s, 0.26 * s, 0.18 * Math.PI, 0.82 * Math.PI);
-}
-// ...and one with a frown :(
-function iFrown(ctx, s) {
-  ctx.moveTo(0.5 * s, 0);
-  ctx.arc(0, 0, 0.5 * s, 0, TWO_PI);
-  eye(ctx, -0.17 * s, -0.13 * s, 0.06 * s);
-  eye(ctx, 0.17 * s, -0.13 * s, 0.06 * s);
-  mouth(ctx, 0, 0.42 * s, 0.26 * s, 1.18 * Math.PI, 1.82 * Math.PI);
-}
-function iHeart(ctx, s) {
-  ctx.moveTo(0, 0.36 * s);
-  ctx.bezierCurveTo(-0.62 * s, -0.08 * s, -0.32 * s, -0.52 * s, 0, -0.16 * s);
-  ctx.bezierCurveTo(0.32 * s, -0.52 * s, 0.62 * s, -0.08 * s, 0, 0.36 * s);
-}
-function iStar(ctx, s) {
-  for (let i = 0; i < 10; i += 1) {
-    const r = i % 2 === 0 ? 0.56 * s : 0.24 * s;
-    const a = (Math.PI / 5) * i - Math.PI / 2;
-    const x = Math.cos(a) * r;
-    const y = Math.sin(a) * r;
-    if (i === 0) ctx.moveTo(x, y);
-    else ctx.lineTo(x, y);
-  }
-  ctx.closePath();
-}
 // --- Hand-drawn-style arrows & motion marks (inspired by the arrow set) ---
 // A chevron arrowhead at (x, y) pointing along `angle`, drawn as part of the
 // current path so the caller's single stroke covers it.
@@ -196,58 +154,10 @@ function iChevrons(ctx, s) {
   ctx.lineTo(0.05 * s, 0.34 * s);
 }
 
-// --- More emoticon faces (inspired by the emoji-doodle set) ---
-// An X eye for the dizzy/dead face.
-function cross(ctx, x, y, r) {
-  ctx.moveTo(x - r, y - r);
-  ctx.lineTo(x + r, y + r);
-  ctx.moveTo(x + r, y - r);
-  ctx.lineTo(x - r, y + r);
-}
-// A wink ;) — one open eye, one happy closed eye, a smile.
-function iWink(ctx, s) {
-  ctx.moveTo(0.5 * s, 0);
-  ctx.arc(0, 0, 0.5 * s, 0, TWO_PI);
-  eye(ctx, -0.17 * s, -0.12 * s, 0.06 * s);
-  mouth(ctx, 0.17 * s, -0.08 * s, 0.1 * s, 1.15 * Math.PI, 1.85 * Math.PI);
-  mouth(ctx, 0, 0.05 * s, 0.26 * s, 0.18 * Math.PI, 0.82 * Math.PI);
-}
-// A surprised face :o — wide eyes and a round mouth.
-function iSurprised(ctx, s) {
-  ctx.moveTo(0.5 * s, 0);
-  ctx.arc(0, 0, 0.5 * s, 0, TWO_PI);
-  eye(ctx, -0.17 * s, -0.14 * s, 0.075 * s);
-  eye(ctx, 0.17 * s, -0.14 * s, 0.075 * s);
-  ctx.moveTo(0.12 * s, 0.17 * s);
-  ctx.arc(0, 0.17 * s, 0.12 * s, 0, TWO_PI);
-}
-// A cool face B) — sunglasses (a brow bar with two hanging lenses) and a grin.
-function iCool(ctx, s) {
-  ctx.moveTo(0.5 * s, 0);
-  ctx.arc(0, 0, 0.5 * s, 0, TWO_PI);
-  ctx.moveTo(-0.34 * s, -0.16 * s);
-  ctx.lineTo(0.34 * s, -0.16 * s);
-  ctx.moveTo(-0.04 * s, -0.16 * s);
-  ctx.arc(-0.18 * s, -0.16 * s, 0.14 * s, 0, Math.PI);
-  ctx.moveTo(0.32 * s, -0.16 * s);
-  ctx.arc(0.18 * s, -0.16 * s, 0.14 * s, 0, Math.PI);
-  mouth(ctx, 0, 0.1 * s, 0.24 * s, 0.2 * Math.PI, 0.8 * Math.PI);
-}
-// A knocked-out face x_x — crossed eyes and a flat line mouth.
-function iDead(ctx, s) {
-  ctx.moveTo(0.5 * s, 0);
-  ctx.arc(0, 0, 0.5 * s, 0, TWO_PI);
-  cross(ctx, -0.17 * s, -0.12 * s, 0.08 * s);
-  cross(ctx, 0.17 * s, -0.12 * s, 0.08 * s);
-  ctx.moveTo(-0.13 * s, 0.2 * s);
-  ctx.lineTo(0.13 * s, 0.2 * s);
-}
-
 const ICONS = [
   iCheck, iCheck, iDiamond, iCircle, iPlus, iTriangle, iChevron, iHex, iArrow, iBracket, iDot,
-  iCode, iCode, iTerminal, iHeart, iStar,
-  iCurveArrow, iSquiggleArrow, iSpiral, iChevrons,
-  iSmile, iFrown, iWink, iSurprised, iCool, iDead
+  iCode, iCode, iTerminal,
+  iCurveArrow, iSquiggleArrow, iSpiral, iChevrons
 ];
 
 export function initBackground() {
@@ -264,29 +174,61 @@ export function initBackground() {
   let icons = [];
   let lines = [];
 
-  function makeIcon(y) {
-    const depth = 0.32 + Math.random() * 0.68;
+  // Every placement must clear this gap (px) from existing icons, so the field
+  // reads as tidy and deliberate and glyphs never overlap. With a low count and
+  // gentle, near-uniform motion, the spacing holds as they drift.
+  const MIN_GAP = 96;
+
+  function tooClose(x, y) {
+    for (const o of icons) {
+      const dx = x - o.x;
+      const dy = y - o.y;
+      if (dx * dx + dy * dy < MIN_GAP * MIN_GAP) return true;
+    }
+    return false;
+  }
+
+  // Find a spot that doesn't crowd the existing icons. bandY === null spreads
+  // across the full height (initial seed); a number pins near the bottom edge
+  // (respawn), with a little scatter so respawns don't line up. Falls back to
+  // the last try after a bounded number of attempts.
+  function placeXY(bandY) {
+    let x = Math.random() * width;
+    let y = bandY == null ? Math.random() * height : bandY + Math.random() * 90;
+    for (let attempt = 0; attempt < 30 && tooClose(x, y); attempt += 1) {
+      x = Math.random() * width;
+      y = bandY == null ? Math.random() * height : bandY + Math.random() * 90;
+    }
+    return { x, y };
+  }
+
+  function makeIcon(bandY) {
+    // Narrow depth range -> similar sizes and near-uniform speed, so the field
+    // drifts as one calm layer and parallax can't shuffle glyphs into overlap.
+    const depth = 0.5 + Math.random() * 0.5;
+    const pos = placeXY(bandY);
     return {
       draw: ICONS[Math.floor(Math.random() * ICONS.length)],
-      x: Math.random() * width,
-      y,
+      x: pos.x,
+      y: pos.y,
       depth,
-      size: 14 + depth * 26,
-      alpha: 0.05 + depth * 0.13,
-      vy: (0.05 + Math.random() * 0.13) * depth,
+      size: 17 + depth * 20,
+      alpha: 0.05 + depth * 0.1,
+      vy: 0.16 + depth * 0.05,
       sway: Math.random() * TWO_PI,
-      swaySpeed: 0.0015 + Math.random() * 0.003,
-      swayAmp: 7 + Math.random() * 16,
-      rot: Math.random() * TWO_PI,
-      rotSpeed: (Math.random() - 0.5) * 0.004
+      swaySpeed: 0.0009 + Math.random() * 0.0011,
+      swayAmp: 4 + Math.random() * 6,
+      rot: (Math.random() - 0.5) * 0.5 // fixed slight tilt; no spinning
     };
   }
 
   function seed() {
     const area = width * height;
-    const iconCount = Math.max(16, Math.min(70, Math.round(area / (window.innerWidth < 760 ? 42000 : 26000))));
+    // Sparser than before: an airy, professional scatter that leaves room for
+    // the min-gap spacing to keep every glyph clear of its neighbours.
+    const iconCount = Math.max(10, Math.min(38, Math.round(area / (window.innerWidth < 760 ? 60000 : 38000))));
     icons = [];
-    for (let i = 0; i < iconCount; i += 1) icons.push(makeIcon(Math.random() * height));
+    for (let i = 0; i < iconCount; i += 1) icons.push(makeIcon(null));
 
     // A few smooth zigzag lines spanning the width at different bands.
     const lineCount = window.innerWidth < 760 ? 3 : 5;
@@ -357,8 +299,8 @@ export function initBackground() {
 
     for (const d of icons) {
       const sway = Math.sin(d.sway + time * d.swaySpeed) * d.swayAmp;
-      const px = d.x + sway + mouseX * 18 * d.depth;
-      let py = d.y - scroll * 0.06 * d.depth + mouseY * 10 * d.depth;
+      const px = d.x + sway + mouseX * 10 * d.depth;
+      let py = d.y - scroll * 0.03 * d.depth + mouseY * 6 * d.depth;
       py = ((py % height) + height) % height;
 
       ctx.save();
@@ -391,7 +333,6 @@ export function initBackground() {
     if (!running) return;
     for (const d of icons) {
       d.y -= d.vy;
-      d.rot += d.rotSpeed;
       if (d.y < -60) Object.assign(d, makeIcon(height + 40));
     }
     for (const line of lines) line.y -= line.drift;
