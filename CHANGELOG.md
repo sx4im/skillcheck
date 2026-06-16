@@ -6,6 +6,27 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [0.7.1] - 2026-06-16
+
+### Added
+
+- Interactive per-task breakdown offer: after a human `check` run the CLI now asks
+  "See the per-task breakdown?" instead of exiting — answer yes to print it with no
+  re-run (the data is computed from the run's own outputs). `--explain` still shows
+  it straight away, unprompted.
+
+### Changed
+
+- Progress bar fills by floor — it never reads "full" while work remains — and shows
+  a precise percentage next to the count.
+
+### Fixed
+
+- `skillcheck check <path>` on an interactive terminal now asks for an effort level
+  (Quick / Standard / Thorough) when you don't pass `--tasks`/`--trials`, instead of
+  silently running at the defaults. Pinning `--tasks`/`--trials`, `--json`, and
+  non-interactive sessions are unaffected.
+
 ## [0.7.0] - 2026-06-16
 
 ### Added

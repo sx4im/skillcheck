@@ -27,6 +27,7 @@ import {
   printKeyPromptHint,
   printLogout,
   promptSecret,
+  promptText,
   selectSkillPath,
   selectEffort,
   startProgress,
@@ -194,6 +195,10 @@ interface CheckOptions {
   evalOptions: EvalOptions;
   json: boolean;
   output?: string;
+  // True when the user pinned the run size with --tasks/--trials. When false (and
+  // the session is interactive), runCheck asks for an effort level instead of
+  // silently using the defaults.
+  effortPinned: boolean;
 }
 
 export function parseCheckOptions(argv: string[], inputIndex = 3): CheckOptions {
@@ -227,7 +232,8 @@ export function parseCheckOptions(argv: string[], inputIndex = 3): CheckOptions 
       explain: hasFlag(argv, '--explain')
     },
     json: hasFlag(argv, '--json'),
-    output
+    output,
+    effortPinned: hasFlag(argv, '--tasks') || hasFlag(argv, '--trials')
   };
 }
 
@@ -267,9 +273,31 @@ function parseCorpusRunOptions(argv: string[]): CorpusRunOptions {
 async function runCheck(options: CheckOptions, header: 'compact' | 'none' = 'compact'): Promise<void> {
   await validateSkillInput(options.evalOptions.inputPath);
   await ensureCloudConfigured(false);
-  if (header === 'compact' && !options.json) {
+
+  const interactive = !options.json && process.stdin.isTTY === true && process.stdout.isTTY === true;
+
+  // A direct `check <path>` on a TTY that didn't pin --tasks/--trials gets the same
+  // effort menu as the no-arg flow, instead of silently running at the defaults.
+  let pickedEffort = false;
+  if (interactive && !options.effortPinned) {
+    const effort = await selectEffort('Effort');
+    options.evalOptions.tasks = effort.tasks;
+    options.evalOptions.trials = effort.trials;
+    pickedEffort = true;
+  }
+
+  // Skip the compact header when we just showed the effort menu — its confirmation
+  // line ("✓ Effort  Standard · 3 tasks × 2 trials") already states the run size.
+  if (header === 'compact' && !options.json && !pickedEffort) {
     printCheckHeader(options.evalOptions.inputPath, options.evalOptions.tasks, options.evalOptions.trials);
   }
+
+  // The per-task breakdown reuses the outputs the run already produced (no extra
+  // model calls), so for an interactive human run we always compute it and then
+  // OFFER it after the card. `--explain` shows it straight away, unprompted.
+  const explicitExplain = options.evalOptions.explain === true;
+  options.evalOptions.explain = explicitExplain || interactive;
+
   const progress = options.json ? undefined : startProgress();
   let result: unknown;
   try {
@@ -287,9 +315,18 @@ async function runCheck(options: CheckOptions, header: 'compact' | 'none' = 'com
     return;
   }
   await printResultCard(result, options.output);
-  if (options.evalOptions.explain) {
-    const breakdown = formatExplain(result);
-    if (breakdown) {
+
+  const breakdown = formatExplain(result);
+  if (!breakdown) {
+    return;
+  }
+  if (explicitExplain) {
+    console.log(breakdown);
+    return;
+  }
+  if (interactive) {
+    const answer = (await promptText('See the per-task breakdown? [y/N] ')).trim().toLowerCase();
+    if (answer === 'y' || answer === 'yes') {
       console.log(breakdown);
     }
   }
@@ -302,6 +339,7 @@ async function runInteractiveCheck(): Promise<void> {
   const options = parseCheckOptions(['node', 'skillcheck', 'check', selectedPath]);
   options.evalOptions.tasks = effort.tasks;
   options.evalOptions.trials = effort.trials;
+  options.effortPinned = true; // already chosen above — don't let runCheck re-ask
   await runCheck(options, 'none');
 }
 

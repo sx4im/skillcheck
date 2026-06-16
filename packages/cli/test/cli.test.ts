@@ -71,6 +71,12 @@ describe('friendly CLI check command', () => {
     expect(summary).toContain('GOOD');
   });
 
+  it('pins effort only when --tasks or --trials is given (else the run asks interactively)', () => {
+    expect(parseCheckOptions(['node', 'skillcheck', 'check', './SKILL.md']).effortPinned).toBe(false);
+    expect(parseCheckOptions(['node', 'skillcheck', 'check', './SKILL.md', '--tasks', '5']).effortPinned).toBe(true);
+    expect(parseCheckOptions(['node', 'skillcheck', 'check', './SKILL.md', '--trials', '3']).effortPinned).toBe(true);
+  });
+
   it('rejects mistyped options instead of silently ignoring them', () => {
     expect(() => parseCheckOptions(['node', 'skillcheck', 'check', './SKILL.md', '--task', '5'])).toThrow(
       /Unknown option --task/

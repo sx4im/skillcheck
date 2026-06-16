@@ -49,7 +49,8 @@ jobs:
       - name: Smoke-test the built binary
         run: |
           node dist/bin/skillcheck.js --version
-          node dist/bin/skillcheck.js --help | grep -q "Usage"
+          help_out="$(node dist/bin/skillcheck.js --help)"
+          grep -q "Usage" <<< "$help_out"
 
   package:
     name: Package validation
@@ -72,9 +73,9 @@ jobs:
           set -euo pipefail
           files="$(npm pack --dry-run --json | node -e "let d='';process.stdin.on('data',c=>d+=c);process.stdin.on('end',()=>{for(const f of JSON.parse(d)[0].files)console.log(f.path)})")"
           echo "$files"
-          echo "$files" | grep -qx "dist/bin/skillcheck.js"
-          echo "$files" | grep -qx "README.md"
-          if echo "$files" | grep -qE "(^|/)\.env|packages/cli/test/"; then
+          grep -qx "dist/bin/skillcheck.js" <<< "$files"
+          grep -qx "README.md" <<< "$files"
+          if grep -qE "(^|/)\.env|packages/cli/test/" <<< "$files"; then
             echo "::error::tarball contains files that should not be published"
             exit 1
           fi

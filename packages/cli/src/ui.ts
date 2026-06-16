@@ -52,8 +52,8 @@ interface Keypress {
 
 // Big "ANSI Shadow" block-letter glyphs (6 rows tall) for the hero wordmark. Only the
 // letters in SKILL / CHECK are defined. `█` is the solid fill; `═ ║ ╔ ╗ ╚ ╝` form the
-// outline. Fill and outline are painted separately: SKILL is solid white, CHECK gets
-// the brand gradient sweeping top-to-bottom with a white outline.
+// 3D extruded edge. Fill and edge are painted separately: SKILL is solid white, CHECK
+// gets the brand gradient sweeping top-to-bottom with a white edge.
 const GLYPH_ROWS = 6;
 const OUTLINE_CHARS = new Set(['═', '║', '╔', '╗', '╚', '╝']);
 const GLYPHS: Record<string, string[]> = {
@@ -152,6 +152,9 @@ export function bannerLines(): string[] {
   const bigWidth = indent.length + wordWidth(GLYPHS, 'SKILL') + gap.length + wordWidth(GLYPHS, 'CHECK');
   const compactWidth = indent.length + wordWidth(COMPACT_GLYPHS, 'SKILL') + gap.length + wordWidth(COMPACT_GLYPHS, 'CHECK');
 
+  // The hero wordmark: SKILL solid white, CHECK in the brand gradient sweeping
+  // cyan→indigo top-to-bottom, both with the 3D extruded edge. Three width tiers:
+  // full ANSI-Shadow letters, compact solid blocks (fits 80 cols), then plain text.
   if (columns === undefined || columns >= bigWidth) {
     const skillRows = renderWord('SKILL', () => paint.bold, paint.bold);
     const checkRows = renderWord('CHECK', (row) => paint.brand(row / (GLYPH_ROWS - 1)), paint.bold);
@@ -636,9 +639,9 @@ function effortChoice(level: EffortLevel): EffortChoice {
   return { tasks: level.tasks, trials: level.trials, label: level.name, estimate: estimateLabel(level.tasks, level.trials) };
 }
 
-function effortMenuLines(selected: number): string[] {
+function effortMenuLines(selected: number, eyebrow: string): string[] {
   const lines: string[] = [];
-  lines.push(`  ${paint.accent('Step 2 of 2')}  ${paint.bold('How thorough should this check be?')}`);
+  lines.push(`  ${paint.accent(eyebrow)}  ${paint.bold('How thorough should this check be?')}`);
   lines.push(`  ${paint.dim('More tasks mean a more confident verdict — and a little more time.')}`);
   lines.push('');
   for (const [index, level] of EFFORT_LEVELS.entries()) {
@@ -656,9 +659,10 @@ function effortMenuLines(selected: number): string[] {
 }
 
 // Ask how thorough the check should be with an in-place arrow-key menu, showing
-// an estimated time for each level. Non-interactive callers never reach this
-// (they pass --tasks/--trials); a non-TTY session quietly gets Standard.
-export async function selectEffort(): Promise<EffortChoice> {
+// an estimated time for each level. `eyebrow` labels the step — the no-arg flow
+// uses "Step 2 of 2", a direct `check <path>` just says "Effort". A non-TTY
+// session quietly gets Standard.
+export async function selectEffort(eyebrow = 'Step 2 of 2'): Promise<EffortChoice> {
   const defaultIndex = 1; // Standard
   if (!process.stdin.isTTY || !process.stdout.isTTY) {
     return effortChoice(EFFORT_LEVELS[defaultIndex]!);
@@ -673,7 +677,7 @@ export async function selectEffort(): Promise<EffortChoice> {
   let selected = defaultIndex;
   let painted = false;
   const draw = () => {
-    const lines = effortMenuLines(selected);
+    const lines = effortMenuLines(selected, eyebrow);
     if (painted) {
       process.stdout.write(`\x1b[${lines.length}A`);
     }
@@ -716,7 +720,7 @@ export async function selectEffort(): Promise<EffortChoice> {
   // Collapse the menu into a single confirmation line.
   const chosen = EFFORT_LEVELS[selected]!;
   const choice = effortChoice(chosen);
-  process.stdout.write(`\x1b[${effortMenuLines(selected).length}A\x1b[0J`);
+  process.stdout.write(`\x1b[${effortMenuLines(selected, eyebrow).length}A\x1b[0J`);
   const scope = `${chosen.tasks} tasks × ${chosen.trials} trial${chosen.trials > 1 ? 's' : ''}`;
   console.log(`  ${paint.ok(SYM.tick)} ${paint.bold('Effort')}      ${chosen.name} ${paint.dim(`${SYM.dot} ${scope}`)} ${paint.accent(`[${choice.estimate}]`)}\n`);
   return choice;
@@ -742,8 +746,11 @@ function formatElapsed(ms: number): string {
   return minutes > 0 ? `${minutes}m ${String(seconds % 60).padStart(2, '0')}s` : `${seconds}s`;
 }
 
-function progressBar(completed: number, total: number, width = 12): string {
-  const filled = Math.max(0, Math.min(width, Math.round((completed / total) * width)));
+// Floor (not round) so a segment only lights up once it is genuinely complete —
+// the bar never reads "full" while work remains. Wider bar = finer granularity.
+function progressBar(completed: number, total: number, width = 16): string {
+  const ratio = total > 0 ? completed / total : 0;
+  const filled = Math.max(0, Math.min(width, Math.floor(ratio * width)));
   return `${epaint.accent(SYM.barOn.repeat(filled))}${epaint.dim(SYM.barOff.repeat(width - filled))}`;
 }
 
@@ -795,7 +802,10 @@ export function startProgress(): ProgressController {
     const spinner = epaint.accent(SPINNER_FRAMES[frame % SPINNER_FRAMES.length]!);
     const label = epaint.bold(ACTIVE_PHASE_LABELS[current.phase]);
     const counted = typeof current.completed === 'number' && typeof current.total === 'number' && current.total > 0;
-    const bar = counted ? ` ${progressBar(current.completed!, current.total!)} ${epaint.dim(`${current.completed}/${current.total}`)}` : '';
+    const pct = counted ? Math.floor((current.completed! / current.total!) * 100) : 0;
+    const bar = counted
+      ? ` ${progressBar(current.completed!, current.total!)} ${epaint.dim(`${current.completed}/${current.total} (${pct}%)`)}`
+      : '';
     const elapsed = epaint.dim(` ${SYM.dot} ${formatElapsed(Date.now() - startedAt)}`);
     stream.write(`\r\x1b[2K${spinner} ${label}${bar}${elapsed}`);
   };
