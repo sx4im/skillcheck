@@ -105,7 +105,13 @@
           <p class="muted" style="margin-top:8px">Update any time with <code>npm install -g @sx4im/skillcheck</code>.</p>
           <ul class="changelog" style="margin-top:20px">
             <li>
-              <div class="cl-head"><span class="badge badge-pro">v0.7.0</span> <span class="fine">2026-06-16</span></div>
+              <div class="cl-head"><span class="badge badge-pro">v0.7.1</span> <span class="fine">2026-06-16</span></div>
+              <p class="cl-title">Smoother interactive runs</p>
+              <p>Running <code>skillcheck check &lt;file&gt;</code> now asks how thorough to be (Quick / Standard / Thorough) instead of guessing, and after the result it offers the per-task breakdown — no need to remember <code>--explain</code>. The progress bar is more precise, too.</p>
+              <div class="code cl-code"><span>skillcheck check ./SKILL.md</span></div>
+            </li>
+            <li>
+              <div class="cl-head"><span class="badge badge-outline">v0.7.0</span> <span class="fine">2026-06-16</span></div>
               <p class="cl-title"><code>--explain</code> — per-task breakdown</p>
               <p>See <em>why</em> a verdict landed: with/without pass rates for every task, the change, and a contrasting example model output from each arm — printed under the result card and in <code>--json</code> output. It reuses the run's outputs, so it costs no extra runs.</p>
               <div class="code cl-code"><span>skillcheck check ./SKILL.md --explain</span></div>

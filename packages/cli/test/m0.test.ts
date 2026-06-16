@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import type { NvidiaNimClient } from '../src/adapters/nvidia-nim.js';
 import { runM0Gate } from '../src/m0/run.js';
 
@@ -26,6 +26,19 @@ function fakeClientFactory(): NvidiaNimClient {
 }
 
 describe('runM0Gate', () => {
+  // runM0Gate calls loadNvidiaConfig(), which throws without a configured key.
+  // Set a throwaway one (the injected fake client never uses it) so the test does
+  // not depend on an ambient .env — that's why this passed locally but not in CI.
+  let savedKey: string | undefined;
+  beforeEach(() => {
+    savedKey = process.env.NVIDIA_API_KEY;
+    process.env.NVIDIA_API_KEY = 'test-key';
+  });
+  afterEach(() => {
+    if (savedKey === undefined) delete process.env.NVIDIA_API_KEY;
+    else process.env.NVIDIA_API_KEY = savedKey;
+  });
+
   it('passes repeatability and the empty control with a deterministic runner', async () => {
     const report = await runM0Gate(fakeClientFactory);
 
