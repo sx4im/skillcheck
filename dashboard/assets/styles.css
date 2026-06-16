@@ -300,6 +300,14 @@ html.js .reveal.in {
   color: var(--ink); display: grid; place-items: center; font-weight: 700; margin-bottom: 16px; font-size: 14px;
 }
 
+/* "What's new in the CLI" changelog list on the dashboard. */
+.changelog { list-style: none; margin: 0; padding: 0; }
+.changelog > li + li { margin-top: 22px; padding-top: 22px; border-top: 1px solid var(--hairline-strong); }
+.changelog .cl-head { display: flex; align-items: center; gap: 10px; }
+.changelog .cl-title { color: var(--ink); font-weight: 600; font-size: 15px; margin-top: 10px; }
+.changelog p { color: var(--body); font-size: 14px; font-weight: 300; line-height: 1.55; margin-top: 6px; }
+.changelog .cl-code { margin-top: 12px; }
+
 /* ---------- Pipeline timeline ---------- */
 .pipeline { position: relative; max-width: 720px; margin: 64px auto 0; }
 .pipeline::before { content: ''; position: absolute; left: 19px; top: 8px; bottom: 8px; width: 1px; background: var(--hairline); }

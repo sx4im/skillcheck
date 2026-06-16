@@ -7,7 +7,7 @@ Static HTML/CSS/JS + Vercel serverless functions. The only dependency is `@clerk
 ```
 dashboard/
   index.html            Landing page (HP design, Framer Motion) — buttons open Clerk on click
-  app.html              Signed-in dashboard (key, usage, preview)
+  app.html              Signed-in dashboard (key, usage, quickstart, "What's new in the CLI")
   sso-callback.html     Clerk OAuth redirect handler
   assets/               styles.css, app.js, landing.js, auth.js (Clerk), motion.js (Framer Motion)
   api/
@@ -21,6 +21,15 @@ dashboard/
   test/                 smoke.mjs + proxy.mjs (run with `npm test`)
   .env.example          every variable, documented
 ```
+
+## "What's new in the CLI"
+
+The signed-in dashboard (`app.html`) shows a hand-maintained changelog card so users
+see new CLI features without leaving the app. It's static markup (no build step) —
+when the CLI ships a release, add an entry at the top of the `<ul class="changelog">`
+list and keep it in sync with the root [`CHANGELOG.md`](../CHANGELOG.md). Latest:
+**v0.7.0 — `skillcheck check --explain`** prints a per-task breakdown (with/without
+pass rates, the change, and example outputs from each arm).
 
 ## Quick start
 

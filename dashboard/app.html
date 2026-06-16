@@ -96,6 +96,27 @@
             <p class="fine" style="margin-top:12px">Prefer interactive setup? Run <code>skillcheck setup</code> and paste your key when asked.</p>
           </div>
         </div>
+
+        <div class="card whatsnew" style="margin-top:24px">
+          <div class="usage-head">
+            <h3>What's new in the CLI</h3>
+            <a class="btn-text" href="https://github.com/sx4im/skillcheck/blob/main/CHANGELOG.md" rel="noopener">Full changelog →</a>
+          </div>
+          <p class="muted" style="margin-top:8px">Update any time with <code>npm install -g @sx4im/skillcheck</code>.</p>
+          <ul class="changelog" style="margin-top:20px">
+            <li>
+              <div class="cl-head"><span class="badge badge-pro">v0.7.0</span> <span class="fine">2026-06-16</span></div>
+              <p class="cl-title"><code>--explain</code> — per-task breakdown</p>
+              <p>See <em>why</em> a verdict landed: with/without pass rates for every task, the change, and a contrasting example model output from each arm — printed under the result card and in <code>--json</code> output. It reuses the run's outputs, so it costs no extra runs.</p>
+              <div class="code cl-code"><span>skillcheck check ./SKILL.md --explain</span></div>
+            </li>
+            <li>
+              <div class="cl-head"><span class="badge badge-outline">v0.6.0</span> <span class="fine">2026-06-16</span></div>
+              <p class="cl-title">Friendlier help &amp; production hardening</p>
+              <p><code>skillcheck &lt;command&gt; --help</code> now prints usage from anywhere, plus a full test, coverage, and release pipeline behind the scenes.</p>
+            </li>
+          </ul>
+        </div>
       </div>
     </main>
 
