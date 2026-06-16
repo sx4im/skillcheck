@@ -24,6 +24,10 @@ export interface EvalOptions {
   taskSuite?: string;
   sourceLabel?: string;
   saveArtifacts?: boolean;
+  // Attach a per-task breakdown (with/without pass rates, the change, and an
+  // example model output per arm) to the result. No extra model calls — it reuses
+  // the outputs the run already produced.
+  explain?: boolean;
   onProgress?: ProgressReporter;
   // Reuse a local disk cache of model calls across runs. Off by default so every
   // `skillcheck check` runs fresh and writes nothing to disk; batch flows (corpus)
@@ -79,6 +83,60 @@ function taskBreakdowns(tasks: GeneratedTask[], graded: GradedOutput[]): TaskBre
 
 function mean(values: number[]): number {
   return values.length === 0 ? 0 : values.reduce((sum, value) => sum + value, 0) / values.length;
+}
+
+interface ExplainExample {
+  output: string;
+  pass: boolean;
+}
+
+interface ExplainTask {
+  id: string;
+  prompt: string;
+  criterion: string;
+  with_skill_pass_rate: number;
+  no_skill_pass_rate: number;
+  delta_pp: number;
+  label: 'helped' | 'hurt' | 'no change';
+  example_with: ExplainExample | null;
+  example_without: ExplainExample | null;
+}
+
+// Collapse whitespace and cap a raw model output to a readable snippet.
+function snippet(text: string, max = 240): string {
+  const collapsed = text.replace(/\s+/g, ' ').trim();
+  return collapsed.length > max ? `${collapsed.slice(0, max - 1)}…` : collapsed;
+}
+
+function buildExplain(tasks: GeneratedTask[], graded: GradedOutput[]): { tasks: ExplainTask[] } {
+  const example = (list: GradedOutput[], preferPass?: boolean): ExplainExample | null => {
+    const pick = (preferPass === undefined ? undefined : list.find((item) => item.pass === preferPass)) ?? list[0];
+    return pick ? { output: snippet(pick.output), pass: pick.pass } : null;
+  };
+
+  return {
+    tasks: tasks.map((task) => {
+      const taskGrades = graded.filter((item) => item.taskId === task.id);
+      const withSkill = taskGrades.filter((item) => item.arm === 'with_skill');
+      const noSkill = taskGrades.filter((item) => item.arm === 'no_skill');
+      const withRate = withSkill.length ? withSkill.filter((item) => item.pass).length / withSkill.length : 0;
+      const noRate = noSkill.length ? noSkill.filter((item) => item.pass).length / noSkill.length : 0;
+      const delta = Number(((withRate - noRate) * 100).toFixed(1));
+      return {
+        id: task.id,
+        prompt: task.prompt,
+        criterion: task.criterion,
+        with_skill_pass_rate: Number(withRate.toFixed(4)),
+        no_skill_pass_rate: Number(noRate.toFixed(4)),
+        delta_pp: delta,
+        label: delta > 0 ? 'helped' : delta < 0 ? 'hurt' : 'no change',
+        // Show the sharpest contrast: when the skill helped here, surface a
+        // passing with-skill output against a failing without-skill one.
+        example_with: example(withSkill, delta > 0 ? true : undefined),
+        example_without: example(noSkill, delta > 0 ? false : undefined)
+      };
+    })
+  };
 }
 
 async function writeJson(filePath: string, value: unknown): Promise<void> {
@@ -185,6 +243,7 @@ export async function evalSkill(options: EvalOptions): Promise<unknown> {
       value_per_1k_tokens: valuePer1kTokens
     },
     tasks: breakdowns,
+    ...(options.explain ? { explain: buildExplain(tasks, graded) } : {}),
     reproducibility: {
       ...(taskSuitePath ? { task_suite_path: taskSuitePath } : {}),
       transcript_hashes: graded.map((item) => item.transcriptHash)

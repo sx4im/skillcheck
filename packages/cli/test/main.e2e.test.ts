@@ -148,6 +148,32 @@ describe('main() end-to-end (mocked model)', () => {
     expect(stdout).toContain('Satisfaction');
   });
 
+  it('attaches a per-task breakdown with example outputs under `--explain --json`', async () => {
+    const { stdout } = await runMain(['node', 'skillcheck', 'check', 'SKILL.md', '--tasks', '2', '--trials', '1', '--explain', '--json']);
+    const result = JSON.parse(stdout);
+    expect(result.explain.tasks).toHaveLength(2);
+    const task = result.explain.tasks[0];
+    expect(task.with_skill_pass_rate).toBe(1);
+    expect(task.no_skill_pass_rate).toBe(0);
+    expect(task.delta_pp).toBe(100);
+    expect(task.label).toBe('helped');
+    expect(task.example_with.output).toContain('the task is handled');
+    expect(task.example_with.pass).toBe(true);
+    expect(task.example_without.pass).toBe(false);
+  });
+
+  it('prints the per-task breakdown below the card for human output', async () => {
+    const { stdout } = await runMain(['node', 'skillcheck', 'check', 'SKILL.md', '--tasks', '2', '--trials', '1', '--explain']);
+    expect(stdout).toContain('Per-task breakdown');
+    expect(stdout).toContain('helped');
+    expect(stdout).toContain('with skill');
+  });
+
+  it('omits the breakdown when --explain is not set', async () => {
+    const { stdout } = await runMain(['node', 'skillcheck', 'check', 'SKILL.md', '--tasks', '2', '--trials', '1', '--json']);
+    expect(JSON.parse(stdout).explain).toBeUndefined();
+  });
+
   it('saves a verifiable result with `--output`, then `verify` reproduces it', async () => {
     await runMain(['node', 'skillcheck', 'eval', 'SKILL.md', '--tasks', '2', '--trials', '1', '--output', 'result.json']);
     const saved = JSON.parse(await readFile(path.join(workDir, 'result.json'), 'utf8'));

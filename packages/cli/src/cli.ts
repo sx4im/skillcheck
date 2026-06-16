@@ -15,6 +15,7 @@ import { runM0Gate } from './m0/run.js';
 import { runRot, type RotOptions } from './rot.js';
 import {
   printResultCard,
+  formatExplain,
   printHelpUi,
   printBanner,
   printCheckHeader,
@@ -163,16 +164,12 @@ function parseEvalOptions(argv: string[], inputIndex = 3): EvalOptions {
   if (!inputPath || inputPath.startsWith('--')) {
     throw new Error('Usage: skillcheck eval <path> [--tasks N] [--trials K] [--output file.json]');
   }
-  assertKnownOptions(argv, inputIndex + 1, [
-    '--tasks',
-    '--trials',
-    '--output',
-    '--mode',
-    '--runner',
-    '--grader',
-    '--generator',
-    '--task-suite'
-  ]);
+  assertKnownOptions(
+    argv,
+    inputIndex + 1,
+    ['--tasks', '--trials', '--output', '--mode', '--runner', '--grader', '--generator', '--task-suite'],
+    ['--explain']
+  );
 
   const mode = readOption(argv, '--mode') ?? 'forced';
   if (mode !== 'forced') {
@@ -188,7 +185,8 @@ function parseEvalOptions(argv: string[], inputIndex = 3): EvalOptions {
     runner: readOption(argv, '--runner'),
     grader: readOption(argv, '--grader'),
     generator: readOption(argv, '--generator'),
-    taskSuite: readOption(argv, '--task-suite')
+    taskSuite: readOption(argv, '--task-suite'),
+    explain: hasFlag(argv, '--explain')
   };
 }
 
@@ -210,7 +208,7 @@ export function parseCheckOptions(argv: string[], inputIndex = 3): CheckOptions 
     argv,
     inputIndex + 1,
     ['--tasks', '--trials', '--output', '--runner', '--grader', '--generator', '--task-suite'],
-    ['--json']
+    ['--json', '--explain']
   );
 
   const output = readOption(argv, '--output');
@@ -225,7 +223,8 @@ export function parseCheckOptions(argv: string[], inputIndex = 3): CheckOptions 
       grader: readOption(argv, '--grader'),
       generator: readOption(argv, '--generator'),
       taskSuite: readOption(argv, '--task-suite'),
-      saveArtifacts: Boolean(output)
+      saveArtifacts: Boolean(output),
+      explain: hasFlag(argv, '--explain')
     },
     json: hasFlag(argv, '--json'),
     output
@@ -288,6 +287,12 @@ async function runCheck(options: CheckOptions, header: 'compact' | 'none' = 'com
     return;
   }
   await printResultCard(result, options.output);
+  if (options.evalOptions.explain) {
+    const breakdown = formatExplain(result);
+    if (breakdown) {
+      console.log(breakdown);
+    }
+  }
 }
 
 async function runInteractiveCheck(): Promise<void> {

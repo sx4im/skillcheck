@@ -213,6 +213,7 @@ export function printHelpUi(): void {
   opt('--tasks N', 'generated tasks per check (default 3, max 50)');
   opt('--trials K', 'trials per task and arm (default 2, max 10)');
   opt('--output FILE', 'save the full JSON result');
+  opt('--explain', 'show a per-task breakdown with example outputs');
   opt('--json', 'machine-readable output, no UI');
   opt('--version', 'print the installed version');
   opt('--help', 'show this help (works after any command)');
@@ -1001,6 +1002,50 @@ export function formatResultCard(result: unknown, outputPath?: string): string {
   const score = asRecord(asRecord(result).result);
   const sat = satisfactionFromResult(score);
   return [...resultHeaderLines(geometry, result, outputPath), satisfactionLine(geometry, sat, sat), cardEdge(geometry, 'bottom')].join('\n');
+}
+
+function explainExampleLines(armLabel: string, mark: Paint, value: unknown, width: number): string[] {
+  const example = asRecord(value);
+  if (typeof example.output !== 'string' || example.output.length === 0) {
+    return [];
+  }
+  const verdict = example.pass ? paint.ok('pass') : paint.err('fail');
+  const lines = [`      ${mark(armLabel)} ${paint.dim(SYM.dot)} ${verdict}`];
+  for (const wrapped of wrapText(example.output, width - 8)) {
+    lines.push(`        ${paint.dim(wrapped)}`);
+  }
+  return lines;
+}
+
+// The per-task breakdown printed below the card when --explain is set. Reads the
+// `explain` payload eval attaches (pass rates per arm, the change, an example
+// output per arm). Returns '' when there is nothing to show, so callers can skip
+// printing entirely.
+export function formatExplain(result: unknown): string {
+  const explain = asRecord(asRecord(result).explain);
+  const tasks = Array.isArray(explain.tasks) ? explain.tasks : [];
+  if (tasks.length === 0) {
+    return '';
+  }
+  const width = layoutWidth(process.stdout, 78, 50);
+  const lines: string[] = ['', `  ${paint.bold('Per-task breakdown')}`];
+
+  for (const entry of tasks) {
+    const task = asRecord(entry);
+    const withPct = Math.round((typeof task.with_skill_pass_rate === 'number' ? task.with_skill_pass_rate : 0) * 100);
+    const noPct = Math.round((typeof task.no_skill_pass_rate === 'number' ? task.no_skill_pass_rate : 0) * 100);
+    const label = String(task.label ?? 'no change');
+    const labelPaint = label === 'helped' ? paint.ok : label === 'hurt' ? paint.err : paint.dim;
+    lines.push(
+      `  ${paint.accent(String(task.id ?? '?'))}  ${paint.dim('with')} ${String(withPct).padStart(3)}%  ${paint.dim('without')} ${String(noPct).padStart(3)}%  ${signedPp(task.delta_pp)}  ${labelPaint(label)}`
+    );
+    for (const wrapped of wrapText(String(task.prompt ?? ''), width - 6)) {
+      lines.push(`      ${paint.dim(wrapped)}`);
+    }
+    lines.push(...explainExampleLines('with skill', paint.ok, task.example_with, width));
+    lines.push(...explainExampleLines('without', paint.accent, task.example_without, width));
+  }
+  return lines.join('\n');
 }
 
 function easeOutCubic(t: number): number {

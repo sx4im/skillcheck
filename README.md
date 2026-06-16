@@ -189,7 +189,7 @@ Key properties:
 
 ```bash
 skillcheck                                  # interactive: pick a file, pick effort, run
-skillcheck check <path> [--tasks N] [--trials K] [--output file.json] [--json]
+skillcheck check <path> [--tasks N] [--trials K] [--output file.json] [--json] [--explain]
 skillcheck setup                            # connect / change your API key
 skillcheck logout                           # remove your saved API key
 skillcheck eval <path> [--tasks N] [--trials K] [--output file.json]   # raw JSON evaluator
@@ -223,6 +223,17 @@ or any other `.md` — or a folder containing one. `--tasks` is capped at 50 and
 Each run is an independent experiment — tasks and model outputs are generated
 fresh every time, so results vary run to run. That variance is what the
 confidence interval quantifies.
+
+Add `--explain` to see *why* a verdict landed where it did: a per-task breakdown
+of the with/without pass rates, the change, and a contrasting example model output
+from each arm — printed below the card, and included in `--json` output under
+`explain`. It reuses the outputs the run already produced, so it costs nothing
+extra.
+
+```bash
+skillcheck check ./SKILL.md --explain
+skillcheck check ./SKILL.md --explain --json    # breakdown under result.explain
+```
 
 ## Effort levels
 

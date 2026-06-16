@@ -1,6 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import {
   bannerLines,
+  formatExplain,
   formatQuotaUpsell,
   formatResultCard,
   printBanner,
@@ -100,5 +101,32 @@ describe('ui formatters', () => {
 
   it('exposes a human description of supported inputs', () => {
     expect(supportedSkillFilesText()).toMatch(/Markdown/);
+  });
+
+  it('formats a per-task explain breakdown and returns empty when absent', () => {
+    expect(formatExplain({})).toBe('');
+    expect(formatExplain({ explain: { tasks: [] } })).toBe('');
+    const text = formatExplain({
+      explain: {
+        tasks: [
+          {
+            id: 't001',
+            prompt: 'Write a clear commit message',
+            criterion: 'explains the why',
+            with_skill_pass_rate: 1,
+            no_skill_pass_rate: 0.33,
+            delta_pp: 67,
+            label: 'helped',
+            example_with: { output: 'fix(api): handle null user because the proxy can omit it', pass: true },
+            example_without: { output: 'fix bug', pass: false }
+          }
+        ]
+      }
+    });
+    expect(text).toContain('Per-task breakdown');
+    expect(text).toContain('t001');
+    expect(text).toContain('helped');
+    expect(text).toContain('with skill');
+    expect(text).toContain('handle null user');
   });
 });

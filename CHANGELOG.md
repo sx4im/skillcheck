@@ -6,6 +6,15 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [0.7.0] - 2026-06-16
+
+### Added
+
+- `--explain` flag for `check`/`eval`: prints a per-task breakdown (with/without
+  pass rates, the change, and a contrasting example output from each arm) below the
+  result card, and includes it in `--json` output under `explain`. Reuses the run's
+  existing outputs, so it makes no extra model calls.
+
 ## [0.6.0] - 2026-06-16
 
 ### Added
@@ -36,6 +45,7 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 - Recalibrated effort-level time estimates to observed `gpt-oss-120b` runs.
 
-[Unreleased]: https://github.com/sx4im/skillcheck/compare/v0.6.0...HEAD
+[Unreleased]: https://github.com/sx4im/skillcheck/compare/v0.7.0...HEAD
+[0.7.0]: https://github.com/sx4im/skillcheck/compare/v0.6.0...v0.7.0
 [0.6.0]: https://github.com/sx4im/skillcheck/compare/v0.5.3...v0.6.0
 [0.5.3]: https://github.com/sx4im/skillcheck/releases/tag/v0.5.3
