@@ -5,7 +5,7 @@
 <p align="center">
   <a href="https://www.npmjs.com/package/@sx4im/skillcheck"><img src="https://img.shields.io/npm/v/@sx4im/skillcheck" alt="npm version"></a>
   <a href="https://www.npmjs.com/package/@sx4im/skillcheck"><img src="https://img.shields.io/npm/dm/@sx4im/skillcheck" alt="npm downloads"></a>
-  <a href="https://github.com/sx4im/skillcheck/actions"><img src="https://github.com/sx4im/skillcheck/actions/workflows/rot.yml/badge.svg" alt="CI"></a>
+  <a href="https://github.com/sx4im/skillcheck/actions/workflows/ci.yml"><img src="https://github.com/sx4im/skillcheck/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue" alt="License: MIT"></a>
   <a href="https://nodejs.org"><img src="https://img.shields.io/badge/node-%E2%89%A520-brightgreen" alt="Node ≥20"></a>
 </p>
@@ -326,15 +326,29 @@ To skip the proxy entirely, set `NVIDIA_API_KEY` (see
 
 ```bash
 npm ci
-npm run build      # compile to dist/
-npm test           # vitest (73 tests)
-npm run typecheck  # strict TS, src + tests
+npm run build          # compile to dist/
+npm test               # vitest (131 tests)
+npm run test:coverage  # vitest + v8 coverage gate (85% lines/stmts/funcs, 70% branches)
+npm run lint           # eslint (flat config, typescript-eslint)
+npm run typecheck      # strict TS, src + tests
 ```
 
 The CLI lives in [`packages/cli`](packages/cli) (`bin/skillcheck.ts` → `src/cli.ts`).
 `packages/site` is the static leaderboard site; `dashboard/` is the hosted cloud.
-A scheduled [rot workflow](.github/workflows/rot.yml) re-runs the corpus weekly and
-opens a PR when a skill's verdict regresses.
+
+The suite runs fully offline: the model adapter is mocked, so an end-to-end test
+drives the whole `normalize → generate → run → grade → score` pipeline (plus the
+retry adapter, metering, and every command) without a single API call. The
+interactive terminal shell is verified behaviourally rather than counted toward the
+coverage percentage.
+
+Every push and pull request runs [`ci.yml`](.github/workflows/ci.yml) — lint,
+typecheck, coverage, and a clean build on Node 20 and 22, a published-tarball
+validation, and the dashboard's offline tests — and it makes no model calls, so it
+runs on forks too. Tagging a release (`npm version patch && git push --follow-tags`)
+triggers [`release.yml`](.github/workflows/release.yml), which republishes to npm
+with provenance. Separately, a scheduled [rot workflow](.github/workflows/rot.yml)
+re-runs the live corpus weekly and opens a PR when a skill's verdict regresses.
 
 ## Star history
 

@@ -1,6 +1,6 @@
 {
   "name": "@sx4im/skillcheck",
-  "version": "0.5.3",
+  "version": "0.6.0",
   "description": "Measure whether agent skills improve task performance.",
   "type": "module",
   "license": "MIT",
@@ -37,8 +37,10 @@
     "m0": "tsx packages/cli/bin/skillcheck.ts m0",
     "site:build": "next build packages/site",
     "test": "vitest run",
+    "test:coverage": "vitest run --coverage",
+    "lint": "eslint .",
     "typecheck": "tsc -p tsconfig.json --noEmit && tsc -p tsconfig.test.json --noEmit",
-    "prepublishOnly": "npm run build && npm test"
+    "prepublishOnly": "npm run lint && npm run typecheck && npm run build && npm run test:coverage"
   },
   "engines": {
     "node": ">=20"
@@ -53,14 +55,18 @@
     }
   },
   "devDependencies": {
+    "@eslint/js": "^9.39.4",
     "@types/node": "^22.10.2",
     "@types/react": "^19.2.16",
     "@types/react-dom": "^19.2.3",
+    "@vitest/coverage-v8": "^4.1.8",
+    "eslint": "^9.39.4",
     "next": "^16.2.7",
     "react": "^19.2.7",
     "react-dom": "^19.2.7",
     "tsx": "^4.19.2",
     "typescript": "^5.7.2",
+    "typescript-eslint": "^8.61.1",
     "vitest": "^4.1.8"
   }
 }

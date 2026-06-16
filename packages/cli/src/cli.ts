@@ -303,7 +303,10 @@ async function runInteractiveCheck(): Promise<void> {
 export async function main(argv: string[]): Promise<void> {
   const command = argv[2];
 
-  if (command === '--help' || command === '-h') {
+  // `--help`/`-h` anywhere on the line prints usage. Without this, `skillcheck
+  // check --help` parses `--help` as the skill path and dies with a confusing
+  // "missing path" error instead of showing help.
+  if (argv.includes('--help') || argv.includes('-h')) {
     printHelp();
     return;
   }

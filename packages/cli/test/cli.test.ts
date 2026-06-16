@@ -1,8 +1,8 @@
 import { mkdtemp, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-import { parseCheckOptions } from '../src/cli.js';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { main, parseCheckOptions } from '../src/cli.js';
 import { loadUserConfig, logoutUser, saveUserConfig } from '../src/config.js';
 import { formatFatalError, formatResultCard, validateSkillInput } from '../src/ui.js';
 import { currentVersion, isNewerVersion } from '../src/update.js';
@@ -102,6 +102,33 @@ describe('friendly CLI check command', () => {
 
   it('rejects a missing path', async () => {
     await expect(validateSkillInput('/tmp/does-not-exist-skillcheck.md')).rejects.toThrow(/does not exist/i);
+  });
+});
+
+describe('help', () => {
+  async function runMain(argv: string[]): Promise<string> {
+    const logs: string[] = [];
+    const spy = vi.spyOn(console, 'log').mockImplementation((...args: unknown[]) => {
+      logs.push(args.map((arg) => String(arg)).join(' '));
+    });
+    try {
+      await main(argv);
+    } finally {
+      spy.mockRestore();
+    }
+    return logs.join('\n');
+  }
+
+  it('prints usage for `--help`', async () => {
+    const out = await runMain(['node', 'skillcheck', '--help']);
+    expect(out).toMatch(/Usage/);
+    expect(out).toMatch(/Commands/);
+  });
+
+  it('prints usage for `check --help` instead of erroring on a missing path', async () => {
+    const out = await runMain(['node', 'skillcheck', 'check', '--help']);
+    expect(out).toMatch(/Usage/);
+    expect(out).toMatch(/check <path>/);
   });
 });
 

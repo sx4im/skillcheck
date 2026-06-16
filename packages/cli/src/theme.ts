@@ -182,6 +182,7 @@ export function truncateDisplay(text: string, width: number): string {
   let used = 0;
   let rest = text;
   while (rest.length > 0 && used < width - 1) {
+    // eslint-disable-next-line no-control-regex -- matching ANSI escapes needs \x1b
     const match = /^\x1b\[[0-9;?]*[A-Za-z]/.exec(rest);
     if (match) {
       out += match[0];

@@ -215,6 +215,7 @@ export function printHelpUi(): void {
   opt('--output FILE', 'save the full JSON result');
   opt('--json', 'machine-readable output, no UI');
   opt('--version', 'print the installed version');
+  opt('--help', 'show this help (works after any command)');
   console.log('');
 
   console.log(`  ${paint.accent('Examples')}`);
