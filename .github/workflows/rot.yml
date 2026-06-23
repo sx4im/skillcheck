@@ -43,7 +43,7 @@ jobs:
       TASKS: ${{ inputs.tasks || '10' }}
       TRIALS: ${{ inputs.trials || '3' }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - uses: actions/setup-node@v4
         with:
