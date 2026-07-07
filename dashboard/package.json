@@ -8,7 +8,7 @@
     "node": ">=20"
   },
   "dependencies": {
-    "@clerk/backend": "^3.5.0"
+    "@clerk/backend": "^3.11.0"
   },
   "scripts": {
     "test": "node test/smoke.mjs && node test/proxy.mjs && node test/verify.mjs"
