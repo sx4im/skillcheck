@@ -6,6 +6,14 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [0.9.1] - 2026-07-23
+
+### Fixed
+
+- Allow explicit re-configuration via `skillcheck setup` even when direct provider environment variables are set.
+- Add `--setup` and `--config` command aliases to `skillcheck setup`.
+- Comprehensive `--help` UI documentation for multi-provider BYOK, `matrix` benchmarking, and `--concurrency`.
+
 ## [0.9.0] - 2026-07-23
 
 ### Added
