@@ -127,7 +127,7 @@ export async function verifyProviderKey(
   }
 }
 
-export function createLlmClient(config: ProviderConfig): LlmClient {
+export function createLlmClient(config: ProviderConfig, options: { defaultHeaders?: Record<string, string> } = {}): LlmClient {
   const baseUrl = config.baseUrl || DEFAULT_PROVIDER_BASE_URLS[config.provider] || DEFAULT_PROVIDER_BASE_URLS.nvidia;
 
   if (config.provider === 'anthropic') {
@@ -149,26 +149,32 @@ export function createLlmClient(config: ProviderConfig): LlmClient {
   }
 
   if (config.provider === 'nvidia' || config.provider === 'cloud') {
-    return new NvidiaNimClient({
-      apiKey: config.apiKey,
-      baseUrl,
-      timeoutMs: config.timeoutMs ?? 120000,
-      requestDelayMs: config.requestDelayMs ?? 750,
-      maxAttempts: config.maxAttempts ?? 8,
-      maxRetryDelayMs: config.maxRetryDelayMs ?? 60000,
-      generatorModel: config.generatorModel,
-      graderModel: config.graderModel,
-      runnerModel: config.runnerModel
-    });
+    return new NvidiaNimClient(
+      {
+        apiKey: config.apiKey,
+        baseUrl,
+        timeoutMs: config.timeoutMs ?? 120000,
+        requestDelayMs: config.requestDelayMs ?? 750,
+        maxAttempts: config.maxAttempts ?? 8,
+        maxRetryDelayMs: config.maxRetryDelayMs ?? 60000,
+        generatorModel: config.generatorModel,
+        graderModel: config.graderModel,
+        runnerModel: config.runnerModel
+      },
+      options
+    );
   }
 
-  return new OpenAiCompatClient({
-    apiKey: config.apiKey,
-    baseUrl,
-    timeoutMs: config.timeoutMs,
-    requestDelayMs: config.requestDelayMs,
-    maxAttempts: config.maxAttempts,
-    maxRetryDelayMs: config.maxRetryDelayMs,
-    sendChatTemplateKwargs: false
-  });
+  return new OpenAiCompatClient(
+    {
+      apiKey: config.apiKey,
+      baseUrl,
+      timeoutMs: config.timeoutMs,
+      requestDelayMs: config.requestDelayMs,
+      maxAttempts: config.maxAttempts,
+      maxRetryDelayMs: config.maxRetryDelayMs,
+      sendChatTemplateKwargs: false
+    },
+    options
+  );
 }

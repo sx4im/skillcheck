@@ -20,8 +20,13 @@ async function saveUser(user) {
   return user;
 }
 
+function currentMonthTag() {
+  return new Date().toISOString().slice(0, 7);
+}
+
 export async function getRunsUsed(uid) {
-  return Number((await kvGet(`runsused:${uid}`)) || 0);
+  const month = currentMonthTag();
+  return Number((await kvGet(`runsused:${uid}:${month}`)) || 0);
 }
 
 export async function uidForApiKey(key) {
@@ -79,6 +84,7 @@ export function runLimitFor(plan) {
 // (Previously a missing id was treated as "unmetered/allow", which let anyone
 // with a free key make unlimited model calls by dropping the header.)
 // Returns { allowed, counted, used, limit, reason? }.
+// Quotas automatically reset to 0 at the start of every calendar month.
 export async function consumeRun(uid, runId, plan) {
   const limit = runLimitFor(plan);
   const used = await getRunsUsed(uid);
@@ -96,6 +102,7 @@ export async function consumeRun(uid, runId, plan) {
     return { allowed: false, counted: false, used, limit, reason: 'quota_exceeded' };
   }
 
-  const nowUsed = await kvIncr(`runsused:${uid}`);
+  const month = currentMonthTag();
+  const nowUsed = await kvIncr(`runsused:${uid}:${month}`);
   return { allowed: true, counted: true, used: nowUsed, limit };
 }

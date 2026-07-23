@@ -6,6 +6,14 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [0.9.3] - 2026-07-23
+
+### Fixed
+
+- Pass session `x-skillcheck-run` header on all model completion calls in `evalSkill` so an entire evaluation run is metered as 1 single run instead of charging per call.
+- Monthly automatic quota reset: free tier 10 runs auto-refresh on the 1st of every calendar month.
+- Immediately refreshed 10/10 free runs for all existing users affected by the previous header bug.
+
 ## [0.9.1] - 2026-07-23
 
 ### Fixed

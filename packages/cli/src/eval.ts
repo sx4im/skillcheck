@@ -1,3 +1,4 @@
+import { randomUUID } from 'node:crypto';
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { createLlmClient } from './adapters/providers.js';
@@ -169,7 +170,8 @@ export async function evalSkill(options: EvalOptions): Promise<unknown> {
   const skill = await normalizeSkill(options.inputPath);
   const baseConfig = loadProviderConfig();
   const config = applyModelOverrides(baseConfig, options);
-  const client = createLlmClient(config);
+  const runId = randomUUID();
+  const client = createLlmClient(config, { defaultHeaders: { 'x-skillcheck-run': runId } });
   // Fresh by default: a disabled cache neither reads nor writes, so repeating the
   // same skill at the same effort always re-runs from scratch and leaves no files.
   const cache = options.useCache ? new JsonCache() : JsonCache.disabled();
