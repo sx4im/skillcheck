@@ -1,0 +1,7 @@
+User-agent: *
+Allow: /
+Disallow: /app.html
+Disallow: /sso-callback.html
+Disallow: /api/
+
+Sitemap: https://www.skillcheck.page/sitemap.xml

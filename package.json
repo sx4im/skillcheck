@@ -1,0 +1,72 @@
+{
+  "name": "@sx4im/skillcheck",
+  "version": "0.8.0",
+  "description": "Measure whether agent skills improve task performance.",
+  "type": "module",
+  "license": "MIT",
+  "author": "sx4im",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sx4im/skillcheck.git"
+  },
+  "bugs": {
+    "url": "https://github.com/sx4im/skillcheck/issues"
+  },
+  "homepage": "https://github.com/sx4im/skillcheck#readme",
+  "keywords": [
+    "agents",
+    "ai",
+    "benchmark",
+    "cli",
+    "evaluation",
+    "skills"
+  ],
+  "bin": {
+    "skillcheck": "dist/bin/skillcheck.js"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "METHODOLOGY.md"
+  ],
+  "scripts": {
+    "build": "rm -rf dist && tsc -p tsconfig.json && chmod +x dist/bin/skillcheck.js",
+    "m0": "tsx packages/cli/bin/skillcheck.ts m0",
+    "site:build": "next build packages/site",
+    "test": "vitest run",
+    "test:coverage": "vitest run --coverage",
+    "lint": "eslint .",
+    "typecheck": "tsc -p tsconfig.json --noEmit && tsc -p tsconfig.test.json --noEmit",
+    "prepublishOnly": "npm run lint && npm run typecheck && npm run build && npm run test:coverage"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.7",
+    "openai": "^4.77.0"
+  },
+  "overrides": {
+    "next": {
+      "postcss": "8.5.10"
+    }
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.39.4",
+    "@types/node": "^22.10.2",
+    "@types/react": "^19.2.16",
+    "@types/react-dom": "^19.2.3",
+    "@vitest/coverage-v8": "^4.1.8",
+    "eslint": "^9.39.4",
+    "next": "^16.2.7",
+    "react": "^19.2.7",
+    "react-dom": "^19.2.7",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.2",
+    "typescript-eslint": "^8.61.1",
+    "vitest": "^4.1.8"
+  }
+}

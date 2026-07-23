@@ -1,0 +1,78 @@
+{
+  "generated_at": "2026-06-04T14:07:20.604Z",
+  "results_dir": "fixtures/m4/results",
+  "model": "simulated/new-runner-model",
+  "summary": {
+    "skills": 1,
+    "new": 0,
+    "stable": 0,
+    "rot": 1
+  },
+  "skills": [
+    {
+      "key": "m4-rot-canary:m4-rot-canary-skill-hash",
+      "skill": {
+        "name": "M4 Rot Canary",
+        "source": "fixtures/m4/rot-canary/SKILL.md",
+        "format": "SKILL.md",
+        "commit_hash": "m4-rot-canary-skill-hash",
+        "domain": "rot detection canary"
+      },
+      "status": "rot",
+      "latest": {
+        "result_id": "m4-rot-canary--new-model-nextjs",
+        "file_path": "new-model-nextjs.json",
+        "runner_model": "simulated/new-runner-model",
+        "runner_version": "simulated/new-runner-model",
+        "run_date": "2026-06-04",
+        "effect_pp": 0,
+        "ci_pp": [
+          0,
+          0
+        ],
+        "verdict": "placebo"
+      },
+      "changed_from": {
+        "result_id": "m4-rot-canary--baseline-nextjs",
+        "file_path": "baseline-nextjs.json",
+        "runner_model": "mistralai/mistral-small-4-119b-2603",
+        "runner_version": "mistralai/mistral-small-4-119b-2603",
+        "run_date": "2026-06-03",
+        "effect_pp": 50,
+        "ci_pp": [
+          16.67,
+          83.33
+        ],
+        "verdict": "helps"
+      },
+      "history": [
+        {
+          "result_id": "m4-rot-canary--baseline-nextjs",
+          "file_path": "baseline-nextjs.json",
+          "runner_model": "mistralai/mistral-small-4-119b-2603",
+          "runner_version": "mistralai/mistral-small-4-119b-2603",
+          "run_date": "2026-06-03",
+          "effect_pp": 50,
+          "ci_pp": [
+            16.67,
+            83.33
+          ],
+          "verdict": "helps"
+        },
+        {
+          "result_id": "m4-rot-canary--new-model-nextjs",
+          "file_path": "new-model-nextjs.json",
+          "runner_model": "simulated/new-runner-model",
+          "runner_version": "simulated/new-runner-model",
+          "run_date": "2026-06-04",
+          "effect_pp": 0,
+          "ci_pp": [
+            0,
+            0
+          ],
+          "verdict": "placebo"
+        }
+      ]
+    }
+  ]
+}

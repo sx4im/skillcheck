@@ -1,0 +1,27 @@
+node_modules/
+dist/
+.cache/
+results/
+.env
+*.log
+site/.next/
+site/out/
+site/node_modules/
+packages/site/.next/
+packages/site/out/
+packages/site/node_modules/
+.vercel/
+dashboard/.vercel/
+.DS_Store
+
+# Internal design references, not part of the open-source release
+DESIGN.md
+
+# Doodle inspiration source art (Freepik/rawpixel stock — license forbids
+# redistribution/archiving). Used only as reference to draw original glyphs.
+dashboard/assets/*-doodle*/
+dashboard/assets/*-doodles/
+dashboard/assets/arrow-doodles-set/
+dashboard/assets/*doodle*.zip
+dashboard/assets/arrow-doodles-set.zip
+coverage/

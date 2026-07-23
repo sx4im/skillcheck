@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Signing you in · SkillCheck</title>
+    <meta name="robots" content="noindex, nofollow" />
+    <meta name="theme-color" content="#0b1220" />
+    <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml" />
+    <link rel="icon" href="/assets/icon-32.png" type="image/png" sizes="32x32" />
+    <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="/assets/styles.css" />
+  </head>
+  <body>
+    <div class="wrap" style="padding:120px 0; text-align:center">
+      <div class="brand" style="justify-content:center; margin-bottom:18px">
+        <span class="mark" aria-hidden="true">
+          <svg width="24" height="18" viewBox="0 0 52 38" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <linearGradient id="gsso-a" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#22d3ee"/><stop offset="1" stop-color="#3b82f6"/></linearGradient>
+              <linearGradient id="gsso-b" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#3b82f6"/><stop offset="1" stop-color="#6366f1"/></linearGradient>
+            </defs>
+            <path d="M9 0h13l-9 38H0L9 0Z" fill="url(#gsso-a)"/>
+            <path d="M27 0h13l-9 38H18L27 0Z" fill="url(#gsso-b)"/>
+          </svg>
+        </span>
+        SkillCheck
+      </div>
+      <div class="skeleton" style="max-width:260px; margin:0 auto">
+        <div class="sk"></div>
+        <div class="sk w60" style="margin-left:auto; margin-right:auto"></div>
+      </div>
+      <p class="muted" style="margin-top:6px">Completing sign-in…</p>
+    </div>
+    <script type="module">
+      import { getClerk } from '/assets/auth.js';
+      try {
+        const clerk = await getClerk();
+        await clerk.handleRedirectCallback({ afterSignInUrl: '/app.html', afterSignUpUrl: '/app.html' });
+      } catch (error) {
+        location.href = '/?error=sso';
+      }
+    </script>
+  </body>
+</html>

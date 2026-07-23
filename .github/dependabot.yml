@@ -1,0 +1,24 @@
+version: 2
+updates:
+  # CLI / root package
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5
+    groups:
+      dev-dependencies:
+        dependency-type: development
+
+  # Hosted dashboard (separate lockfile)
+  - package-ecosystem: npm
+    directory: /dashboard
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5
+
+  # GitHub Actions used by ci.yml / release.yml / rot.yml
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly

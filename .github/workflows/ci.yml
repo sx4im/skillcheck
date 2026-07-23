@@ -1,0 +1,102 @@
+name: ci
+
+# Per-commit quality gate: lint, typecheck, coverage, and a clean build on every
+# push to main and every pull request. (The separate rot.yml runs the live corpus
+# on a weekly schedule and needs the NVIDIA secret — this one never makes model
+# calls, so it runs for forks and PRs too.)
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  cli:
+    name: CLI (Node ${{ matrix.node }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        node: ['20', '22']
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+          cache: npm
+
+      - run: npm ci
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Typecheck (src + tests)
+        run: npm run typecheck
+
+      - name: Test with coverage
+        run: npm run test:coverage
+
+      - name: Build
+        run: npm run build
+
+      - name: Smoke-test the built binary
+        run: |
+          node dist/bin/skillcheck.js --version
+          help_out="$(node dist/bin/skillcheck.js --help)"
+          grep -q "Usage" <<< "$help_out"
+
+  package:
+    name: Package validation
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+
+      - run: npm ci
+      - run: npm run build
+
+      # Confirm the published tarball contains the executable entrypoint and
+      # nothing unintended (no src/tests/secrets), and that a publish would succeed.
+      - name: Inspect the publish tarball
+        run: |
+          set -euo pipefail
+          files="$(npm pack --dry-run --json | node -e "let d='';process.stdin.on('data',c=>d+=c);process.stdin.on('end',()=>{for(const f of JSON.parse(d)[0].files)console.log(f.path)})")"
+          echo "$files"
+          grep -qx "dist/bin/skillcheck.js" <<< "$files"
+          grep -qx "README.md" <<< "$files"
+          if grep -qE "(^|/)\.env|packages/cli/test/" <<< "$files"; then
+            echo "::error::tarball contains files that should not be published"
+            exit 1
+          fi
+      - run: npm publish --dry-run
+
+  dashboard:
+    name: Dashboard
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: dashboard
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+          cache-dependency-path: dashboard/package-lock.json
+
+      - run: npm ci
+
+      - name: Test (offline smoke + proxy + verify)
+        run: npm test

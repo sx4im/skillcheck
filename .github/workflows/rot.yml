@@ -1,0 +1,136 @@
+name: skillcheck rot
+
+on:
+  schedule:
+    - cron: "17 5 * * 1"
+  workflow_dispatch:
+    inputs:
+      simulate_only:
+        description: "Run the M4 simulated model-swap gate without NVIDIA calls"
+        default: true
+        required: false
+        type: boolean
+      runner_model:
+        description: "NVIDIA runner model ID for the rerun"
+        required: false
+        type: string
+      tasks:
+        description: "Tasks per skill"
+        default: "10"
+        required: false
+        type: string
+      trials:
+        description: "Trials per task"
+        default: "3"
+        required: false
+        type: string
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  rot:
+    runs-on: ubuntu-latest
+    env:
+      NVIDIA_API_KEY: ${{ secrets.NVIDIA_API_KEY }}
+      NVIDIA_BASE_URL: ${{ vars.NVIDIA_BASE_URL }}
+      NVIDIA_RUNNER_MODEL: ${{ vars.NVIDIA_RUNNER_MODEL }}
+      NVIDIA_GRADER_MODEL: ${{ vars.NVIDIA_GRADER_MODEL }}
+      NVIDIA_GENERATOR_MODEL: ${{ vars.NVIDIA_GENERATOR_MODEL }}
+      NVIDIA_REQUEST_DELAY_MS: ${{ vars.NVIDIA_REQUEST_DELAY_MS }}
+      NVIDIA_TIMEOUT_MS: ${{ vars.NVIDIA_TIMEOUT_MS }}
+      TASKS: ${{ inputs.tasks || '10' }}
+      TRIALS: ${{ inputs.trials || '3' }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+
+      - run: npm ci
+
+      - run: npm run build
+
+      - run: npm test
+
+      - name: Run simulated M4 gate
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.simulate_only }}
+        run: |
+          set -euo pipefail
+          node dist/bin/skillcheck.js rot \
+            --results fixtures/m4/results \
+            --output /tmp/skillcheck-m4-rot-report.json \
+            --model simulated/new-runner-model
+          SKILLCHECK_RESULTS_DIR=fixtures/m4/results \
+            SKILLCHECK_ROT_REPORT=/tmp/skillcheck-m4-rot-report.json \
+            npm run site:build
+          grep -R "Rot flagged" packages/site/out/skill/m4-rot-canary-fixtures-m4-results-new-model-nextjs/index.html
+          grep -R "Rot Timeline" packages/site/out/skill/m4-rot-canary-fixtures-m4-results-new-model-nextjs/index.html
+          grep -R "simulated/new-runner-model" packages/site/out/skill/m4-rot-canary-fixtures-m4-results-new-model-nextjs/index.html
+          node dist/bin/skillcheck.js rot \
+            --results results \
+            --output results/rot/report.json
+
+      - name: Run rot rerun
+        if: ${{ github.event_name != 'workflow_dispatch' || !inputs.simulate_only }}
+        env:
+          DISPATCH_RUNNER_MODEL: ${{ inputs.runner_model }}
+        run: |
+          set -euo pipefail
+          runner_model="${DISPATCH_RUNNER_MODEL:-$NVIDIA_RUNNER_MODEL}"
+          if [ -z "$NVIDIA_API_KEY" ]; then
+            echo "NVIDIA_API_KEY secret is required"
+            exit 1
+          fi
+          if [ -z "$NVIDIA_GRADER_MODEL" ] || [ -z "$NVIDIA_GENERATOR_MODEL" ]; then
+            echo "NVIDIA_GRADER_MODEL and NVIDIA_GENERATOR_MODEL repository variables are required"
+            exit 1
+          fi
+          if [ -z "$runner_model" ]; then
+            echo "Set workflow input runner_model or repository variable NVIDIA_RUNNER_MODEL"
+            exit 1
+          fi
+          node dist/bin/skillcheck.js rot \
+            --corpus corpus/corpus.yaml \
+            --model "$runner_model" \
+            --results results \
+            --output results/rot/report.json \
+            --tasks "$TASKS" \
+            --trials "$TRIALS"
+
+      - run: npm run site:build
+
+      - name: Open pull request
+        env:
+          GH_TOKEN: ${{ github.token }}
+          DISPATCH_RUNNER_MODEL: ${{ inputs.runner_model }}
+        run: |
+          set -euo pipefail
+          if git diff --quiet -- results; then
+            echo "No result changes to publish"
+            exit 0
+          fi
+          branch="skillcheck/rot-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          runner_label="${DISPATCH_RUNNER_MODEL:-${NVIDIA_RUNNER_MODEL:-simulated/manual-dispatch}}"
+          git checkout -b "$branch"
+          git add results
+          git commit -m "Update skillcheck rot results"
+          git push --set-upstream origin "$branch"
+          if ! command -v gh >/dev/null 2>&1; then
+            echo "::error::GitHub CLI (gh) is not available on this runner"
+            exit 1
+          fi
+          if ! gh pr create \
+            --title "Update skillcheck rot results" \
+            --body "Automated skillcheck rot rerun for runner model ${runner_label}." \
+            --base "$GITHUB_REF_NAME" \
+            --head "${GITHUB_REPOSITORY_OWNER}:$branch"
+          then
+            echo "::error::Failed to create pull request. If the branch push succeeded, enable Settings > Actions > General > Workflow permissions > Allow GitHub Actions to create and approve pull requests."
+            exit 1
+          fi

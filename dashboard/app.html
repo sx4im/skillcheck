@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Dashboard · SkillCheck</title>
+    <meta name="robots" content="noindex, nofollow" />
+    <meta name="theme-color" content="#0b1220" />
+    <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml" />
+    <link rel="icon" href="/assets/icon-32.png" type="image/png" sizes="32x32" />
+    <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png" />
+    <link rel="manifest" href="/site.webmanifest" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="/assets/styles.css" />
+  </head>
+  <body class="app-bg">
+    <div class="util">
+      <div class="wrap">
+        <span id="utilEmail">SkillCheck Cloud</span>
+        <button class="btn-text util-signout" data-action="signout">Sign out</button>
+      </div>
+    </div>
+
+    <nav class="nav" aria-label="Main">
+      <div class="wrap">
+        <a class="brand" href="/" aria-label="SkillCheck home">
+          <span class="mark" aria-hidden="true">
+            <svg width="24" height="18" viewBox="0 0 52 38" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <defs>
+                <linearGradient id="gapp-a" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#22d3ee"/><stop offset="1" stop-color="#3b82f6"/></linearGradient>
+                <linearGradient id="gapp-b" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#3b82f6"/><stop offset="1" stop-color="#6366f1"/></linearGradient>
+              </defs>
+              <path d="M9 0h13l-9 38H0L9 0Z" fill="url(#gapp-a)"/>
+              <path d="M27 0h13l-9 38H18L27 0Z" fill="url(#gapp-b)"/>
+            </svg>
+          </span>
+          SkillCheck
+        </a>
+        <div class="spacer"></div>
+        <div class="right">
+          <span id="planBadge" class="badge badge-outline">Free</span>
+          <button class="btn btn-outline-ink btn-sm" data-action="signout">Sign out</button>
+        </div>
+      </div>
+    </nav>
+
+    <main class="wrap" style="padding-top:48px; padding-bottom:80px">
+      <span class="eyebrow">Dashboard</span>
+      <h1 style="font-size:40px">Your API key</h1>
+      <p class="muted" style="margin-top:10px">Use this key as <code>SKILLCHECK_TOKEN</code>. It maps to our server-side model provider key, so keep it private.</p>
+
+      <div id="loading" class="skeleton muted" aria-live="polite">
+        <div class="sk w40"></div>
+        <div class="sk w80"></div>
+        <div class="sk w60"></div>
+      </div>
+
+      <div id="content" style="display:none; margin-top:32px">
+        <div class="dash-grid">
+          <div class="stack">
+            <div class="card">
+              <h3>SkillCheck API key</h3>
+              <div class="keyfield" style="margin-top:14px">
+                <code id="apiKey">chk_live_…</code>
+                <button class="btn btn-outline-ink btn-sm" id="revealBtn">Reveal</button>
+                <button class="btn btn-primary btn-sm" id="copyKeyBtn">Copy</button>
+              </div>
+              <div style="margin-top:14px">
+                <button class="btn-text" id="rotateBtn">Rotate key</button>
+                <span class="fine" style="margin-left:8px">Rotating invalidates the old key immediately.</span>
+              </div>
+            </div>
+
+            <div class="card">
+              <div class="usage-head">
+                <h3>Usage</h3>
+                <span id="usageCount" class="muted">0 / 10 runs</span>
+              </div>
+              <div class="bar"><div class="bar-fill" id="usageBar"></div></div>
+              <div id="upgradeRow" style="margin-top:18px; display:none">
+                <button class="btn btn-primary" id="upgradeBtn">Upgrade to Pro</button>
+                <span class="fine" id="upgradeNote" style="margin-left:8px"></span>
+              </div>
+              <div id="proRow" style="margin-top:18px; display:none">
+                <span class="badge badge-pro">Pro · unlimited runs</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <h3>Quickstart</h3>
+            <p class="muted" style="margin-top:8px">Paste these into your terminal, then check any skill.</p>
+            <div class="code" id="commands" style="margin-top:14px"><span id="commandsText"></span><button class="copy" id="copyCmd" aria-label="Copy quickstart commands">Copy</button></div>
+            <p class="fine" style="margin-top:12px">Prefer interactive setup? Run <code>skillcheck setup</code> and paste your key when asked.</p>
+          </div>
+        </div>
+
+        <div class="card whatsnew" style="margin-top:24px">
+          <div class="usage-head">
+            <h3>What's new in the CLI</h3>
+            <a class="btn-text" href="https://github.com/sx4im/skillcheck/blob/main/CHANGELOG.md" rel="noopener">Full changelog →</a>
+          </div>
+          <p class="muted" style="margin-top:8px">Update any time with <code>npm install -g @sx4im/skillcheck</code>.</p>
+          <ul class="changelog" style="margin-top:20px">
+            <li>
+              <div class="cl-head"><span class="badge badge-pro">v0.7.1</span> <span class="fine">2026-06-16</span></div>
+              <p class="cl-title">Smoother interactive runs</p>
+              <p>Running <code>skillcheck check &lt;file&gt;</code> now asks how thorough to be (Quick / Standard / Thorough) instead of guessing, and after the result it offers the per-task breakdown — no need to remember <code>--explain</code>. The progress bar is more precise, too.</p>
+              <div class="code cl-code"><span>skillcheck check ./SKILL.md</span></div>
+            </li>
+            <li>
+              <div class="cl-head"><span class="badge badge-outline">v0.7.0</span> <span class="fine">2026-06-16</span></div>
+              <p class="cl-title"><code>--explain</code> — per-task breakdown</p>
+              <p>See <em>why</em> a verdict landed: with/without pass rates for every task, the change, and a contrasting example model output from each arm — printed under the result card and in <code>--json</code> output. It reuses the run's outputs, so it costs no extra runs.</p>
+              <div class="code cl-code"><span>skillcheck check ./SKILL.md --explain</span></div>
+            </li>
+            <li>
+              <div class="cl-head"><span class="badge badge-outline">v0.6.0</span> <span class="fine">2026-06-16</span></div>
+              <p class="cl-title">Friendlier help &amp; production hardening</p>
+              <p><code>skillcheck &lt;command&gt; --help</code> now prints usage from anywhere, plus a full test, coverage, and release pipeline behind the scenes.</p>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="wrap">
+        <div class="legal">
+          <span>© <span id="year"></span> SkillCheck. Keep your API key private.</span>
+          <span><a href="https://github.com/sx4im/skillcheck" rel="noopener">GitHub</a> · <a href="https://github.com/sx4im/skillcheck/blob/main/METHODOLOGY.md" rel="noopener">Methodology</a></span>
+        </div>
+      </div>
+    </footer>
+
+    <script type="module" src="/assets/app.js"></script>
+  </body>
+</html>

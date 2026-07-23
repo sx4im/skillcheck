@@ -1,0 +1,52 @@
+{
+  "skill": {
+    "name": "M4 Rot Canary",
+    "source": "fixtures/m4/rot-canary/SKILL.md",
+    "format": "SKILL.md",
+    "commit_hash": "m4-rot-canary-skill-hash",
+    "domain": "rot detection canary"
+  },
+  "config": {
+    "runner_model": "simulated/new-runner-model",
+    "runner_version": "simulated/new-runner-model",
+    "grader_model": "stepfun-ai/step-3.7-flash",
+    "grader_version": "stepfun-ai/step-3.7-flash",
+    "generator_model": "stepfun-ai/step-3.7-flash",
+    "trials": 3,
+    "tasks": 1,
+    "temperature": 0.7,
+    "mode": "forced-injection"
+  },
+  "result": {
+    "effect_pp": 0,
+    "ci_pp": [0, 0],
+    "verdict": "placebo",
+    "with_skill_pass": 0.5,
+    "no_skill_pass": 0.5,
+    "token_overhead": 120,
+    "value_per_1k_tokens": 0
+  },
+  "tasks": [
+    {
+      "id": "m4-rot-canary",
+      "prompt": "Return the canary token.",
+      "criterion_type": "deterministic",
+      "criterion": "includes:ROT-CANARY",
+      "arm_a_pass_rate": 0.5,
+      "arm_b_pass_rate": 0.5
+    }
+  ],
+  "reproducibility": {
+    "task_suite_path": "fixtures/m4/tasks.json",
+    "transcript_hashes": ["m4-new-with", "m4-new-without"]
+  },
+  "history": [
+    {
+      "runner_version": "simulated/new-runner-model",
+      "run_date": "2026-06-04",
+      "effect_pp": 0,
+      "verdict": "placebo"
+    }
+  ],
+  "run_date": "2026-06-04"
+}

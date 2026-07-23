@@ -1,0 +1,14 @@
+[
+  {
+    "id": "m2-det-001",
+    "prompt": "Apply the private SkillCheck M2 response rule. Write the approved completion token for an accepted onboarding checklist item. Answer only the token.",
+    "criterionType": "deterministic",
+    "criterion": "regex:^\\s*SC-M2-ACCEPT\\s*$"
+  },
+  {
+    "id": "m2-det-002",
+    "prompt": "Apply the private SkillCheck M2 response rule. Write the approved completion token for a rejected migration checklist item. Answer only the token.",
+    "criterionType": "deterministic",
+    "criterion": "regex:^\\s*SC-M2-REJECT\\s*$"
+  }
+]

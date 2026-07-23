@@ -1,0 +1,145 @@
+{
+  "name": "launch-20",
+  "skills": [
+    {
+      "id": "awesome-nextjs",
+      "source": "jnMetaCode/awesome-claude-md",
+      "repo": "https://github.com/jnMetaCode/awesome-claude-md.git",
+      "commit": "fe38fcd8f245460b989879c9155a16404e77cffa",
+      "path": "by-framework/nextjs/CLAUDE.md"
+    },
+    {
+      "id": "awesome-react",
+      "source": "jnMetaCode/awesome-claude-md",
+      "repo": "https://github.com/jnMetaCode/awesome-claude-md.git",
+      "commit": "fe38fcd8f245460b989879c9155a16404e77cffa",
+      "path": "by-framework/react/CLAUDE.md"
+    },
+    {
+      "id": "awesome-fastapi",
+      "source": "jnMetaCode/awesome-claude-md",
+      "repo": "https://github.com/jnMetaCode/awesome-claude-md.git",
+      "commit": "fe38fcd8f245460b989879c9155a16404e77cffa",
+      "path": "by-framework/fastapi/CLAUDE.md"
+    },
+    {
+      "id": "awesome-typescript",
+      "source": "jnMetaCode/awesome-claude-md",
+      "repo": "https://github.com/jnMetaCode/awesome-claude-md.git",
+      "commit": "fe38fcd8f245460b989879c9155a16404e77cffa",
+      "path": "by-language/typescript/CLAUDE.md"
+    },
+    {
+      "id": "awesome-python",
+      "source": "jnMetaCode/awesome-claude-md",
+      "repo": "https://github.com/jnMetaCode/awesome-claude-md.git",
+      "commit": "fe38fcd8f245460b989879c9155a16404e77cffa",
+      "path": "by-language/python/CLAUDE.md"
+    },
+    {
+      "id": "awesome-rust",
+      "source": "jnMetaCode/awesome-claude-md",
+      "repo": "https://github.com/jnMetaCode/awesome-claude-md.git",
+      "commit": "fe38fcd8f245460b989879c9155a16404e77cffa",
+      "path": "by-language/rust/CLAUDE.md"
+    },
+    {
+      "id": "matt-tdd",
+      "source": "mattpocock/skills",
+      "repo": "https://github.com/mattpocock/skills.git",
+      "commit": "aaf2453fbdfe7a15c07f11d861224f34ab4b53cb",
+      "path": "skills/engineering/tdd/SKILL.md"
+    },
+    {
+      "id": "matt-diagnose",
+      "source": "mattpocock/skills",
+      "repo": "https://github.com/mattpocock/skills.git",
+      "commit": "aaf2453fbdfe7a15c07f11d861224f34ab4b53cb",
+      "path": "skills/engineering/diagnose/SKILL.md"
+    },
+    {
+      "id": "matt-architecture",
+      "source": "mattpocock/skills",
+      "repo": "https://github.com/mattpocock/skills.git",
+      "commit": "aaf2453fbdfe7a15c07f11d861224f34ab4b53cb",
+      "path": "skills/engineering/improve-codebase-architecture/SKILL.md"
+    },
+    {
+      "id": "matt-prototype",
+      "source": "mattpocock/skills",
+      "repo": "https://github.com/mattpocock/skills.git",
+      "commit": "aaf2453fbdfe7a15c07f11d861224f34ab4b53cb",
+      "path": "skills/engineering/prototype/SKILL.md"
+    },
+    {
+      "id": "matt-to-prd",
+      "source": "mattpocock/skills",
+      "repo": "https://github.com/mattpocock/skills.git",
+      "commit": "aaf2453fbdfe7a15c07f11d861224f34ab4b53cb",
+      "path": "skills/engineering/to-prd/SKILL.md"
+    },
+    {
+      "id": "matt-to-issues",
+      "source": "mattpocock/skills",
+      "repo": "https://github.com/mattpocock/skills.git",
+      "commit": "aaf2453fbdfe7a15c07f11d861224f34ab4b53cb",
+      "path": "skills/engineering/to-issues/SKILL.md"
+    },
+    {
+      "id": "matt-triage",
+      "source": "mattpocock/skills",
+      "repo": "https://github.com/mattpocock/skills.git",
+      "commit": "aaf2453fbdfe7a15c07f11d861224f34ab4b53cb",
+      "path": "skills/engineering/triage/SKILL.md"
+    },
+    {
+      "id": "antigravity-angular",
+      "source": "sickn33/antigravity-awesome-skills",
+      "repo": "https://github.com/sickn33/antigravity-awesome-skills.git",
+      "commit": "b806b97a9a48063f7bdbee5611caf40edd17e305",
+      "path": "plugins/antigravity-awesome-skills-claude/skills/angular/SKILL.md"
+    },
+    {
+      "id": "antigravity-api-docs",
+      "source": "sickn33/antigravity-awesome-skills",
+      "repo": "https://github.com/sickn33/antigravity-awesome-skills.git",
+      "commit": "b806b97a9a48063f7bdbee5611caf40edd17e305",
+      "path": "plugins/antigravity-awesome-skills-claude/skills/api-documentation/SKILL.md"
+    },
+    {
+      "id": "antigravity-api-design",
+      "source": "sickn33/antigravity-awesome-skills",
+      "repo": "https://github.com/sickn33/antigravity-awesome-skills.git",
+      "commit": "b806b97a9a48063f7bdbee5611caf40edd17e305",
+      "path": "plugins/antigravity-awesome-skills-claude/skills/api-design-principles/SKILL.md"
+    },
+    {
+      "id": "antigravity-astro",
+      "source": "sickn33/antigravity-awesome-skills",
+      "repo": "https://github.com/sickn33/antigravity-awesome-skills.git",
+      "commit": "b806b97a9a48063f7bdbee5611caf40edd17e305",
+      "path": "plugins/antigravity-awesome-skills-claude/skills/astro/SKILL.md"
+    },
+    {
+      "id": "antigravity-auth-patterns",
+      "source": "sickn33/antigravity-awesome-skills",
+      "repo": "https://github.com/sickn33/antigravity-awesome-skills.git",
+      "commit": "b806b97a9a48063f7bdbee5611caf40edd17e305",
+      "path": "plugins/antigravity-awesome-skills-claude/skills/auth-implementation-patterns/SKILL.md"
+    },
+    {
+      "id": "antigravity-adr",
+      "source": "sickn33/antigravity-awesome-skills",
+      "repo": "https://github.com/sickn33/antigravity-awesome-skills.git",
+      "commit": "b806b97a9a48063f7bdbee5611caf40edd17e305",
+      "path": "plugins/antigravity-awesome-skills-claude/skills/architecture-decision-records/SKILL.md"
+    },
+    {
+      "id": "awesome-go",
+      "source": "jnMetaCode/awesome-claude-md",
+      "repo": "https://github.com/jnMetaCode/awesome-claude-md.git",
+      "commit": "fe38fcd8f245460b989879c9155a16404e77cffa",
+      "path": "by-language/go/CLAUDE.md"
+    }
+  ]
+}

@@ -1,0 +1,8 @@
+[
+  {
+    "id": "m4-rot-canary",
+    "prompt": "Return the canary token.",
+    "criterionType": "deterministic",
+    "criterion": "includes:ROT-CANARY"
+  }
+]

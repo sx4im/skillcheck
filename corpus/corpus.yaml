@@ -1,0 +1,14 @@
+name: awesome-claude-md
+repo: https://github.com/jnMetaCode/awesome-claude-md.git
+commit: fe38fcd8f245460b989879c9155a16404e77cffa
+skills:
+  - id: nextjs
+    path: by-framework/nextjs/CLAUDE.md
+  - id: react
+    path: by-framework/react/CLAUDE.md
+  - id: fastapi
+    path: by-framework/fastapi/CLAUDE.md
+  - id: typescript
+    path: by-language/typescript/CLAUDE.md
+  - id: python
+    path: by-language/python/CLAUDE.md
