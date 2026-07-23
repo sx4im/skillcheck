@@ -218,7 +218,7 @@ document.querySelectorAll('.copy').forEach(function (btn) {
   }
 })();
 
-// --- FAQ Accordion: Single open item at a time (keeps section height stable) ---
+// --- FAQ Accordion: Single open item with smooth toggle opening & closing ---
 (function initFaqAccordion() {
   const faqContainer = document.querySelector('.faq');
   if (!faqContainer) return;
@@ -233,10 +233,15 @@ document.querySelectorAll('.copy').forEach(function (btn) {
 
     summary.addEventListener('click', function (e) {
       e.preventDefault();
+      const isOpen = targetDetail.hasAttribute('open');
+
       detailsList.forEach(function (detail) {
         detail.removeAttribute('open');
       });
-      targetDetail.setAttribute('open', '');
+
+      if (!isOpen) {
+        targetDetail.setAttribute('open', '');
+      }
     });
   });
 })();

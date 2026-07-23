@@ -28,6 +28,14 @@ function progressBar(completed: number, total: number, width = 16): string {
   return `${epaint.accent(SYM.barOn.repeat(filled))}${epaint.dim(SYM.barOff.repeat(width - filled))}`;
 }
 
+function indeterminateBar(frame: number, width = 16): string {
+  const cycle = (width - 2) * 2;
+  const pos = cycle > 0 ? frame % cycle : 0;
+  const idx = pos < width - 2 ? pos : cycle - pos;
+  const chars = Array.from({ length: width }, (_, i) => (i >= idx && i <= idx + 2 ? SYM.barOn : SYM.barOff));
+  return `${epaint.accent(chars.join(''))}`;
+}
+
 export interface ProgressController {
   update: (event: ProgressUpdate) => void;
   finish: () => void;
@@ -73,7 +81,7 @@ export function startProgress(): ProgressController {
     const pct = counted ? Math.floor((current.completed! / current.total!) * 100) : 0;
     const bar = counted
       ? ` ${progressBar(current.completed!, current.total!)} ${epaint.dim(`${current.completed}/${current.total} (${pct}%)`)}`
-      : '';
+      : ` ${indeterminateBar(frame)}`;
     const elapsed = epaint.dim(` ${SYM.dot} ${formatElapsed(Date.now() - startedAt)}`);
     stream.write(`\r\x1b[2K${spinner} ${label}${bar}${elapsed}`);
   };

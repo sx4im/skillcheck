@@ -382,27 +382,27 @@
         <div class="faq reveal">
           <details open>
             <summary>What is SkillCheck?</summary>
-            <div class="a">SkillCheck is an open source CLI and cloud service that measures whether an agent skill file actually improves a model's task performance. It runs a controlled A/B experiment instead of relying on intuition: the same tasks are solved with and without your skill, graded blind, and scored with a bootstrap confidence interval.</div>
+            <div class="a">SkillCheck is an open-source CLI and cloud service that measures whether an agent skill file actually improves task performance. It runs a controlled A/B experiment: tasks are solved with and without your skill, graded blind, and scored with a bootstrap confidence interval.</div>
           </details>
           <details>
             <summary>How does SkillCheck test a skill?</summary>
-            <div class="a">SkillCheck reads your skill's declared domain and generates fresh evaluation tasks from the domain only, so tasks can never leak the skill's instructions. Each task runs in two arms, with and without the skill injected as a system prompt. A separate grader model scores every output blind, then a 1,000 iteration paired bootstrap produces the effect size, a 95% confidence interval, and one verdict: HELPS, PLACEBO, or HARMS.</div>
+            <div class="a">SkillCheck reads your skill domain and generates fresh evaluation tasks. Each task runs with and without your skill injected. A separate grader model scores every output blind, producing an effect size, confidence interval, and a clear verdict: HELPS, PLACEBO, or HARMS.</div>
           </details>
           <details>
             <summary>Which skill files can I check?</summary>
-            <div class="a">Any Markdown skill file: SKILL.md, AGENTS.md, CLAUDE.md, or any other .md file. You can also point SkillCheck at a folder that contains one and pick the file interactively.</div>
+            <div class="a">You can check any Markdown skill file including SKILL.md, AGENTS.md, or CLAUDE.md. Point SkillCheck directly at a single file or a project folder to pick your target skill file interactively.</div>
           </details>
           <details>
             <summary>Do I need my own model API key?</summary>
-            <div class="a">No. Sign in with Google or GitHub and SkillCheck Cloud issues you a free API key with 10 runs included. The model provider key stays on the server and never reaches your terminal. Power users can set <code>NVIDIA_API_KEY</code> to run fully direct instead.</div>
+            <div class="a">No. Sign in with Google or GitHub to receive a free SkillCheck Cloud API key with 10 included runs. Alternatively, bring your own API key for OpenAI, Anthropic, Gemini, Groq, Mistral, OpenRouter, or NVIDIA NIM to run fully direct.</div>
           </details>
           <details>
             <summary>What does a PLACEBO verdict mean?</summary>
-            <div class="a">PLACEBO means the 95% confidence interval for the skill's effect overlaps zero: no measurable difference between running with and without the skill. It does not always mean the skill is bad, but it does mean you are paying tokens for an effect you cannot demonstrate.</div>
+            <div class="a">A PLACEBO verdict means the confidence interval for the skill effect overlaps zero. There is no statistically measurable performance improvement, meaning you are consuming extra tokens without proving any tangible benefit to model outputs.</div>
           </details>
           <details>
             <summary>Is SkillCheck open source?</summary>
-            <div class="a">Yes. The CLI, the evaluation methodology, and this dashboard are MIT licensed and developed in the open at <a href="https://github.com/sx4im/skillcheck" rel="noopener">github.com/sx4im/skillcheck</a>.</div>
+            <div class="a">Yes. The SkillCheck CLI, evaluation framework, benchmark methodology, and dashboard web app are 100% open-source under the MIT license. You can inspect the codebase and contribute on GitHub at <a href="https://github.com/sx4im/skillcheck" rel="noopener">github.com/sx4im/skillcheck</a>.</div>
           </details>
         </div>
       </div>
