@@ -63,7 +63,7 @@ async function ensureCloudConfigured(force = false): Promise<void> {
     process.env.MISTRAL_API_KEY?.trim() ||
     process.env.OPENROUTER_API_KEY?.trim()
   );
-  if (hasDirectEnv) {
+  if (!force && hasDirectEnv) {
     return;
   }
 
@@ -529,7 +529,7 @@ export async function main(argv: string[]): Promise<void> {
     return;
   }
 
-  if (command === 'setup' || command === 'config' || command === 'login') {
+  if (command === 'setup' || command === '--setup' || command === 'config' || command === '--config' || command === 'login') {
     await ensureCloudConfigured(true);
     return;
   }

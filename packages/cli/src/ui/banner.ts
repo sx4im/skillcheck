@@ -122,19 +122,20 @@ export function printCheckHeader(inputPath: string, tasks: number, trials: numbe
 export function printHelpUi(): void {
   printBanner();
   const cmd = (name: string, blurb: string) =>
-    console.log(`    ${paint.bold(name.padEnd(16))}${paint.dim(blurb)}`);
+    console.log(`    ${paint.bold(name.padEnd(18))}${paint.dim(blurb)}`);
   const opt = (name: string, blurb: string) =>
-    console.log(`    ${paint.accent(name.padEnd(16))}${paint.dim(blurb)}`);
+    console.log(`    ${paint.accent(name.padEnd(18))}${paint.dim(blurb)}`);
 
   console.log(`  ${paint.accent('Usage')}`);
-  console.log(`    ${paint.bold('skillcheck')}                ${paint.dim('interactive — pick a file, choose effort, run')}`);
-  console.log(`    ${paint.bold('skillcheck')} ${paint.accent('<path>')}         ${paint.dim('check a skill file or folder directly')}`);
+  console.log(`    ${paint.bold('skillcheck')}                  ${paint.dim('interactive — pick a file, choose effort, run')}`);
+  console.log(`    ${paint.bold('skillcheck')} ${paint.accent('<path>')}           ${paint.dim('check a skill file or folder directly')}`);
   console.log(`    ${paint.bold('skillcheck')} ${paint.accent('<command>')} ${paint.dim('[options]')}\n`);
 
   console.log(`  ${paint.accent('Commands')}`);
   cmd('check <path>', 'A/B check a skill with a readable result card');
-  cmd('setup', 'connect your Skillcheck Cloud key or Bring Your Own Key');
-  cmd('logout', 'remove the saved key');
+  cmd('matrix <path>', 'benchmark a skill across multiple models side-by-side');
+  cmd('setup', 'connect via Skillcheck Cloud or Bring Your Own Key (BYOK)');
+  cmd('logout', 'remove the saved API key or provider config');
   cmd('eval <path>', 'full evaluation, JSON output');
   cmd('verify <file>', 're-grade a saved result to confirm it reproduces');
   cmd('corpus run', 'batch-check every skill in a corpus file');
@@ -143,7 +144,10 @@ export function printHelpUi(): void {
 
   console.log(`  ${paint.accent('Options')}`);
   opt('--tasks N', 'generated tasks per check (default 3, max 50)');
-  opt('--trials K', 'trials per task and arm (default 2, max 10)');
+  opt('--trials K', 'trials per task and arm (default 3, max 10)');
+  opt('--concurrency C', 'parallel trial execution limit (default 4)');
+  opt('--runner MODEL', 'runner model override (e.g. gpt-4o, claude-3-5-sonnet)');
+  opt('--models M1,M2', 'models list for matrix command');
   opt('--output FILE', 'save the full JSON result');
   opt('--explain', 'show a per-task breakdown with example outputs');
   opt('--json', 'machine-readable output, no UI');
@@ -153,9 +157,11 @@ export function printHelpUi(): void {
 
   console.log(`  ${paint.accent('Examples')}`);
   console.log(`    ${paint.dim('$')} skillcheck ./SKILL.md`);
-  console.log(`    ${paint.dim('$')} skillcheck check ./skill --tasks 5 --trials 3 --output result.json`);
-  console.log(`    ${paint.dim('$')} skillcheck verify result.json\n`);
+  console.log(`    ${paint.dim('$')} skillcheck check ./SKILL.md --tasks 5 --trials 3 --concurrency 4`);
+  console.log(`    ${paint.dim('$')} skillcheck matrix ./SKILL.md --models gpt-4o,claude-3-5-sonnet,gemini-1.5-pro`);
+  console.log(`    ${paint.dim('$')} skillcheck setup\n`);
 
-  console.log(`  ${paint.dim('Supported inputs: any Markdown (.md) file — e.g.')} ${paint.dim(CONVENTIONAL_SKILL_FILES.join(', '))} ${paint.dim('— or a folder containing one.')}`);
+  console.log(`  ${paint.dim('Supported providers (BYOK): OpenAI, Anthropic, Gemini, Groq, Mistral, OpenRouter, NVIDIA NIM')}`);
+  console.log(`  ${paint.dim('Supported inputs: any Markdown (.md) file — e.g.')} ${paint.dim(CONVENTIONAL_SKILL_FILES.join(', '))} ${paint.dim('— or a folder.')}`);
   console.log(`  ${paint.dim('Docs:')} https://${REPO_URL}\n`);
 }
