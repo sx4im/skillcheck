@@ -24,15 +24,10 @@ export interface EvalOptions {
   taskSuite?: string;
   sourceLabel?: string;
   saveArtifacts?: boolean;
-  // Attach a per-task breakdown (with/without pass rates, the change, and an
-  // example model output per arm) to the result. No extra model calls — it reuses
-  // the outputs the run already produced.
   explain?: boolean;
   onProgress?: ProgressReporter;
-  // Reuse a local disk cache of model calls across runs. Off by default so every
-  // `skillcheck check` runs fresh and writes nothing to disk; batch flows (corpus)
-  // opt in for resumability.
   useCache?: boolean;
+  concurrency?: number;
 }
 
 function applyModelOverrides(config: ProviderConfig, options: EvalOptions): ProviderConfig {
@@ -194,7 +189,7 @@ export async function evalSkill(options: EvalOptions): Promise<unknown> {
     await writeJson(taskSuitePath, tasks);
   }
 
-  const outputs = await runTrials(skill, tasks, options.trials, config, client, cache, onProgress);
+  const outputs = await runTrials(skill, tasks, options.trials, config, client, cache, onProgress, options.concurrency);
   const graded = await gradeOutputs(tasks, outputs, config, client, cache, onProgress);
   onProgress?.({ phase: 'scoring' });
   const score = scorePairedObservations(pairedObservations(graded));

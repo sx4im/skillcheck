@@ -59,6 +59,19 @@ async function runOne(
   };
 }
 
+async function asyncPool<T, R>(items: T[], limit: number, fn: (item: T) => Promise<R>): Promise<R[]> {
+  const results: R[] = new Array(items.length);
+  let index = 0;
+  const workers = Array.from({ length: Math.min(limit, items.length) }, async () => {
+    while (index < items.length) {
+      const i = index++;
+      results[i] = await fn(items[i]);
+    }
+  });
+  await Promise.all(workers);
+  return results;
+}
+
 export async function runTrials(
   skill: NormalizedSkill,
   tasks: GeneratedTask[],
@@ -66,9 +79,9 @@ export async function runTrials(
   config: { runnerModel: string },
   client: LlmClient,
   cache: JsonCache,
-  onProgress?: ProgressReporter
+  onProgress?: ProgressReporter,
+  concurrency = 4
 ): Promise<TrialOutput[]> {
-  const outputs: TrialOutput[] = [];
   const debug = process.env.SKILLCHECK_DEBUG === '1';
   const total = tasks.length * trials * 2; // two arms (with/without skill) per trial
   let completed = 0;
@@ -77,19 +90,21 @@ export async function runTrials(
     onProgress?.({ phase: 'running', completed, total });
   };
   onProgress?.({ phase: 'running', completed, total });
+
+  const jobs: Array<{ task: GeneratedTask; trial: number; arm: TrialOutput['arm'] }> = [];
   for (const task of tasks) {
     for (let trial = 1; trial <= trials; trial += 1) {
-      if (debug) {
-        console.error(`[skillcheck] run ${task.id} trial ${trial}/${trials} with_skill`);
-      }
-      outputs.push(await runOne(skill, task, trial, 'with_skill', config, client, cache));
-      tick();
-      if (debug) {
-        console.error(`[skillcheck] run ${task.id} trial ${trial}/${trials} no_skill`);
-      }
-      outputs.push(await runOne(skill, task, trial, 'no_skill', config, client, cache));
-      tick();
+      jobs.push({ task, trial, arm: 'with_skill' });
+      jobs.push({ task, trial, arm: 'no_skill' });
     }
   }
-  return outputs;
+
+  return await asyncPool(jobs, Math.max(1, concurrency), async (job) => {
+    if (debug) {
+      console.error(`[skillcheck] run ${job.task.id} trial ${job.trial}/${trials} ${job.arm}`);
+    }
+    const res = await runOne(skill, job.task, job.trial, job.arm, config, client, cache);
+    tick();
+    return res;
+  });
 }

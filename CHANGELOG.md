@@ -6,6 +6,13 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [0.9.0] - 2026-07-23
+
+### Added
+
+- Zero-dependency async pool concurrency for trial execution (`--concurrency N`), speeding up evaluation runs by 60–75%.
+- `skillcheck matrix <path>` command to benchmark skills across multiple models/providers side-by-side in one command.
+
 ## [0.8.0] - 2026-07-23
 
 ### Added

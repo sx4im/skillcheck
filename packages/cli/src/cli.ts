@@ -48,7 +48,7 @@ import type { ProviderType } from './adapters/types.js';
 
 // Commands that emit machine-readable output or run unattended — never interrupt
 // these with the interactive "update available?" prompt.
-const MACHINE_COMMANDS = new Set(['eval', 'm0', 'corpus', 'rot', 'verify']);
+const MACHINE_COMMANDS = new Set(['eval', 'm0', 'corpus', 'rot', 'verify', 'matrix']);
 
 // First-run onboarding. Supports hosted mode (Skillcheck Cloud) as default,
 // or Bring-Your-Own-Key (BYOK) for OpenAI, Anthropic, Gemini, Groq, Mistral, OpenRouter, NVIDIA NIM.
@@ -245,12 +245,12 @@ function assertKnownOptions(argv: string[], firstIndex: number, valueOptions: st
 function parseEvalOptions(argv: string[], inputIndex = 3): EvalOptions {
   const inputPath = argv[inputIndex];
   if (!inputPath || inputPath.startsWith('--')) {
-    throw new Error('Usage: skillcheck eval <path> [--tasks N] [--trials K] [--output file.json]');
+    throw new Error('Usage: skillcheck eval <path> [--tasks N] [--trials K] [--concurrency C] [--output file.json]');
   }
   assertKnownOptions(
     argv,
     inputIndex + 1,
-    ['--tasks', '--trials', '--output', '--mode', '--runner', '--grader', '--generator', '--task-suite'],
+    ['--tasks', '--trials', '--concurrency', '--output', '--mode', '--runner', '--grader', '--generator', '--task-suite'],
     ['--explain']
   );
 
@@ -264,6 +264,7 @@ function parseEvalOptions(argv: string[], inputIndex = 3): EvalOptions {
     output: readOption(argv, '--output'),
     tasks: readNumberOption(argv, '--tasks', 10, MAX_TASKS),
     trials: readNumberOption(argv, '--trials', 3, MAX_TRIALS),
+    concurrency: readNumberOption(argv, '--concurrency', 4, MAX_CONCURRENCY),
     mode,
     runner: readOption(argv, '--runner'),
     grader: readOption(argv, '--grader'),
@@ -277,9 +278,6 @@ interface CheckOptions {
   evalOptions: EvalOptions;
   json: boolean;
   output?: string;
-  // True when the user pinned the run size with --tasks/--trials. When false (and
-  // the session is interactive), runCheck asks for an effort level instead of
-  // silently using the defaults.
   effortPinned: boolean;
 }
 
@@ -294,7 +292,7 @@ export function parseCheckOptions(argv: string[], inputIndex = 3): CheckOptions 
   assertKnownOptions(
     argv,
     inputIndex + 1,
-    ['--tasks', '--trials', '--output', '--runner', '--grader', '--generator', '--task-suite'],
+    ['--tasks', '--trials', '--concurrency', '--output', '--runner', '--grader', '--generator', '--task-suite'],
     ['--json', '--explain']
   );
 
@@ -304,9 +302,8 @@ export function parseCheckOptions(argv: string[], inputIndex = 3): CheckOptions 
       inputPath,
       output,
       tasks: readNumberOption(argv, '--tasks', 3, MAX_TASKS),
-      // K=3 is the methodology's minimum for launch-quality evidence (METHODOLOGY.md);
-      // the default run must not fall below it. Lower it only via explicit --trials.
       trials: readNumberOption(argv, '--trials', 3, MAX_TRIALS),
+      concurrency: readNumberOption(argv, '--concurrency', 4, MAX_CONCURRENCY),
       mode: 'forced',
       runner: readOption(argv, '--runner'),
       grader: readOption(argv, '--grader'),
@@ -349,6 +346,84 @@ function parseCorpusRunOptions(argv: string[]): CorpusRunOptions {
     runner: readOption(argv, '--runner'),
     limit: readOptionalNumberOption(argv, '--limit')
   };
+}
+
+interface MatrixOptions {
+  inputPath: string;
+  models: string[];
+  tasks: number;
+  trials: number;
+  concurrency: number;
+  json: boolean;
+}
+
+function parseMatrixOptions(argv: string[]): MatrixOptions {
+  const inputPath = argv[3];
+  if (!inputPath || inputPath.startsWith('--')) {
+    throw new Error('Usage: skillcheck matrix <path> [--models model1,model2] [--tasks N] [--trials K] [--concurrency C]');
+  }
+  assertKnownOptions(
+    argv,
+    4,
+    ['--models', '--tasks', '--trials', '--concurrency'],
+    ['--json']
+  );
+
+  const rawModels = readOption(argv, '--models');
+  const models = rawModels
+    ? rawModels.split(',').map((m) => m.trim()).filter(Boolean)
+    : ['openai/gpt-4o', 'anthropic/claude-3-5-sonnet-20241022', 'google/gemini-1.5-pro', 'openai/gpt-oss-120b'];
+
+  return {
+    inputPath,
+    models,
+    tasks: readNumberOption(argv, '--tasks', 3, MAX_TASKS),
+    trials: readNumberOption(argv, '--trials', 3, MAX_TRIALS),
+    concurrency: readNumberOption(argv, '--concurrency', 4, MAX_CONCURRENCY),
+    json: hasFlag(argv, '--json')
+  };
+}
+
+async function runMatrix(options: MatrixOptions): Promise<unknown> {
+  await validateSkillInput(options.inputPath);
+  await ensureCloudConfigured(false);
+
+  const results: Array<{ model: string; verdict: string; score: number; effectPp: number }> = [];
+
+  for (const model of options.models) {
+    const res = (await evalSkill({
+      inputPath: options.inputPath,
+      tasks: options.tasks,
+      trials: options.trials,
+      concurrency: options.concurrency,
+      mode: 'forced',
+      runner: model
+    })) as { summary: { verdict: string; satisfactionScore: number; effectPp: number } };
+
+    results.push({
+      model,
+      verdict: res.summary.verdict,
+      score: res.summary.satisfactionScore,
+      effectPp: res.summary.effectPp
+    });
+  }
+
+  if (!options.json) {
+    console.log('\n┌─────────────────────────────────────────────────────────────┐');
+    console.log('│                    SKILLCHECK MATRIX                        │');
+    console.log('├──────────────────────────────────────┬──────────┬───────────┤');
+    console.log('│ Model                                │ Verdict  │ Score     │');
+    console.log('├──────────────────────────────────────┼──────────┼───────────┤');
+    for (const r of results) {
+      const m = r.model.padEnd(36).slice(0, 36);
+      const v = r.verdict.padEnd(8);
+      const s = `${r.score.toFixed(1)}%`.padStart(9);
+      console.log(`│ ${m} │ ${v} │ ${s} │`);
+    }
+    console.log('└──────────────────────────────────────┴──────────┴───────────┘\n');
+  }
+
+  return { matrix: results };
 }
 
 // Direct invocations (`skillcheck check ./SKILL.md`) get a compact one-line
@@ -509,6 +584,15 @@ export async function main(argv: string[]): Promise<void> {
   if (command === 'rot') {
     const result = await runRot(parseRotOptions(argv));
     console.log(JSON.stringify(result, null, 2));
+    return;
+  }
+
+  if (command === 'matrix') {
+    const options = parseMatrixOptions(argv);
+    const result = await runMatrix(options);
+    if (options.json) {
+      console.log(JSON.stringify(result, null, 2));
+    }
     return;
   }
 
