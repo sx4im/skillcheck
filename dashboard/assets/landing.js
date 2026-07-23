@@ -218,6 +218,29 @@ document.querySelectorAll('.copy').forEach(function (btn) {
   }
 })();
 
+// --- FAQ Accordion: Single open item at a time (keeps section height stable) ---
+(function initFaqAccordion() {
+  const faqContainer = document.querySelector('.faq');
+  if (!faqContainer) return;
+  const detailsList = faqContainer.querySelectorAll('details');
+  if (!detailsList.length) return;
+
+  detailsList[0].setAttribute('open', '');
+
+  detailsList.forEach(function (targetDetail) {
+    const summary = targetDetail.querySelector('summary');
+    if (!summary) return;
+
+    summary.addEventListener('click', function (e) {
+      e.preventDefault();
+      detailsList.forEach(function (detail) {
+        detail.removeAttribute('open');
+      });
+      targetDetail.setAttribute('open', '');
+    });
+  });
+})();
+
 // --- Auth ---
 bindAuthButtons();
 

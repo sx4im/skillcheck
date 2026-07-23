@@ -385,10 +385,23 @@ html.js .reveal.in {
   cursor: pointer; list-style: none; display: flex; justify-content: space-between; align-items: center;
   padding: 18px 22px; font-weight: 600; font-size: 16px; color: var(--ink); gap: 16px;
 }
-.faq summary::-webkit-details-marker { display: none; }
-.faq summary::after { content: '+'; color: var(--muted); font-size: 22px; font-weight: 300; transition: transform var(--fast); flex-shrink: 0; }
 .faq details[open] summary::after { transform: rotate(45deg); color: var(--ink); }
-.faq .a { padding: 0 22px 20px; color: var(--body); font-size: 15px; font-weight: 300; line-height: 1.6; }
+.faq .a {
+  padding: 0 22px;
+  max-height: 0;
+  opacity: 0;
+  overflow: hidden;
+  color: var(--body);
+  font-size: 15px;
+  font-weight: 300;
+  line-height: 1.6;
+  transition: max-height 0.3s ease, opacity 0.3s ease, padding 0.3s ease;
+}
+.faq details[open] .a {
+  max-height: 300px;
+  opacity: 1;
+  padding: 0 22px 20px;
+}
 .faq .a a { color: var(--body-strong); text-decoration: underline; }
 
 /* ---------- CTA band ---------- */
