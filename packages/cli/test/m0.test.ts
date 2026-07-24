@@ -26,9 +26,7 @@ function fakeClientFactory(): NvidiaNimClient {
 }
 
 describe('runM0Gate', () => {
-  // runM0Gate calls loadNvidiaConfig(), which throws without a configured key.
-  // Set a throwaway one (the injected fake client never uses it) so the test does
-  // not depend on an ambient .env — that's why this passed locally but not in CI.
+  // runM0Gate reads environment configuration; provide a test key so execution is hermetic.
   let savedKey: string | undefined;
   beforeEach(() => {
     savedKey = process.env.NVIDIA_API_KEY;

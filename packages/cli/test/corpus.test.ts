@@ -2,36 +2,12 @@ import { mkdir, mkdtemp, readFile, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { parseCorpusManifest, slugify, runCorpus } from '../src/corpus.js';
 
-// Same offline model fake as the e2e suite: with-skill emits a pass marker, the
-// blind grader passes outputs that carry it. Lets runCorpus drive the real
-// evalSkill pipeline against a local (non-git) manifest without any network.
-const PASS_MARKER = 'SKILL_PASS_MARKER';
-vi.mock('../src/adapters/nvidia-nim.js', () => {
-  class FakeNvidiaNimClient {
-    constructor(
-      public config: unknown,
-      public options: unknown
-    ) {}
-    async complete(request: { messages: Array<{ role: string; content: string }> }) {
-      const system = request.messages.find((m) => m.role === 'system')?.content ?? '';
-      const user = request.messages.find((m) => m.role === 'user')?.content ?? '';
-      const usage = { promptTokens: 10, completionTokens: 2, totalTokens: 12 };
-      if (/evaluation tasks/i.test(system)) {
-        const tasks = Array.from({ length: 8 }, (_, i) => ({ id: `t${i + 1}`, prompt: `Task ${i + 1}`, criterion: `Crit ${i + 1}` }));
-        return { content: JSON.stringify({ tasks }), model: 'fake', usage };
-      }
-      if (/blind evaluator/i.test(system)) {
-        return { content: JSON.stringify({ score: user.includes(PASS_MARKER) ? 1 : 0, reason: 'g' }), model: 'fake', usage };
-      }
-      const withSkill = /skill instructions/i.test(system);
-      return { content: withSkill ? `${PASS_MARKER} done` : 'baseline', model: 'fake', usage };
-    }
-  }
+vi.mock('../src/adapters/nvidia-nim.js', async () => {
+  const { FakeNvidiaNimClient } = await import('./helpers.js');
   return { NvidiaNimClient: FakeNvidiaNimClient };
 });
-
-const { parseCorpusManifest, slugify, runCorpus } = await import('../src/corpus.js');
 
 describe('corpus helpers', () => {
   it('slugifies arbitrary labels', () => {

@@ -3,56 +3,15 @@ import { readFile } from 'node:fs/promises';
 import { NvidiaNimClient } from './adapters/nvidia-nim.js';
 import { JsonCache } from './cache.js';
 import { loadNvidiaConfig } from './env.js';
+import { parseTaskSuite } from './eval.js';
 import { gradeOutputs } from './grade.js';
 import { normalizeSkill } from './normalize.js';
 import { runTrials } from './run.js';
-import { scorePairedObservations, type PairedObservation } from './score.js';
-import type { GeneratedTask, GradedOutput } from './types.js';
+import { scorePairedObservations, pairedObservations } from './score.js';
 
 export interface VerifyOptions {
   resultPath: string;
   sample: number;
-}
-
-function parseTasks(text: string): GeneratedTask[] {
-  const value = JSON.parse(text) as unknown;
-  const tasks = Array.isArray(value) ? value : (value as { tasks?: unknown }).tasks;
-  if (!Array.isArray(tasks)) {
-    throw new Error('Task suite must be an array or object with tasks');
-  }
-  return tasks.map((task, index) => {
-    const item = task as Record<string, unknown>;
-    const criterionType = item.criterionType ?? item.criterion_type ?? 'rubric';
-    if (criterionType !== 'rubric' && criterionType !== 'deterministic') {
-      throw new Error(`Unsupported criterion type in task ${index + 1}`);
-    }
-    return {
-      id: String(item.id ?? `t${String(index + 1).padStart(3, '0')}`),
-      prompt: String(item.prompt ?? ''),
-      criterionType,
-      criterion: String(item.criterion ?? '')
-    };
-  });
-}
-
-function pairedObservations(graded: GradedOutput[]): PairedObservation[] {
-  const byPair = new Map<string, Partial<PairedObservation>>();
-  for (const item of graded) {
-    const key = `${item.taskId}:${item.trial}`;
-    const current = byPair.get(key) ?? {};
-    if (item.arm === 'with_skill') {
-      current.withSkillPass = item.pass;
-    } else {
-      current.noSkillPass = item.pass;
-    }
-    byPair.set(key, current);
-  }
-  return [...byPair.values()].map((item) => {
-    if (typeof item.withSkillPass !== 'boolean' || typeof item.noSkillPass !== 'boolean') {
-      throw new Error('Incomplete A/B pair while verifying');
-    }
-    return item as PairedObservation;
-  });
 }
 
 export async function verifyResult(options: VerifyOptions): Promise<unknown> {
@@ -88,7 +47,7 @@ export async function verifyResult(options: VerifyOptions): Promise<unknown> {
     }
     throw error;
   }
-  const tasks = parseTasks(await readFile(taskSuitePath, 'utf8')).slice(0, options.sample);
+  const tasks = parseTaskSuite(await readFile(taskSuitePath, 'utf8')).slice(0, options.sample);
   if (tasks.length === 0) {
     throw new Error(`The task suite at ${taskSuitePath} is empty — nothing to verify.`);
   }

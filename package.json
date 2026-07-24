@@ -1,6 +1,6 @@
 {
   "name": "@sx4im/skillcheck",
-  "version": "0.9.3",
+  "version": "0.9.4",
   "description": "Measure whether agent skills improve task performance.",
   "type": "module",
   "license": "MIT",

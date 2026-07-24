@@ -77,4 +77,29 @@ describe('normalizeSkill', () => {
     expect(skill.domain).toBe('Rust Project Rules');
     expect(skill.domain).not.toContain('lint instruction');
   });
+
+  it('derives a readable name from a markdown filename', async () => {
+    const dir = await mkdtemp(path.join(tmpdir(), 'skillcheck-norm-'));
+    const file = path.join(dir, 'frontend-design.md');
+    await writeFile(file, 'Plain markdown body with no heading.\n');
+    const skill = await normalizeSkill(file);
+    expect(skill.format).toBe('markdown');
+    expect(skill.name).toBe('frontend design');
+    expect(skill.domain).toBe('general agent skill');
+  });
+
+  it('falls back to the first .md by name inside a folder', async () => {
+    const dir = await mkdtemp(path.join(tmpdir(), 'skillcheck-norm-'));
+    await writeFile(path.join(dir, 'zeta.md'), '# Zeta\n');
+    await writeFile(path.join(dir, 'alpha.md'), '# Alpha\n');
+    const skill = await normalizeSkill(dir);
+    expect(skill.name).toBe('Alpha'); // sorted, first by name
+  });
+
+  it('rejects a folder with no markdown and a non-markdown file', async () => {
+    const dir = await mkdtemp(path.join(tmpdir(), 'skillcheck-norm-'));
+    await writeFile(path.join(dir, 'notes.txt'), 'nope');
+    await expect(normalizeSkill(dir)).rejects.toThrow(/No \.md file/);
+    await expect(normalizeSkill(path.join(dir, 'notes.txt'))).rejects.toThrow(/only analyzes Markdown/);
+  });
 });

@@ -2,36 +2,12 @@ import { mkdtemp, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { evalSkill } from '../src/eval.js';
 
-// Route the runner by task prompt so a single eval produces one helped, one
-// hurt, and one no-change task — covering every branch of the explain builder
-// (labels + the example-selection preferences) offline.
-const PASS = 'SKILL_PASS_MARKER';
-vi.mock('../src/adapters/nvidia-nim.js', () => {
-  class FakeNvidiaNimClient {
-    constructor(
-      public config: unknown,
-      public options: unknown
-    ) {}
-    async complete(request: { messages: Array<{ role: string; content: string }> }) {
-      const system = request.messages.find((m) => m.role === 'system')?.content ?? '';
-      const user = request.messages.find((m) => m.role === 'user')?.content ?? '';
-      const usage = { promptTokens: 10, completionTokens: 2, totalTokens: 12 };
-      if (/blind evaluator/i.test(system)) {
-        return { content: JSON.stringify({ score: user.includes(PASS) ? 1 : 0, reason: 'g' }), model: 'fake', usage };
-      }
-      const withSkill = /skill instructions/i.test(system);
-      let pass = false;
-      if (/HELP/.test(user)) pass = withSkill;
-      else if (/HURT/.test(user)) pass = !withSkill;
-      // SAME: never passes → no change
-      return { content: pass ? `${PASS} ok` : 'plain miss', model: 'fake', usage };
-    }
-  }
+vi.mock('../src/adapters/nvidia-nim.js', async () => {
+  const { FakeNvidiaNimClient } = await import('./helpers.js');
   return { NvidiaNimClient: FakeNvidiaNimClient };
 });
-
-const { evalSkill } = await import('../src/eval.js');
 
 describe('eval --explain payload', () => {
   let saved: string | undefined;

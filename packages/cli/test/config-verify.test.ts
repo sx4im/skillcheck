@@ -1,5 +1,9 @@
+import { mkdtemp, writeFile } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
+import path from 'node:path';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { verifyCloudKey } from '../src/config.js';
+import { verifyResult } from '../src/verify.js';
 
 function jsonResponse(status: number, body: unknown): Response {
   return {
@@ -46,5 +50,14 @@ describe('verifyCloudKey', () => {
     const result = await verifyCloudKey('https://api.test/api', 'chk_live_x');
     expect(result).toMatchObject({ valid: false, reachable: false });
     expect(result.message).toMatch(/ECONNREFUSED/);
+  });
+});
+
+describe('verifyResult validation', () => {
+  it('refuses to verify a result that is missing reproducibility metadata', async () => {
+    const dir = await mkdtemp(path.join(tmpdir(), 'skillcheck-verify-'));
+    const file = path.join(dir, 'result.json');
+    await writeFile(file, JSON.stringify({ skill: {}, result: {}, config: {} }));
+    await expect(verifyResult({ resultPath: file, sample: 1 })).rejects.toThrow(/cannot be verified/i);
   });
 });

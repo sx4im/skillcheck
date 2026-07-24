@@ -2,40 +2,17 @@ import { mkdtemp, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { main } from '../src/cli.js';
 
-// Offline model fake (same shape as the e2e suite).
-const PASS_MARKER = 'SKILL_PASS_MARKER';
-vi.mock('../src/adapters/nvidia-nim.js', () => {
-  class FakeNvidiaNimClient {
-    constructor(
-      public config: unknown,
-      public options: unknown
-    ) {}
-    async complete(request: { messages: Array<{ role: string; content: string }> }) {
-      const system = request.messages.find((m) => m.role === 'system')?.content ?? '';
-      const user = request.messages.find((m) => m.role === 'user')?.content ?? '';
-      const usage = { promptTokens: 10, completionTokens: 2, totalTokens: 12 };
-      if (/evaluation tasks/i.test(system)) {
-        const tasks = Array.from({ length: 8 }, (_, i) => ({ id: `t${i + 1}`, prompt: `Task ${i + 1}`, criterion: `Crit ${i + 1}` }));
-        return { content: JSON.stringify({ tasks }), model: 'fake', usage };
-      }
-      if (/blind evaluator/i.test(system)) {
-        return { content: JSON.stringify({ score: user.includes(PASS_MARKER) ? 1 : 0, reason: 'g' }), model: 'fake', usage };
-      }
-      return { content: /skill instructions/i.test(system) ? `${PASS_MARKER} ok` : 'baseline', model: 'fake', usage };
-    }
-  }
+vi.mock('../src/adapters/nvidia-nim.js', async () => {
+  const { FakeNvidiaNimClient } = await import('./helpers.js');
   return { NvidiaNimClient: FakeNvidiaNimClient };
 });
 
-// Answer the post-result prompt deterministically. promptText() builds its readline
-// interface from node:readline/promises, so stubbing createInterface controls it.
 let promptAnswer = 'n';
 vi.mock('node:readline/promises', () => ({
   createInterface: () => ({ question: async () => promptAnswer, close() {} })
 }));
-
-const { main } = await import('../src/cli.js');
 
 describe('interactive per-task breakdown offer', () => {
   let saved: Record<string, unknown>;

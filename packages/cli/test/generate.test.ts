@@ -4,8 +4,8 @@ import path from 'node:path';
 import { describe, expect, it } from 'vitest';
 import type { NvidiaNimClient } from '../src/adapters/nvidia-nim.js';
 import { JsonCache } from '../src/cache.js';
-import type { NvidiaConfig } from '../src/env.js';
 import { generateTasks } from '../src/generate.js';
+import { testNvidiaConfig } from './helpers.js';
 
 describe('generateTasks', () => {
   it('retries when the generator returns malformed JSON', async () => {
@@ -24,19 +24,8 @@ describe('generateTasks', () => {
         };
       }
     } as unknown as NvidiaNimClient;
-    const config = {
-      baseUrl: 'https://example.test',
-      apiKey: 'test',
-      timeoutMs: 1000,
-      requestDelayMs: 0,
-      maxAttempts: 8,
-      maxRetryDelayMs: 60000,
-      generatorModel: 'generator',
-      graderModel: 'grader',
-      runnerModel: 'runner'
-    } satisfies NvidiaConfig;
 
-    const tasks = await generateTasks({ domain: 'retry testing', count: 1 }, config, client, new JsonCache(cacheDir));
+    const tasks = await generateTasks({ domain: 'retry testing', count: 1 }, testNvidiaConfig, client, new JsonCache(cacheDir));
 
     expect(calls).toBe(2);
     expect(tasks).toHaveLength(1);
@@ -58,19 +47,8 @@ describe('generateTasks', () => {
         };
       }
     } as unknown as NvidiaNimClient;
-    const config = {
-      baseUrl: 'https://example.test',
-      apiKey: 'test',
-      timeoutMs: 1000,
-      requestDelayMs: 0,
-      maxAttempts: 8,
-      maxRetryDelayMs: 60000,
-      generatorModel: 'generator',
-      graderModel: 'grader',
-      runnerModel: 'runner'
-    } satisfies NvidiaConfig;
 
-    const tasks = await generateTasks({ domain: 'short batches', count: 3 }, config, client, new JsonCache(cacheDir));
+    const tasks = await generateTasks({ domain: 'short batches', count: 3 }, testNvidiaConfig, client, new JsonCache(cacheDir));
 
     expect(calls).toBe(3); // tried three times for the full count
     expect(tasks).toHaveLength(1); // then settled for what it got

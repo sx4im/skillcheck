@@ -1,3 +1,5 @@
+import type { GradedOutput } from './types.js';
+
 export interface PairedObservation {
   withSkillPass: boolean;
   noSkillPass: boolean;
@@ -13,6 +15,27 @@ export interface ScoreSummary {
   verdict: 'helps' | 'placebo' | 'harms';
   withSkillPass: number;
   noSkillPass: number;
+}
+
+export function pairedObservations(graded: GradedOutput[]): PairedObservation[] {
+  const byPair = new Map<string, Partial<PairedObservation>>();
+  for (const item of graded) {
+    const key = `${item.taskId}:${item.trial}`;
+    const current = byPair.get(key) ?? {};
+    if (item.arm === 'with_skill') {
+      current.withSkillPass = item.pass;
+    } else {
+      current.noSkillPass = item.pass;
+    }
+    byPair.set(key, current);
+  }
+
+  return [...byPair.values()].map((item) => {
+    if (typeof item.withSkillPass !== 'boolean' || typeof item.noSkillPass !== 'boolean') {
+      throw new Error('Incomplete A/B pair while scoring');
+    }
+    return item as PairedObservation;
+  });
 }
 
 function createSeededRandom(seed: number): () => number {

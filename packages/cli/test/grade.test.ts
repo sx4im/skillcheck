@@ -4,9 +4,34 @@ import path from 'node:path';
 import { describe, expect, it } from 'vitest';
 import type { NvidiaNimClient } from '../src/adapters/nvidia-nim.js';
 import { JsonCache } from '../src/cache.js';
-import type { NvidiaConfig } from '../src/env.js';
 import { gradeOutputs } from '../src/grade.js';
 import type { GeneratedTask, TrialOutput } from '../src/types.js';
+import { testNvidiaConfig } from './helpers.js';
+
+const sampleTasks: GeneratedTask[] = [
+  {
+    id: 't001',
+    prompt: 'Do the task',
+    criterionType: 'rubric',
+    criterion: 'Output must satisfy the task.'
+  }
+];
+
+function sampleOutputs(hash = 'sha256:test', outputText = 'The task is satisfied.'): TrialOutput[] {
+  return [
+    {
+      taskId: 't001',
+      trial: 1,
+      arm: 'with_skill',
+      output: outputText,
+      model: 'runner',
+      promptTokens: 1,
+      completionTokens: 1,
+      totalTokens: 2,
+      transcriptHash: hash
+    }
+  ];
+}
 
 describe('gradeOutputs', () => {
   it('retries when the grader returns malformed JSON', async () => {
@@ -22,40 +47,8 @@ describe('gradeOutputs', () => {
         };
       }
     } as unknown as NvidiaNimClient;
-    const config = {
-      baseUrl: 'https://example.test',
-      apiKey: 'test',
-      timeoutMs: 1000,
-      requestDelayMs: 0,
-      maxAttempts: 8,
-      maxRetryDelayMs: 60000,
-      generatorModel: 'generator',
-      graderModel: 'grader',
-      runnerModel: 'runner'
-    } satisfies NvidiaConfig;
-    const tasks: GeneratedTask[] = [
-      {
-        id: 't001',
-        prompt: 'Do the task',
-        criterionType: 'rubric',
-        criterion: 'Output must satisfy the task.'
-      }
-    ];
-    const outputs: TrialOutput[] = [
-      {
-        taskId: 't001',
-        trial: 1,
-        arm: 'with_skill',
-        output: 'The task is satisfied.',
-        model: 'runner',
-        promptTokens: 1,
-        completionTokens: 1,
-        totalTokens: 2,
-        transcriptHash: 'sha256:test'
-      }
-    ];
 
-    const graded = await gradeOutputs(tasks, outputs, config, client, new JsonCache(cacheDir));
+    const graded = await gradeOutputs(sampleTasks, sampleOutputs(), testNvidiaConfig, client, new JsonCache(cacheDir));
 
     expect(calls).toBe(2);
     expect(graded[0]?.pass).toBe(true);
@@ -70,40 +63,8 @@ describe('gradeOutputs', () => {
         usage: { promptTokens: 1, completionTokens: 1, totalTokens: 2 }
       })
     } as unknown as NvidiaNimClient;
-    const config = {
-      baseUrl: 'https://example.test',
-      apiKey: 'test',
-      timeoutMs: 1000,
-      requestDelayMs: 0,
-      maxAttempts: 8,
-      maxRetryDelayMs: 60000,
-      generatorModel: 'generator',
-      graderModel: 'grader',
-      runnerModel: 'runner'
-    } satisfies NvidiaConfig;
-    const tasks: GeneratedTask[] = [
-      {
-        id: 't001',
-        prompt: 'Do the task',
-        criterionType: 'rubric',
-        criterion: 'Output must satisfy the task.'
-      }
-    ];
-    const outputs: TrialOutput[] = [
-      {
-        taskId: 't001',
-        trial: 1,
-        arm: 'with_skill',
-        output: 'The task is satisfied.',
-        model: 'runner',
-        promptTokens: 1,
-        completionTokens: 1,
-        totalTokens: 2,
-        transcriptHash: 'sha256:test'
-      }
-    ];
 
-    const graded = await gradeOutputs(tasks, outputs, config, client, new JsonCache(cacheDir));
+    const graded = await gradeOutputs(sampleTasks, sampleOutputs(), testNvidiaConfig, client, new JsonCache(cacheDir));
 
     expect(graded[0]?.pass).toBe(true);
     expect(graded[0]?.reason).toContain('non-json grader response');
@@ -118,40 +79,14 @@ describe('gradeOutputs', () => {
         usage: { promptTokens: 1, completionTokens: 1, totalTokens: 2 }
       })
     } as unknown as NvidiaNimClient;
-    const config = {
-      baseUrl: 'https://example.test',
-      apiKey: 'test',
-      timeoutMs: 1000,
-      requestDelayMs: 0,
-      maxAttempts: 8,
-      maxRetryDelayMs: 60000,
-      generatorModel: 'generator',
-      graderModel: 'grader',
-      runnerModel: 'runner'
-    } satisfies NvidiaConfig;
-    const tasks: GeneratedTask[] = [
-      {
-        id: 't001',
-        prompt: 'Do the task',
-        criterionType: 'rubric',
-        criterion: 'Output must satisfy the task.'
-      }
-    ];
-    const outputs: TrialOutput[] = [
-      {
-        taskId: 't001',
-        trial: 1,
-        arm: 'with_skill',
-        output: 'An unrelated answer.',
-        model: 'runner',
-        promptTokens: 1,
-        completionTokens: 1,
-        totalTokens: 2,
-        transcriptHash: 'sha256:test-negated'
-      }
-    ];
 
-    const graded = await gradeOutputs(tasks, outputs, config, client, new JsonCache(cacheDir));
+    const graded = await gradeOutputs(
+      sampleTasks,
+      sampleOutputs('sha256:test-negated', 'An unrelated answer.'),
+      testNvidiaConfig,
+      client,
+      new JsonCache(cacheDir)
+    );
 
     expect(graded[0]?.pass).toBe(false);
   });
@@ -165,40 +100,14 @@ describe('gradeOutputs', () => {
         usage: { promptTokens: 1, completionTokens: 1, totalTokens: 2 }
       })
     } as unknown as NvidiaNimClient;
-    const config = {
-      baseUrl: 'https://example.test',
-      apiKey: 'test',
-      timeoutMs: 1000,
-      requestDelayMs: 0,
-      maxAttempts: 8,
-      maxRetryDelayMs: 60000,
-      generatorModel: 'generator',
-      graderModel: 'grader',
-      runnerModel: 'runner'
-    } satisfies NvidiaConfig;
-    const tasks: GeneratedTask[] = [
-      {
-        id: 't001',
-        prompt: 'Do the task',
-        criterionType: 'rubric',
-        criterion: 'Output must satisfy the task.'
-      }
-    ];
-    const outputs: TrialOutput[] = [
-      {
-        taskId: 't001',
-        trial: 1,
-        arm: 'with_skill',
-        output: 'A correct answer.',
-        model: 'runner',
-        promptTokens: 1,
-        completionTokens: 1,
-        totalTokens: 2,
-        transcriptHash: 'sha256:test-score-marker'
-      }
-    ];
 
-    const graded = await gradeOutputs(tasks, outputs, config, client, new JsonCache(cacheDir));
+    const graded = await gradeOutputs(
+      sampleTasks,
+      sampleOutputs('sha256:test-score-marker', 'A correct answer.'),
+      testNvidiaConfig,
+      client,
+      new JsonCache(cacheDir)
+    );
 
     expect(graded[0]?.pass).toBe(true);
   });

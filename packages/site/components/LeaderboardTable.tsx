@@ -3,13 +3,14 @@
 import { useState } from 'react';
 import type { LeaderboardResult } from '../lib/results';
 
-type SortKey = 'name' | 'effect' | 'verdict' | 'value' | 'date' | 'rot';
+type SortKey = 'name' | 'effect' | 'verdict' | 'value' | 'date' | 'rot' | 'model';
 
 function compare(a: LeaderboardResult, b: LeaderboardResult, sort: SortKey): number {
   if (sort === 'name') return a.skill.name.localeCompare(b.skill.name);
   if (sort === 'verdict') return a.result.verdict.localeCompare(b.result.verdict);
   if (sort === 'value') return b.result.value_per_1k_tokens - a.result.value_per_1k_tokens;
   if (sort === 'date') return b.run_date.localeCompare(a.run_date);
+  if (sort === 'model') return a.config.runner_model.localeCompare(b.config.runner_model);
   if (sort === 'rot') return (a.rot?.status ?? 'untracked').localeCompare(b.rot?.status ?? 'untracked');
   return b.result.effect_pp - a.result.effect_pp;
 }
@@ -45,7 +46,7 @@ export function LeaderboardTable({ results }: { results: LeaderboardResult[] }) 
             <th><button onClick={() => setSort('verdict')}>Verdict</button></th>
             <th>Token overhead</th>
             <th><button onClick={() => setSort('value')}>Value / 1k</button></th>
-            <th><button onClick={() => setSort('date')}>Model</button></th>
+            <th><button onClick={() => setSort('model')}>Model</button></th>
             <th><button onClick={() => setSort('rot')}>Rot</button></th>
           </tr>
         </thead>

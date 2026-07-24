@@ -10,7 +10,7 @@ import { hashJson } from './hash.js';
 import { gradeOutputs } from './grade.js';
 import { normalizeSkill } from './normalize.js';
 import { runTrials } from './run.js';
-import { scorePairedObservations, type PairedObservation } from './score.js';
+import { scorePairedObservations, pairedObservations } from './score.js';
 import type { GeneratedTask, GradedOutput, ProgressReporter, TaskBreakdown } from './types.js';
 
 export interface EvalOptions {
@@ -40,26 +40,7 @@ function applyModelOverrides(config: ProviderConfig, options: EvalOptions): Prov
   };
 }
 
-function pairedObservations(graded: GradedOutput[]): PairedObservation[] {
-  const byPair = new Map<string, Partial<PairedObservation>>();
-  for (const item of graded) {
-    const key = `${item.taskId}:${item.trial}`;
-    const current = byPair.get(key) ?? {};
-    if (item.arm === 'with_skill') {
-      current.withSkillPass = item.pass;
-    } else {
-      current.noSkillPass = item.pass;
-    }
-    byPair.set(key, current);
-  }
 
-  return [...byPair.values()].map((item) => {
-    if (typeof item.withSkillPass !== 'boolean' || typeof item.noSkillPass !== 'boolean') {
-      throw new Error('Incomplete A/B pair while scoring');
-    }
-    return item as PairedObservation;
-  });
-}
 
 function taskBreakdowns(tasks: GeneratedTask[], graded: GradedOutput[]): TaskBreakdown[] {
   return tasks.map((task) => {
@@ -140,7 +121,7 @@ async function writeJson(filePath: string, value: unknown): Promise<void> {
   await writeFile(filePath, `${JSON.stringify(value, null, 2)}\n`);
 }
 
-function parseTaskSuite(text: string): GeneratedTask[] {
+export function parseTaskSuite(text: string): GeneratedTask[] {
   const value = JSON.parse(text) as unknown;
   const tasks = Array.isArray(value)
     ? value

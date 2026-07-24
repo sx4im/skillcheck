@@ -2,59 +2,12 @@ import { mkdtemp, readFile, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { main } from '../src/cli.js';
 
-// End-to-end coverage of the command router in cli.ts. We mock ONLY the network
-// adapter (NvidiaNimClient) so the whole pipeline — normalize → generate → run →
-// grade → score → render — runs for real, offline and deterministically. The fake
-// routes on message content: the generator returns a task batch, the runner emits
-// a pass marker only in the with-skill arm, and the blind grader passes any output
-// carrying that marker. That yields a stable HELPS verdict (with 100%, without 0%)
-// with a measurable token overhead, exercising every branch of evalSkill.
-const PASS_MARKER = 'SKILL_PASS_MARKER';
-
-vi.mock('../src/adapters/nvidia-nim.js', () => {
-  class FakeNvidiaNimClient {
-    constructor(
-      public config: unknown,
-      public options: unknown
-    ) {}
-
-    async complete(request: {
-      messages: Array<{ role: string; content: string }>;
-      responseFormat?: string;
-    }): Promise<{ content: string; model: string; usage: Record<string, number> }> {
-      const system = request.messages.find((m) => m.role === 'system')?.content ?? '';
-      const user = request.messages.find((m) => m.role === 'user')?.content ?? '';
-      const withSkill = /skill instructions/i.test(system);
-      const usage = { promptTokens: withSkill ? 100 : 20, completionTokens: 5, totalTokens: withSkill ? 105 : 25 };
-
-      if (/evaluation tasks/i.test(system)) {
-        const tasks = Array.from({ length: 12 }, (_, i) => ({
-          id: `t${i + 1}`,
-          prompt: `Task number ${i + 1}`,
-          criterion: `Output addresses task ${i + 1}`
-        }));
-        return { content: JSON.stringify({ tasks }), model: 'fake', usage };
-      }
-
-      if (/blind evaluator/i.test(system)) {
-        const score = user.includes(PASS_MARKER) ? 1 : 0;
-        return { content: JSON.stringify({ score, reason: 'graded' }), model: 'fake', usage };
-      }
-
-      // Runner arm.
-      return {
-        content: withSkill ? `${PASS_MARKER} the task is handled` : 'a plain baseline answer',
-        model: 'fake',
-        usage
-      };
-    }
-  }
+vi.mock('../src/adapters/nvidia-nim.js', async () => {
+  const { FakeNvidiaNimClient } = await import('./helpers.js');
   return { NvidiaNimClient: FakeNvidiaNimClient };
 });
-
-// Imported after the mock is registered so cli.ts picks up the fake adapter.
-const { main } = await import('../src/cli.js');
 
 interface Captured {
   stdout: string;

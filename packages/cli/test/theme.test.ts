@@ -1,6 +1,8 @@
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import {
   colorLevel,
+  layoutWidth,
+  makePalette,
   padDisplay,
   stripAnsi,
   truncateDisplay,
@@ -95,5 +97,25 @@ describe('display-width helpers', () => {
   it('wraps text greedily at the given width', () => {
     expect(wrapText('the quick brown fox jumps', 11)).toEqual(['the quick', 'brown fox', 'jumps']);
     expect(wrapText('', 10)).toEqual(['']);
+  });
+
+  it('paints with truecolor, 256, and plain palettes', () => {
+    process.env.FORCE_COLOR = '3';
+    const truecolor = makePalette({ isTTY: true });
+    expect(truecolor.badge('HELPS', 'ok')).toContain('HELPS');
+    expect(truecolor.brand(0.5)('x')).toContain('\x1b[');
+
+    process.env.FORCE_COLOR = '2';
+    expect(makePalette({ isTTY: true }).brand(0.5)('x')).toContain('38;5;');
+
+    process.env.NO_COLOR = '1';
+    const plain = makePalette({ isTTY: true });
+    expect(plain.badge('X', 'ok')).toBe('X');
+    expect(plain.accent('x')).toBe('x');
+  });
+
+  it('clamps layout width to sane bounds', () => {
+    expect(layoutWidth({ columns: 5 })).toBe(42); // floor
+    expect(layoutWidth({ columns: 9999 })).toBe(58); // ceiling
   });
 });

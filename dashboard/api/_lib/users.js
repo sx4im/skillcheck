@@ -79,10 +79,8 @@ export function runLimitFor(plan) {
 // x-skillcheck-run id; only the first call of a new id consumes a slot, so the
 // dozens of calls in a single run are charged once.
 //
-// SECURITY: the quota is ALWAYS enforced. A request that omits the run id is not
-// a free pass — it simply cannot be deduped, so it is charged as its own run.
-// (Previously a missing id was treated as "unmetered/allow", which let anyone
-// with a free key make unlimited model calls by dropping the header.)
+// SECURITY: Quota enforcement is strictly mandatory for every request. An omitted
+// run ID cannot be deduplicated and is metered individually as a distinct run.
 // Returns { allowed, counted, used, limit, reason? }.
 // Quotas automatically reset to 0 at the start of every calendar month.
 export async function consumeRun(uid, runId, plan) {

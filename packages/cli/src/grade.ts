@@ -1,7 +1,7 @@
 import type { LlmClient } from './adapters/types.js';
 import type { JsonCache } from './cache.js';
 import { gradeDeterministically } from './deterministic.js';
-import { hashJson } from './hash.js';
+import { hashJson, seededShuffle } from './hash.js';
 import type { GeneratedTask, GradedOutput, ProgressReporter, TrialOutput } from './types.js';
 
 interface GradePayload {
@@ -45,20 +45,6 @@ function parseGrade(text: string): GradePayload {
     score,
     reason: `non-json grader response: ${trimmed.slice(0, 160)}`
   };
-}
-
-function seededShuffle<T>(items: T[], seedText: string): T[] {
-  let state = parseInt(hashJson(seedText).slice(0, 8), 16) >>> 0;
-  const random = () => {
-    state = (state * 1664525 + 1013904223) >>> 0;
-    return state / 0x100000000;
-  };
-  const copy = [...items];
-  for (let index = copy.length - 1; index > 0; index -= 1) {
-    const swapIndex = Math.floor(random() * (index + 1));
-    [copy[index], copy[swapIndex]] = [copy[swapIndex]!, copy[index]!];
-  }
-  return copy;
 }
 
 export async function gradeOutputs(

@@ -1,5 +1,7 @@
 import { existsSync } from 'node:fs';
 import { NvidiaNimClient } from './adapters/nvidia-nim.js';
+import { verifyProviderKey, PROVIDER_NAMES } from './adapters/providers.js';
+import type { ProviderType } from './adapters/types.js';
 import {
   cloudApiUrl,
   cloudWebUrl,
@@ -40,11 +42,6 @@ import { verifyResult } from './verify.js';
 function printHelp(): void {
   printHelpUi();
 }
-
-// Commands that emit machine-readable output or run unattended — never interrupt
-// these with the interactive "update available?" prompt.
-import { verifyProviderKey, PROVIDER_NAMES } from './adapters/providers.js';
-import type { ProviderType } from './adapters/types.js';
 
 // Commands that emit machine-readable output or run unattended — never interrupt
 // these with the interactive "update available?" prompt.

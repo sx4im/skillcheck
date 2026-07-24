@@ -1,6 +1,7 @@
 // Skillcheck dashboard logic. Requires a Clerk session: the account endpoints
 // (/api/me, /api/key/rotate, /api/billing/*) are called with the Clerk session token.
 import { getClerk, getToken, bindAuthButtons } from './auth.js';
+import { copyText, flash, maskApiKey } from './clipboard.js';
 
 const $ = (id) => document.getElementById(id);
 const apiBase = location.origin + '/api';
@@ -38,26 +39,8 @@ async function authFetch(path, options = {}) {
   return res;
 }
 
-function copyText(text, done) {
-  if (navigator.clipboard && navigator.clipboard.writeText) {
-    navigator.clipboard.writeText(text).then(done, function () { fallback(text, done); });
-  } else { fallback(text, done); }
-}
-function fallback(text, done) {
-  const ta = document.createElement('textarea');
-  ta.value = text; ta.style.position = 'fixed'; ta.style.opacity = '0';
-  document.body.appendChild(ta); ta.select();
-  try { document.execCommand('copy'); } catch (e) {}
-  document.body.removeChild(ta); if (done) done();
-}
-function flash(btn, label) {
-  const prev = btn.textContent; btn.textContent = label || 'Copied';
-  setTimeout(function () { btn.textContent = prev; }, 1200);
-}
-function mask(key) { return key && key.length > 15 ? key.slice(0, 11) + '…' + key.slice(-4) : key; }
-
 function renderKey() {
-  $('apiKey').textContent = state.revealed ? state.fullKey : mask(state.fullKey);
+  $('apiKey').textContent = state.revealed ? state.fullKey : maskApiKey(state.fullKey);
   $('revealBtn').textContent = state.revealed ? 'Hide' : 'Reveal';
 }
 function renderCommands() {

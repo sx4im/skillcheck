@@ -1,8 +1,7 @@
-/* SkillCheck design system, derived from DESIGN.md (motorsport-engineering):
-   pure black canvas, white UPPERCASE display headlines (700) against light
-   body copy (300), zero border radius, 1px hairlines, no shadows and no
-   gradient backdrops. The SkillCheck tricolor stripe (cyan, blue, indigo)
-   appears only as a brand divider, never as a fill or action surface.
+/* SkillCheck design system: pure black canvas, white UPPERCASE display headlines
+   (700) against light body copy (300), zero border radius, 1px hairlines, no
+   shadows and no gradient backdrops. The SkillCheck tricolor stripe (cyan, blue,
+   indigo) appears only as a brand divider, never as a fill or action surface.
    One stylesheet serves the landing page, app.html, and the SSO callback. */
 
 :root {

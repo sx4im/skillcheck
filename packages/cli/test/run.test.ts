@@ -4,21 +4,9 @@ import path from 'node:path';
 import { describe, expect, it } from 'vitest';
 import type { NvidiaNimClient } from '../src/adapters/nvidia-nim.js';
 import { JsonCache } from '../src/cache.js';
-import type { NvidiaConfig } from '../src/env.js';
 import { runTrials } from '../src/run.js';
 import type { GeneratedTask, NormalizedSkill } from '../src/types.js';
-
-const config = {
-  baseUrl: 'https://example.test',
-  apiKey: 'test',
-  timeoutMs: 1000,
-  requestDelayMs: 0,
-  maxAttempts: 8,
-  maxRetryDelayMs: 60000,
-  generatorModel: 'generator',
-  graderModel: 'grader',
-  runnerModel: 'runner'
-} satisfies NvidiaConfig;
+import { testNvidiaConfig } from './helpers.js';
 
 const skill: NormalizedSkill = {
   name: 'Example Skill',
@@ -53,7 +41,7 @@ describe('runTrials trial independence', () => {
       }
     } as unknown as NvidiaNimClient;
 
-    const outputs = await runTrials(skill, tasks, 3, config, client, new JsonCache(cacheDir));
+    const outputs = await runTrials(skill, tasks, 3, testNvidiaConfig, client, new JsonCache(cacheDir));
 
     expect(calls).toBe(6); // 1 task x 3 trials x 2 arms
     expect(outputs).toHaveLength(6);
@@ -83,8 +71,8 @@ describe('runTrials trial independence', () => {
     } as unknown as NvidiaNimClient;
 
     const cache = new JsonCache(cacheDir);
-    const first = await runTrials(skill, tasks, 3, config, client, cache);
-    const second = await runTrials(skill, tasks, 3, config, client, cache);
+    const first = await runTrials(skill, tasks, 3, testNvidiaConfig, client, cache);
+    const second = await runTrials(skill, tasks, 3, testNvidiaConfig, client, cache);
 
     expect(calls).toBe(6); // second run is fully cached
     expect(second.map((output) => output.output)).toEqual(first.map((output) => output.output));
