@@ -269,15 +269,13 @@ function isQuotaError(error: unknown): boolean {
 export function sanitizeCliError(error: unknown): string {
   const raw = error instanceof Error ? error.message : String(error);
   if (/quota[_ ]?exceeded|payment required|free .*runs|\b402\b/i.test(raw)) {
-    return raw.replace(/^\d+\s+/, '').replace(/NVIDIA[_ -]?NIM|NVIDIA/gi, 'Skillcheck Cloud');
+    return raw.replace(/^\d+\s+/, '').replace(/NVIDIA(?:[_ -]?NIM)?/gi, 'Skillcheck Cloud');
   }
   if (/api[_ -]?key|credential|unauthorized|authentication|401/i.test(raw)) {
     return 'Skillcheck Cloud is not connected for this workspace. Please try again later or contact the workspace owner.';
   }
   return raw
-    .replace(/NVIDIA NIM/gi, 'Skillcheck Cloud')
-    .replace(/NVIDIA_API_KEY/gi, 'Skillcheck Cloud')
-    .replace(/NVIDIA/gi, 'Skillcheck Cloud')
+    .replace(/NVIDIA(?:[_ -]?(?:NIM|API_KEY))?/gi, 'Skillcheck Cloud')
     .replace(/API[_ -]?KEY/gi, 'credential');
 }
 

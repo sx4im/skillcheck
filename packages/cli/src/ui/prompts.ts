@@ -1,9 +1,8 @@
 import process from 'node:process';
-import readline from 'node:readline';
 import { createInterface } from 'node:readline/promises';
 import { cloudPricingUrl } from '../config.js';
 import { SYM, padDisplay, paint } from '../theme.js';
-import { CancelledError, readKey } from './picker.js';
+import { CancelledError, readKey, withRawMode } from './picker.js';
 
 export async function promptText(question: string): Promise<string> {
   const rl = createInterface({ input: process.stdin, output: process.stdout });
@@ -187,12 +186,6 @@ export async function selectEffort(eyebrow = 'Step 2 of 2'): Promise<EffortChoic
     return effortChoice(EFFORT_LEVELS[defaultIndex]!);
   }
 
-  readline.emitKeypressEvents(process.stdin);
-  const wasRaw = process.stdin.isRaw === true;
-  process.stdin.resume();
-  process.stdin.setRawMode(true);
-  process.stdout.write('\x1b[?25l');
-
   let selected = defaultIndex;
   let painted = false;
   const draw = () => {
@@ -204,7 +197,7 @@ export async function selectEffort(eyebrow = 'Step 2 of 2'): Promise<EffortChoic
     painted = true;
   };
 
-  try {
+  await withRawMode(async () => {
     draw();
     for (;;) {
       const { input, key } = await readKey();
@@ -230,11 +223,7 @@ export async function selectEffort(eyebrow = 'Step 2 of 2'): Promise<EffortChoic
         break;
       }
     }
-  } finally {
-    process.stdin.setRawMode(wasRaw);
-    process.stdin.pause();
-    process.stdout.write('\x1b[?25h');
-  }
+  });
 
   const chosen = EFFORT_LEVELS[selected]!;
   const choice = effortChoice(chosen);
@@ -259,12 +248,6 @@ export async function selectMenuOption<T = string>(
   if (!process.stdin.isTTY || !process.stdout.isTTY) {
     return options[0]!.value;
   }
-
-  readline.emitKeypressEvents(process.stdin);
-  const wasRaw = process.stdin.isRaw === true;
-  process.stdin.resume();
-  process.stdin.setRawMode(true);
-  process.stdout.write('\x1b[?25l');
 
   let selected = 0;
   let painted = false;
@@ -300,7 +283,7 @@ export async function selectMenuOption<T = string>(
     }
 
     lines.push('');
-    lines.push(`  ${paint.dim(`↑/↓ choose ${SYM.dot} Enter confirm ${SYM.dot} q cancel`)}`);
+    lines.push(`  ${paint.dim(`↑/↓ move ${SYM.dot} Enter choose`)}`);
     return lines;
   };
 
@@ -313,7 +296,7 @@ export async function selectMenuOption<T = string>(
     painted = true;
   };
 
-  try {
+  await withRawMode(async () => {
     draw();
     for (;;) {
       const { input, key } = await readKey();
@@ -334,11 +317,7 @@ export async function selectMenuOption<T = string>(
         break;
       }
     }
-  } finally {
-    process.stdin.setRawMode(wasRaw);
-    process.stdin.pause();
-    process.stdout.write('\x1b[?25h');
-  }
+  });
 
   const lines = renderLines();
   process.stdout.write(`\x1b[${lines.length}A\x1b[0J`);

@@ -178,15 +178,36 @@ export function readKey(): Promise<{ input: string; key: Keypress }> {
   });
 }
 
-export async function selectSkillPath(startDir = process.cwd()): Promise<string> {
-  if (!process.stdin.isTTY || !process.stdout.isTTY) {
-    throw new Error(`Please give me a path to ${supportedSkillFilesText()}.`);
-  }
-
+export async function withRawMode<T>(
+  action: () => Promise<T>,
+  options: { altScreen?: boolean } = {}
+): Promise<T> {
   readline.emitKeypressEvents(process.stdin);
   const wasRaw = process.stdin.isRaw === true;
   process.stdin.resume();
   process.stdin.setRawMode(true);
+  if (options.altScreen) {
+    process.stdout.write('\x1b[?1049h\x1b[?25l');
+  } else {
+    process.stdout.write('\x1b[?25l');
+  }
+  try {
+    return await action();
+  } finally {
+    process.stdin.setRawMode(wasRaw);
+    process.stdin.pause();
+    if (options.altScreen) {
+      process.stdout.write('\x1b[?25h\x1b[?1049l');
+    } else {
+      process.stdout.write('\x1b[?25h');
+    }
+  }
+}
+
+export async function selectSkillPath(startDir = process.cwd()): Promise<string> {
+  if (!process.stdin.isTTY || !process.stdout.isTTY) {
+    throw new Error(`Please give me a path to ${supportedSkillFilesText()}.`);
+  }
 
   let currentDir = path.resolve(startDir);
   let lastGoodDir = currentDir;
@@ -194,8 +215,7 @@ export async function selectSkillPath(startDir = process.cwd()): Promise<string>
   let message: string | undefined;
   let chosen: string | undefined;
 
-  process.stdout.write('\x1b[?1049h\x1b[?25l');
-  try {
+  await withRawMode(async () => {
     for (;;) {
       let entries: PickerEntry[];
       try {
@@ -245,14 +265,10 @@ export async function selectSkillPath(startDir = process.cwd()): Promise<string>
       }
       message = 'We only check Markdown (.md) files. Open a folder to find one, or pick a .md file.';
     }
-  } finally {
-    process.stdin.setRawMode(wasRaw);
-    process.stdin.pause();
-    process.stdout.write('\x1b[?25h\x1b[?1049l');
-  }
+  }, { altScreen: true });
 
   printBanner();
-  const shown = path.relative(process.cwd(), chosen) || chosen;
+  const shown = path.relative(process.cwd(), chosen!) || chosen!;
   console.log(`  ${paint.ok(SYM.tick)} ${paint.bold('Skill file')}  ${shown}\n`);
-  return chosen;
+  return chosen!;
 }

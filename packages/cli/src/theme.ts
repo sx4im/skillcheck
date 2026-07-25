@@ -157,6 +157,8 @@ export const epaint = makePalette(process.stderr);
 
 // eslint-disable-next-line no-control-regex
 const ANSI_PATTERN = /\x1b\[[0-9;?]*[A-Za-z]/g;
+// eslint-disable-next-line no-control-regex
+const ANSI_START = /^\x1b\[[0-9;?]*[A-Za-z]/;
 
 export function stripAnsi(text: string): string {
   return text.replace(ANSI_PATTERN, '');
@@ -182,8 +184,7 @@ export function truncateDisplay(text: string, width: number): string {
   let used = 0;
   let rest = text;
   while (rest.length > 0 && used < width - 1) {
-    // eslint-disable-next-line no-control-regex -- matching ANSI escapes needs \x1b
-    const match = /^\x1b\[[0-9;?]*[A-Za-z]/.exec(rest);
+    const match = ANSI_START.exec(rest);
     if (match) {
       out += match[0];
       rest = rest.slice(match[0].length);

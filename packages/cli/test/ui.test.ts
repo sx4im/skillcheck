@@ -20,6 +20,7 @@ describe('sanitizeCliError', () => {
   it('scrubs provider branding from generic errors', () => {
     expect(sanitizeCliError(new Error('NVIDIA NIM request timeout'))).toBe('Skillcheck Cloud request timeout');
     expect(sanitizeCliError(new Error('NVIDIA error occurred'))).toBe('Skillcheck Cloud error occurred');
+    expect(sanitizeCliError(new Error('Invalid NVIDIA_API_KEY found'))).toBe('Skillcheck Cloud is not connected for this workspace. Please try again later or contact the workspace owner.');
   });
 });
 
