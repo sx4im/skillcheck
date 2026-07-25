@@ -178,6 +178,37 @@ const MAX_TASKS = 50;
 const MAX_TRIALS = 10;
 const MAX_CONCURRENCY = 8;
 
+const VALUE_OPTIONS = new Set([
+  '--tasks',
+  '--trials',
+  '--concurrency',
+  '--output',
+  '--mode',
+  '--runner',
+  '--grader',
+  '--generator',
+  '--task-suite',
+  '--models',
+  '--results',
+  '--corpus',
+  '--sample',
+  '--limit'
+]);
+
+function findInputArgument(argv: string[], startIndex = 2): { path: string | undefined; index: number } {
+  for (let i = startIndex; i < argv.length; i += 1) {
+    const token = argv[i]!;
+    if (token.startsWith('-')) {
+      if (VALUE_OPTIONS.has(token)) {
+        i += 1; // skip this option's value
+      }
+      continue;
+    }
+    return { path: token, index: i };
+  }
+  return { path: undefined, index: -1 };
+}
+
 function readOption(argv: string[], name: string): string | undefined {
   const index = argv.indexOf(name);
   if (index === -1) {
@@ -223,8 +254,17 @@ function hasFlag(argv: string[], name: string): boolean {
 
 // Reject mistyped options (e.g. --task instead of --tasks) instead of silently
 // ignoring them and running with defaults the user did not ask for.
-function assertKnownOptions(argv: string[], firstIndex: number, valueOptions: string[], flags: string[] = []): void {
+function assertKnownOptions(
+  argv: string[],
+  firstIndex: number,
+  valueOptions: string[],
+  flags: string[] = [],
+  skipIndex = -1
+): void {
   for (let i = Math.max(firstIndex, 0); i < argv.length; i += 1) {
+    if (i === skipIndex) {
+      continue;
+    }
     const token = argv[i]!;
     if (!token.startsWith('--')) {
       continue;
@@ -239,31 +279,41 @@ function assertKnownOptions(argv: string[], firstIndex: number, valueOptions: st
   }
 }
 
-function parseCommonEvalOptions(argv: string[], defaultTasks: number): Omit<EvalOptions, 'inputPath'> {
+function parseCommonEvalOptions(
+  argv: string[],
+  defaultTasks: number,
+  startIndex: number
+): { evalOptions: Omit<EvalOptions, 'inputPath'>; inputPath?: string; inputIndex: number } {
+  const { path: inputPath, index: inputIndex } = findInputArgument(argv, startIndex);
   return {
-    output: readOption(argv, '--output'),
-    tasks: readNumberOption(argv, '--tasks', defaultTasks, MAX_TASKS),
-    trials: readNumberOption(argv, '--trials', 3, MAX_TRIALS),
-    concurrency: readNumberOption(argv, '--concurrency', 4, MAX_CONCURRENCY),
-    mode: 'forced',
-    runner: readOption(argv, '--runner'),
-    grader: readOption(argv, '--grader'),
-    generator: readOption(argv, '--generator'),
-    taskSuite: readOption(argv, '--task-suite'),
-    explain: hasFlag(argv, '--explain')
+    inputPath,
+    inputIndex,
+    evalOptions: {
+      output: readOption(argv, '--output'),
+      tasks: readNumberOption(argv, '--tasks', defaultTasks, MAX_TASKS),
+      trials: readNumberOption(argv, '--trials', 3, MAX_TRIALS),
+      concurrency: readNumberOption(argv, '--concurrency', 4, MAX_CONCURRENCY),
+      mode: 'forced',
+      runner: readOption(argv, '--runner'),
+      grader: readOption(argv, '--grader'),
+      generator: readOption(argv, '--generator'),
+      taskSuite: readOption(argv, '--task-suite'),
+      explain: hasFlag(argv, '--explain')
+    }
   };
 }
 
-function parseEvalOptions(argv: string[], inputIndex = 3): EvalOptions {
-  const inputPath = argv[inputIndex];
-  if (!inputPath || inputPath.startsWith('--')) {
+function parseEvalOptions(argv: string[], startIndex = 3): EvalOptions {
+  const { inputPath, inputIndex, evalOptions } = parseCommonEvalOptions(argv, 10, startIndex);
+  if (!inputPath) {
     throw new Error('Usage: skillcheck eval <path> [--tasks N] [--trials K] [--concurrency C] [--output file.json]');
   }
   assertKnownOptions(
     argv,
-    inputIndex + 1,
+    startIndex,
     ['--tasks', '--trials', '--concurrency', '--output', '--mode', '--runner', '--grader', '--generator', '--task-suite'],
-    ['--explain']
+    ['--explain'],
+    inputIndex
   );
 
   const mode = readOption(argv, '--mode') ?? 'forced';
@@ -273,7 +323,7 @@ function parseEvalOptions(argv: string[], inputIndex = 3): EvalOptions {
 
   return {
     inputPath,
-    ...parseCommonEvalOptions(argv, 10)
+    ...evalOptions
   };
 }
 
@@ -284,9 +334,9 @@ interface CheckOptions {
   effortPinned: boolean;
 }
 
-export function parseCheckOptions(argv: string[], inputIndex = 3): CheckOptions {
-  const inputPath = argv[inputIndex];
-  if (!inputPath || inputPath.startsWith('--')) {
+export function parseCheckOptions(argv: string[], startIndex = 3): CheckOptions {
+  const { inputPath, inputIndex, evalOptions } = parseCommonEvalOptions(argv, 3, startIndex);
+  if (!inputPath) {
     throw new Error(
       'Usage: skillcheck check <path-to-skill-file-or-folder>\nExample: skillcheck check ./SKILL.md'
     );
@@ -294,20 +344,20 @@ export function parseCheckOptions(argv: string[], inputIndex = 3): CheckOptions 
 
   assertKnownOptions(
     argv,
-    inputIndex + 1,
+    startIndex,
     ['--tasks', '--trials', '--concurrency', '--output', '--runner', '--grader', '--generator', '--task-suite'],
-    ['--json', '--explain']
+    ['--json', '--explain'],
+    inputIndex
   );
 
-  const common = parseCommonEvalOptions(argv, 3);
   return {
     evalOptions: {
       inputPath,
-      ...common,
-      saveArtifacts: Boolean(common.output)
+      ...evalOptions,
+      saveArtifacts: Boolean(evalOptions.output)
     },
     json: hasFlag(argv, '--json'),
-    output: common.output,
+    output: evalOptions.output,
     effortPinned: hasFlag(argv, '--tasks') || hasFlag(argv, '--trials')
   };
 }
@@ -351,16 +401,17 @@ interface MatrixOptions {
   json: boolean;
 }
 
-function parseMatrixOptions(argv: string[]): MatrixOptions {
-  const inputPath = argv[3];
-  if (!inputPath || inputPath.startsWith('--')) {
+function parseMatrixOptions(argv: string[], startIndex = 3): MatrixOptions {
+  const { path: inputPath, index: inputIndex } = findInputArgument(argv, startIndex);
+  if (!inputPath) {
     throw new Error('Usage: skillcheck matrix <path> [--models model1,model2] [--tasks N] [--trials K] [--concurrency C]');
   }
   assertKnownOptions(
     argv,
-    4,
+    startIndex,
     ['--models', '--tasks', '--trials', '--concurrency'],
-    ['--json']
+    ['--json'],
+    inputIndex
   );
 
   const rawModels = readOption(argv, '--models');
@@ -489,7 +540,7 @@ async function runInteractiveCheck(): Promise<void> {
   await ensureCloudConfigured(false);
   const selectedPath = await selectSkillPath();
   const effort = await selectEffort();
-  const options = parseCheckOptions(['node', 'skillcheck', 'check', selectedPath]);
+  const options = parseCheckOptions(['node', 'skillcheck', 'check', selectedPath], 3);
   options.evalOptions.tasks = effort.tasks;
   options.evalOptions.trials = effort.trials;
   options.effortPinned = true; // already chosen above — don't let runCheck re-ask
@@ -541,22 +592,22 @@ export async function main(argv: string[]): Promise<void> {
   }
 
   if (command === 'check') {
-    await runCheck(parseCheckOptions(argv));
+    await runCheck(parseCheckOptions(argv, 3));
     return;
   }
 
   if (command === 'eval') {
-    const result = await evalSkill(parseEvalOptions(argv));
+    const result = await evalSkill(parseEvalOptions(argv, 3));
     console.log(JSON.stringify(result, null, 2));
     return;
   }
 
   if (command === 'verify') {
-    const resultPath = argv[3];
-    if (!resultPath || resultPath.startsWith('--')) {
+    const { path: resultPath, index: inputIndex } = findInputArgument(argv, 3);
+    if (!resultPath) {
       throw new Error('Usage: skillcheck verify <result.json> [--sample n]');
     }
-    assertKnownOptions(argv, 4, ['--sample']);
+    assertKnownOptions(argv, 3, ['--sample'], [], inputIndex);
     const result = await verifyResult({
       resultPath,
       sample: readNumberOption(argv, '--sample', 3, MAX_TASKS)
@@ -582,7 +633,7 @@ export async function main(argv: string[]): Promise<void> {
   }
 
   if (command === 'matrix') {
-    const options = parseMatrixOptions(argv);
+    const options = parseMatrixOptions(argv, 3);
     const result = await runMatrix(options);
     if (options.json) {
       console.log(JSON.stringify(result, null, 2));
@@ -590,17 +641,24 @@ export async function main(argv: string[]): Promise<void> {
     return;
   }
 
-  if (!command.startsWith('-') && existsSync(command)) {
-    await runCheck(parseCheckOptions(['node', 'skillcheck', 'check', ...argv.slice(2)]));
+  // Not an explicit subcommand: handle `skillcheck ./SKILL.md` or `skillcheck --explain ./SKILL.md`
+  const { path: inputPath } = findInputArgument(argv, 2);
+  if (inputPath) {
+    if (existsSync(inputPath)) {
+      await runCheck(parseCheckOptions(argv, 2));
+      return;
+    }
+    const looksLikePath =
+      inputPath.includes('/') || inputPath.includes('\\') || inputPath.startsWith('.') || /\.md$/i.test(inputPath);
+    if (looksLikePath) {
+      throw new Error(`Path not found: ${inputPath}\nGive me a Markdown (.md) skill file, or a folder containing one.`);
+    }
+  }
+
+  if (command.startsWith('-')) {
+    await runCheck(parseCheckOptions(argv, 2));
     return;
   }
 
-  // A path-shaped argument that doesn't exist deserves a file error, not a
-  // baffling "unknown command".
-  const looksLikePath =
-    !command.startsWith('-') && (command.includes('/') || command.includes('\\') || command.startsWith('.') || /\.md$/i.test(command));
-  if (looksLikePath) {
-    throw new Error(`Path not found: ${command}\nGive me a Markdown (.md) skill file, or a folder containing one.`);
-  }
   throw new Error(`Unknown command: ${command}\nRun \`skillcheck --help\` to see available commands.`);
 }

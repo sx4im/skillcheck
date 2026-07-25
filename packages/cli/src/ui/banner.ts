@@ -122,14 +122,15 @@ export function printCheckHeader(inputPath: string, tasks: number, trials: numbe
 export function printHelpUi(): void {
   printBanner();
   const cmd = (name: string, blurb: string) =>
-    console.log(`    ${paint.bold(name.padEnd(18))}${paint.dim(blurb)}`);
+    console.log(`    ${paint.bold(name.padEnd(22))}${paint.dim(blurb)}`);
   const opt = (name: string, blurb: string) =>
-    console.log(`    ${paint.accent(name.padEnd(18))}${paint.dim(blurb)}`);
+    console.log(`    ${paint.accent(name.padEnd(22))}${paint.dim(blurb)}`);
 
   console.log(`  ${paint.accent('Usage')}`);
-  console.log(`    ${paint.bold('skillcheck')}                  ${paint.dim('interactive — pick a file, choose effort, run')}`);
-  console.log(`    ${paint.bold('skillcheck')} ${paint.accent('<path>')}           ${paint.dim('check a skill file or folder directly')}`);
-  console.log(`    ${paint.bold('skillcheck')} ${paint.accent('<command>')} ${paint.dim('[options]')}\n`);
+  console.log(`    ${paint.bold('skillcheck')}                      ${paint.dim('interactive — pick a file, choose effort, run')}`);
+  console.log(`    ${paint.bold('skillcheck')} ${paint.accent('<path>')}               ${paint.dim('check a skill file or folder directly')}`);
+  console.log(`    ${paint.bold('skillcheck')} ${paint.accent('<path> --explain')}     ${paint.dim('check and show detailed task breakdown')}`);
+  console.log(`    ${paint.bold('skillcheck')} ${paint.accent('<command> [options]')}\n`);
 
   console.log(`  ${paint.accent('Commands')}`);
   cmd('check <path>', 'A/B check a skill with a readable result card');
@@ -157,8 +158,9 @@ export function printHelpUi(): void {
 
   console.log(`  ${paint.accent('Examples')}`);
   console.log(`    ${paint.dim('$')} skillcheck ./SKILL.md`);
-  console.log(`    ${paint.dim('$')} skillcheck check ./SKILL.md --tasks 5 --trials 3 --concurrency 4`);
-  console.log(`    ${paint.dim('$')} skillcheck matrix ./SKILL.md --models gpt-4o,claude-3-5-sonnet,gemini-1.5-pro`);
+  console.log(`    ${paint.dim('$')} skillcheck ./SKILL.md --explain`);
+  console.log(`    ${paint.dim('$')} skillcheck check ./SKILL.md --tasks 5 --trials 3`);
+  console.log(`    ${paint.dim('$')} skillcheck matrix ./SKILL.md --models gpt-4o,claude-3-5-sonnet-20241022`);
   console.log(`    ${paint.dim('$')} skillcheck setup\n`);
 
   console.log(`  ${paint.dim('Supported providers (BYOK): OpenAI, Anthropic, Gemini, Groq, Mistral, OpenRouter, NVIDIA NIM')}`);

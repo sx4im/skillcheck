@@ -42,6 +42,27 @@ describe('friendly CLI check command', () => {
     expect(options.json).toBe(true);
   });
 
+  it('accepts options before or after the skill path', () => {
+    const optsBefore = parseCheckOptions(['node', 'skillcheck', '--explain', './SKILL.md', '--tasks', '5'], 2);
+    expect(optsBefore.evalOptions.inputPath).toBe('./SKILL.md');
+    expect(optsBefore.evalOptions.explain).toBe(true);
+    expect(optsBefore.evalOptions.tasks).toBe(5);
+
+    const optsAfter = parseCheckOptions(['node', 'skillcheck', 'check', '--explain', './SKILL.md'], 3);
+    expect(optsAfter.evalOptions.inputPath).toBe('./SKILL.md');
+    expect(optsAfter.evalOptions.explain).toBe(true);
+  });
+
+  it('supports matrix command option parsing before or after path', () => {
+    const matrixOptsAfter = parseCheckOptions(['node', 'skillcheck', 'matrix', './SKILL.md', '--tasks', '5'], 3);
+    expect(matrixOptsAfter.evalOptions.inputPath).toBe('./SKILL.md');
+    expect(matrixOptsAfter.evalOptions.tasks).toBe(5);
+
+    const matrixOptsBefore = parseCheckOptions(['node', 'skillcheck', 'matrix', '--tasks', '5', './SKILL.md'], 3);
+    expect(matrixOptsBefore.evalOptions.inputPath).toBe('./SKILL.md');
+    expect(matrixOptsBefore.evalOptions.tasks).toBe(5);
+  });
+
   it('formats a readable result summary', () => {
     const summary = formatResultCard(
       {
