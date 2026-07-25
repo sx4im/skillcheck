@@ -29,8 +29,8 @@ export function LeaderboardTable({ results }: { results: LeaderboardResult[] }) 
   return (
     <section className="panel">
       <div className="toolbar">
-        <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Filter skills, domains, sources" />
-        <select value={verdict} onChange={(event) => setVerdict(event.target.value)}>
+        <input aria-label="Filter skills" value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Filter skills, domains, sources" />
+        <select aria-label="Filter by verdict" value={verdict} onChange={(event) => setVerdict(event.target.value)}>
           <option value="all">All verdicts</option>
           <option value="helps">helps</option>
           <option value="placebo">placebo</option>

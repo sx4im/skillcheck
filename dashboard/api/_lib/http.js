@@ -25,11 +25,7 @@ export function bearerToken(req) {
   return match ? match[1].trim() : '';
 }
 
-export function redirect(res, location) {
-  res.statusCode = 302;
-  res.setHeader('location', location);
-  res.end();
-}
+
 
 // Vercel parses JSON bodies into req.body; locally (node http) it may be a stream.
 export async function readJsonBody(req) {
@@ -43,34 +39,3 @@ export async function readJsonBody(req) {
   try { return JSON.parse(Buffer.concat(chunks).toString('utf8')); } catch { return {}; }
 }
 
-export function parseCookies(req) {
-  const out = {};
-  const raw = req.headers['cookie'];
-  if (!raw) return out;
-  for (const part of raw.split(';')) {
-    const index = part.indexOf('=');
-    if (index === -1) continue;
-    out[part.slice(0, index).trim()] = decodeURIComponent(part.slice(index + 1).trim());
-  }
-  return out;
-}
-
-export function setCookie(res, name, value, options = {}) {
-  const segments = [`${name}=${encodeURIComponent(value)}`];
-  segments.push(`Path=${options.path || '/'}`);
-  if (options.maxAge != null) segments.push(`Max-Age=${options.maxAge}`);
-  segments.push(`SameSite=${options.sameSite || 'Lax'}`);
-  if (options.httpOnly !== false) segments.push('HttpOnly');
-  if (options.secure !== false) segments.push('Secure');
-  appendHeader(res, 'Set-Cookie', segments.join('; '));
-}
-
-export function clearCookie(res, name) {
-  appendHeader(res, 'Set-Cookie', `${name}=; Path=/; Max-Age=0; SameSite=Lax; HttpOnly; Secure`);
-}
-
-function appendHeader(res, name, value) {
-  const existing = res.getHeader(name);
-  if (!existing) res.setHeader(name, value);
-  else res.setHeader(name, Array.isArray(existing) ? [...existing, value] : [existing, value]);
-}

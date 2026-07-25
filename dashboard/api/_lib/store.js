@@ -31,7 +31,12 @@ async function upstash(command) {
     headers: { authorization: `Bearer ${UPSTASH_TOKEN}`, 'content-type': 'application/json' },
     body: JSON.stringify(command)
   });
-  const data = await response.json();
+  let data;
+  try {
+    data = await response.json();
+  } catch (err) {
+    throw new Error(`store error: bad response (${response.status})`);
+  }
   if (data && data.error) throw new Error(`store error: ${data.error}`);
   return data ? data.result : null;
 }

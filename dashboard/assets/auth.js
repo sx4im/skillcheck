@@ -51,7 +51,9 @@ function loadClerkFromCdn(publishableKey) {
 export async function getClerk() {
   if (clerkPromise) return clerkPromise;
   clerkPromise = (async () => {
-    const config = await (await fetch('/api/config')).json();
+    const res = await fetch('/api/config');
+    let config;
+    try { config = await res.json(); } catch (e) { config = {}; }
     if (!config.clerkPublishableKey) {
       throw new Error('Sign-in is not configured yet. Set CLERK_PUBLISHABLE_KEY on the server.');
     }

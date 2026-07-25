@@ -210,14 +210,14 @@ async function prepareSources(
     grouped.set(key, current);
   }
 
-  for (const [key, group] of grouped) {
+  await Promise.all(Array.from(grouped.entries()).map(async ([key, group]) => {
     roots.set(
       key,
       group.repo
         ? await prepareGitSource(group.source, group.repo, group.commit, group.paths)
         : path.dirname(path.resolve(corpusPath))
     );
-  }
+  }));
 
   return roots;
 }
