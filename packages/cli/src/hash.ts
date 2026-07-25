@@ -1,4 +1,6 @@
 import { createHash } from 'node:crypto';
+import { mkdir, writeFile } from 'node:fs/promises';
+import path from 'node:path';
 
 export function sha256(value: string): string {
   return createHash('sha256').update(value).digest('hex');
@@ -6,6 +8,18 @@ export function sha256(value: string): string {
 
 export function hashJson(value: unknown): string {
   return sha256(JSON.stringify(value));
+}
+
+export function slugify(value: string): string {
+  return value
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-|-$/g, '');
+}
+
+export async function writeJson(filePath: string, value: unknown): Promise<void> {
+  await mkdir(path.dirname(filePath), { recursive: true });
+  await writeFile(filePath, `${JSON.stringify(value, null, 2)}\n`);
 }
 
 /**

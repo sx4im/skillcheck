@@ -1,12 +1,11 @@
 import { randomUUID } from 'node:crypto';
-import { mkdir, readFile, writeFile } from 'node:fs/promises';
-import path from 'node:path';
+import { readFile } from 'node:fs/promises';
 import { createLlmClient } from './adapters/providers.js';
 import type { ProviderConfig } from './adapters/types.js';
 import { JsonCache } from './cache.js';
 import { loadProviderConfig } from './env.js';
 import { generateTasks } from './generate.js';
-import { hashJson } from './hash.js';
+import { hashJson, writeJson } from './hash.js';
 import { gradeOutputs } from './grade.js';
 import { normalizeSkill } from './normalize.js';
 import { runTrials } from './run.js';
@@ -114,11 +113,6 @@ function buildExplain(tasks: GeneratedTask[], graded: GradedOutput[]): { tasks: 
       };
     })
   };
-}
-
-async function writeJson(filePath: string, value: unknown): Promise<void> {
-  await mkdir(path.dirname(filePath), { recursive: true });
-  await writeFile(filePath, `${JSON.stringify(value, null, 2)}\n`);
 }
 
 export function parseTaskSuite(text: string): GeneratedTask[] {

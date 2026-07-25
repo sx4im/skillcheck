@@ -239,6 +239,21 @@ function assertKnownOptions(argv: string[], firstIndex: number, valueOptions: st
   }
 }
 
+function parseCommonEvalOptions(argv: string[], defaultTasks: number): Omit<EvalOptions, 'inputPath'> {
+  return {
+    output: readOption(argv, '--output'),
+    tasks: readNumberOption(argv, '--tasks', defaultTasks, MAX_TASKS),
+    trials: readNumberOption(argv, '--trials', 3, MAX_TRIALS),
+    concurrency: readNumberOption(argv, '--concurrency', 4, MAX_CONCURRENCY),
+    mode: 'forced',
+    runner: readOption(argv, '--runner'),
+    grader: readOption(argv, '--grader'),
+    generator: readOption(argv, '--generator'),
+    taskSuite: readOption(argv, '--task-suite'),
+    explain: hasFlag(argv, '--explain')
+  };
+}
+
 function parseEvalOptions(argv: string[], inputIndex = 3): EvalOptions {
   const inputPath = argv[inputIndex];
   if (!inputPath || inputPath.startsWith('--')) {
@@ -258,16 +273,7 @@ function parseEvalOptions(argv: string[], inputIndex = 3): EvalOptions {
 
   return {
     inputPath,
-    output: readOption(argv, '--output'),
-    tasks: readNumberOption(argv, '--tasks', 10, MAX_TASKS),
-    trials: readNumberOption(argv, '--trials', 3, MAX_TRIALS),
-    concurrency: readNumberOption(argv, '--concurrency', 4, MAX_CONCURRENCY),
-    mode,
-    runner: readOption(argv, '--runner'),
-    grader: readOption(argv, '--grader'),
-    generator: readOption(argv, '--generator'),
-    taskSuite: readOption(argv, '--task-suite'),
-    explain: hasFlag(argv, '--explain')
+    ...parseCommonEvalOptions(argv, 10)
   };
 }
 
@@ -293,24 +299,15 @@ export function parseCheckOptions(argv: string[], inputIndex = 3): CheckOptions 
     ['--json', '--explain']
   );
 
-  const output = readOption(argv, '--output');
+  const common = parseCommonEvalOptions(argv, 3);
   return {
     evalOptions: {
       inputPath,
-      output,
-      tasks: readNumberOption(argv, '--tasks', 3, MAX_TASKS),
-      trials: readNumberOption(argv, '--trials', 3, MAX_TRIALS),
-      concurrency: readNumberOption(argv, '--concurrency', 4, MAX_CONCURRENCY),
-      mode: 'forced',
-      runner: readOption(argv, '--runner'),
-      grader: readOption(argv, '--grader'),
-      generator: readOption(argv, '--generator'),
-      taskSuite: readOption(argv, '--task-suite'),
-      saveArtifacts: Boolean(output),
-      explain: hasFlag(argv, '--explain')
+      ...common,
+      saveArtifacts: Boolean(common.output)
     },
     json: hasFlag(argv, '--json'),
-    output,
+    output: common.output,
     effortPinned: hasFlag(argv, '--tasks') || hasFlag(argv, '--trials')
   };
 }

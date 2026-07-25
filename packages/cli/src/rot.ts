@@ -1,6 +1,7 @@
-import { mkdir, readdir, readFile, writeFile } from 'node:fs/promises';
+import { readdir, readFile } from 'node:fs/promises';
 import path from 'node:path';
 import { runCorpus } from './corpus.js';
+import { slugify, writeJson } from './hash.js';
 
 type Verdict = 'helps' | 'placebo' | 'harms';
 type RotStatus = 'new' | 'stable' | 'rot';
@@ -65,13 +66,6 @@ export interface RotOptions {
   corpus?: string;
   tasks: number;
   trials: number;
-}
-
-function slugify(value: string): string {
-  return value
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-|-$/g, '');
 }
 
 function resultKey(result: StoredResult): string {
@@ -226,11 +220,6 @@ async function rerunCorpus(options: RotOptions): Promise<void> {
     concurrency: 2,
     runner: options.model
   });
-}
-
-async function writeJson(filePath: string, value: unknown): Promise<void> {
-  await mkdir(path.dirname(filePath), { recursive: true });
-  await writeFile(filePath, `${JSON.stringify(value, null, 2)}\n`);
 }
 
 export async function runRot(options: RotOptions): Promise<RotReport> {

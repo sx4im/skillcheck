@@ -18,8 +18,8 @@ describe('sanitizeCliError', () => {
   });
 
   it('scrubs provider branding from generic errors', () => {
-    expect(sanitizeCliError(new Error('NVIDIA NIM request timeout'))).toContain('Skillcheck Cloud');
-    expect(sanitizeCliError(new Error('NVIDIA NIM request timeout'))).not.toContain('NVIDIA');
+    expect(sanitizeCliError(new Error('NVIDIA NIM request timeout'))).toBe('Skillcheck Cloud request timeout');
+    expect(sanitizeCliError(new Error('NVIDIA error occurred'))).toBe('Skillcheck Cloud error occurred');
   });
 });
 

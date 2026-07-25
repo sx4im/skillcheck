@@ -1,10 +1,13 @@
 import { execFile as execFileCallback } from 'node:child_process';
-import { mkdir, readFile, stat, writeFile } from 'node:fs/promises';
+import { mkdir, readFile, stat } from 'node:fs/promises';
 import path from 'node:path';
 import { promisify } from 'node:util';
 import { evalSkill } from './eval.js';
+import { slugify, writeJson } from './hash.js';
 
 const execFile = promisify(execFileCallback);
+
+export { slugify };
 
 export interface CorpusSkill {
   id: string;
@@ -49,13 +52,6 @@ export interface CorpusRunReport {
   concurrency: number;
   runner?: string;
   skills: CorpusRunEntry[];
-}
-
-export function slugify(value: string): string {
-  return value
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-|-$/g, '');
 }
 
 function unquote(value: string): string {
@@ -224,11 +220,6 @@ async function prepareSources(
   }
 
   return roots;
-}
-
-async function writeJson(filePath: string, value: unknown): Promise<void> {
-  await mkdir(path.dirname(filePath), { recursive: true });
-  await writeFile(filePath, `${JSON.stringify(value, null, 2)}\n`);
 }
 
 export async function runCorpus(options: CorpusRunOptions): Promise<CorpusRunReport> {
