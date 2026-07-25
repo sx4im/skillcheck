@@ -186,7 +186,9 @@ export async function evalSkill(options: EvalOptions): Promise<unknown> {
       source: options.sourceLabel ?? skill.sourcePath,
       format: skill.format,
       commit_hash: skill.versionHash,
-      domain: skill.domain
+      domain: skill.domain,
+      tool_dependent: skill.toolDependent,
+      toolDependent: skill.toolDependent
     },
     config: {
       runner_model: config.runnerModel,
@@ -209,7 +211,9 @@ export async function evalSkill(options: EvalOptions): Promise<unknown> {
       with_skill_pass: score.withSkillPass,
       no_skill_pass: score.noSkillPass,
       token_overhead: tokenOverhead,
-      value_per_1k_tokens: valuePer1kTokens
+      value_per_1k_tokens: valuePer1kTokens,
+      tool_dependent: skill.toolDependent,
+      toolDependent: skill.toolDependent
     },
     tasks: breakdowns,
     ...(options.explain ? { explain: buildExplain(tasks, graded) } : {}),

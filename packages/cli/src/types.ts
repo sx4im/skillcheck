@@ -19,6 +19,7 @@ export interface NormalizedSkill {
   domain: string;
   assets: string[];
   versionHash: string;
+  toolDependent: boolean;
 }
 
 export interface GeneratedTask {

@@ -2,7 +2,7 @@ import { mkdtemp, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { describe, expect, it } from 'vitest';
-import { normalizeSkill } from '../src/normalize.js';
+import { isToolDependent, normalizeSkill } from '../src/normalize.js';
 
 describe('normalizeSkill', () => {
   it('normalizes SKILL.md front matter', async () => {
@@ -101,5 +101,20 @@ describe('normalizeSkill', () => {
     await writeFile(path.join(dir, 'notes.txt'), 'nope');
     await expect(normalizeSkill(dir)).rejects.toThrow(/No \.md file/);
     await expect(normalizeSkill(path.join(dir, 'notes.txt'))).rejects.toThrow(/only analyzes Markdown/);
+  });
+});
+
+describe('isToolDependent detection heuristic', () => {
+  it('detects tool dependency when instructions reference script execution or file saving', () => {
+    expect(isToolDependent('Save test cases to `evals/evals.json`')).toBe(true);
+    expect(isToolDependent('Run `python3 scripts/quick_validate.py` to validate.')).toBe(true);
+    expect(isToolDependent('Execute `git commit -m "feat: add"` in terminal')).toBe(true);
+  });
+
+  it('does not flag pure prompt guidelines, rhetorical mentions, or passive file reading without extensions', () => {
+    expect(isToolDependent('Always write a failing test before writing code.')).toBe(false);
+    expect(isToolDependent('Read the uploaded resume file the user provided, then write a summary... Do not save anything')).toBe(false);
+    expect(isToolDependent('Analyze the situation using the tool of structured thinking and form a hypothesis.')).toBe(false);
+    expect(isToolDependent('Templates live in scripts/ directory for reference.')).toBe(false);
   });
 });

@@ -115,6 +115,9 @@ function resultHeaderLines(geometry: CardGeometry, result: unknown, outputPath?:
   const inconclusive =
     ciLow !== undefined && ciHigh !== undefined && ciLow < 0 && ciHigh > 0 && ciHigh - ciLow > 40;
   const verdict = String(score.verdict ?? 'unknown');
+  const toolDependent = Boolean(
+    skill.tool_dependent ?? skill.toolDependent ?? score.tool_dependent ?? score.toolDependent
+  );
 
   const lines = [
     cardEdge(geometry, 'top'),
@@ -127,6 +130,14 @@ function resultHeaderLines(geometry: CardGeometry, result: unknown, outputPath?:
   ];
   for (const wrapped of wrapText(plainVerdict(verdict, score.with_skill_pass, score.no_skill_pass), geometry.content)) {
     lines.push(cardRow(geometry, paint.dim(wrapped)));
+  }
+  if (toolDependent) {
+    for (const wrapped of wrapText(
+      "Note: this skill's instructions reference script or file execution, results may not reflect real-world performance.",
+      geometry.content
+    )) {
+      lines.push(cardRow(geometry, paint.warn(wrapped)));
+    }
   }
   lines.push(cardRow(geometry, ''));
   lines.push(cardLabelRow(geometry, 'With skill', `${formatPercent(score.with_skill_pass)} of tasks passed`));

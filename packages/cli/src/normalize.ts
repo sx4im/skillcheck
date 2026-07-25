@@ -149,6 +149,59 @@ function nameFromPath(filePath: string, format: SkillFormat): string {
   return path.basename(path.dirname(filePath)) || base;
 }
 
+/**
+ * Detects whether a skill's instructions reference running scripts, shell commands,
+ * or reading/writing files as part of its documented workflow.
+ */
+export function isToolDependent(instructions: string): boolean {
+  if (!instructions || typeof instructions !== 'string') {
+    return false;
+  }
+
+  // 1. Explicit command execution verbs + script targets
+  const commandExecutionRegex =
+    /\b(run|execute|exec|call|launch|invoke)\s+([`"']?[\w./-]+\.(sh|py|js|ts|rb|pl)[`"']?|bash|shell|terminal|script|scripts\/[\w./-]+)/i;
+  if (commandExecutionRegex.test(instructions)) {
+    return true;
+  }
+
+  // 2. Direct shell commands in text or code blocks
+  const directShellRegex =
+    /(^|\s|`)(bash|sh|zsh|python|python3|node|npm|npx|pytest|cargo|git|curl|wget)\s+([`"']?[\w./-]+\.(sh|py|js|ts|rb|pl|json|csv|md)|check|test|run|commit|checkout|install|build|package)(?=\s|`|$|\.|,)/im;
+  if (directShellRegex.test(instructions)) {
+    return true;
+  }
+
+  // 3. Executable script path invocation patterns
+  const scriptPathRegex = /(^|\s|`)\.?\/?[\w./-]*scripts\/[\w./-]+\.(sh|py|js|ts|rb|pl)\b/im;
+  if (scriptPathRegex.test(instructions)) {
+    return true;
+  }
+
+  // 4. File Save operations (writing/saving to a file with an explicit extension)
+  const fileSaveRegex =
+    /\b(write|save|output|export)\s+.*?\b(to|into)\s+[`"']?[\w./-]+\.(json|csv|txt|yaml|yml|md|xml|html)[`"']?/i;
+  if (fileSaveRegex.test(instructions)) {
+    return true;
+  }
+
+  // 5. File Read operations (reading/loading from a file with an explicit extension)
+  const fileReadRegex =
+    /\b(read|load|parse)\s+.*?\b(from|of)\s+[`"']?[\w./-]+\.(json|csv|txt|yaml|yml|md|xml|html)[`"']?/i;
+  if (fileReadRegex.test(instructions)) {
+    return true;
+  }
+
+  // 6. Terminal / Shell environment usage phrases
+  const toolEnvironmentRegex =
+    /\b(using|via|in|from)\s+(the\s+)?(bash|terminal|shell|command line)\b/i;
+  if (toolEnvironmentRegex.test(instructions)) {
+    return true;
+  }
+
+  return false;
+}
+
 export async function normalizeSkill(inputPath: string): Promise<NormalizedSkill> {
   const { filePath, format } = await resolveSkillFile(inputPath);
   const instructions = await readFile(filePath, 'utf8');
@@ -163,6 +216,7 @@ export async function normalizeSkill(inputPath: string): Promise<NormalizedSkill
     instructions,
     domain: extractDomain(instructions),
     assets: await listAssets(filePath),
-    versionHash: sha256(instructions)
+    versionHash: sha256(instructions),
+    toolDependent: isToolDependent(instructions)
   };
 }

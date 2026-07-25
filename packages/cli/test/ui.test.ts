@@ -71,6 +71,18 @@ describe('result card rendering', () => {
     expect(widths.size).toBe(1);
     expect(stripAnsi(lines.join('\n'))).toContain('…');
   });
+
+  it('renders a hedged caveat when a skill is tool_dependent', () => {
+    const card = stripAnsi(
+      formatResultCard({
+        ...SAMPLE_RESULT,
+        skill: { ...SAMPLE_RESULT.skill, tool_dependent: true }
+      })
+    )
+      .replace(/[│─╭╮╰╯├┤]/g, ' ')
+      .replace(/\s+/g, ' ');
+    expect(card).toContain("Note: this skill's instructions reference script or file execution, results may not reflect real-world performance.");
+  });
 });
 
 describe('quota upsell block', () => {
