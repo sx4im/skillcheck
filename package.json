@@ -47,7 +47,7 @@
   },
   "dependencies": {
     "dotenv": "^16.4.7",
-    "openai": "^4.77.0"
+    "openai": "^7.0.0"
   },
   "overrides": {
     "next": {
