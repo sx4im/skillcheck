@@ -10,8 +10,10 @@
   <a href="https://nodejs.org"><img src="https://img.shields.io/badge/node-%E2%89%A520-brightgreen" alt="Node ≥20"></a>
 </p>
 
-**CLI for AI agent skill testing and prompt A/B testing** — measure whether an agent
-skill actually improves a model's task performance.
+**A/B test agent skills with blind grading and bootstrap CIs** - measure whether an
+agent skill actually improves a model's task performance.
+
+Not a skill linter - a controlled experiment that measures effect size.
 
 Most published `SKILL.md` files have never been tested. You can't tell whether they
 help your model or are just decoration. Skillcheck answers that with a controlled

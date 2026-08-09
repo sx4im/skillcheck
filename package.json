@@ -1,7 +1,7 @@
 {
   "name": "@sx4im/skillcheck",
   "version": "0.9.7",
-  "description": "CLI for AI agent skill testing and prompt A/B testing — measure whether a SKILL.md improves LLM task performance.",
+  "description": "Controlled A/B tests for agent SKILL.md files: blind grading, bootstrap confidence intervals, HELPS/PLACEBO/HARMS - effect size, not schema validation.",
   "type": "module",
   "license": "MIT",
   "author": "sx4im",
