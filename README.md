@@ -365,11 +365,11 @@ re-runs the live corpus weekly and opens a PR when a skill's verdict regresses.
 
 If Skillcheck saved you from shipping a placebo skill, a ⭐ helps other people find it.
 
-<a href="https://www.star-history.com/#sx4im/skillcheck&Date">
+<a href="https://www.star-history.com/?repos=sx4im%2Fskillcheck&type=date&legend=top-left">
   <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=sx4im/skillcheck&type=Date&theme=dark" />
-    <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=sx4im/skillcheck&type=Date" />
-    <img alt="Star History Chart" src="https://api.star-history.com/svg?repos=sx4im/skillcheck&type=Date" />
+    <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=sx4im/skillcheck&type=Date&legend=top-left&theme=dark" />
+    <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=sx4im/skillcheck&type=Date&legend=top-left" />
+    <img alt="Star History Chart" src="https://api.star-history.com/svg?repos=sx4im/skillcheck&type=Date&legend=top-left" />
   </picture>
 </a>
 
