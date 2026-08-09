@@ -10,11 +10,13 @@
   <a href="https://nodejs.org"><img src="https://img.shields.io/badge/node-%E2%89%A520-brightgreen" alt="Node ≥20"></a>
 </p>
 
-**Measure whether an agent skill actually improves a model's task performance.**
+**CLI for AI agent skill testing and prompt A/B testing** — measure whether an agent
+skill actually improves a model's task performance.
 
 Most published `SKILL.md` files have never been tested. You can't tell whether they
 help your model or are just decoration. Skillcheck answers that with a controlled
-experiment instead of a vibe check.
+experiment instead of a vibe check: AI agent evaluation with blind grading, not
+anecdotes.
 
 Point it at any Markdown skill file and it runs an A/B test: it generates fresh tasks
 for the skill's declared domain, has the model solve every task **with** and
@@ -53,6 +55,7 @@ $ skillcheck
 
 - [Install](#install)
 - [Quick start](#quick-start)
+- [Why skillcheck](#why-skillcheck)
 - [How it works](#how-it-works)
 - [Architecture](#architecture)
 - [Commands](#commands)
@@ -109,6 +112,18 @@ Fully headless (CI, scripts) — set the key via environment variable:
 export SKILLCHECK_TOKEN=chk_live_...
 skillcheck check ./SKILL.md --tasks 5 --trials 3 --json
 ```
+
+## Why skillcheck
+
+- **Ship skills with evidence** — before you publish a Claude Code, Codex, or Cursor
+  `SKILL.md`, know whether it helps the model or just adds tokens.
+- **Prompt A/B testing in one command** — compare with-skill vs without-skill arms on
+  the same tasks, with blind grading so the grader never sees which arm wrote the answer.
+- **CI-friendly LLM eval** — `--json` / `--output` for scripts and pipelines; hosted
+  mode or bring-your-own-key across OpenAI, Anthropic, Gemini, Groq, Mistral, OpenRouter,
+  and NVIDIA NIM.
+- **Effect size, not vibes** — bootstrap confidence intervals and a 0–100 satisfaction
+  score so you can tell a real lift from noise. Details in [`METHODOLOGY.md`](METHODOLOGY.md).
 
 ## How it works
 

@@ -1,7 +1,7 @@
 {
   "name": "@sx4im/skillcheck",
   "version": "0.9.7",
-  "description": "Measure whether agent skills improve task performance.",
+  "description": "CLI for AI agent skill testing and prompt A/B testing — measure whether a SKILL.md improves LLM task performance.",
   "type": "module",
   "license": "MIT",
   "author": "sx4im",
@@ -12,14 +12,24 @@
   "bugs": {
     "url": "https://github.com/sx4im/skillcheck/issues"
   },
-  "homepage": "https://github.com/sx4im/skillcheck#readme",
+  "homepage": "https://dashboard-skillcheck.vercel.app/",
   "keywords": [
-    "agents",
-    "ai",
-    "benchmark",
     "cli",
+    "llm",
+    "ai-agent",
+    "ai-agents",
+    "agent-skills",
+    "skill-testing",
+    "llm-eval",
+    "evals",
     "evaluation",
-    "skills"
+    "prompt-engineering",
+    "prompt-testing",
+    "ab-testing",
+    "benchmark",
+    "testing",
+    "typescript",
+    "nodejs"
   ],
   "bin": {
     "skillcheck": "dist/bin/skillcheck.js"
