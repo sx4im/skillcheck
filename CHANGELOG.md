@@ -6,6 +6,27 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [0.10.0] - 2026-08-16
+
+### Fixed
+
+- `skillcheck matrix` crashed while rendering its table (verdict/score were read from a shape the result never had). It now reads the typed result, and its default model list only applies on multi-vendor providers (NIM, Cloud, OpenRouter) — on other providers it asks for `--models` up front instead of failing mid-run.
+- `skillcheck verify` re-runs through your configured provider instead of always NVIDIA NIM, so BYOK keys are no longer sent to the wrong upstream.
+- Skill files with multi-line YAML front-matter descriptions (`>` and `|` block scalars — a common authoring style) no longer extract a garbage domain; tasks are now generated from the full folded description.
+- The non-JSON grader fallback no longer zeroes clear passes when unrelated negation words appear elsewhere in the grader's explanation; only a negation near the pass-word counts.
+- A corrupted `~/.config/skillcheck/config.json` now logs a warning instead of silently resetting to an empty config.
+
+### Changed
+
+- Result JSON cleanup — **breaking for external consumers of `--json` output**: removed duplicate keys (`runner_version`, `grader_version`, and the `toolDependent` spelling of `tool_dependent`); per-task pass rates renamed `arm_a_pass_rate`/`arm_b_pass_rate` → `with_skill_pass_rate`/`no_skill_pass_rate`; `history` entries carry `runner_model`. In-repo consumers (rot, leaderboard, verify) are updated and still read older result files.
+- The `m0` calibration gate now runs the exact production runner prompt instead of a hand-rolled variant.
+
+### Dashboard (self-hosted)
+
+- Run metering is atomic at the quota boundary, and each run id is capped at 200 model calls — replaying one `x-skillcheck-run` id can no longer bypass metering.
+- All outbound calls (Upstash, NVIDIA, Clerk, Stripe) carry request timeouts; billing confirm is POST-only; Stripe errors are reported by status instead of crashing on HTML; `TOKEN_PEPPER` no longer falls back to a public constant.
+- The dashboard API is now statically type-checked (JSDoc + `tsc --checkJs`) in CI.
+
 ## [0.9.3] - 2026-07-23
 
 ### Fixed

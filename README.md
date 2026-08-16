@@ -259,9 +259,9 @@ confidence interval but a longer run:
 
 | Level    | Tasks × trials | Typical time |
 |----------|----------------|--------------|
-| Quick    | 2 × 1          | ~30 sec      |
-| Standard | 3 × 2          | ~1–2 min     |
-| Thorough | 5 × 3          | ~3–4 min     |
+| Quick    | 2 × 1          | ~2–3 min     |
+| Standard | 3 × 3          | ~4–5 min     |
+| Thorough | 5 × 3          | ~6–7 min     |
 
 For scripted runs, set it explicitly: `skillcheck check ./SKILL.md --tasks 5 --trials 3`.
 
@@ -340,8 +340,8 @@ To bypass the hosted proxy, run `skillcheck setup` and select Bring Your Own Key
 ```bash
 npm ci
 npm run build          # compile to dist/
-npm test               # vitest (131 tests)
-npm run test:coverage  # vitest + v8 coverage gate (85% lines/stmts/funcs, 70% branches)
+npm test               # vitest (140 tests)
+npm run test:coverage  # vitest + v8 coverage gate (84% statements/lines, 85% functions, 68% branches)
 npm run lint           # eslint (flat config, typescript-eslint)
 npm run typecheck      # strict TS, src + tests
 ```
