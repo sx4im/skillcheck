@@ -25,3 +25,7 @@ dashboard/assets/arrow-doodles-set/
 dashboard/assets/*doodle*.zip
 dashboard/assets/arrow-doodles-set.zip
 coverage/
+
+# Local-only docs
+AUDIT.md
+CLAUDE.md
