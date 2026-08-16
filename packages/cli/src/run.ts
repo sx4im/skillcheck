@@ -4,18 +4,24 @@ import type { JsonCache } from './cache.js';
 import { hashJson } from './hash.js';
 import type { GeneratedTask, NormalizedSkill, ProgressReporter, TrialOutput } from './types.js';
 
-function messagesForArm(skill: NormalizedSkill, task: GeneratedTask, withSkill: boolean): ChatCompletionMessageParam[] {
-  if (!withSkill) {
-    return [{ role: 'user', content: task.prompt }];
+// The exact two-arm prompt construction used by every eval. Exported so the
+// m0 calibration gate runs the identical prompt it is gating.
+export function runnerMessages(instructions: string, prompt: string): ChatCompletionMessageParam[] {
+  if (!instructions.trim()) {
+    return [{ role: 'user', content: prompt }];
   }
 
   return [
     {
       role: 'system',
-      content: `You are completing an evaluation task. Apply the following skill instructions when relevant.\n\n${skill.instructions}`
+      content: `You are completing an evaluation task. Apply the following skill instructions when relevant.\n\n${instructions}`
     },
-    { role: 'user', content: task.prompt }
+    { role: 'user', content: prompt }
   ];
+}
+
+function messagesForArm(skill: NormalizedSkill, task: GeneratedTask, withSkill: boolean): ChatCompletionMessageParam[] {
+  return runnerMessages(withSkill ? skill.instructions : '', task.prompt);
 }
 
 async function runOne(
@@ -59,7 +65,9 @@ async function runOne(
   };
 }
 
-async function asyncPool<T, R>(items: T[], limit: number, fn: (item: T) => Promise<R>): Promise<R[]> {
+// Zero-dependency bounded-concurrency pool. Shared by the eval runner and the
+// corpus batch runner so both schedule work the same way.
+export async function asyncPool<T, R>(items: T[], limit: number, fn: (item: T) => Promise<R>): Promise<R[]> {
   const results: R[] = new Array(items.length);
   let index = 0;
   const workers = Array.from({ length: Math.min(limit, items.length) }, async () => {

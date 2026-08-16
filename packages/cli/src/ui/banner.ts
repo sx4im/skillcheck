@@ -1,5 +1,5 @@
 import process from 'node:process';
-import { SYM, paint } from '../theme.js';
+import { SYM, paint } from './theme.js';
 import { currentVersion } from '../version.js';
 
 const CONVENTIONAL_SKILL_FILES = ['SKILL.md', 'AGENTS.md', 'CLAUDE.md'];

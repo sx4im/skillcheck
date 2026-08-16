@@ -52,6 +52,6 @@ export interface TaskBreakdown {
   prompt: string;
   criterion_type: CriterionType;
   criterion: string;
-  arm_a_pass_rate: number;
-  arm_b_pass_rate: number;
+  with_skill_pass_rate: number;
+  no_skill_pass_rate: number;
 }

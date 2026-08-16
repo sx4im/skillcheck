@@ -13,17 +13,21 @@ export default defineConfig({
       // terminal shells, which need a pseudo-terminal to exercise line-by-line:
       //   - cli.ts        command router + interactive setup loop — driven end to
       //                   end by main.e2e.test.ts against the real pipeline.
-      //   - ui.ts         raw-mode file picker, spinners, animated card; its pure
-      //                   formatters are unit-tested in ui-print.test.ts.
+      //   - ui shells     raw-mode file picker, menus, spinners, animated card;
+      //                   their pure formatters (theme, card text) are unit-tested
+      //                   in theme.test.ts / ui-print.test.ts.
       //   - update.ts     the npm update notifier (spawns npm, prompts the user).
       //   - m0/hardcoded  canary fixtures (data, no logic).
       // Everything else is held to the strict thresholds below.
       exclude: [
         'packages/cli/src/m0/hardcoded.ts',
-        'packages/cli/src/ui.ts',
-        'packages/cli/src/ui/**',
+        'packages/cli/src/cli.ts',
         'packages/cli/src/update.ts',
-        'packages/cli/src/cli.ts'
+        'packages/cli/src/ui/banner.ts',
+        'packages/cli/src/ui/card.ts',
+        'packages/cli/src/ui/picker.ts',
+        'packages/cli/src/ui/progress.ts',
+        'packages/cli/src/ui/prompts.ts'
       ],
       // Floors carry ~5–10pp of margin below the observed numbers on purpose: v8
       // coverage drifts a point or two between Node versions (CI runs 20 and 22),

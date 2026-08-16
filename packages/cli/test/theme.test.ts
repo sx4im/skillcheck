@@ -8,7 +8,7 @@ import {
   truncateDisplay,
   visibleWidth,
   wrapText
-} from '../src/theme.js';
+} from '../src/ui/theme.js';
 
 const ENV_KEYS = ['NO_COLOR', 'FORCE_COLOR', 'TERM', 'COLORTERM'] as const;
 

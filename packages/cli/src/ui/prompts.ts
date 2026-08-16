@@ -1,8 +1,8 @@
 import process from 'node:process';
 import { createInterface } from 'node:readline/promises';
 import { cloudPricingUrl } from '../config.js';
-import { SYM, padDisplay, paint } from '../theme.js';
-import { CancelledError, readKey, withRawMode } from './picker.js';
+import { SYM, padDisplay, paint } from './theme.js';
+import { CancelledError, drawLines, readKey, visibleWindow, withRawMode, wrapIndex } from './picker.js';
 
 export async function promptText(question: string): Promise<string> {
   const rl = createInterface({ input: process.stdin, output: process.stdout });
@@ -189,12 +189,7 @@ export async function selectEffort(eyebrow = 'Step 2 of 2'): Promise<EffortChoic
   let selected = defaultIndex;
   let painted = false;
   const draw = () => {
-    const lines = effortMenuLines(selected, eyebrow);
-    if (painted) {
-      process.stdout.write(`\x1b[${lines.length}A`);
-    }
-    process.stdout.write(lines.map((line) => `\x1b[2K${line}`).join('\n') + '\n');
-    painted = true;
+    painted = drawLines(effortMenuLines(selected, eyebrow), painted);
   };
 
   await withRawMode(async () => {
@@ -205,12 +200,12 @@ export async function selectEffort(eyebrow = 'Step 2 of 2'): Promise<EffortChoic
         throw new CancelledError('Selection cancelled.');
       }
       if (key.name === 'up' || input === 'k') {
-        selected = selected <= 0 ? EFFORT_LEVELS.length - 1 : selected - 1;
+        selected = wrapIndex(selected, -1, EFFORT_LEVELS.length);
         draw();
         continue;
       }
       if (key.name === 'down' || input === 'j') {
-        selected = selected >= EFFORT_LEVELS.length - 1 ? 0 : selected + 1;
+        selected = wrapIndex(selected, 1, EFFORT_LEVELS.length);
         draw();
         continue;
       }
@@ -261,8 +256,9 @@ export async function selectMenuOption<T = string>(
     lines.push('');
 
     const maxLines = 12;
-    const offset = Math.max(0, Math.min(selected - Math.floor(maxLines / 2), Math.max(0, options.length - maxLines)));
-    const visible = options.slice(offset, offset + maxLines);
+    const window = visibleWindow(options, selected, maxLines);
+    const offset = window.offset;
+    const visible = window.items;
 
     if (offset > 0) {
       lines.push(`    ${paint.dim(`↑ ${offset} more`)}`);
@@ -288,12 +284,7 @@ export async function selectMenuOption<T = string>(
   };
 
   const draw = () => {
-    const lines = renderLines();
-    if (painted) {
-      process.stdout.write(`\x1b[${lines.length}A`);
-    }
-    process.stdout.write(lines.map((line) => `\x1b[2K${line}`).join('\n') + '\n');
-    painted = true;
+    painted = drawLines(renderLines(), painted);
   };
 
   await withRawMode(async () => {
@@ -304,12 +295,12 @@ export async function selectMenuOption<T = string>(
         throw new CancelledError('Selection cancelled.');
       }
       if (key.name === 'up' || input === 'k') {
-        selected = selected <= 0 ? options.length - 1 : selected - 1;
+        selected = wrapIndex(selected, -1, options.length);
         draw();
         continue;
       }
       if (key.name === 'down' || input === 'j') {
-        selected = selected >= options.length - 1 ? 0 : selected + 1;
+        selected = wrapIndex(selected, 1, options.length);
         draw();
         continue;
       }

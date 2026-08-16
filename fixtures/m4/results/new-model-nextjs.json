@@ -32,8 +32,8 @@
       "prompt": "Return the canary token.",
       "criterion_type": "deterministic",
       "criterion": "includes:ROT-CANARY",
-      "arm_a_pass_rate": 0.5,
-      "arm_b_pass_rate": 0.5
+      "with_skill_pass_rate": 0.5,
+      "no_skill_pass_rate": 0.5
     }
   ],
   "reproducibility": {

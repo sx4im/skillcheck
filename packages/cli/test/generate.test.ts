@@ -2,7 +2,7 @@ import { mkdtemp } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { describe, expect, it } from 'vitest';
-import type { NvidiaNimClient } from '../src/adapters/nvidia-nim.js';
+import type { LlmClient } from '../src/adapters/types.js';
 import { JsonCache } from '../src/cache.js';
 import { generateTasks } from '../src/generate.js';
 import { testNvidiaConfig } from './helpers.js';
@@ -23,7 +23,7 @@ describe('generateTasks', () => {
           usage: { promptTokens: 1, completionTokens: 1, totalTokens: 2 }
         };
       }
-    } as unknown as NvidiaNimClient;
+    } as unknown as LlmClient;
 
     const tasks = await generateTasks({ domain: 'retry testing', count: 1 }, testNvidiaConfig, client, new JsonCache(cacheDir));
 
@@ -46,7 +46,7 @@ describe('generateTasks', () => {
           usage: { promptTokens: 1, completionTokens: 1, totalTokens: 2 }
         };
       }
-    } as unknown as NvidiaNimClient;
+    } as unknown as LlmClient;
 
     const tasks = await generateTasks({ domain: 'short batches', count: 3 }, testNvidiaConfig, client, new JsonCache(cacheDir));
 

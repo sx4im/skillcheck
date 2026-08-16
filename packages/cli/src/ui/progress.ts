@@ -1,5 +1,6 @@
 import process from 'node:process';
-import { SPINNER_FRAMES, SYM, epaint } from '../theme.js';
+import { exitOnInterrupt } from './picker.js';
+import { SPINNER_FRAMES, SYM, epaint } from './theme.js';
 import type { ProgressPhase, ProgressUpdate } from '../types.js';
 
 const ACTIVE_PHASE_LABELS: Record<ProgressPhase, string> = {
@@ -91,19 +92,17 @@ export function startProgress(): ProgressController {
     render();
   }, 80);
 
-  const onInterrupt = () => {
+  const unregisterInterrupt = exitOnInterrupt(() => {
     clearInterval(timer);
     stream.write('\r\x1b[2K\x1b[?25h');
-    process.exit(130);
-  };
-  process.once('SIGINT', onInterrupt);
+  });
   const cleanup = () => {
     if (settled) {
       return;
     }
     settled = true;
     clearInterval(timer);
-    process.removeListener('SIGINT', onInterrupt);
+    unregisterInterrupt();
   };
 
   stream.write('\x1b[?25l');

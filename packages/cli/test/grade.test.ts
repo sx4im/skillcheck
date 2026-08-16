@@ -2,7 +2,7 @@ import { mkdtemp } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { describe, expect, it } from 'vitest';
-import type { NvidiaNimClient } from '../src/adapters/nvidia-nim.js';
+import type { LlmClient } from '../src/adapters/types.js';
 import { JsonCache } from '../src/cache.js';
 import { gradeOutputs } from '../src/grade.js';
 import type { GeneratedTask, TrialOutput } from '../src/types.js';
@@ -46,7 +46,7 @@ describe('gradeOutputs', () => {
           usage: { promptTokens: 1, completionTokens: 1, totalTokens: 2 }
         };
       }
-    } as unknown as NvidiaNimClient;
+    } as unknown as LlmClient;
 
     const graded = await gradeOutputs(sampleTasks, sampleOutputs(), testNvidiaConfig, client, new JsonCache(cacheDir));
 
@@ -62,7 +62,7 @@ describe('gradeOutputs', () => {
         model: 'grader',
         usage: { promptTokens: 1, completionTokens: 1, totalTokens: 2 }
       })
-    } as unknown as NvidiaNimClient;
+    } as unknown as LlmClient;
 
     const graded = await gradeOutputs(sampleTasks, sampleOutputs(), testNvidiaConfig, client, new JsonCache(cacheDir));
 
@@ -78,7 +78,7 @@ describe('gradeOutputs', () => {
         model: 'grader',
         usage: { promptTokens: 1, completionTokens: 1, totalTokens: 2 }
       })
-    } as unknown as NvidiaNimClient;
+    } as unknown as LlmClient;
 
     const graded = await gradeOutputs(
       sampleTasks,
@@ -99,7 +99,7 @@ describe('gradeOutputs', () => {
         model: 'grader',
         usage: { promptTokens: 1, completionTokens: 1, totalTokens: 2 }
       })
-    } as unknown as NvidiaNimClient;
+    } as unknown as LlmClient;
 
     const graded = await gradeOutputs(
       sampleTasks,

@@ -2,7 +2,7 @@ import { mkdtemp } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { describe, expect, it } from 'vitest';
-import type { NvidiaNimClient } from '../src/adapters/nvidia-nim.js';
+import type { LlmClient } from '../src/adapters/types.js';
 import { JsonCache } from '../src/cache.js';
 import { runTrials } from '../src/run.js';
 import type { GeneratedTask, NormalizedSkill } from '../src/types.js';
@@ -15,7 +15,8 @@ const skill: NormalizedSkill = {
   instructions: 'Always do the thing carefully.',
   domain: 'example domain',
   assets: [],
-  versionHash: 'hash'
+  versionHash: 'hash',
+  toolDependent: false
 };
 
 const tasks: GeneratedTask[] = [
@@ -39,7 +40,7 @@ describe('runTrials trial independence', () => {
           usage: { promptTokens: 10, completionTokens: 1, totalTokens: 11 }
         };
       }
-    } as unknown as NvidiaNimClient;
+    } as unknown as LlmClient;
 
     const outputs = await runTrials(skill, tasks, 3, testNvidiaConfig, client, new JsonCache(cacheDir));
 
@@ -68,7 +69,7 @@ describe('runTrials trial independence', () => {
           usage: { promptTokens: 10, completionTokens: 1, totalTokens: 11 }
         };
       }
-    } as unknown as NvidiaNimClient;
+    } as unknown as LlmClient;
 
     const cache = new JsonCache(cacheDir);
     const first = await runTrials(skill, tasks, 3, testNvidiaConfig, client, cache);

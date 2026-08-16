@@ -28,8 +28,9 @@ function parseGrade(text: string): GradePayload {
   }
 
   // Last-resort heuristic for a grader that ignored JSON mode. An explicit
-  // score marker wins outright; otherwise pass-words only count when the text
-  // carries no negation ("does not pass", "fails to meet" must grade 0).
+  // score marker wins outright; otherwise pass-words count only when no
+  // negation sits near them (either side, within one clause). A negation
+  // elsewhere in the explanation must not zero an otherwise clear pass.
   const lower = trimmed.toLowerCase();
   let score: number;
   if (/\b(score|grade)\s*[:=]\s*1\b/.test(lower)) {
@@ -37,9 +38,13 @@ function parseGrade(text: string): GradePayload {
   } else if (/\b(score|grade)\s*[:=]\s*0\b/.test(lower)) {
     score = 0;
   } else {
-    const positive = /\b(pass|passes|passed|meets|met|satisfies|satisfied)\b/.test(lower);
-    const negated = /\b(not|no|never|fail|fails|failed|cannot|can't|doesn'?t|don'?t|isn'?t|wasn'?t|unmet|unsatisfied)\b/.test(lower);
-    score = positive && !negated ? 1 : 0;
+    const positives = [...lower.matchAll(/\b(?:pass|passes|passed|meets|met|satisfies|satisfied)\b/g)];
+    const negation = /\b(?:not|no|never|fail|fails|failed|cannot|can'?t|doesn'?t|don'?t|isn'?t|wasn'?t|unmet|unsatisfied)\b/;
+    const negated = positives.some((match) => {
+      const index = match.index ?? 0;
+      return negation.test(lower.slice(Math.max(0, index - 60), index + 60));
+    });
+    score = positives.length > 0 && !negated ? 1 : 0;
   }
   return {
     score,

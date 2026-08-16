@@ -1,3 +1,4 @@
+import { seededRandom } from './hash.js';
 import type { GradedOutput } from './types.js';
 
 export interface PairedObservation {
@@ -38,14 +39,6 @@ export function pairedObservations(graded: GradedOutput[]): PairedObservation[] 
   });
 }
 
-function createSeededRandom(seed: number): () => number {
-  let state = seed >>> 0;
-  return () => {
-    state = (state * 1664525 + 1013904223) >>> 0;
-    return state / 0x100000000;
-  };
-}
-
 function quantile(sortedValues: number[], q: number): number {
   if (sortedValues.length === 0) {
     throw new Error('Cannot compute quantile of an empty sample');
@@ -66,6 +59,12 @@ function toPp(value: number): number {
   return Number((value * 100).toFixed(2));
 }
 
+// 0–100 satisfaction score: 50 = no effect, linear in the (bootstrap mean)
+// effect. Shared by the eval result and the result card.
+export function satisfactionFromEffect(meanEffectPp: number): number {
+  return Math.max(0, Math.min(100, Number((50 + meanEffectPp).toFixed(1))));
+}
+
 export function scorePairedObservations(
   observations: PairedObservation[],
   iterations = 1000,
@@ -81,7 +80,7 @@ export function scorePairedObservations(
     observations.filter((observation) => observation.noSkillPass).length / observations.length;
   const effect = withSkillPass - noSkillPass;
 
-  const random = createSeededRandom(seed);
+  const random = seededRandom(seed);
   const bootstrapEffects: number[] = [];
 
   for (let iteration = 0; iteration < iterations; iteration += 1) {

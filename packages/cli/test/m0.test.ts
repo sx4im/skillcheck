@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-import type { NvidiaNimClient } from '../src/adapters/nvidia-nim.js';
+import type { LlmClient } from '../src/adapters/types.js';
 import { runM0Gate } from '../src/m0/run.js';
 
 // Apply the canary SKU rule the M0 skill encodes, so the with-skill arm answers
@@ -13,7 +13,7 @@ function classify(candidate: string): 'VALID' | 'INVALID' {
   return match[2] === expected ? 'VALID' : 'INVALID';
 }
 
-function fakeClientFactory(): NvidiaNimClient {
+function fakeClientFactory(): LlmClient {
   return {
     complete: async ({ messages }: { messages: Array<{ role: string; content: string }> }) => {
       const hasSkill = messages.some((m) => m.role === 'system');
@@ -22,7 +22,7 @@ function fakeClientFactory(): NvidiaNimClient {
       const answer = hasSkill ? classify(candidate) : 'INVALID';
       return { content: answer, model: 'fake', usage: { promptTokens: 1, completionTokens: 1, totalTokens: 2 } };
     }
-  } as unknown as NvidiaNimClient;
+  } as unknown as LlmClient;
 }
 
 describe('runM0Gate', () => {

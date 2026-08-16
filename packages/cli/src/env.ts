@@ -115,7 +115,12 @@ function resolveModel(provider: ProviderType, role: 'GENERATOR' | 'GRADER' | 'RU
   );
 }
 
-export function loadProviderConfig(): ProviderConfig {
+// loadProviderConfig always populates every field below; the base interface
+// keeps them optional for hand-built configs (tests, direct construction).
+type ResolvedProviderConfig = ProviderConfig &
+  Required<Pick<ProviderConfig, 'baseUrl' | 'timeoutMs' | 'requestDelayMs' | 'maxAttempts' | 'maxRetryDelayMs'>>;
+
+export function loadProviderConfig(): ResolvedProviderConfig {
   const active = resolveActiveProvider();
 
   const timeoutMs = Number(process.env.NVIDIA_TIMEOUT_MS?.trim() || process.env.SKILLCHECK_TIMEOUT_MS?.trim() || 120000);
@@ -152,17 +157,9 @@ export function loadProviderConfig(): ProviderConfig {
   };
 }
 
+// NVIDIA-shaped view of the provider config for the NIM client and the m0
+// gate. A passthrough: every field loadProviderConfig returns is already
+// guaranteed, so no re-defaulting here.
 export function loadNvidiaConfig(): NvidiaConfig {
-  const config = loadProviderConfig();
-  return {
-    apiKey: config.apiKey,
-    baseUrl: config.baseUrl ?? DEFAULT_PROVIDER_BASE_URLS.nvidia,
-    timeoutMs: config.timeoutMs ?? 120000,
-    requestDelayMs: config.requestDelayMs ?? 750,
-    maxAttempts: config.maxAttempts ?? 8,
-    maxRetryDelayMs: config.maxRetryDelayMs ?? 60000,
-    generatorModel: config.generatorModel ?? DEFAULT_MODEL,
-    graderModel: config.graderModel ?? DEFAULT_MODEL,
-    runnerModel: config.runnerModel ?? DEFAULT_MODEL
-  };
+  return loadProviderConfig();
 }

@@ -1,7 +1,8 @@
 import process from 'node:process';
 import { cloudPricingUrl } from '../config.js';
-import { BOX, SYM, epaint, layoutWidth, padDisplay, paint, truncateDisplay, wrapText } from '../theme.js';
-import { CancelledError } from './picker.js';
+import { satisfactionFromEffect } from '../score.js';
+import { BOX, SYM, epaint, layoutWidth, padDisplay, paint, truncateDisplay, wrapText } from './theme.js';
+import { CancelledError, exitOnInterrupt } from './picker.js';
 
 type Paint = (value: string) => string;
 
@@ -27,8 +28,9 @@ function satisfactionFromResult(score: Record<string, unknown>): number {
   if (typeof score.satisfaction === 'number') {
     return Math.max(0, Math.min(100, score.satisfaction));
   }
+  // Result JSONs from before the satisfaction field existed: recompute it.
   const effect = typeof score.effect_pp === 'number' ? score.effect_pp : 0;
-  return Math.max(0, Math.min(100, 50 + effect));
+  return satisfactionFromEffect(effect);
 }
 
 function satisfactionBand(score: number): { label: string; paint: Paint } {
@@ -115,9 +117,7 @@ function resultHeaderLines(geometry: CardGeometry, result: unknown, outputPath?:
   const inconclusive =
     ciLow !== undefined && ciHigh !== undefined && ciLow < 0 && ciHigh > 0 && ciHigh - ciLow > 40;
   const verdict = String(score.verdict ?? 'unknown');
-  const toolDependent = Boolean(
-    skill.tool_dependent ?? skill.toolDependent ?? score.tool_dependent ?? score.toolDependent
-  );
+  const toolDependent = Boolean(skill.tool_dependent);
 
   const lines = [
     cardEdge(geometry, 'top'),
@@ -222,11 +222,7 @@ export async function printResultCard(result: unknown, outputPath?: string): Pro
   }
 
   console.log(resultHeaderLines(geometry, result, outputPath).join('\n'));
-  const onInterrupt = () => {
-    process.stdout.write('\x1b[?25h\n');
-    process.exit(130);
-  };
-  process.once('SIGINT', onInterrupt);
+  const unregisterInterrupt = exitOnInterrupt(() => process.stdout.write('\x1b[?25h\n'));
   process.stdout.write('\x1b[?25l');
   try {
     const frames = 32;
@@ -237,7 +233,7 @@ export async function printResultCard(result: unknown, outputPath?: string): Pro
     }
     process.stdout.write(`\r\x1b[2K${satisfactionLine(geometry, finalScore, finalScore)}\n`);
   } finally {
-    process.removeListener('SIGINT', onInterrupt);
+    unregisterInterrupt();
     process.stdout.write('\x1b[?25h');
   }
   console.log(cardEdge(geometry, 'bottom'));

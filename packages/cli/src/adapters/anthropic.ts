@@ -1,8 +1,5 @@
+import { fetchWithRetry, textContent } from './http.js';
 import type { CompletionRequest, CompletionResponse, LlmClient } from './types.js';
-
-function sleep(ms: number): Promise<void> {
-  return new Promise((resolve) => setTimeout(resolve, ms));
-}
 
 export interface AnthropicConfig {
   apiKey: string;
@@ -29,7 +26,7 @@ export class AnthropicClient implements LlmClient {
     const formattedMessages: { role: string; content: string }[] = [];
 
     for (const msg of request.messages) {
-      const contentStr = typeof msg.content === 'string' ? msg.content : JSON.stringify(msg.content);
+      const contentStr = textContent(msg.content) ?? '';
       if (msg.role === 'system') {
         systemPrompt = systemPrompt ? `${systemPrompt}\n\n${contentStr}` : contentStr;
       } else {
@@ -53,60 +50,37 @@ export class AnthropicClient implements LlmClient {
       temperature: request.temperature
     };
 
-    let lastError: unknown;
-    for (let attempt = 0; attempt < this.maxAttempts; attempt += 1) {
-      try {
-        const controller = new AbortController();
-        const timeout = setTimeout(() => controller.abort(), this.timeoutMs);
-
-        const response = await fetch(`${this.baseUrl}/messages`, {
-          method: 'POST',
-          headers: {
-            'content-type': 'application/json',
-            'x-api-key': this.apiKey,
-            'anthropic-version': '2023-06-01'
-          },
-          body: JSON.stringify(payload),
-          signal: controller.signal
-        });
-        clearTimeout(timeout);
-
-        if (!response.ok) {
-          const errText = await response.text().catch(() => '');
-          const error = new Error(`Anthropic API error (${response.status}): ${errText}`);
-          (error as unknown as Record<string, unknown>).status = response.status;
-          throw error;
-        }
-
-        const data = (await response.json()) as {
-          model?: string;
-          content?: { type: string; text?: string }[];
-          usage?: { input_tokens?: number; output_tokens?: number };
-        };
-
-        const textPart = data.content?.find((part) => part.type === 'text');
-        const content = textPart?.text ?? '';
-
-        return {
-          content,
-          model: data.model ?? request.model,
-          usage: {
-            promptTokens: data.usage?.input_tokens,
-            completionTokens: data.usage?.output_tokens,
-            totalTokens: (data.usage?.input_tokens ?? 0) + (data.usage?.output_tokens ?? 0)
-          }
-        };
-      } catch (error) {
-        lastError = error;
-        const status = (error as { status?: number })?.status;
-        const retryable = status === 429 || status === 500 || status === 502 || status === 503 || status === 504;
-        if (!retryable || attempt === this.maxAttempts - 1) {
-          break;
-        }
-        await sleep(1000 * 2 ** attempt);
-      }
+    const result = await fetchWithRetry(`${this.baseUrl}/messages`, {
+      headers: {
+        'content-type': 'application/json',
+        'x-api-key': this.apiKey,
+        'anthropic-version': '2023-06-01'
+      },
+      body: JSON.stringify(payload),
+      timeoutMs: this.timeoutMs,
+      maxAttempts: this.maxAttempts
+    });
+    if (!result.ok) {
+      throw new Error(`Anthropic API error (${result.status}): ${result.text}`);
     }
 
-    throw lastError instanceof Error ? lastError : new Error(String(lastError));
+    const data = JSON.parse(result.text) as {
+      model?: string;
+      content?: { type: string; text?: string }[];
+      usage?: { input_tokens?: number; output_tokens?: number };
+    };
+
+    const textPart = data.content?.find((part) => part.type === 'text');
+    const content = textPart?.text ?? '';
+
+    return {
+      content,
+      model: data.model ?? request.model,
+      usage: {
+        promptTokens: data.usage?.input_tokens,
+        completionTokens: data.usage?.output_tokens,
+        totalTokens: (data.usage?.input_tokens ?? 0) + (data.usage?.output_tokens ?? 0)
+      }
+    };
   }
 }

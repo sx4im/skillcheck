@@ -2,7 +2,7 @@ import { readdir, stat } from 'node:fs/promises';
 import path from 'node:path';
 import process from 'node:process';
 import readline from 'node:readline';
-import { SYM, padDisplay, paint, truncateDisplay } from '../theme.js';
+import { SYM, padDisplay, paint, truncateDisplay } from './theme.js';
 import { bannerLines, printBanner } from './banner.js';
 
 const CONVENTIONAL_SKILL_FILES = ['SKILL.md', 'AGENTS.md', 'CLAUDE.md'];
@@ -119,9 +119,36 @@ async function listPickerEntries(currentDir: string): Promise<PickerEntry[]> {
   ];
 }
 
-function visibleWindow<T>(items: T[], selected: number, size: number): { items: T[]; offset: number } {
+export function visibleWindow<T>(items: T[], selected: number, size: number): { items: T[]; offset: number } {
   const offset = Math.max(0, Math.min(selected - Math.floor(size / 2), Math.max(0, items.length - size)));
   return { items: items.slice(offset, offset + size), offset };
+}
+
+// Move a selection by delta with wraparound past either end. The one navigation
+// primitive behind every list UI (picker, effort menu, generic menu).
+export function wrapIndex(selected: number, delta: number, length: number): number {
+  return (selected + delta + length) % length;
+}
+
+// Redraw in place: first paint scrolls the cursor up over the previous frame
+// before writing the new one. Shared by the inline (non-alt-screen) menus.
+export function drawLines(lines: string[], painted: boolean): boolean {
+  if (painted) {
+    process.stdout.write(`\x1b[${lines.length}A`);
+  }
+  process.stdout.write(lines.map((line) => `\x1b[2K${line}`).join('\n') + '\n');
+  return true;
+}
+
+// Register Ctrl-C cleanup that exits with the conventional "user backed out"
+// code; returns an unregister for normal completion paths.
+export function exitOnInterrupt(cleanup: () => void): () => void {
+  const onInterrupt = () => {
+    cleanup();
+    process.exit(130);
+  };
+  process.once('SIGINT', onInterrupt);
+  return () => process.removeListener('SIGINT', onInterrupt);
 }
 
 const PICKER_WINDOW = 10;
@@ -239,11 +266,11 @@ export async function selectSkillPath(startDir = process.cwd()): Promise<string>
         throw new CancelledError('Selection cancelled.');
       }
       if (key.name === 'up' || input === 'k') {
-        selected = selected <= 0 ? entries.length - 1 : selected - 1;
+        selected = wrapIndex(selected, -1, entries.length);
         continue;
       }
       if (key.name === 'down' || input === 'j') {
-        selected = selected >= entries.length - 1 ? 0 : selected + 1;
+        selected = wrapIndex(selected, 1, entries.length);
         continue;
       }
       if (key.name !== 'return') {

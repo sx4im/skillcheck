@@ -112,13 +112,15 @@ describe('providers abstraction', () => {
   });
 
   it('createLlmClient returns working client for Anthropic and Gemini', async () => {
+    const anthropicPayload = {
+      model: 'claude-3-5-sonnet-20241022',
+      content: [{ type: 'text', text: 'Hello world' }],
+      usage: { input_tokens: 10, output_tokens: 5 }
+    };
     const anthropicFetch = vi.fn().mockResolvedValue({
       ok: true,
-      json: async () => ({
-        model: 'claude-3-5-sonnet-20241022',
-        content: [{ type: 'text', text: 'Hello world' }],
-        usage: { input_tokens: 10, output_tokens: 5 }
-      })
+      status: 200,
+      text: async () => JSON.stringify(anthropicPayload)
     });
     global.fetch = anthropicFetch as unknown as typeof fetch;
 
@@ -138,12 +140,14 @@ describe('providers abstraction', () => {
     });
     expect(anthropicRes.content).toBe('Hello world');
 
+    const geminiPayload = {
+      candidates: [{ content: { parts: [{ text: '{"status":"ok"}' }] } }],
+      usageMetadata: { promptTokenCount: 5, candidatesTokenCount: 5, totalTokenCount: 10 }
+    };
     const geminiFetch = vi.fn().mockResolvedValue({
       ok: true,
-      json: async () => ({
-        candidates: [{ content: { parts: [{ text: '{"status":"ok"}' }] } }],
-        usageMetadata: { promptTokenCount: 5, candidatesTokenCount: 5, totalTokenCount: 10 }
-      })
+      status: 200,
+      text: async () => JSON.stringify(geminiPayload)
     });
     global.fetch = geminiFetch as unknown as typeof fetch;
 

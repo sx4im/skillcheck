@@ -1,8 +1,8 @@
 import { randomUUID } from 'node:crypto';
 import { readFile } from 'node:fs/promises';
-import { NvidiaNimClient } from './adapters/nvidia-nim.js';
+import { createLlmClient } from './adapters/providers.js';
 import { JsonCache } from './cache.js';
-import { loadNvidiaConfig } from './env.js';
+import { loadProviderConfig } from './env.js';
 import { parseTaskSuite } from './eval.js';
 import { gradeOutputs } from './grade.js';
 import { normalizeSkill } from './normalize.js';
@@ -14,7 +14,17 @@ export interface VerifyOptions {
   sample: number;
 }
 
-export async function verifyResult(options: VerifyOptions): Promise<unknown> {
+export interface VerifyReport {
+  passed: boolean;
+  sample: number;
+  published_effect_pp?: number;
+  published_ci_pp: [number, number];
+  verify_effect_pp: number;
+  verify_ci_pp: [number, number];
+  verify_verdict: 'helps' | 'placebo' | 'harms';
+}
+
+export async function verifyResult(options: VerifyOptions): Promise<VerifyReport> {
   const published = JSON.parse(await readFile(options.resultPath, 'utf8')) as {
     skill?: { source?: string };
     config?: { trials?: number };
@@ -30,8 +40,10 @@ export async function verifyResult(options: VerifyOptions): Promise<unknown> {
       'This result file cannot be verified: it is missing skill.source, config.trials, result.ci_pp, or reproducibility.task_suite_path. Produce a verifiable result with `skillcheck eval <path> --output result.json` (or `check --output`).'
     );
   }
-  const config = loadNvidiaConfig();
-  const client = new NvidiaNimClient(config, { defaultHeaders: { 'x-skillcheck-run': randomUUID() } });
+  // Verification re-runs through the user's active provider, like every other
+  // model call.
+  const config = loadProviderConfig();
+  const client = createLlmClient(config, { defaultHeaders: { 'x-skillcheck-run': randomUUID() } });
   // Verification must be an independent re-measurement, so it bypasses the cache.
   // Reusing the shared on-disk cache would replay the original run's outputs and
   // make `verify` trivially pass on the machine that produced the result.

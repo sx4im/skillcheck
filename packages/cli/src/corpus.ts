@@ -4,6 +4,7 @@ import path from 'node:path';
 import { promisify } from 'node:util';
 import { evalSkill } from './eval.js';
 import { slugify, writeJson } from './hash.js';
+import { asyncPool } from './run.js';
 
 const execFile = promisify(execFileCallback);
 
@@ -76,6 +77,10 @@ export function parseCorpusManifest(text: string): CorpusManifest {
   if (trimmed.startsWith('{')) {
     return assertCorpusManifest(JSON.parse(trimmed) as unknown);
   }
+
+  // Tiny YAML subset (no nested lists, quoted colons, or block scalars) —
+  // enough for this repo's corpus manifests; anything richer goes in the
+  // JSON form above.
 
   const manifest: CorpusManifest = { name: '', skills: [] };
   let currentSkill: Partial<CorpusSkill> | undefined;
@@ -192,6 +197,13 @@ async function prepareGitSource(source: string, repo: string, commit: string | u
   return checkoutDir;
 }
 
+// Identity of a prepared source root: repo#commit for git sources, the corpus
+// file's directory for local skills. Shared by prepareSources and runOne so
+// the two cannot drift and read the wrong checkout.
+function sourceKey(repo: string | undefined, commit: string | undefined, corpusPath: string): string {
+  return repo ? `${repo}#${commit ?? 'HEAD'}` : `local:${path.dirname(path.resolve(corpusPath))}`;
+}
+
 async function prepareSources(
   corpusPath: string,
   manifest: CorpusManifest,
@@ -204,7 +216,7 @@ async function prepareSources(
     const repo = skill.repo ?? manifest.repo;
     const commit = skill.commit ?? manifest.commit;
     const source = sourceName(manifest, skill);
-    const key = repo ? `${repo}#${commit ?? 'HEAD'}` : `local:${path.dirname(path.resolve(corpusPath))}`;
+    const key = sourceKey(repo, commit, corpusPath);
     const current = grouped.get(key) ?? { source, repo, commit, paths: [] };
     current.paths.push(skill.path);
     grouped.set(key, current);
@@ -232,7 +244,7 @@ export async function runCorpus(options: CorpusRunOptions): Promise<CorpusRunRep
     const repo = skill.repo ?? manifest.repo;
     const commit = skill.commit ?? manifest.commit;
     const source = sourceName(manifest, skill);
-    const key = repo ? `${repo}#${commit ?? 'HEAD'}` : `local:${path.dirname(path.resolve(options.corpus))}`;
+    const key = sourceKey(repo, commit, options.corpus);
     const root = roots.get(key);
     if (!root) {
       throw new Error(`No prepared source root for ${source}`);
@@ -272,16 +284,11 @@ export async function runCorpus(options: CorpusRunOptions): Promise<CorpusRunRep
   }
 
   let nextIndex = 0;
-  const workerCount = Math.min(options.concurrency, skills.length);
-  await Promise.all(
-    Array.from({ length: workerCount }, async () => {
-      while (nextIndex < skills.length) {
-        const index = nextIndex;
-        nextIndex += 1;
-        await runOne(skills[index]!, index);
-      }
-    })
-  );
+  await asyncPool(skills, Math.max(1, options.concurrency), async (skill) => {
+    const index = nextIndex;
+    nextIndex += 1;
+    await runOne(skill, index);
+  });
 
   if (entries.some((entry) => !entry)) {
     throw new Error('Corpus run completed without producing all result entries');

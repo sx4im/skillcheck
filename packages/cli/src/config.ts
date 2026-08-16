@@ -158,8 +158,12 @@ export function loadUserConfig(): SkillcheckUserConfig {
       graderModel: typeof record.graderModel === 'string' ? record.graderModel : undefined
     };
   } catch (error) {
-    if ((error as NodeJS.ErrnoException).code === 'ENOENT') {
-      return {};
+    // A missing file is a first run. Anything else is a corrupted config the
+    // user cannot see — say so instead of silently dropping their saved key.
+    if ((error as NodeJS.ErrnoException).code !== 'ENOENT') {
+      console.error(
+        `[skillcheck] ignoring unreadable config at ${userConfigPath()}: ${error instanceof Error ? error.message : String(error)}`
+      );
     }
     return {};
   }

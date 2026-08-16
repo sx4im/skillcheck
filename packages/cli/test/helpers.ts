@@ -1,10 +1,14 @@
-import type { NvidiaConfig } from '../src/adapters/nvidia-nim.js';
+import type { NvidiaConfig } from '../src/env.js';
 
 export const PASS_MARKER = 'SKILL_PASS_MARKER';
 
 export const testNvidiaConfig: NvidiaConfig = {
   apiKey: 'test-key',
   baseUrl: 'https://integrate.api.nvidia.com/v1',
+  timeoutMs: 120000,
+  requestDelayMs: 0,
+  maxAttempts: 1,
+  maxRetryDelayMs: 1000,
   generatorModel: 'meta/llama-3.1-70b-instruct',
   runnerModel: 'meta/llama-3.1-70b-instruct',
   graderModel: 'meta/llama-3.1-70b-instruct'

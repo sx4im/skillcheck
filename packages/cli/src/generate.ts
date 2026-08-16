@@ -27,15 +27,20 @@ function extractJsonPayload(text: string): unknown {
   return JSON.parse(trimmed.slice(start, end + 1));
 }
 
-function validateTasks(value: unknown, count: number): GeneratedTask[] {
-  const array = Array.isArray(value)
-    ? value
-    : typeof value === 'object' && value !== null && Array.isArray((value as { tasks?: unknown }).tasks)
-      ? (value as { tasks: unknown[] }).tasks
-      : undefined;
-  if (!array) {
-    throw new Error('Generated task payload must be an array');
+// Accepts either a bare task array or a {"tasks": [...]} wrapper. Shared by the
+// generator and the task-suite parser so both read the same shapes.
+export function tasksArrayFrom(value: unknown): unknown[] {
+  if (Array.isArray(value)) {
+    return value;
   }
+  if (typeof value === 'object' && value !== null && Array.isArray((value as { tasks?: unknown }).tasks)) {
+    return (value as { tasks: unknown[] }).tasks;
+  }
+  throw new Error('Task payload must be an array or an object with a tasks array');
+}
+
+function validateTasks(value: unknown, count: number): GeneratedTask[] {
+  const array = tasksArrayFrom(value);
 
   return array.slice(0, count).map((item, index) => {
     if (typeof item !== 'object' || item === null) {

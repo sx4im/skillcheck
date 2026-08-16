@@ -9,8 +9,9 @@ import { hashJson, writeJson } from './hash.js';
 import { gradeOutputs } from './grade.js';
 import { normalizeSkill } from './normalize.js';
 import { runTrials } from './run.js';
-import { scorePairedObservations, pairedObservations } from './score.js';
-import type { GeneratedTask, GradedOutput, ProgressReporter, TaskBreakdown } from './types.js';
+import { scorePairedObservations, pairedObservations, satisfactionFromEffect } from './score.js';
+import { tasksArrayFrom } from './generate.js';
+import type { GeneratedTask, GradedOutput, ProgressReporter, SkillFormat, TaskBreakdown } from './types.js';
 
 export interface EvalOptions {
   inputPath: string;
@@ -41,18 +42,22 @@ function applyModelOverrides(config: ProviderConfig, options: EvalOptions): Prov
 
 
 
+// Pass rate of one arm's graded outputs. Shared by the per-task breakdown and
+// the explain view so both compute it identically (empty arm = 0, never NaN).
+function armPassRate(items: GradedOutput[]): number {
+  return items.length ? items.filter((item) => item.pass).length / items.length : 0;
+}
+
 function taskBreakdowns(tasks: GeneratedTask[], graded: GradedOutput[]): TaskBreakdown[] {
   return tasks.map((task) => {
     const taskGrades = graded.filter((item) => item.taskId === task.id);
-    const withSkill = taskGrades.filter((item) => item.arm === 'with_skill');
-    const noSkill = taskGrades.filter((item) => item.arm === 'no_skill');
     return {
       id: task.id,
       prompt: task.prompt,
       criterion_type: task.criterionType,
       criterion: task.criterion,
-      arm_a_pass_rate: withSkill.filter((item) => item.pass).length / withSkill.length,
-      arm_b_pass_rate: noSkill.filter((item) => item.pass).length / noSkill.length
+      with_skill_pass_rate: armPassRate(taskGrades.filter((item) => item.arm === 'with_skill')),
+      no_skill_pass_rate: armPassRate(taskGrades.filter((item) => item.arm === 'no_skill'))
     };
   });
 }
@@ -66,7 +71,7 @@ interface ExplainExample {
   pass: boolean;
 }
 
-interface ExplainTask {
+export interface ExplainTask {
   id: string;
   prompt: string;
   criterion: string;
@@ -95,8 +100,8 @@ function buildExplain(tasks: GeneratedTask[], graded: GradedOutput[]): { tasks: 
       const taskGrades = graded.filter((item) => item.taskId === task.id);
       const withSkill = taskGrades.filter((item) => item.arm === 'with_skill');
       const noSkill = taskGrades.filter((item) => item.arm === 'no_skill');
-      const withRate = withSkill.length ? withSkill.filter((item) => item.pass).length / withSkill.length : 0;
-      const noRate = noSkill.length ? noSkill.filter((item) => item.pass).length / noSkill.length : 0;
+      const withRate = armPassRate(withSkill);
+      const noRate = armPassRate(noSkill);
       const delta = Number(((withRate - noRate) * 100).toFixed(1));
       return {
         id: task.id,
@@ -117,14 +122,7 @@ function buildExplain(tasks: GeneratedTask[], graded: GradedOutput[]): { tasks: 
 
 export function parseTaskSuite(text: string): GeneratedTask[] {
   const value = JSON.parse(text) as unknown;
-  const tasks = Array.isArray(value)
-    ? value
-    : typeof value === 'object' && value !== null && Array.isArray((value as { tasks?: unknown }).tasks)
-      ? (value as { tasks: unknown[] }).tasks
-      : undefined;
-  if (!tasks) {
-    throw new Error('Task suite must be an array or an object with a tasks array');
-  }
+  const tasks = tasksArrayFrom(value);
 
   return tasks.map((task, index) => {
     const item = task as Record<string, unknown>;
@@ -141,7 +139,54 @@ export function parseTaskSuite(text: string): GeneratedTask[] {
   });
 }
 
-export async function evalSkill(options: EvalOptions): Promise<unknown> {
+// The published result JSON shape. Typed so every consumer (matrix, the card,
+// verify, the leaderboard) reads the same contract instead of re-guessing it.
+export interface EvalResult {
+  skill: {
+    name: string;
+    source: string;
+    format: SkillFormat;
+    commit_hash: string;
+    domain: string;
+    tool_dependent: boolean;
+  };
+  config: {
+    runner_model: string;
+    grader_model: string;
+    generator_model: string;
+    trials: number;
+    // Actual task count — the generator may deliver fewer than requested.
+    tasks: number;
+    temperature: number;
+    mode: 'forced';
+  };
+  result: {
+    effect_pp: number;
+    mean_effect_pp: number;
+    satisfaction: number;
+    ci_pp: [number, number];
+    verdict: 'helps' | 'placebo' | 'harms';
+    with_skill_pass: number;
+    no_skill_pass: number;
+    token_overhead: number;
+    value_per_1k_tokens: number;
+  };
+  tasks: TaskBreakdown[];
+  explain?: { tasks: ExplainTask[] };
+  reproducibility: {
+    task_suite_path?: string;
+    transcript_hashes: string[];
+  };
+  history: Array<{
+    runner_model: string;
+    run_date: string;
+    effect_pp: number;
+    verdict: 'helps' | 'placebo' | 'harms';
+  }>;
+  run_date: string;
+}
+
+export async function evalSkill(options: EvalOptions): Promise<EvalResult> {
   const skill = await normalizeSkill(options.inputPath);
   const baseConfig = loadProviderConfig();
   const config = applyModelOverrides(baseConfig, options);
@@ -177,30 +222,26 @@ export async function evalSkill(options: EvalOptions): Promise<unknown> {
   const valuePer1kTokens = tokenOverhead === 0 ? 0 : Number((score.effectPp / (tokenOverhead / 1000)).toFixed(2));
   // 0–100 quality score: 50 = no effect. Built from the bootstrap mean effect so
   // it varies smoothly rather than snapping to coarse multiples of the sample step.
-  const satisfaction = Math.max(0, Math.min(100, Number((50 + score.meanEffectPp).toFixed(1))));
+  const satisfaction = satisfactionFromEffect(score.meanEffectPp);
   const runDate = new Date().toISOString().slice(0, 10);
 
-  const result = {
+  const result: EvalResult = {
     skill: {
       name: skill.name,
       source: options.sourceLabel ?? skill.sourcePath,
       format: skill.format,
       commit_hash: skill.versionHash,
       domain: skill.domain,
-      tool_dependent: skill.toolDependent,
-      toolDependent: skill.toolDependent
+      tool_dependent: skill.toolDependent
     },
     config: {
       runner_model: config.runnerModel,
-      runner_version: config.runnerModel,
       grader_model: config.graderModel,
-      grader_version: config.graderModel,
       generator_model: config.generatorModel,
       trials: options.trials,
-      // Actual task count — the generator may deliver fewer than requested.
       tasks: tasks.length,
       temperature: 0.7,
-      mode: 'forced-injection'
+      mode: 'forced'
     },
     result: {
       effect_pp: score.effectPp,
@@ -211,9 +252,7 @@ export async function evalSkill(options: EvalOptions): Promise<unknown> {
       with_skill_pass: score.withSkillPass,
       no_skill_pass: score.noSkillPass,
       token_overhead: tokenOverhead,
-      value_per_1k_tokens: valuePer1kTokens,
-      tool_dependent: skill.toolDependent,
-      toolDependent: skill.toolDependent
+      value_per_1k_tokens: valuePer1kTokens
     },
     tasks: breakdowns,
     ...(options.explain ? { explain: buildExplain(tasks, graded) } : {}),
@@ -223,7 +262,7 @@ export async function evalSkill(options: EvalOptions): Promise<unknown> {
     },
     history: [
       {
-        runner_version: config.runnerModel,
+        runner_model: config.runnerModel,
         run_date: runDate,
         effect_pp: score.effectPp,
         verdict: score.verdict

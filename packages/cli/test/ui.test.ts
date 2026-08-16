@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { stripAnsi, visibleWidth } from '../src/theme.js';
+import { stripAnsi, visibleWidth } from '../src/ui/theme.js';
 import { formatFatalError, formatQuotaUpsell, formatResultCard, sanitizeCliError } from '../src/ui.js';
 
 describe('sanitizeCliError', () => {

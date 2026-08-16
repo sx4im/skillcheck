@@ -23,14 +23,22 @@ export async function writeJson(filePath: string, value: unknown): Promise<void>
 }
 
 /**
- * Deterministic Fisher-Yates shuffle using an LCG seeded by a text string's SHA-256 hash.
+ * Deterministic LCG (Numerical Recipes constants). The single source of seeded
+ * randomness: used by `seededShuffle` here and the paired bootstrap in score.ts.
  */
-export function seededShuffle<T>(items: T[], seedText: string): T[] {
-  let state = parseInt(hashJson(seedText).slice(0, 8), 16) >>> 0;
-  const random = () => {
+export function seededRandom(seed: number): () => number {
+  let state = seed >>> 0;
+  return () => {
     state = (state * 1664525 + 1013904223) >>> 0;
     return state / 0x100000000;
   };
+}
+
+/**
+ * Deterministic Fisher-Yates shuffle using an LCG seeded by a text string's SHA-256 hash.
+ */
+export function seededShuffle<T>(items: T[], seedText: string): T[] {
+  const random = seededRandom(parseInt(hashJson(seedText).slice(0, 8), 16) >>> 0);
   const copy = [...items];
   for (let index = copy.length - 1; index > 0; index -= 1) {
     const swapIndex = Math.floor(random() * (index + 1));

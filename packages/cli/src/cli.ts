@@ -1,6 +1,5 @@
 import { existsSync } from 'node:fs';
-import { NvidiaNimClient } from './adapters/nvidia-nim.js';
-import { verifyProviderKey, PROVIDER_NAMES } from './adapters/providers.js';
+import { verifyProviderKey, createLlmClient, PROVIDER_NAMES } from './adapters/providers.js';
 import type { ProviderType } from './adapters/types.js';
 import {
   cloudApiUrl,
@@ -13,6 +12,7 @@ import {
 } from './config.js';
 import { runCorpus, type CorpusRunOptions } from './corpus.js';
 import { evalSkill, type EvalOptions } from './eval.js';
+import { loadProviderConfig } from './env.js';
 import { runM0Gate } from './m0/run.js';
 import { runRot, type RotOptions } from './rot.js';
 import {
@@ -38,10 +38,6 @@ import {
 } from './ui.js';
 import { currentVersion, maybeNotifyUpdate } from './update.js';
 import { verifyResult } from './verify.js';
-
-function printHelp(): void {
-  printHelpUi();
-}
 
 // Commands that emit machine-readable output or run unattended — never interrupt
 // these with the interactive "update available?" prompt.
@@ -178,22 +174,11 @@ const MAX_TASKS = 50;
 const MAX_TRIALS = 10;
 const MAX_CONCURRENCY = 8;
 
-const VALUE_OPTIONS = new Set([
-  '--tasks',
-  '--trials',
-  '--concurrency',
-  '--output',
-  '--mode',
-  '--runner',
-  '--grader',
-  '--generator',
-  '--task-suite',
-  '--models',
-  '--results',
-  '--corpus',
-  '--sample',
-  '--limit'
-]);
+// Options shared by `check` and `eval`; one list for the path-detector and the
+// unknown-option guard.
+const CHECK_VALUE_OPTIONS = ['--tasks', '--trials', '--concurrency', '--output', '--runner', '--grader', '--generator', '--task-suite'];
+
+const VALUE_OPTIONS = new Set([...CHECK_VALUE_OPTIONS, '--mode', '--models', '--results', '--corpus', '--sample', '--limit']);
 
 function findInputArgument(argv: string[], startIndex = 2): { path: string | undefined; index: number } {
   for (let i = startIndex; i < argv.length; i += 1) {
@@ -311,7 +296,7 @@ function parseEvalOptions(argv: string[], startIndex = 3): EvalOptions {
   assertKnownOptions(
     argv,
     startIndex,
-    ['--tasks', '--trials', '--concurrency', '--output', '--mode', '--runner', '--grader', '--generator', '--task-suite'],
+    [...CHECK_VALUE_OPTIONS, '--mode'],
     ['--explain'],
     inputIndex
   );
@@ -345,7 +330,7 @@ export function parseCheckOptions(argv: string[], startIndex = 3): CheckOptions 
   assertKnownOptions(
     argv,
     startIndex,
-    ['--tasks', '--trials', '--concurrency', '--output', '--runner', '--grader', '--generator', '--task-suite'],
+    CHECK_VALUE_OPTIONS,
     ['--json', '--explain'],
     inputIndex
   );
@@ -395,11 +380,18 @@ function parseCorpusRunOptions(argv: string[]): CorpusRunOptions {
 interface MatrixOptions {
   inputPath: string;
   models: string[];
+  /** True when the user passed --models; false means the default list applies. */
+  modelsPinned: boolean;
   tasks: number;
   trials: number;
   concurrency: number;
   json: boolean;
 }
+
+// Default matrix models use NIM/OpenRouter namespace ids; they only resolve on
+// providers that serve many vendors' models under one key.
+const DEFAULT_MATRIX_MODELS = ['openai/gpt-4o', 'anthropic/claude-3-5-sonnet-20241022', 'google/gemini-1.5-pro', 'openai/gpt-oss-120b'];
+const MULTI_MODEL_PROVIDERS = new Set(['nvidia', 'cloud', 'openrouter']);
 
 function parseMatrixOptions(argv: string[], startIndex = 3): MatrixOptions {
   const { path: inputPath, index: inputIndex } = findInputArgument(argv, startIndex);
@@ -417,11 +409,12 @@ function parseMatrixOptions(argv: string[], startIndex = 3): MatrixOptions {
   const rawModels = readOption(argv, '--models');
   const models = rawModels
     ? rawModels.split(',').map((m) => m.trim()).filter(Boolean)
-    : ['openai/gpt-4o', 'anthropic/claude-3-5-sonnet-20241022', 'google/gemini-1.5-pro', 'openai/gpt-oss-120b'];
+    : DEFAULT_MATRIX_MODELS;
 
   return {
     inputPath,
     models,
+    modelsPinned: rawModels !== undefined,
     tasks: readNumberOption(argv, '--tasks', 3, MAX_TASKS),
     trials: readNumberOption(argv, '--trials', 3, MAX_TRIALS),
     concurrency: readNumberOption(argv, '--concurrency', 4, MAX_CONCURRENCY),
@@ -429,27 +422,40 @@ function parseMatrixOptions(argv: string[], startIndex = 3): MatrixOptions {
   };
 }
 
-async function runMatrix(options: MatrixOptions): Promise<unknown> {
+interface MatrixEntry {
+  model: string;
+  verdict: string;
+  score: number;
+  effectPp: number;
+}
+
+async function runMatrix(options: MatrixOptions): Promise<{ matrix: MatrixEntry[] }> {
   await validateSkillInput(options.inputPath);
   await ensureCloudConfigured(false);
 
-  const results: Array<{ model: string; verdict: string; score: number; effectPp: number }> = [];
+  if (!options.modelsPinned && !MULTI_MODEL_PROVIDERS.has(loadProviderConfig().provider)) {
+    throw new Error(
+      `The default matrix models use NIM-style ids that only resolve on multi-vendor providers (NIM, Cloud, OpenRouter). Pass --models with ids your active provider serves.`
+    );
+  }
+
+  const results: MatrixEntry[] = [];
 
   for (const model of options.models) {
-    const res = (await evalSkill({
+    const res = await evalSkill({
       inputPath: options.inputPath,
       tasks: options.tasks,
       trials: options.trials,
       concurrency: options.concurrency,
       mode: 'forced',
       runner: model
-    })) as { summary: { verdict: string; satisfactionScore: number; effectPp: number } };
+    });
 
     results.push({
       model,
-      verdict: res.summary.verdict,
-      score: res.summary.satisfactionScore,
-      effectPp: res.summary.effectPp
+      verdict: res.result.verdict,
+      score: res.result.satisfaction,
+      effectPp: res.result.effect_pp
     });
   }
 
@@ -491,7 +497,7 @@ async function runCheck(options: CheckOptions, header: 'compact' | 'none' = 'com
   }
 
   // Skip the compact header when we just showed the effort menu — its confirmation
-  // line ("✓ Effort  Standard · 3 tasks × 2 trials") already states the run size.
+  // line ("✓ Effort  Standard · 3 tasks × 3 trials") already states the run size.
   if (header === 'compact' && !options.json && !pickedEffort) {
     printCheckHeader(options.evalOptions.inputPath, options.evalOptions.tasks, options.evalOptions.trials);
   }
@@ -540,10 +546,21 @@ async function runInteractiveCheck(): Promise<void> {
   await ensureCloudConfigured(false);
   const selectedPath = await selectSkillPath();
   const effort = await selectEffort();
-  const options = parseCheckOptions(['node', 'skillcheck', 'check', selectedPath], 3);
-  options.evalOptions.tasks = effort.tasks;
-  options.evalOptions.trials = effort.trials;
-  options.effortPinned = true; // already chosen above — don't let runCheck re-ask
+  // Same defaults parseCheckOptions would produce for a direct `check <path>`;
+  // built directly because there is no argv to parse in the interactive flow.
+  const options: CheckOptions = {
+    evalOptions: {
+      inputPath: selectedPath,
+      tasks: effort.tasks,
+      trials: effort.trials,
+      concurrency: 4,
+      mode: 'forced',
+      explain: false,
+      saveArtifacts: false
+    },
+    json: false,
+    effortPinned: true // already chosen above — don't let runCheck re-ask
+  };
   await runCheck(options, 'none');
 }
 
@@ -554,7 +571,7 @@ export async function main(argv: string[]): Promise<void> {
   // check --help` parses `--help` as the skill path and dies with a confusing
   // "missing path" error instead of showing help.
   if (argv.includes('--help') || argv.includes('-h')) {
-    printHelp();
+    printHelpUi();
     return;
   }
 
@@ -585,7 +602,7 @@ export async function main(argv: string[]): Promise<void> {
   }
 
   if (command === 'm0') {
-    const report = await runM0Gate((config) => new NvidiaNimClient(config));
+    const report = await runM0Gate(createLlmClient);
     console.log(JSON.stringify(report, null, 2));
     process.exitCode = report.passed ? 0 : 1;
     return;

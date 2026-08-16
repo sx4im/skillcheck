@@ -1,6 +1,7 @@
 import type { ChatCompletionMessageParam } from 'openai/resources/chat/completions';
-import type { NvidiaNimClient } from '../adapters/nvidia-nim.js';
-import { loadNvidiaConfig } from '../env.js';
+import type { LlmClient } from '../adapters/types.js';
+import { loadProviderConfig } from '../env.js';
+import { runnerMessages } from '../run.js';
 import {
   ciOverlapsZero,
   effectInsideCi,
@@ -51,18 +52,11 @@ export interface M0GateReport {
   passed: boolean;
 }
 
+// The gate runs the production runner prompt (runnerMessages from run.ts), so
+// it calibrates the exact prompt shape real evals use — a hand-rolled variant
+// here would silently validate a different pipeline.
 function buildMessages(skill: string, prompt: string): ChatCompletionMessageParam[] {
-  if (!skill.trim()) {
-    return [{ role: 'user', content: prompt }];
-  }
-
-  return [
-    {
-      role: 'system',
-      content: `You are the runner in an A/B skill evaluation. Follow any skill instructions below when they apply.\n\n${skill}`
-    },
-    { role: 'user', content: prompt }
-  ];
+  return runnerMessages(skill, prompt);
 }
 
 function outputPasses(output: string, expected: M0Task['expected']): boolean {
@@ -71,7 +65,7 @@ function outputPasses(output: string, expected: M0Task['expected']): boolean {
 }
 
 async function runArm(
-  client: NvidiaNimClient,
+  client: LlmClient,
   model: string,
   skill: string,
   task: M0Task,
@@ -96,7 +90,7 @@ async function runArm(
 }
 
 async function runSkillOnce(
-  client: NvidiaNimClient,
+  client: LlmClient,
   model: string,
   skill: string,
   skillLabel: string,
@@ -138,8 +132,8 @@ function hashSeed(value: string): number {
   return hash >>> 0;
 }
 
-export async function runM0Gate(clientFactory: (config: ReturnType<typeof loadNvidiaConfig>) => NvidiaNimClient): Promise<M0GateReport> {
-  const config = loadNvidiaConfig();
+export async function runM0Gate(clientFactory: (config: ReturnType<typeof loadProviderConfig>) => LlmClient): Promise<M0GateReport> {
+  const config = loadProviderConfig();
   const client = clientFactory(config);
   const startedAt = new Date().toISOString();
   const repeatRuns: M0RunResult[] = [];

@@ -79,11 +79,35 @@ function extractFrontMatter(rawText: string): Record<string, string> {
   }
 
   const fields: Record<string, string> = {};
-  for (const line of text.slice(4, end).split('\n')) {
-    const match = /^([A-Za-z0-9_-]+):\s*(.+)$/.exec(line.trim());
-    if (match) {
-      fields[match[1]!.toLowerCase()] = match[2]!.trim().replace(/^["']|["']$/g, '');
+  const lines = text.slice(4, end).split('\n');
+  for (let i = 0; i < lines.length; ) {
+    const match = /^([A-Za-z0-9_-]+):\s*(.*)$/.exec(lines[i]!.trim());
+    if (!match) {
+      i += 1;
+      continue;
     }
+    const key = match[1]!.toLowerCase();
+    const inline = match[2]!.trim();
+    // Block scalar (`>`, `|`, with optional chomping indicator): the value
+    // lives on the following indented lines. Without this, `description: >`
+    // would capture the marker itself as the value. Both styles fold to one
+    // line — front-matter values here are used as single-line domains/labels.
+    if (/^[|>][+-]?$/.test(inline)) {
+      const folded: string[] = [];
+      i += 1;
+      while (i < lines.length && (lines[i]!.trim() === '' || /^\s+\S/.test(lines[i]!))) {
+        if (lines[i]!.trim() !== '') {
+          folded.push(lines[i]!.trim());
+        }
+        i += 1;
+      }
+      fields[key] = folded.join(' ');
+      continue;
+    }
+    if (inline) {
+      fields[key] = inline.replace(/^["']|["']$/g, '');
+    }
+    i += 1;
   }
   return fields;
 }

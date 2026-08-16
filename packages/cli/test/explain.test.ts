@@ -35,36 +35,36 @@ describe('eval --explain payload', () => {
   });
 
   it('classifies helped / hurt / no-change and picks contrasting examples', async () => {
-    const result = (await evalSkill({
+    const result = await evalSkill({
       inputPath: path.join(dir, 'SKILL.md'),
       tasks: 3,
       trials: 1,
       mode: 'forced',
       taskSuite: path.join(dir, 'tasks.json'),
       explain: true
-    })) as { explain: { tasks: Array<Record<string, unknown>> } };
+    });
 
-    const byLabel = new Map(result.explain.tasks.map((t) => [t.label as string, t]));
+    const byLabel = new Map(result.explain!.tasks.map((t) => [t.label, t]));
     expect(new Set(byLabel.keys())).toEqual(new Set(['helped', 'hurt', 'no change']));
 
     const helped = byLabel.get('helped')!;
     expect(helped.delta_pp).toBe(100);
-    expect((helped.example_with as { pass: boolean }).pass).toBe(true);
-    expect((helped.example_without as { pass: boolean }).pass).toBe(false);
+    expect(helped.example_with!.pass).toBe(true);
+    expect(helped.example_without!.pass).toBe(false);
 
     const hurt = byLabel.get('hurt')!;
     expect(hurt.delta_pp).toBe(-100);
-    expect((hurt.example_without as { pass: boolean }).pass).toBe(true);
+    expect(hurt.example_without!.pass).toBe(true);
   });
 
   it('omits the explain payload unless requested', async () => {
-    const result = (await evalSkill({
+    const result = await evalSkill({
       inputPath: path.join(dir, 'SKILL.md'),
       tasks: 3,
       trials: 1,
       mode: 'forced',
       taskSuite: path.join(dir, 'tasks.json')
-    })) as Record<string, unknown>;
+    });
     expect(result.explain).toBeUndefined();
   });
 });

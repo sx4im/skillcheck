@@ -1,31 +1,12 @@
 import OpenAI from 'openai';
 import type { ChatCompletion } from 'openai/resources/chat/completions';
+import { sleep, textContent } from './http.js';
 import type { CompletionRequest, CompletionResponse, LlmClient } from './types.js';
 
 const RETRYABLE_STATUSES = new Set([408, 409, 429, 500, 502, 503, 504]);
 
 function extractTextContent(content: unknown): string | undefined {
-  if (typeof content === 'string') {
-    return content;
-  }
-
-  if (Array.isArray(content)) {
-    const parts = content
-      .map((part) => {
-        if (typeof part === 'string') {
-          return part;
-        }
-        if (typeof part === 'object' && part !== null && 'text' in part) {
-          const text = (part as { text?: unknown }).text;
-          return typeof text === 'string' ? text : '';
-        }
-        return '';
-      })
-      .join('');
-    return parts || undefined;
-  }
-
-  return undefined;
+  return textContent(content);
 }
 
 function extractMessageText(message: unknown): string | undefined {
@@ -39,10 +20,6 @@ function extractMessageText(message: unknown): string | undefined {
     extractTextContent(record.reasoning_content) ??
     extractTextContent(record.refusal)
   );
-}
-
-function sleep(ms: number): Promise<void> {
-  return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 function getStatus(error: unknown): number | undefined {

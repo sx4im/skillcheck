@@ -2,8 +2,6 @@ import { OpenAiCompatClient } from './openai-compat.js';
 import type { CompletionRequest, CompletionResponse, LlmClient } from './types.js';
 import type { NvidiaConfig } from '../env.js';
 
-export type { CompletionRequest, CompletionResponse } from './types.js';
-
 export class NvidiaNimClient implements LlmClient {
   private readonly inner: OpenAiCompatClient;
 

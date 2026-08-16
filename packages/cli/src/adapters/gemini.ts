@@ -1,8 +1,5 @@
+import { fetchWithRetry, textContent } from './http.js';
 import type { CompletionRequest, CompletionResponse, LlmClient } from './types.js';
-
-function sleep(ms: number): Promise<void> {
-  return new Promise((resolve) => setTimeout(resolve, ms));
-}
 
 export interface GeminiConfig {
   apiKey: string;
@@ -29,7 +26,7 @@ export class GeminiClient implements LlmClient {
     const contents: { role: string; parts: { text: string }[] }[] = [];
 
     for (const msg of request.messages) {
-      const text = typeof msg.content === 'string' ? msg.content : JSON.stringify(msg.content);
+      const text = textContent(msg.content) ?? '';
       if (msg.role === 'system') {
         systemInstructionText = systemInstructionText ? `${systemInstructionText}\n\n${text}` : text;
       } else {
@@ -58,57 +55,34 @@ export class GeminiClient implements LlmClient {
       generationConfig
     };
 
-    let lastError: unknown;
-    for (let attempt = 0; attempt < this.maxAttempts; attempt += 1) {
-      try {
-        const controller = new AbortController();
-        const timeout = setTimeout(() => controller.abort(), this.timeoutMs);
-
-        const response = await fetch(url, {
-          method: 'POST',
-          headers: {
-            'content-type': 'application/json'
-          },
-          body: JSON.stringify(payload),
-          signal: controller.signal
-        });
-        clearTimeout(timeout);
-
-        if (!response.ok) {
-          const errText = await response.text().catch(() => '');
-          const error = new Error(`Gemini API error (${response.status}): ${errText}`);
-          (error as unknown as Record<string, unknown>).status = response.status;
-          throw error;
-        }
-
-        const data = (await response.json()) as {
-          candidates?: { content?: { parts?: { text?: string }[] } }[];
-          usageMetadata?: { promptTokenCount?: number; candidatesTokenCount?: number; totalTokenCount?: number };
-        };
-
-        const firstPart = data.candidates?.[0]?.content?.parts?.[0];
-        const content = firstPart?.text ?? '';
-
-        return {
-          content,
-          model: request.model,
-          usage: {
-            promptTokens: data.usageMetadata?.promptTokenCount,
-            completionTokens: data.usageMetadata?.candidatesTokenCount,
-            totalTokens: data.usageMetadata?.totalTokenCount
-          }
-        };
-      } catch (error) {
-        lastError = error;
-        const status = (error as { status?: number })?.status;
-        const retryable = status === 429 || status === 500 || status === 502 || status === 503 || status === 504;
-        if (!retryable || attempt === this.maxAttempts - 1) {
-          break;
-        }
-        await sleep(1000 * 2 ** attempt);
-      }
+    const result = await fetchWithRetry(url, {
+      headers: {
+        'content-type': 'application/json'
+      },
+      body: JSON.stringify(payload),
+      timeoutMs: this.timeoutMs,
+      maxAttempts: this.maxAttempts
+    });
+    if (!result.ok) {
+      throw new Error(`Gemini API error (${result.status}): ${result.text}`);
     }
 
-    throw lastError instanceof Error ? lastError : new Error(String(lastError));
+    const data = JSON.parse(result.text) as {
+      candidates?: { content?: { parts?: { text?: string }[] } }[];
+      usageMetadata?: { promptTokenCount?: number; candidatesTokenCount?: number; totalTokenCount?: number };
+    };
+
+    const firstPart = data.candidates?.[0]?.content?.parts?.[0];
+    const content = firstPart?.text ?? '';
+
+    return {
+      content,
+      model: request.model,
+      usage: {
+        promptTokens: data.usageMetadata?.promptTokenCount,
+        completionTokens: data.usageMetadata?.candidatesTokenCount,
+        totalTokens: data.usageMetadata?.totalTokenCount
+      }
+    };
   }
 }
