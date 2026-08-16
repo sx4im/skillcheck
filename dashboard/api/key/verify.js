@@ -4,9 +4,10 @@
 // Clerk — same auth model as the proxy, so it works from the CLI.
 
 import { sendJson, methodNotAllowed, proxyCors, bearerToken } from '../_lib/http.js';
-import { uidForApiKey, getUser, getRunsUsed, runLimitFor } from '../_lib/users.js';
+import { uidForApiKey, usageFor, getUser } from '../_lib/users.js';
 import { maskApiKey } from '../_lib/keys.js';
 
+/** @param {import("http").IncomingMessage} req @param {import("http").ServerResponse} res */
 export default async function handler(req, res) {
   proxyCors(res);
   if (req.method === 'OPTIONS') {
@@ -29,14 +30,13 @@ export default async function handler(req, res) {
     return sendJson(res, 401, { valid: false, error: { message: 'Account not found for this key.', type: 'invalid_key' } });
   }
 
-  const runsUsed = await getRunsUsed(uid);
-  const limit = runLimitFor(user.plan);
+  const usage = await usageFor(uid, user.plan);
   sendJson(res, 200, {
     valid: true,
     plan: user.plan,
     email: user.email,
-    runsUsed,
-    runsLimit: Number.isFinite(limit) ? limit : null,
+    runsUsed: usage.runsUsed,
+    runsLimit: usage.runsLimit,
     apiKeyMasked: maskApiKey(key)
   });
 }

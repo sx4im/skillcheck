@@ -11,6 +11,11 @@
     "@clerk/backend": "^3.15.0"
   },
   "scripts": {
-    "test": "node test/smoke.mjs && node test/proxy.mjs && node test/verify.mjs"
+    "test": "node test/smoke.mjs && node test/proxy.mjs && node test/verify.mjs",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.2",
+    "typescript": "^5.7.2"
   }
 }

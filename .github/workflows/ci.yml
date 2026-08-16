@@ -98,5 +98,8 @@ jobs:
 
       - run: npm ci
 
+      - name: Typecheck (JSDoc + checkJs)
+        run: npm run typecheck
+
       - name: Test (offline smoke + proxy + verify)
         run: npm test

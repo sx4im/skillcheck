@@ -7,6 +7,7 @@ import { uidForApiKey, getUser, consumeRun } from '../_lib/users.js';
 import { forwardChatCompletion } from '../_lib/nvidia.js';
 import { NVIDIA_API_KEY, appUrl } from '../_lib/config.js';
 
+/** @param {import("http").IncomingMessage} req @param {import("http").ServerResponse} res */
 export default async function handler(req, res) {
   proxyCors(res);
   if (req.method === 'OPTIONS') {
@@ -29,6 +30,8 @@ export default async function handler(req, res) {
   if (!user) return sendJson(res, 401, { error: { message: 'Account not found for this key.', type: 'invalid_key' } });
 
   const runId = String(req.headers['x-skillcheck-run'] || '').trim();
+  // Read the body before metering — a malformed request must not consume quota.
+  const body = await readJsonBody(req);
   const meter = await consumeRun(uid, runId, user.plan);
   if (!meter.allowed) {
     return sendJson(res, 402, {
@@ -40,7 +43,6 @@ export default async function handler(req, res) {
     });
   }
 
-  const body = await readJsonBody(req);
   try {
     const result = await forwardChatCompletion(body);
     res.statusCode = result.status;
@@ -48,6 +50,6 @@ export default async function handler(req, res) {
     res.setHeader('x-skillcheck-runs-used', String(meter.used));
     res.end(result.text);
   } catch (error) {
-    sendJson(res, 502, { error: { message: 'Upstream model provider error.', detail: String((error && error.message) || error) } });
+    sendJson(res, 502, { error: { message: 'Upstream model provider error.', detail: String((error instanceof Error && error.message) || error) } });
   }
 }

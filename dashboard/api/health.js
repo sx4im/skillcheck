@@ -7,6 +7,7 @@ import { sendJson, methodNotAllowed } from './_lib/http.js';
 import { storeDurable } from './_lib/store.js';
 import { NVIDIA_API_KEY, clerkEnabled, billingEnabled, DEFAULT_MODEL } from './_lib/config.js';
 
+/** @param {import("http").IncomingMessage} req @param {import("http").ServerResponse} res */
 export default function handler(req, res) {
   if (req.method !== 'GET') return methodNotAllowed(res, 'GET');
 

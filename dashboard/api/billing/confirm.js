@@ -7,14 +7,17 @@ import { setPlan } from '../_lib/users.js';
 import { billingEnabled, appUrl } from '../_lib/config.js';
 import { getCheckoutSession } from '../_lib/stripe.js';
 
+/** @param {import("http").IncomingMessage} req @param {import("http").ServerResponse} res */
 export default async function handler(req, res) {
-  if (req.method !== 'POST' && req.method !== 'GET') return methodNotAllowed(res, 'POST, GET');
+  // POST-only: this handler mutates the plan, and the frontend calls it with
+  // POST (assets/app.js). A state-changing GET invites prefetchers/scanners.
+  if (req.method !== 'POST') return methodNotAllowed(res, 'POST');
   if (!billingEnabled) return sendJson(res, 400, { error: { message: 'Billing is not configured.' } });
 
   const userId = await getClerkUserId(req);
   if (!userId) return sendJson(res, 401, { error: { message: 'Not signed in' } });
 
-  const url = new URL(req.url, appUrl(req));
+  const url = new URL(req.url ?? '/', appUrl(req));
   const sessionId = url.searchParams.get('session_id');
   if (!sessionId) return sendJson(res, 400, { error: { message: 'Missing session_id' } });
 
@@ -27,6 +30,6 @@ export default async function handler(req, res) {
     }
     sendJson(res, 200, { plan: 'free', paid: false });
   } catch (error) {
-    sendJson(res, 502, { error: { message: String((error && error.message) || error) } });
+    sendJson(res, 502, { error: { message: String((error instanceof Error && error.message) || error) } });
   }
 }

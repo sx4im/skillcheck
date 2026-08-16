@@ -4,6 +4,7 @@
 import { sendJson, methodNotAllowed } from './_lib/http.js';
 import { CLERK_PUBLISHABLE_KEY, clerkEnabled, billingEnabled } from './_lib/config.js';
 
+/** @param {import("http").IncomingMessage} req @param {import("http").ServerResponse} res */
 export default function handler(req, res) {
   if (req.method !== 'GET') return methodNotAllowed(res, 'GET');
   sendJson(res, 200, {

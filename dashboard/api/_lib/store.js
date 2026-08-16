@@ -6,6 +6,7 @@
 // Set UPSTASH_REDIS_REST_URL + UPSTASH_REDIS_REST_TOKEN for production.
 
 import { UPSTASH_URL, UPSTASH_TOKEN } from './config.js';
+import { fetchWithTimeout } from './fetch-timeout.js';
 
 export const usingRedis = Boolean(UPSTASH_URL && UPSTASH_TOKEN);
 
@@ -23,10 +24,15 @@ if (!usingRedis && (process.env.VERCEL || process.env.NODE_ENV === 'production')
   );
 }
 
-const mem = globalThis.__skillcheckMem || (globalThis.__skillcheckMem = { kv: new Map(), exp: new Map() });
+const g = /** @type {any} */ (globalThis);
+const mem = g.__skillcheckMem || (g.__skillcheckMem = { kv: new Map(), exp: new Map() });
 
+/**
+ * @param {unknown[]} command
+ * @returns {Promise<any>}
+ */
 async function upstash(command) {
-  const response = await fetch(UPSTASH_URL, {
+  const response = await fetchWithTimeout(UPSTASH_URL, {
     method: 'POST',
     headers: { authorization: `Bearer ${UPSTASH_TOKEN}`, 'content-type': 'application/json' },
     body: JSON.stringify(command)
@@ -41,6 +47,7 @@ async function upstash(command) {
   return data ? data.result : null;
 }
 
+/** @param {string} key @returns {boolean} */
 function memLive(key) {
   const expiry = mem.exp.get(key);
   if (expiry !== undefined && expiry < Date.now()) {
@@ -51,12 +58,22 @@ function memLive(key) {
   return mem.kv.has(key);
 }
 
+/**
+ * @param {string} key
+ * @returns {Promise<string | null>}
+ */
 export async function kvGet(key) {
   if (usingRedis) return upstash(['GET', key]);
   return memLive(key) ? mem.kv.get(key) : null;
 }
 
-// options: { ex?: seconds, nx?: boolean }. Returns 'OK' on write, null when nx skipped.
+/**
+ * @param {string} key
+ * @param {string} value
+ * @param {{ ex?: number, nx?: boolean }} [options]
+ * @returns {Promise<string | null>}
+ */
+// Returns 'OK' on write, null when nx skipped.
 export async function kvSet(key, value, options = {}) {
   if (usingRedis) {
     const command = ['SET', key, value];
@@ -71,6 +88,10 @@ export async function kvSet(key, value, options = {}) {
   return 'OK';
 }
 
+/**
+ * @param {string} key
+ * @returns {Promise<number>}
+ */
 export async function kvDel(key) {
   if (usingRedis) return upstash(['DEL', key]);
   mem.kv.delete(key);
@@ -78,9 +99,24 @@ export async function kvDel(key) {
   return 1;
 }
 
+/**
+ * @param {string} key
+ * @returns {Promise<number>}
+ */
 export async function kvIncr(key) {
   if (usingRedis) return upstash(['INCR', key]);
   const next = Number(memLive(key) ? mem.kv.get(key) : 0) + 1;
+  mem.kv.set(key, String(next));
+  return next;
+}
+
+/**
+ * @param {string} key
+ * @returns {Promise<number>}
+ */
+export async function kvDecr(key) {
+  if (usingRedis) return upstash(['DECR', key]);
+  const next = Number(memLive(key) ? mem.kv.get(key) : 0) - 1;
   mem.kv.set(key, String(next));
   return next;
 }

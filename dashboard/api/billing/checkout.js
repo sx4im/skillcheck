@@ -4,6 +4,7 @@ import { getUser } from '../_lib/users.js';
 import { billingEnabled, appUrl } from '../_lib/config.js';
 import { createCheckoutSession } from '../_lib/stripe.js';
 
+/** @param {import("http").IncomingMessage} req @param {import("http").ServerResponse} res */
 export default async function handler(req, res) {
   if (req.method !== 'POST') return methodNotAllowed(res, 'POST');
   if (!billingEnabled) return sendJson(res, 400, { error: { message: 'Billing is not configured.' } });
@@ -24,6 +25,6 @@ export default async function handler(req, res) {
     });
     sendJson(res, 200, { url: checkout.url });
   } catch (error) {
-    sendJson(res, 502, { error: { message: String((error && error.message) || error) } });
+    sendJson(res, 502, { error: { message: String((error instanceof Error && error.message) || error) } });
   }
 }

@@ -5,15 +5,27 @@
 import { createHash, randomBytes } from 'node:crypto';
 import { TOKEN_PEPPER } from './config.js';
 
+/**
+ * @param {boolean} [live]
+ * @returns {string}
+ */
 export function generateApiKey(live = true) {
   const random = randomBytes(24).toString('base64url');
   return `chk_${live ? 'live' : 'test'}_${random}`;
 }
 
+/**
+ * @param {string} key
+ * @returns {string}
+ */
 export function hashApiKey(key) {
   return createHash('sha256').update(`${key}.${TOKEN_PEPPER}`).digest('hex');
 }
 
+/**
+ * @param {string} [key]
+ * @returns {string}
+ */
 export function maskApiKey(key) {
   if (!key || key.length < 16) return key || '';
   return `${key.slice(0, 11)}…${key.slice(-4)}`;

@@ -1,9 +1,10 @@
 import js from '@eslint/js';
 import tseslint from 'typescript-eslint';
 
-// Flat config. Lints the CLI TypeScript (src + tests). The dashboard ships its
-// own plain-JS serverless functions and the Next.js site has its own toolchain,
-// so both are out of scope here; build artifacts are ignored.
+// Flat config. Lints the CLI TypeScript (src + tests). The dashboard ships
+// plain-JS serverless functions typed via JSDoc and checked with
+// `tsc --checkJs` (dashboard/tsconfig.json, run by dashboard `npm run
+// typecheck`); the Next.js site is type-checked by `next build`.
 export default tseslint.config(
   {
     ignores: ['dist/**', 'coverage/**', 'node_modules/**', 'packages/site/**', 'dashboard/**', 'scripts/**', '**/*.d.ts']

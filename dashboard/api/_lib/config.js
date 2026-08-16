@@ -1,6 +1,10 @@
 // Central environment configuration for the Skillcheck dashboard + proxy.
 // Every secret is read here so the rest of the code never touches process.env directly.
 
+/**
+ * @param {string | undefined} value
+ * @returns {string}
+ */
 function clean(value) {
   return (value || '').trim();
 }
@@ -20,8 +24,16 @@ export const CLERK_PUBLISHABLE_KEY = clean(process.env.CLERK_PUBLISHABLE_KEY) ||
 export const CLERK_SECRET_KEY = clean(process.env.CLERK_SECRET_KEY);
 export const clerkEnabled = Boolean(CLERK_PUBLISHABLE_KEY && CLERK_SECRET_KEY);
 
-// Pepper used when hashing issued API keys before storing them.
-export const TOKEN_PEPPER = clean(process.env.TOKEN_PEPPER) || CLERK_SECRET_KEY || 'skillcheck-dev-pepper';
+// Pepper used when hashing issued API keys before storing them. No default
+// value: an unset pepper in production hashes keys with '' — loud warning
+// below rather than silently weakening every issued key.
+export const TOKEN_PEPPER = clean(process.env.TOKEN_PEPPER) || CLERK_SECRET_KEY;
+if (!TOKEN_PEPPER && (process.env.VERCEL || process.env.NODE_ENV === 'production')) {
+  console.warn(
+    '[skillcheck] WARNING: TOKEN_PEPPER (or CLERK_SECRET_KEY) is not set. ' +
+      'Issued API keys will be hashed with an empty pepper.'
+  );
+}
 
 // --- Quota ---
 export const FREE_RUNS = Number(process.env.FREE_RUNS || 10);
@@ -42,6 +54,10 @@ export const APP_URL = clean(process.env.APP_URL).replace(/\/+$/, '');
 
 export const billingEnabled = Boolean(STRIPE_SECRET_KEY && STRIPE_PRICE_ID);
 
+/**
+ * @param {import('http').IncomingMessage} req
+ * @returns {string}
+ */
 export function appUrl(req) {
   if (APP_URL) return APP_URL;
   const proto = String(req.headers['x-forwarded-proto'] || 'https').split(',')[0];
