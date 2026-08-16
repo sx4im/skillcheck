@@ -2,6 +2,17 @@ import { existsSync, readFileSync } from 'node:fs';
 import { readFile, readdir } from 'node:fs/promises';
 import path from 'node:path';
 
+// Must stay byte-identical to slugify in packages/cli/src/hash.ts.
+function slugify(value: string): string {
+  return value
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-|-$/g, '');
+}
+// Mirror of the CLI's EvalResult (packages/cli/src/eval.ts) plus the fields
+// the leaderboard adds when loading. Turbopack cannot import across packages
+// (value or type) — when the result JSON shape changes in eval.ts, update
+// this to match.
 export interface LeaderboardResult {
   id: string;
   filePath: string;
@@ -12,10 +23,11 @@ export interface LeaderboardResult {
     format: string;
     commit_hash: string;
     domain: string;
+    tool_dependent?: boolean;
   };
   config: {
     runner_model: string;
-    runner_version: string;
+    runner_version?: string;
     grader_model: string;
     generator_model: string;
     trials: number;
@@ -36,8 +48,10 @@ export interface LeaderboardResult {
     prompt: string;
     criterion_type: string;
     criterion: string;
-    arm_a_pass_rate: number;
-    arm_b_pass_rate: number;
+    with_skill_pass_rate?: number;
+    no_skill_pass_rate?: number;
+    arm_a_pass_rate?: number;
+    arm_b_pass_rate?: number;
   }>;
   reproducibility: {
     task_suite_path: string;
@@ -74,13 +88,6 @@ function repoRoot(): string {
   return cwd.endsWith(path.join('packages', 'site')) ? path.resolve(cwd, '..', '..') : cwd;
 }
 
-function slugify(value: string): string {
-  return value
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-|-$/g, '');
-}
-
 function configuredPath(root: string, value: string): string {
   return path.isAbsolute(value) ? value : path.join(root, value);
 }
@@ -105,9 +112,14 @@ function rotReportPath(root: string): string {
 }
 
 function resultKey(result: Omit<LeaderboardResult, 'id' | 'filePath' | 'rot'>): string {
+  // Must match rot.ts resultKey — the string the rot report's `key` field is
+  // built with. Cannot import rot.ts here (it pulls the whole CLI graph);
+  // the format stays trivial: slugify(name):commit_hash.
   return `${slugify(result.skill.name)}:${result.skill.commit_hash}`;
 }
 
+// Recursive *.json walk, mirroring rot.ts listJsonFiles (kept local for the
+// same reason as resultKey above — no CLI import graph in the site build).
 async function listJsonFiles(dir: string): Promise<string[]> {
   // results/ is git-ignored, so a fresh clone has none — an empty leaderboard,
   // not a build crash.

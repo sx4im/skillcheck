@@ -59,8 +59,8 @@ export default async function SkillDetailPage({ params }: { params: Promise<{ id
                 <td>{task.id}</td>
                 <td>{task.prompt}</td>
                 <td>{task.criterion}</td>
-                <td>{task.arm_a_pass_rate}</td>
-                <td>{task.arm_b_pass_rate}</td>
+                <td>{task.with_skill_pass_rate ?? task.arm_a_pass_rate}</td>
+                <td>{task.no_skill_pass_rate ?? task.arm_b_pass_rate}</td>
               </tr>
             ))}
           </tbody>
