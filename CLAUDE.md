@@ -11,6 +11,8 @@
    - **Strict Top-Level Import Grouping**: Group all imports at the top of the file. Never place import statements mid-file or duplicate comments around them.
    - **Single Source of Truth for Core Utilities**: Share math, parsing, and data manipulation helpers (e.g. `seededShuffle` in `src/hash.ts`, `pairedObservations` in `src/score.ts`) across modules rather than copy-pasting near-duplicate functions.
    - **No Catch-All Test Files or Copy-Pasted Test Mocks**: Maintain domain-focused test files instead of catch-all coverage grab-bags. Share test mocks (`FakeNvidiaNimClient`, test configs) through `packages/cli/test/helpers.ts`.
+   - **Typed Cross-Module Contracts**: A function returning a structured payload that other modules consume (e.g. `evalSkill`'s result) declares and exports a concrete interface — never `Promise<unknown>` — so every consumer reads one shape instead of re-guessing it with casts and runtime guards.
+   - **Bounded Outbound Calls**: Every outbound network request (model providers, Upstash, Clerk, Stripe, npm registry) sets an explicit timeout. An unbounded fetch turns platform limits (serverless maxDuration) into opaque failures the caller cannot report.
 
 2. **Provider Abstraction Architecture**
    - **Bring Your Own Key (BYOK)**: Supports OpenAI, Anthropic, Google Gemini, Groq, Mistral, OpenRouter, and NVIDIA NIM in addition to Hosted Mode (`SKILLCHECK_TOKEN`).
