@@ -60,6 +60,9 @@ jobs:
 
       - name: Publish to npm (with provenance)
         if: steps.check_token.outputs.skip != 'true'
-        run: npm publish --provenance --access public || echo "Notice: Package already published or skipped."
+        # Single-quoted: the plain scalar contains "Notice: ...", and a
+        # colon+space inside a plain YAML scalar is a parse error — which made
+        # every run of this workflow die in 0s before this fix.
+        run: 'npm publish --provenance --access public || echo "Notice: Package already published or skipped."'
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
