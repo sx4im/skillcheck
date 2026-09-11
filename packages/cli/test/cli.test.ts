@@ -53,6 +53,52 @@ describe('friendly CLI check command', () => {
     expect(optsAfter.evalOptions.explain).toBe(true);
   });
 
+  it.each([2, 3])('accepts inline values before and after the path (start index %i)', (startIndex) => {
+    const prefix = startIndex === 3 ? ['node', 'skillcheck', 'check'] : ['node', 'skillcheck'];
+    const inline = [...prefix, '--tasks=5', './SKILL.md', '--trials=2', '--concurrency=3', '--json'];
+    const separated = [...prefix, '--tasks', '5', './SKILL.md', '--trials', '2', '--concurrency', '3', '--json'];
+
+    expect(parseCheckOptions(inline, startIndex)).toEqual(parseCheckOptions(separated, startIndex));
+    expect(parseCheckOptions(inline, startIndex).effortPinned).toBe(true);
+  });
+
+  it('preserves equals signs in string option values and the skill path', () => {
+    const options = parseCheckOptions([
+      'node', 'skillcheck', 'check', './name=value.md',
+      '--output=results/run=a=b.json', '--runner=provider/model=v1',
+      '--grader=grader=v2', '--generator=generator=v3', '--task-suite=suite=a.json'
+    ]);
+
+    expect(options.evalOptions).toMatchObject({
+      inputPath: './name=value.md',
+      output: 'results/run=a=b.json',
+      runner: 'provider/model=v1',
+      grader: 'grader=v2',
+      generator: 'generator=v3',
+      taskSuite: 'suite=a.json',
+      saveArtifacts: true
+    });
+  });
+
+  it.each([
+    ['--tasks=', /Missing value for --tasks/],
+    ['--tasks=0', /--tasks must be a positive integer/],
+    ['--tasks=1.5', /--tasks must be a positive integer/],
+    ['--tasks=300', /--tasks must be at most 50/],
+    ['--trials=99', /--trials must be at most 10/],
+    ['--task=5', /Unknown option --task=5/],
+    ['--json=true', /Unknown option --json=true/]
+  ])('rejects invalid inline argument %s', (argument, error) => {
+    expect(() => parseCheckOptions(['node', 'skillcheck', 'check', './SKILL.md', argument])).toThrow(error);
+  });
+
+  it.each([
+    ['--tasks=5', '--tasks', '2'],
+    ['--tasks', '5', '--tasks=2']
+  ])('keeps the first value when option formats are mixed: %j', (...args) => {
+    expect(parseCheckOptions(['node', 'skillcheck', 'check', './SKILL.md', ...args]).evalOptions.tasks).toBe(5);
+  });
+
   it('supports matrix command option parsing before or after path', () => {
     const matrixOptsAfter = parseCheckOptions(['node', 'skillcheck', 'matrix', './SKILL.md', '--tasks', '5'], 3);
     expect(matrixOptsAfter.evalOptions.inputPath).toBe('./SKILL.md');

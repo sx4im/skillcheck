@@ -102,6 +102,22 @@ describe('main() end-to-end (mocked model)', () => {
     expect(result.result.verdict).toBe('helps');
   });
 
+  it.each(['check', 'eval'])('runs `%s` with inline values and verifies its saved result', async (command) => {
+    const { stdout } = await runMain([
+      'node', 'skillcheck', command, '--tasks=2', 'SKILL.md', '--trials=1',
+      '--output=result=inline.json', ...(command === 'check' ? ['--json'] : ['--mode=forced'])
+    ]);
+    const result = JSON.parse(stdout);
+    expect(result.config.tasks).toBe(2);
+    expect(result.config.trials).toBe(1);
+    expect(result.result.verdict).toBe('helps');
+
+    const { stdout: verification } = await runMain([
+      'node', 'skillcheck', 'verify', '--sample=2', 'result=inline.json'
+    ]);
+    expect(JSON.parse(verification).passed).toBe(true);
+  });
+
   it('renders the human result card for `check` on a non-TTY', async () => {
     const { stdout } = await runMain(['node', 'skillcheck', 'check', 'SKILL.md', '--tasks', '2', '--trials', '1']);
     expect(stdout).toContain('SKILLCHECK RESULT');

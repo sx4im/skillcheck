@@ -195,11 +195,12 @@ function findInputArgument(argv: string[], startIndex = 2): { path: string | und
 }
 
 function readOption(argv: string[], name: string): string | undefined {
-  const index = argv.indexOf(name);
+  const index = argv.findIndex((token) => token === name || token.startsWith(`${name}=`));
   if (index === -1) {
     return undefined;
   }
-  const value = argv[index + 1];
+  const token = argv[index]!;
+  const value = token === name ? argv[index + 1] : token.slice(name.length + 1);
   if (!value || value.startsWith('--')) {
     throw new Error(`Missing value for ${name}`);
   }
@@ -257,10 +258,14 @@ function assertKnownOptions(
     if (flags.includes(token)) {
       continue;
     }
-    if (!valueOptions.includes(token)) {
+    const equalsIndex = token.indexOf('=');
+    const name = equalsIndex === -1 ? token : token.slice(0, equalsIndex);
+    if (!valueOptions.includes(name)) {
       throw new Error(`Unknown option ${token}. Valid options: ${[...valueOptions, ...flags].join(', ')}`);
     }
-    i += 1; // skip this option's value
+    if (equalsIndex === -1) {
+      i += 1; // skip a space-separated value; inline values consume only one token
+    }
   }
 }
 
@@ -343,7 +348,7 @@ export function parseCheckOptions(argv: string[], startIndex = 3): CheckOptions 
     },
     json: hasFlag(argv, '--json'),
     output: evalOptions.output,
-    effortPinned: hasFlag(argv, '--tasks') || hasFlag(argv, '--trials')
+    effortPinned: readOption(argv, '--tasks') !== undefined || readOption(argv, '--trials') !== undefined
   };
 }
 
