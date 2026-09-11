@@ -11,7 +11,7 @@ import {
   verifyCloudKey
 } from './config.js';
 import { runCorpus, type CorpusRunOptions } from './corpus.js';
-import { evalSkill, type EvalOptions } from './eval.js';
+import { evalSkill, type EvalOptions, type EvalResult } from './eval.js';
 import { loadProviderConfig } from './env.js';
 import { runM0Gate } from './m0/run.js';
 import { runRot, type RotOptions } from './rot.js';
@@ -509,7 +509,7 @@ async function runCheck(options: CheckOptions, header: 'compact' | 'none' = 'com
   options.evalOptions.explain = explicitExplain || interactive;
 
   const progress = options.json ? undefined : startProgress();
-  let result: unknown;
+  let result: EvalResult;
   try {
     result = await evalSkill({
       ...options.evalOptions,

@@ -1,4 +1,5 @@
 import { mkdtemp, writeFile } from 'node:fs/promises';
+import { evalResultFixture } from './eval-result-fixture.js';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
@@ -65,7 +66,7 @@ describe('friendly CLI check command', () => {
 
   it('formats a readable result summary', () => {
     const summary = formatResultCard(
-      {
+      evalResultFixture({
         skill: { name: 'Docs Skill' },
         config: { tasks: 3, trials: 2 },
         result: {
@@ -76,7 +77,7 @@ describe('friendly CLI check command', () => {
           no_skill_pass: 0.5,
           token_overhead: 120
         }
-      },
+      }),
       'skillcheck-results/docs-skill.json'
     );
 
@@ -86,7 +87,7 @@ describe('friendly CLI check command', () => {
     expect(summary).toContain('+25.0 pp');
     expect(summary).toContain('+5.0 pp to +45.0 pp');
     expect(summary).toMatch(/Saved JSON\s+skillcheck-results\/docs-skill\.json/);
-    // +25pp effect (no satisfaction field) -> falls back to 75.0/100 -> "Good"
+    // The typed result supplies satisfaction explicitly.
     expect(summary).toContain('Satisfaction');
     expect(summary).toContain('75.0/100');
     expect(summary).toContain('GOOD');

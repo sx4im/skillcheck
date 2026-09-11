@@ -1,17 +1,13 @@
 import process from 'node:process';
 import { cloudPricingUrl } from '../config.js';
-import { satisfactionFromEffect } from '../score.js';
+import type { EvalResult, ExplainTask } from '../eval.js';
 import { BOX, SYM, epaint, layoutWidth, padDisplay, paint, truncateDisplay, wrapText } from './theme.js';
 import { CancelledError, exitOnInterrupt } from './picker.js';
 
 type Paint = (value: string) => string;
 
-function asRecord(value: unknown): Record<string, unknown> {
-  return typeof value === 'object' && value !== null ? (value as Record<string, unknown>) : {};
-}
-
-function formatPercent(value: unknown): string {
-  return typeof value === 'number' ? `${(value * 100).toFixed(1)}%` : 'n/a';
+function formatPercent(value: number): string {
+  return `${(value * 100).toFixed(1)}%`;
 }
 
 function verdictBadge(verdict: string): string {
@@ -22,15 +18,6 @@ function verdictBadge(verdict: string): string {
     return paint.badge('HARMS', 'err');
   }
   return paint.badge(verdict.toUpperCase(), 'warn');
-}
-
-function satisfactionFromResult(score: Record<string, unknown>): number {
-  if (typeof score.satisfaction === 'number') {
-    return Math.max(0, Math.min(100, score.satisfaction));
-  }
-  // Result JSONs from before the satisfaction field existed: recompute it.
-  const effect = typeof score.effect_pp === 'number' ? score.effect_pp : 0;
-  return satisfactionFromEffect(effect);
 }
 
 function satisfactionBand(score: number): { label: string; paint: Paint } {
@@ -86,44 +73,35 @@ function satisfactionLine(geometry: CardGeometry, finalScore: number, atScore: n
   );
 }
 
-function plainVerdict(verdict: string, withPass: unknown, noPass: unknown): string {
-  const w = typeof withPass === 'number' ? `${Math.round(withPass * 100)}%` : 'n/a';
-  const n = typeof noPass === 'number' ? `${Math.round(noPass * 100)}%` : 'n/a';
+function plainVerdict(verdict: string, withPass: number, noPass: number): string {
+  const w = `${Math.round(withPass * 100)}%`;
+  const n = `${Math.round(noPass * 100)}%`;
   if (verdict === 'helps') return `The skill HELPED — model passed ${w} of tasks with it vs ${n} without.`;
   if (verdict === 'harms') return `The skill HURT — model passed ${w} of tasks with it vs ${n} without.`;
   return `No measurable difference — ${w} passed with the skill, ${n} without.`;
 }
 
-function signedPp(value: unknown): string {
-  if (typeof value !== 'number') return 'n/a';
+function signedPp(value: number): string {
   return `${value >= 0 ? '+' : ''}${value.toFixed(1)} pp`;
 }
 
-function countNoun(value: unknown, noun: string): string {
-  if (typeof value !== 'number') return `n/a ${noun}s`;
+function countNoun(value: number, noun: string): string {
   return `${value} ${noun}${value === 1 ? '' : 's'}`;
 }
 
-function resultHeaderLines(geometry: CardGeometry, result: unknown, outputPath?: string): string[] {
-  const root = asRecord(result);
-  const skill = asRecord(root.skill);
-  const config = asRecord(root.config);
-  const score = asRecord(root.result);
-  const ci = Array.isArray(score.ci_pp) ? score.ci_pp : [];
-  const ciLow = typeof ci[0] === 'number' ? ci[0] : undefined;
-  const ciHigh = typeof ci[1] === 'number' ? ci[1] : undefined;
-  const ciText =
-    ciLow !== undefined && ciHigh !== undefined ? `${signedPp(ciLow)} to ${signedPp(ciHigh)}` : 'n/a';
-  const inconclusive =
-    ciLow !== undefined && ciHigh !== undefined && ciLow < 0 && ciHigh > 0 && ciHigh - ciLow > 40;
-  const verdict = String(score.verdict ?? 'unknown');
-  const toolDependent = Boolean(skill.tool_dependent);
+function resultHeaderLines(geometry: CardGeometry, result: EvalResult, outputPath?: string): string[] {
+  const { skill, config, result: score } = result;
+  const [ciLow, ciHigh] = score.ci_pp;
+  const ciText = `${signedPp(ciLow)} to ${signedPp(ciHigh)}`;
+  const inconclusive = ciLow < 0 && ciHigh > 0 && ciHigh - ciLow > 40;
+  const verdict = score.verdict;
+  const toolDependent = skill.tool_dependent;
 
   const lines = [
     cardEdge(geometry, 'top'),
     cardRow(geometry, paint.bold('SKILLCHECK RESULT')),
     cardEdge(geometry, 'mid'),
-    cardLabelRow(geometry, 'Skill', String(skill.name ?? 'unknown')),
+    cardLabelRow(geometry, 'Skill', skill.name),
     cardLabelRow(geometry, 'Run size', `${countNoun(config.tasks, 'task')} × ${countNoun(config.trials, 'trial')}`),
     cardRow(geometry, ''),
     cardLabelRow(geometry, 'Verdict', verdictBadge(verdict))
@@ -149,7 +127,7 @@ function resultHeaderLines(geometry: CardGeometry, result: unknown, outputPath?:
       lines.push(cardRow(geometry, paint.warn(wrapped)));
     }
   }
-  lines.push(cardLabelRow(geometry, 'Token cost', `+${String(score.token_overhead ?? 'n/a')} ${paint.dim('tokens to include the skill')}`));
+  lines.push(cardLabelRow(geometry, 'Token cost', `+${score.token_overhead} ${paint.dim('tokens to include the skill')}`));
   if (outputPath) {
     lines.push(cardLabelRow(geometry, 'Saved JSON', outputPath));
   }
@@ -157,16 +135,14 @@ function resultHeaderLines(geometry: CardGeometry, result: unknown, outputPath?:
   return lines;
 }
 
-export function formatResultCard(result: unknown, outputPath?: string): string {
+export function formatResultCard(result: EvalResult, outputPath?: string): string {
   const geometry = cardGeometry();
-  const score = asRecord(asRecord(result).result);
-  const sat = satisfactionFromResult(score);
+  const sat = Math.max(0, Math.min(100, result.result.satisfaction));
   return [...resultHeaderLines(geometry, result, outputPath), satisfactionLine(geometry, sat, sat), cardEdge(geometry, 'bottom')].join('\n');
 }
 
-function explainExampleLines(armLabel: string, mark: Paint, value: unknown, width: number): string[] {
-  const example = asRecord(value);
-  if (typeof example.output !== 'string' || example.output.length === 0) {
+function explainExampleLines(armLabel: string, mark: Paint, example: ExplainTask['example_with'], width: number): string[] {
+  if (example === null || example.output.length === 0) {
     return [];
   }
   const verdict = example.pass ? paint.ok('pass') : paint.err('fail');
@@ -177,25 +153,23 @@ function explainExampleLines(armLabel: string, mark: Paint, value: unknown, widt
   return lines;
 }
 
-export function formatExplain(result: unknown): string {
-  const explain = asRecord(asRecord(result).explain);
-  const tasks = Array.isArray(explain.tasks) ? explain.tasks : [];
+export function formatExplain(result: EvalResult): string {
+  const tasks = result.explain?.tasks ?? [];
   if (tasks.length === 0) {
     return '';
   }
   const width = layoutWidth(process.stdout, 78, 50);
   const lines: string[] = ['', `  ${paint.bold('Per-task breakdown')}`];
 
-  for (const entry of tasks) {
-    const task = asRecord(entry);
-    const withPct = Math.round((typeof task.with_skill_pass_rate === 'number' ? task.with_skill_pass_rate : 0) * 100);
-    const noPct = Math.round((typeof task.no_skill_pass_rate === 'number' ? task.no_skill_pass_rate : 0) * 100);
-    const label = String(task.label ?? 'no change');
+  for (const task of tasks) {
+    const withPct = Math.round(task.with_skill_pass_rate * 100);
+    const noPct = Math.round(task.no_skill_pass_rate * 100);
+    const label = task.label;
     const labelPaint = label === 'helped' ? paint.ok : label === 'hurt' ? paint.err : paint.dim;
     lines.push(
-      `  ${paint.accent(String(task.id ?? '?'))}  ${paint.dim('with')} ${String(withPct).padStart(3)}%  ${paint.dim('without')} ${String(noPct).padStart(3)}%  ${signedPp(task.delta_pp)}  ${labelPaint(label)}`
+      `  ${paint.accent(task.id)}  ${paint.dim('with')} ${String(withPct).padStart(3)}%  ${paint.dim('without')} ${String(noPct).padStart(3)}%  ${signedPp(task.delta_pp)}  ${labelPaint(label)}`
     );
-    for (const wrapped of wrapText(String(task.prompt ?? ''), width - 6)) {
+    for (const wrapped of wrapText(task.prompt, width - 6)) {
       lines.push(`      ${paint.dim(wrapped)}`);
     }
     lines.push(...explainExampleLines('with skill', paint.ok, task.example_with, width));
@@ -211,10 +185,9 @@ function sleep(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-export async function printResultCard(result: unknown, outputPath?: string): Promise<void> {
+export async function printResultCard(result: EvalResult, outputPath?: string): Promise<void> {
   const geometry = cardGeometry();
-  const score = asRecord(asRecord(result).result);
-  const finalScore = satisfactionFromResult(score);
+  const finalScore = Math.max(0, Math.min(100, result.result.satisfaction));
 
   if (!process.stdout.isTTY) {
     console.log(formatResultCard(result, outputPath));

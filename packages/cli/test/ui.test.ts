@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { evalResultFixture } from './eval-result-fixture.js';
 import { stripAnsi, visibleWidth } from '../src/ui/theme.js';
 import { formatFatalError, formatQuotaUpsell, formatResultCard, sanitizeCliError } from '../src/ui.js';
 
@@ -24,7 +25,7 @@ describe('sanitizeCliError', () => {
   });
 });
 
-const SAMPLE_RESULT = {
+const SAMPLE_RESULT = evalResultFixture({
   skill: { name: 'Docs Skill' },
   config: { tasks: 3, trials: 2 },
   result: {
@@ -35,7 +36,7 @@ const SAMPLE_RESULT = {
     no_skill_pass: 0.5,
     token_overhead: 120
   }
-};
+});
 
 describe('result card rendering', () => {
   it('keeps every border perfectly aligned (equal visible width on all lines)', () => {

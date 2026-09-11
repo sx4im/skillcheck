@@ -1,4 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import type { EvalResult } from '../src/eval.js';
+import { evalResultFixture } from './eval-result-fixture.js';
 import {
   bannerLines,
   formatExplain,
@@ -32,12 +34,12 @@ function capture(fn: () => void): string {
   return out.join('\n');
 }
 
-function card(withPass: number, noPass: number, verdict: string): string {
-  return formatResultCard({
+function card(withPass: number, noPass: number, verdict: EvalResult['result']['verdict']): string {
+  return formatResultCard(evalResultFixture({
     skill: { name: 'Demo' },
     config: { tasks: 3, trials: 2 },
     result: { verdict, effect_pp: (withPass - noPass) * 100, ci_pp: [0, 0], with_skill_pass: withPass, no_skill_pass: noPass, token_overhead: 40 }
-  });
+  }));
 }
 
 describe('ui formatters', () => {
@@ -104,9 +106,9 @@ describe('ui formatters', () => {
   });
 
   it('formats a per-task explain breakdown and returns empty when absent', () => {
-    expect(formatExplain({})).toBe('');
-    expect(formatExplain({ explain: { tasks: [] } })).toBe('');
-    const text = formatExplain({
+    expect(formatExplain(evalResultFixture())).toBe('');
+    expect(formatExplain(evalResultFixture({ explain: { tasks: [] } }))).toBe('');
+    const text = formatExplain(evalResultFixture({
       explain: {
         tasks: [
           {
@@ -122,7 +124,7 @@ describe('ui formatters', () => {
           }
         ]
       }
-    });
+    }));
     expect(text).toContain('Per-task breakdown');
     expect(text).toContain('t001');
     expect(text).toContain('helped');
