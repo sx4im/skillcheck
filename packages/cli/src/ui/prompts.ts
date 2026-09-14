@@ -180,16 +180,19 @@ function effortMenuLines(selected: number, eyebrow: string): string[] {
   return lines;
 }
 
-export async function selectEffort(eyebrow = 'Step 2 of 2'): Promise<EffortChoice> {
-  const defaultIndex = 1;
-  if (!process.stdin.isTTY || !process.stdout.isTTY) {
-    return effortChoice(EFFORT_LEVELS[defaultIndex]!);
+export async function runMenuSelectionLoop(
+  itemCount: number,
+  initialIndex: number,
+  render: (selected: number) => string[],
+  options?: {
+    cancelOnQ?: boolean;
+    onInput?: (input: string) => number | undefined;
   }
-
-  let selected = defaultIndex;
+): Promise<number> {
+  let selected = initialIndex;
   let painted = false;
   const draw = () => {
-    painted = drawLines(effortMenuLines(selected, eyebrow), painted);
+    painted = drawLines(render(selected), painted);
   };
 
   await withRawMode(async () => {
@@ -199,18 +202,21 @@ export async function selectEffort(eyebrow = 'Step 2 of 2'): Promise<EffortChoic
       if (key.ctrl && key.name === 'c') {
         throw new CancelledError('Selection cancelled.');
       }
+      if (options?.cancelOnQ && input === 'q') {
+        throw new CancelledError('Selection cancelled.');
+      }
       if (key.name === 'up' || input === 'k') {
-        selected = wrapIndex(selected, -1, EFFORT_LEVELS.length);
+        selected = wrapIndex(selected, -1, itemCount);
         draw();
         continue;
       }
       if (key.name === 'down' || input === 'j') {
-        selected = wrapIndex(selected, 1, EFFORT_LEVELS.length);
+        selected = wrapIndex(selected, 1, itemCount);
         draw();
         continue;
       }
-      const jump = EFFORT_LEVELS.findIndex((level) => level.key === input);
-      if (jump !== -1) {
+      const jump = options?.onInput?.(input);
+      if (jump !== undefined) {
         selected = jump;
         break;
       }
@@ -219,6 +225,27 @@ export async function selectEffort(eyebrow = 'Step 2 of 2'): Promise<EffortChoic
       }
     }
   });
+
+  return selected;
+}
+
+export async function selectEffort(eyebrow = 'Step 2 of 2'): Promise<EffortChoice> {
+  const defaultIndex = 1;
+  if (!process.stdin.isTTY || !process.stdout.isTTY) {
+    return effortChoice(EFFORT_LEVELS[defaultIndex]!);
+  }
+
+  const selected = await runMenuSelectionLoop(
+    EFFORT_LEVELS.length,
+    defaultIndex,
+    (index) => effortMenuLines(index, eyebrow),
+    {
+      onInput: (input) => {
+        const jump = EFFORT_LEVELS.findIndex((level) => level.key === input);
+        return jump === -1 ? undefined : jump;
+      }
+    }
+  );
 
   const chosen = EFFORT_LEVELS[selected]!;
   const choice = effortChoice(chosen);
@@ -244,10 +271,7 @@ export async function selectMenuOption<T = string>(
     return options[0]!.value;
   }
 
-  let selected = 0;
-  let painted = false;
-
-  const renderLines = (): string[] => {
+  const renderLines = (selected: number): string[] => {
     const lines: string[] = [];
     lines.push(`  ${paint.accent(SYM.diamond)} ${paint.bold(title)}`);
     if (subtitle) {
@@ -283,34 +307,20 @@ export async function selectMenuOption<T = string>(
     return lines;
   };
 
-  const draw = () => {
-    painted = drawLines(renderLines(), painted);
-  };
-
-  await withRawMode(async () => {
-    draw();
-    for (;;) {
-      const { input, key } = await readKey();
-      if ((key.ctrl && key.name === 'c') || input === 'q') {
-        throw new CancelledError('Selection cancelled.');
-      }
-      if (key.name === 'up' || input === 'k') {
-        selected = wrapIndex(selected, -1, options.length);
-        draw();
-        continue;
-      }
-      if (key.name === 'down' || input === 'j') {
-        selected = wrapIndex(selected, 1, options.length);
-        draw();
-        continue;
-      }
-      if (key.name === 'return') {
-        break;
+  const selected = await runMenuSelectionLoop(
+    options.length,
+    0,
+    renderLines,
+    {
+      cancelOnQ: true,
+      onInput: (input) => {
+        const jump = options.findIndex((opt) => opt.key === input);
+        return jump === -1 ? undefined : jump;
       }
     }
-  });
+  );
 
-  const lines = renderLines();
+  const lines = renderLines(selected);
   process.stdout.write(`\x1b[${lines.length}A\x1b[0J`);
   const chosen = options[selected]!;
   console.log(`  ${paint.ok(SYM.tick)} ${paint.bold(title)}  ${chosen.name}\n`);
