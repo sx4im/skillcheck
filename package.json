@@ -56,7 +56,7 @@
     "node": ">=20"
   },
   "dependencies": {
-    "dotenv": "^16.4.7",
+    "dotenv": "^18.0.1",
     "openai": "^4.77.0"
   },
   "overrides": {
