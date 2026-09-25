@@ -1,0 +1,24 @@
+name: Benchmark / Skill Submission
+description: Propose a public agent skill, Cursor rule, or prompt to benchmark in the corpus
+title: "[Benchmark]: "
+labels: ["benchmark"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Suggest an open-source agent skill (`SKILL.md`, `.cursorrules`, `CLAUDE.md`, or system prompt) to be evaluated and tracked in the Skillcheck corpus.
+  - type: input
+    id: skill-url
+    attributes:
+      label: Skill or Rule Repository URL
+      placeholder: https://github.com/org/repo/blob/main/SKILL.md
+    validations:
+      required: true
+  - type: textarea
+    id: details
+    attributes:
+      label: Skill Context & Target Models
+      description: What task does this skill claim to improve, and what target models should be tested?
+      placeholder: "e.g. Next.js App Router refactoring skill claimed to reduce hydration bugs..."
+    validations:
+      required: true

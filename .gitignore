@@ -29,3 +29,8 @@ coverage/
 # Local-only docs
 AUDIT.md
 CLAUDE.md
+AGENTS.md
+
+# graft's local graph cache — regenerable, not committed (run `graft build`).
+/graft/
+.ignore

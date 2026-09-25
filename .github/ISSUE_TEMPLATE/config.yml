@@ -1,0 +1,8 @@
+blank_issues_enabled: true
+contact_links:
+  - name: GitHub Discussions & Questions
+    url: https://github.com/sx4im/skillcheck/discussions
+    about: Ask questions, share evaluation results, or discuss prompt engineering methodologies.
+  - name: Skillcheck Cloud Dashboard
+    url: https://dashboard-skillcheck.vercel.app/
+    about: Manage API keys, view documentation, or test hosted evaluations.

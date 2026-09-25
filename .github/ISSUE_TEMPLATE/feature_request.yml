@@ -1,0 +1,31 @@
+name: Feature Request
+description: Suggest an enhancement, new provider adapter, or new evaluation capability
+title: "[Feature]: "
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for helping improve Skillcheck! We welcome proposals for LLM providers, eval metrics, terminal UI, and CI integrations.
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem Statement / Use Case
+      description: What challenge or workflow does this feature address?
+      placeholder: "When evaluating Cursor rules in a monorepo..."
+    validations:
+      required: true
+  - type: textarea
+    id: proposed-solution
+    attributes:
+      label: Proposed Solution
+      description: How should this work in the CLI, config, or dashboard?
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives Considered
+      description: Any other approaches or existing workarounds you evaluated.
+    validations:
+      required: false

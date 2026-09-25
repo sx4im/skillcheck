@@ -1,0 +1,55 @@
+name: Bug Report
+description: File a bug report for Skillcheck CLI or dashboard
+title: "[Bug]: "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting an issue! Please ensure you are running the latest version (`skillcheck --version` or `npx @sx4im/skillcheck@latest`).
+  - type: input
+    id: version
+    attributes:
+      label: Skillcheck Version
+      placeholder: e.g. 0.11.0
+    validations:
+      required: true
+  - type: input
+    id: environment
+    attributes:
+      label: Node.js & Operating System
+      placeholder: e.g. Node 22.12.0 on macOS Sonoma (or Ubuntu 24.04, Windows 11)
+    validations:
+      required: true
+  - type: input
+    id: provider
+    attributes:
+      label: Model Provider
+      placeholder: e.g. Hosted Cloud, OpenAI, Anthropic, Gemini, Groq, Mistral, OpenRouter, NVIDIA NIM
+    validations:
+      required: false
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Steps to Reproduce
+      description: The exact command, flags, and structure of the skill or prompt file evaluated.
+      placeholder: |
+        1. Run `skillcheck check ./SKILL.md`
+        2. ...
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected Behavior
+      description: What did you expect to happen?
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual Behavior / Output
+      description: What actually happened? Run with `SKILLCHECK_DEBUG=1` if possible (please redact private API keys).
+      render: shell
+    validations:
+      required: true

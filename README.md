@@ -8,22 +8,16 @@
   <a href="https://github.com/sx4im/skillcheck/actions/workflows/ci.yml"><img src="https://github.com/sx4im/skillcheck/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue" alt="License: MIT"></a>
   <a href="https://nodejs.org"><img src="https://img.shields.io/badge/node-%E2%89%A520-brightgreen" alt="Node ≥20"></a>
+  <a href="CODE_OF_CONDUCT.md"><img src="https://img.shields.io/badge/Contributor%20Covenant-2.1-4baaaa.svg" alt="Contributor Covenant"></a>
 </p>
 
-**A/B test agent skills with blind grading and bootstrap CIs** - measure whether an
-agent skill actually improves a model's task performance.
+**Controlled A/B testing for AI agent skills, `.cursorrules`, `CLAUDE.md`, and system prompts** — measure whether agent instructions actually improve model performance or just waste context tokens.
 
-Not a skill linter - a controlled experiment that measures effect size.
+Not a syntax linter or basic assertion check — a controlled scientific experiment that measures statistical effect size.
 
-Most published `SKILL.md` files have never been tested. You can't tell whether they
-help your model or are just decoration. Skillcheck answers that with a controlled
-experiment instead of a vibe check: AI agent evaluation with blind grading, not
-anecdotes.
+Most published `SKILL.md` files, `.cursorrules`, and agent prompts have never been tested against an unprompted baseline. You cannot tell whether they help your model, make it worse, or are purely decorative prompt bloat. Skillcheck replaces vibe checks with empirical AI evaluation: paired control vs. treatment trials, double-blind grading, and bootstrap confidence intervals.
 
-Point it at any Markdown skill file and it runs an A/B test: it generates fresh tasks
-for the skill's declared domain, has the model solve every task **with** and
-**without** the skill injected, grades both arms **blind**, and reports the measured
-effect with a bootstrap confidence interval and a 0–100 quality score.
+Point it at any Markdown skill or rule file and it runs an automated A/B experiment: it generates fresh domain-specific tasks, has the model solve each task **with** and **without** the skill injected, grades both arms **blind**, and reports the measured effect with a 95% bootstrap confidence interval and a 0–100 satisfaction score.
 
 ```
 $ skillcheck
@@ -57,10 +51,14 @@ $ skillcheck
 
 - [Install](#install)
 - [Quick start](#quick-start)
+- [Supported formats & agents](#supported-formats--agents)
 - [Why skillcheck](#why-skillcheck)
+- [Skillcheck vs. traditional linters](#skillcheck-vs-traditional-linters)
 - [How it works](#how-it-works)
 - [Architecture](#architecture)
 - [Commands](#commands)
+- [CI/CD integration](#cicd-integration)
+- [Badges for your repository](#badges-for-your-repository)
 - [Reading the result](#reading-the-result)
 - [Effort levels](#effort-levels)
 - [Terminal experience](#terminal-experience)
@@ -115,6 +113,19 @@ export SKILLCHECK_TOKEN=chk_live_...
 skillcheck check ./SKILL.md --tasks 5 --trials 3 --json
 ```
 
+## Supported formats & agents
+
+Skillcheck benchmarks any Markdown agent instruction, rule file, or prompt document:
+
+| Tool / Framework | File / Path Convention | Example Command |
+|---|---|---|
+| **Cursor** | `.cursorrules`, `.cursor/rules/*.mdc` | `skillcheck check ./.cursorrules` |
+| **Claude Code** | `SKILL.md`, `CLAUDE.md`, `.claude/skills/*` | `skillcheck check ./SKILL.md` |
+| **GitHub Copilot** | `.github/copilot-instructions.md` | `skillcheck check ./.github/copilot-instructions.md` |
+| **Windsurf & Cline** | `.windsurfrules`, custom prompt files | `skillcheck check ./.windsurfrules` |
+| **System & Agent Prompts** | `SYSTEM_PROMPT.md`, `prompts/*.md` | `skillcheck check ./prompts/coding-agent.md` |
+| **Skill Directories** | Any folder with a supported file | `skillcheck ./my-skill-directory/` |
+
 ## Why skillcheck
 
 - **Ship skills with evidence** — before you publish a Claude Code, Codex, or Cursor
@@ -126,6 +137,20 @@ skillcheck check ./SKILL.md --tasks 5 --trials 3 --json
   and NVIDIA NIM.
 - **Effect size, not vibes** — bootstrap confidence intervals and a 0–100 satisfaction
   score so you can tell a real lift from noise. Details in [`METHODOLOGY.md`](METHODOLOGY.md).
+
+## Skillcheck vs. traditional linters
+
+Most prompt tools and eval frameworks test whether an output matches a static regex or schema. Skillcheck measures whether adding instructions produces statistically significant improvement over an unprompted model.
+
+| Dimension | Vibe Check / Manual Testing | Assertion Linters (e.g. Promptfoo) | Skillcheck |
+|---|---|---|---|
+| **Core Question** | *"Does the output look okay?"* | *"Does output pass hardcoded assertions?"* | ***"Does this prompt actually improve model performance?"*** |
+| **Evaluation Design** | Ad-hoc single prompts | Treatment-only (no control arm) | **Controlled A/B Trial** (With-skill vs. Without-skill) |
+| **Primary Metric** | Subjective opinion | Boolean pass/fail rate | **Net Effect Size ($\Delta$ Pass Rate)** with 95% Bootstrap CI |
+| **Task Generation** | Manual prompt typing | Manual YAML test authoring | **Domain-Adaptive Synthesis** (zero instruction leakage) |
+| **Grading Objectivity** | High confirmation bias | Single-arm evaluation | **Double-Blind Grading** (grader never knows which arm produced output) |
+| **Outcome** | Anecdotal | Test matrix table | **Statistical Verdict** (`HELPS` / `PLACEBO` / `HARMS`) |
+| **Token Overhead** | Unmeasured | Static token count | **Marginal token cost measured against performance lift** |
 
 ## How it works
 
@@ -219,6 +244,51 @@ skillcheck --version
 Accepted inputs: any Markdown (`.md`) file — `SKILL.md`, `AGENTS.md`, `CLAUDE.md`,
 or any other `.md` — or a folder containing one. `--tasks` is capped at 50 and
 `--trials` at 10; mistyped options are rejected rather than silently ignored.
+
+## CI/CD integration
+
+Automate agent prompt and skill regression testing in GitHub Actions. Ensure no prompt edit or rule change silently degrades model performance:
+
+```yaml
+name: Agent Skill Quality Gate
+on:
+  pull_request:
+    paths:
+      - 'SKILL.md'
+      - '.cursorrules'
+      - '.github/copilot-instructions.md'
+      - 'prompts/**'
+
+jobs:
+  eval:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Run Skillcheck evaluation
+        run: npx @sx4im/skillcheck@latest check ./SKILL.md --tasks 5 --trials 3 --json --output skillcheck-result.json
+        env:
+          SKILLCHECK_TOKEN: ${{ secrets.SKILLCHECK_TOKEN }}
+```
+
+## Badges for your repository
+
+Prove to users that your agent skill or `.cursorrules` delivers real, statistically verified lift:
+
+```markdown
+[![Tested with Skillcheck](https://img.shields.io/badge/tested%20with-skillcheck-0ea5e9?style=flat-square&logo=github)](https://github.com/sx4im/skillcheck)
+[![Skillcheck: HELPS](https://img.shields.io/badge/skillcheck-HELPS%20%2B25%25-10b981?style=flat-square)](https://github.com/sx4im/skillcheck)
+[![Skillcheck: PLACEBO](https://img.shields.io/badge/skillcheck-PLACEBO%20%C2%B10%25-64748b?style=flat-square)](https://github.com/sx4im/skillcheck)
+```
+
+| Badge | Markdown Snippet |
+|---|---|
+| **Tested with Skillcheck** | `[![Tested with Skillcheck](https://img.shields.io/badge/tested%20with-skillcheck-0ea5e9?style=flat-square&logo=github)](https://github.com/sx4im/skillcheck)` |
+| **Verdict: HELPS** | `[![Skillcheck: HELPS](https://img.shields.io/badge/skillcheck-HELPS%20%2B25%25-10b981?style=flat-square)](https://github.com/sx4im/skillcheck)` |
+| **Verdict: PLACEBO** | `[![Skillcheck: PLACEBO](https://img.shields.io/badge/skillcheck-PLACEBO%20%C2%B10%25-64748b?style=flat-square)](https://github.com/sx4im/skillcheck)` |
 
 ## Reading the result
 
