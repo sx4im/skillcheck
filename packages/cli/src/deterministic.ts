@@ -31,5 +31,25 @@ export function gradeDeterministically(task: GeneratedTask, output: string): Det
     };
   }
 
+  if (task.criterion.startsWith('not_regex:')) {
+    const pattern = task.criterion.slice('not_regex:'.length);
+    const pass = !new RegExp(pattern, 's').test(output);
+    return {
+      score: pass ? 1 : 0,
+      reason: pass ? `did not match regex ${pattern}` : `matched forbidden regex ${pattern}`,
+      pass
+    };
+  }
+
+  if (task.criterion.startsWith('excludes:')) {
+    const forbidden = task.criterion.slice('excludes:'.length);
+    const pass = !output.includes(forbidden);
+    return {
+      score: pass ? 1 : 0,
+      reason: pass ? `did not include ${forbidden}` : `forbidden text found: ${forbidden}`,
+      pass
+    };
+  }
+
   throw new Error(`Unsupported deterministic criterion for ${task.id}: ${task.criterion}`);
 }
