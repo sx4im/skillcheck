@@ -120,6 +120,26 @@ function buildExplain(tasks: GeneratedTask[], graded: GradedOutput[]): { tasks: 
   };
 }
 
+// Fail fast on malformed deterministic regex criteria. Without this, an
+// invalid `regex:`/`not_regex:` pattern in a hand-written task suite throws a
+// bare SyntaxError from deep inside gradeOutputs — after every runner call has
+// already been paid for — instead of a clear error naming the offending task
+// before the run starts.
+function validateDeterministicCriterion(id: string, criterion: string): void {
+  for (const prefix of ['regex:', 'not_regex:']) {
+    if (criterion.startsWith(prefix)) {
+      const pattern = criterion.slice(prefix.length);
+      try {
+        new RegExp(pattern, 's');
+      } catch (error) {
+        throw new Error(
+          `Invalid regex in deterministic criterion of task ${id}: ${error instanceof Error ? error.message : String(error)}`
+        );
+      }
+    }
+  }
+}
+
 export function parseTaskSuite(text: string): GeneratedTask[] {
   const value = JSON.parse(text) as unknown;
   const tasks = tasksArrayFrom(value);
@@ -130,11 +150,16 @@ export function parseTaskSuite(text: string): GeneratedTask[] {
     if (criterionType !== 'rubric' && criterionType !== 'deterministic') {
       throw new Error(`Unsupported criterion type in task ${index + 1}`);
     }
+    const id = String(item.id ?? `t${String(index + 1).padStart(3, '0')}`);
+    const criterion = String(item.criterion ?? '');
+    if (criterionType === 'deterministic') {
+      validateDeterministicCriterion(id, criterion);
+    }
     return {
-      id: String(item.id ?? `t${String(index + 1).padStart(3, '0')}`),
+      id,
       prompt: String(item.prompt ?? ''),
       criterionType,
-      criterion: String(item.criterion ?? '')
+      criterion
     };
   });
 }

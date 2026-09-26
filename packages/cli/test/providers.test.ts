@@ -167,4 +167,71 @@ describe('providers abstraction', () => {
     });
     expect(geminiRes.content).toBe('{"status":"ok"}');
   });
+
+  it('forwards defaultHeaders on Anthropic and Gemini clients (run metering)', async () => {
+    const anthropicFetch = vi.fn().mockResolvedValue({
+      ok: true,
+      status: 200,
+      text: async () =>
+        JSON.stringify({
+          model: 'claude-x',
+          content: [{ type: 'text', text: 'Hi' }],
+          usage: { input_tokens: 1, output_tokens: 1 }
+        })
+    });
+    global.fetch = anthropicFetch as unknown as typeof fetch;
+
+    const anthropicClient = createLlmClient(
+      {
+        provider: 'anthropic',
+        apiKey: 'test-key',
+        generatorModel: 'claude-x',
+        runnerModel: 'claude-x',
+        graderModel: 'claude-x'
+      },
+      { defaultHeaders: { 'x-skillcheck-run': 'run-123' } }
+    );
+    await anthropicClient.complete({
+      model: 'claude-x',
+      messages: [{ role: 'user', content: 'Hi' }],
+      temperature: 0,
+      maxTokens: 10
+    });
+    expect(anthropicFetch.mock.calls[0]?.[1]?.headers).toMatchObject({
+      'x-api-key': 'test-key',
+      'x-skillcheck-run': 'run-123'
+    });
+
+    const geminiFetch = vi.fn().mockResolvedValue({
+      ok: true,
+      status: 200,
+      text: async () =>
+        JSON.stringify({
+          candidates: [{ content: { parts: [{ text: 'Hi' }] } }],
+          usageMetadata: { promptTokenCount: 1, candidatesTokenCount: 1, totalTokenCount: 2 }
+        })
+    });
+    global.fetch = geminiFetch as unknown as typeof fetch;
+
+    const geminiClient = createLlmClient(
+      {
+        provider: 'gemini',
+        apiKey: 'test-key',
+        generatorModel: 'gemini-x',
+        runnerModel: 'gemini-x',
+        graderModel: 'gemini-x'
+      },
+      { defaultHeaders: { 'x-skillcheck-run': 'run-456' } }
+    );
+    await geminiClient.complete({
+      model: 'gemini-x',
+      messages: [{ role: 'user', content: 'Hi' }],
+      temperature: 0,
+      maxTokens: 10
+    });
+    expect(geminiFetch.mock.calls[0]?.[1]?.headers).toMatchObject({
+      'content-type': 'application/json',
+      'x-skillcheck-run': 'run-456'
+    });
+  });
 });
