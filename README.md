@@ -398,7 +398,7 @@ All three roles (task generator, runner, blind grader) default to the selected p
 When running `skillcheck setup`, choosing Bring Your Own Key queries your provider's live `/models` endpoint, letting you pick any available model directly from your provider.
 
 Role model overrides let you benchmark your specific production model while maintaining a strong generator and grader:
-`OPENAI_RUNNER_MODEL=gpt-4o-mini skillcheck check ./SKILL.md` or `ANTHROPIC_RUNNER_MODEL=claude-3-5-haiku-20241022 skillcheck check ./SKILL.md`.
+`OPENAI_RUNNER_MODEL=gpt-6-luna skillcheck check ./SKILL.md` or `ANTHROPIC_RUNNER_MODEL=claude-haiku-4-5 skillcheck check ./SKILL.md`.
 
 ## Self-hosting
 
@@ -411,14 +411,14 @@ To bypass the hosted proxy, run `skillcheck setup` and select Bring Your Own Key
 ```bash
 npm ci
 npm run build          # compile to dist/
-npm test               # vitest (140 tests)
+npm test               # vitest (187 tests)
 npm run test:coverage  # vitest + v8 coverage gate (84% statements/lines, 85% functions, 68% branches)
 npm run lint           # eslint (flat config, typescript-eslint)
 npm run typecheck      # strict TS, src + tests
 ```
 
 The CLI lives in [`packages/cli`](packages/cli) (`bin/skillcheck.ts` → `src/cli.ts`).
-`packages/site` is the static leaderboard site; `dashboard/` is the hosted cloud.
+`packages/site` is the Next.js leaderboard site; `dashboard/` is the hosted cloud.
 
 The suite runs fully offline: the model adapter is mocked, so an end-to-end test
 drives the whole `normalize → generate → run → grade → score` pipeline (plus the
