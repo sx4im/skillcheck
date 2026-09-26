@@ -6,6 +6,7 @@
   <a href="https://www.npmjs.com/package/@sx4im/skillcheck"><img src="https://img.shields.io/npm/v/@sx4im/skillcheck" alt="npm version"></a>
   <a href="https://www.npmjs.com/package/@sx4im/skillcheck"><img src="https://img.shields.io/npm/dt/@sx4im/skillcheck" alt="lifetime downloads"></a>
   <a href="https://github.com/sx4im/skillcheck/actions/workflows/ci.yml"><img src="https://github.com/sx4im/skillcheck/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
+  <a href="https://github.com/sx4im/skillcheck/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22"><img src="https://img.shields.io/github/issues/sx4im/skillcheck/good%20first%20issue?color=7057ff&label=good%20first%20issues" alt="Good First Issues"></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue" alt="License: MIT"></a>
   <a href="https://nodejs.org"><img src="https://img.shields.io/badge/node-%E2%89%A520-brightgreen" alt="Node ≥20"></a>
   <a href="CODE_OF_CONDUCT.md"><img src="https://img.shields.io/badge/Contributor%20Covenant-2.1-4baaaa.svg" alt="Contributor Covenant"></a>
@@ -444,6 +445,12 @@ If Skillcheck saved you from shipping a placebo skill, a ⭐ helps other people 
     <img alt="Star history chart for sx4im/skillcheck" src=".github/assets/star-history.svg" />
   </picture>
 </a>
+
+## Contributing
+
+Contributions are welcome! Check out our open [**Good First Issues**](https://github.com/sx4im/skillcheck/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22) to get started.
+
+Please see [CONTRIBUTING.md](CONTRIBUTING.md) for local development setup and testing guidelines.
 
 ## License
 
