@@ -6,6 +6,19 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Changed
+
+- Refreshed default provider models to current generations (verified 2026-09-26): OpenAI `gpt-6-sol`, Anthropic `claude-opus-5-5`, Gemini `gemini-3.8-flash`, Groq `openai/gpt-oss-120b`, OpenRouter `anthropic/claude-opus-5.5`; default matrix models updated to match. Mistral/NVIDIA/Cloud defaults unchanged.
+
+### Fixed
+
+- Merged a duplicate `generate.js` import in the eval pipeline.
+- Corrected docs: `packages/site` is the Next.js leaderboard site (not static), refreshed stale model examples and test count.
+
+### Added
+
+- 21 regression tests covering adapter error/retry paths (Anthropic/Gemini payload shaping and HTTP error mapping, `Retry-After` handling in seconds/HTTP-date/Headers forms, request pacing, `fetchWithRetry` retry and degenerate `maxAttempts: 0`) and grader edge cases (unclosed/non-numeric grader JSON, explicit `score: 0` marker, unknown task reference, deterministic grading without an LLM call).
+
 ## [0.11.0] - 2026-09-12
 
 ### Added
