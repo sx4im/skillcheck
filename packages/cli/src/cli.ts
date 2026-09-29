@@ -395,7 +395,7 @@ interface MatrixOptions {
 
 // Default matrix models use NIM/OpenRouter namespace ids; they only resolve on
 // providers that serve many vendors' models under one key.
-const DEFAULT_MATRIX_MODELS = ['openai/gpt-4o', 'anthropic/claude-3-5-sonnet-20241022', 'google/gemini-1.5-pro', 'openai/gpt-oss-120b'];
+const DEFAULT_MATRIX_MODELS = ['openai/gpt-6-sol', 'anthropic/claude-opus-5.5', 'google/gemini-3.8-flash', 'openai/gpt-oss-120b'];
 const MULTI_MODEL_PROVIDERS = new Set(['nvidia', 'cloud', 'openrouter']);
 
 function parseMatrixOptions(argv: string[], startIndex = 3): MatrixOptions {

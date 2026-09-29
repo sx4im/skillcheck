@@ -4,13 +4,12 @@ import { createLlmClient } from './adapters/providers.js';
 import type { ProviderConfig } from './adapters/types.js';
 import { JsonCache } from './cache.js';
 import { loadProviderConfig } from './env.js';
-import { generateTasks } from './generate.js';
+import { generateTasks, tasksArrayFrom } from './generate.js';
 import { hashJson, writeJson } from './hash.js';
 import { gradeOutputs } from './grade.js';
 import { normalizeSkill } from './normalize.js';
 import { runTrials } from './run.js';
 import { scorePairedObservations, pairedObservations, satisfactionFromEffect } from './score.js';
-import { tasksArrayFrom } from './generate.js';
 import type { GeneratedTask, GradedOutput, ProgressReporter, SkillFormat, TaskBreakdown } from './types.js';
 
 export interface EvalOptions {

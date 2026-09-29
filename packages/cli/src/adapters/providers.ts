@@ -14,15 +14,18 @@ export const DEFAULT_PROVIDER_BASE_URLS: Record<ProviderType, string> = {
   openrouter: 'https://openrouter.ai/api/v1'
 };
 
+// Defaults verified against official provider docs on 2026-09-26. When bumping,
+// keep the cost profile in mind: the CLI makes many calls per run, so the
+// default should be a capable-but-sane workhorse, not the priciest flagship.
 export const DEFAULT_PROVIDER_MODELS: Record<ProviderType, string> = {
   cloud: 'openai/gpt-oss-120b',
   nvidia: 'openai/gpt-oss-120b',
-  openai: 'gpt-4o',
-  anthropic: 'claude-3-5-sonnet-20241022',
-  gemini: 'gemini-1.5-pro',
-  groq: 'llama-3.3-70b-versatile',
+  openai: 'gpt-6-sol',
+  anthropic: 'claude-opus-5-5',
+  gemini: 'gemini-3.8-flash',
+  groq: 'openai/gpt-oss-120b',
   mistral: 'mistral-large-latest',
-  openrouter: 'anthropic/claude-3.5-sonnet'
+  openrouter: 'anthropic/claude-opus-5.5'
 };
 
 export const PROVIDER_NAMES: Record<ProviderType, string> = {

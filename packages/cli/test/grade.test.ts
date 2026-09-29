@@ -111,4 +111,94 @@ describe('gradeOutputs', () => {
 
     expect(graded[0]?.pass).toBe(true);
   });
+
+  it('throws a clear error when the grader never returns valid JSON', async () => {
+    const cacheDir = await mkdtemp(path.join(tmpdir(), 'skillcheck-grade-never-valid-'));
+    const client = {
+      complete: async () => ({
+        content: '{ "score": 1, "reason": "truncated...',
+        model: 'grader',
+        usage: { promptTokens: 1, completionTokens: 1, totalTokens: 2 }
+      })
+    } as unknown as LlmClient;
+
+    await expect(
+      gradeOutputs(sampleTasks, sampleOutputs('sha256:test-unclosed'), testProviderConfig, client, new JsonCache(cacheDir))
+    ).rejects.toThrow(/Grader JSON object was not closed/);
+  });
+
+  it('throws a clear error when the grader score is not numeric', async () => {
+    const cacheDir = await mkdtemp(path.join(tmpdir(), 'skillcheck-grade-nonnumeric-'));
+    const client = {
+      complete: async () => ({
+        content: '{"score": "high", "reason": "vibes"}',
+        model: 'grader',
+        usage: { promptTokens: 1, completionTokens: 1, totalTokens: 2 }
+      })
+    } as unknown as LlmClient;
+
+    await expect(
+      gradeOutputs(sampleTasks, sampleOutputs('sha256:test-nonnumeric'), testProviderConfig, client, new JsonCache(cacheDir))
+    ).rejects.toThrow(/missing numeric score/);
+  });
+
+  it('treats an explicit score: 0 marker as a fail', async () => {
+    const cacheDir = await mkdtemp(path.join(tmpdir(), 'skillcheck-grade-zero-'));
+    const client = {
+      complete: async () => ({
+        content: 'score: 0 — the output is wrong and misses the point.',
+        model: 'grader',
+        usage: { promptTokens: 1, completionTokens: 1, totalTokens: 2 }
+      })
+    } as unknown as LlmClient;
+
+    const graded = await gradeOutputs(
+      sampleTasks,
+      sampleOutputs('sha256:test-zero-marker', 'A wrong answer.'),
+      testProviderConfig,
+      client,
+      new JsonCache(cacheDir)
+    );
+
+    expect(graded[0]?.pass).toBe(false);
+    expect(graded[0]?.score).toBe(0);
+  });
+
+  it('throws a clear error when an output references an unknown task', async () => {
+    const cacheDir = await mkdtemp(path.join(tmpdir(), 'skillcheck-grade-unknown-task-'));
+    const client = {
+      complete: async () => {
+        throw new Error('grader must not be called');
+      }
+    } as unknown as LlmClient;
+    const outputs = sampleOutputs('sha256:test-unknown-task').map((o) => ({ ...o, taskId: 'nope' }));
+
+    await expect(
+      gradeOutputs(sampleTasks, outputs, testProviderConfig, client, new JsonCache(cacheDir))
+    ).rejects.toThrow(/Missing task for output nope/);
+  });
+
+  it('grades deterministic tasks without calling the LLM', async () => {
+    const cacheDir = await mkdtemp(path.join(tmpdir(), 'skillcheck-grade-deterministic-'));
+    const tasks: GeneratedTask[] = [
+      { id: 't001', prompt: 'Say hello', criterionType: 'deterministic', criterion: 'includes:hello' }
+    ];
+    const client = {
+      complete: async () => {
+        throw new Error('grader must not be called for deterministic tasks');
+      }
+    } as unknown as LlmClient;
+
+    const graded = await gradeOutputs(
+      tasks,
+      sampleOutputs('sha256:test-deterministic', 'well hello there'),
+      testProviderConfig,
+      client,
+      new JsonCache(cacheDir)
+    );
+
+    expect(graded[0]?.pass).toBe(true);
+    expect(graded[0]?.score).toBe(1);
+    expect(graded[0]?.reason).toContain('included hello');
+  });
 });

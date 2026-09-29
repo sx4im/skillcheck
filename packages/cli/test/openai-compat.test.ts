@@ -2,9 +2,12 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 // Drive the retry/serialize/extract logic of the adapter by mocking the OpenAI
 // SDK underneath it. `createImpl` is swapped per test to simulate successes,
-// transient failures, rate limits, and malformed messages.
+// transient failures, rate limits, and malformed messages. `sleep` from the
+// shared http plumbing is also mocked (calls recorded in `sleepCalls`) so
+// backoff/retry-after/pacing delays stay instant and assertable.
 let createImpl: (body: unknown) => Promise<unknown>;
 let createCalls: number;
+const sleepCalls: number[] = [];
 
 vi.mock('openai', () => ({
   default: class FakeOpenAI {
@@ -19,6 +22,17 @@ vi.mock('openai', () => ({
     constructor(public opts: unknown) {}
   }
 }));
+
+vi.mock('../src/adapters/http.js', async (importOriginal) => {
+  const mod = await importOriginal<typeof import('../src/adapters/http.js')>();
+  return {
+    ...mod,
+    sleep: (ms: number) => {
+      sleepCalls.push(ms);
+      return Promise.resolve();
+    }
+  };
+});
 
 const { OpenAiCompatClient } = await import('../src/adapters/openai-compat.js');
 
@@ -122,5 +136,84 @@ describe('OpenAiCompatClient', () => {
     };
     await new OpenAiCompatClient({ ...baseConfig, sendChatTemplateKwargs: false }).complete(request);
     expect(capturedBody).not.toHaveProperty('chat_template_kwargs');
+  });
+
+  it('honors a retry-after delay in seconds', async () => {
+    sleepCalls.length = 0;
+    let attempt = 0;
+    createImpl = async () => {
+      attempt += 1;
+      if (attempt === 1) {
+        throw Object.assign(new Error('rate limited'), { status: 429, headers: { 'retry-after': '120' } });
+      }
+      return completion({ content: 'after retry' });
+    };
+    const res = await new OpenAiCompatClient(baseConfig).complete(request);
+    expect(res.content).toBe('after retry');
+    expect(sleepCalls).toContain(120000);
+  });
+
+  it('honors retry-after sent as a Headers instance', async () => {
+    sleepCalls.length = 0;
+    let attempt = 0;
+    createImpl = async () => {
+      attempt += 1;
+      if (attempt === 1) {
+        throw Object.assign(new Error('rate limited'), {
+          status: 429,
+          headers: new Headers({ 'retry-after': '45' })
+        });
+      }
+      return completion({ content: 'after retry' });
+    };
+    await new OpenAiCompatClient(baseConfig).complete(request);
+    expect(sleepCalls).toContain(45000);
+  });
+
+  it('honors retry-after sent as an HTTP date', async () => {
+    sleepCalls.length = 0;
+    let attempt = 0;
+    createImpl = async () => {
+      attempt += 1;
+      if (attempt === 1) {
+        throw Object.assign(new Error('rate limited'), {
+          status: 429,
+          headers: { 'retry-after': new Date(Date.now() + 8000).toUTCString() }
+        });
+      }
+      return completion({ content: 'after retry' });
+    };
+    await new OpenAiCompatClient(baseConfig).complete(request);
+    const delay = sleepCalls[0] ?? -1;
+    expect(delay).toBeGreaterThan(5000);
+    expect(delay).toBeLessThanOrEqual(8000);
+  });
+
+  it('falls back to capped backoff when retry-after is unparsable', async () => {
+    sleepCalls.length = 0;
+    let attempt = 0;
+    createImpl = async () => {
+      attempt += 1;
+      if (attempt === 1) {
+        throw Object.assign(new Error('rate limited'), { status: 429, headers: { 'retry-after': 'not-a-date' } });
+      }
+      return completion({ content: 'after retry' });
+    };
+    await new OpenAiCompatClient(baseConfig).complete(request);
+    expect(sleepCalls).toEqual([baseConfig.maxRetryDelayMs]);
+  });
+
+  it('throws a descriptive error when the choice message is not an object', async () => {
+    createImpl = async () => ({ choices: [{ message: 'raw-string' }], model: 'x' });
+    await expect(new OpenAiCompatClient(baseConfig).complete(request)).rejects.toThrow(/did not include text content/);
+  });
+
+  it('paces sequential requests by requestDelayMs', async () => {
+    sleepCalls.length = 0;
+    createImpl = async () => completion({ content: 'ok' });
+    const client = new OpenAiCompatClient({ ...baseConfig, requestDelayMs: 50 });
+    await client.complete(request);
+    await client.complete(request);
+    expect(sleepCalls.some((ms) => ms > 0 && ms <= 50)).toBe(true);
   });
 });

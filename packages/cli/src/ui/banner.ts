@@ -147,7 +147,7 @@ export function printHelpUi(): void {
   opt('--tasks N', 'generated tasks per check (default 3, max 50)');
   opt('--trials K', 'trials per task and arm (default 3, max 10)');
   opt('--concurrency C', 'parallel trial execution limit (default 4)');
-  opt('--runner MODEL', 'runner model override (e.g. gpt-4o, claude-3-5-sonnet)');
+  opt('--runner MODEL', 'runner model override (e.g. gpt-6-sol, claude-opus-5-5)');
   opt('--models M1,M2', 'models list for matrix command');
   opt('--output FILE', 'save the full JSON result');
   opt('--explain', 'show a per-task breakdown with example outputs');
@@ -160,7 +160,7 @@ export function printHelpUi(): void {
   console.log(`    ${paint.dim('$')} skillcheck ./SKILL.md`);
   console.log(`    ${paint.dim('$')} skillcheck ./SKILL.md --explain`);
   console.log(`    ${paint.dim('$')} skillcheck check ./SKILL.md --tasks 5 --trials 3`);
-  console.log(`    ${paint.dim('$')} skillcheck matrix ./SKILL.md --models gpt-4o,claude-3-5-sonnet-20241022`);
+  console.log(`    ${paint.dim('$')} skillcheck matrix ./SKILL.md --models gpt-6-sol,claude-opus-5-5`);
   console.log(`    ${paint.dim('$')} skillcheck setup\n`);
 
   console.log(`  ${paint.dim('Supported providers (BYOK): OpenAI, Anthropic, Gemini, Groq, Mistral, OpenRouter, NVIDIA NIM')}`);
