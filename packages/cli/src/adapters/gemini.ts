@@ -6,6 +6,8 @@ export interface GeminiConfig {
   baseUrl?: string;
   timeoutMs?: number;
   maxAttempts?: number;
+  /** Extra headers merged into every request (e.g. the x-skillcheck-run id). */
+  defaultHeaders?: Record<string, string>;
 }
 
 export class GeminiClient implements LlmClient {
@@ -13,12 +15,14 @@ export class GeminiClient implements LlmClient {
   private readonly baseUrl: string;
   private readonly timeoutMs: number;
   private readonly maxAttempts: number;
+  private readonly defaultHeaders: Record<string, string>;
 
   constructor(config: GeminiConfig) {
     this.apiKey = config.apiKey;
     this.baseUrl = (config.baseUrl || 'https://generativelanguage.googleapis.com/v1beta').replace(/\/+$/, '');
     this.timeoutMs = config.timeoutMs ?? 120000;
     this.maxAttempts = config.maxAttempts ?? 5;
+    this.defaultHeaders = config.defaultHeaders ?? {};
   }
 
   async complete(request: CompletionRequest): Promise<CompletionResponse> {
@@ -57,7 +61,8 @@ export class GeminiClient implements LlmClient {
 
     const result = await fetchWithRetry(url, {
       headers: {
-        'content-type': 'application/json'
+        'content-type': 'application/json',
+        ...this.defaultHeaders
       },
       body: JSON.stringify(payload),
       timeoutMs: this.timeoutMs,

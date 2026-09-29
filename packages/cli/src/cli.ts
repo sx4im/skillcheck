@@ -1,4 +1,5 @@
 import { existsSync } from 'node:fs';
+import { randomUUID } from 'node:crypto';
 import { verifyProviderKey, createLlmClient, PROVIDER_NAMES } from './adapters/providers.js';
 import type { ProviderType } from './adapters/types.js';
 import {
@@ -607,7 +608,12 @@ export async function main(argv: string[]): Promise<void> {
   }
 
   if (command === 'm0') {
-    const report = await runM0Gate(createLlmClient);
+    // The whole gate shares one run id: without it, the cloud proxy meters
+    // every one of the ~192 model calls as a separate run and a free-tier
+    // user burns their monthly quota on a single calibration gate.
+    const report = await runM0Gate((config) =>
+      createLlmClient(config, { defaultHeaders: { 'x-skillcheck-run': randomUUID() } })
+    );
     console.log(JSON.stringify(report, null, 2));
     process.exitCode = report.passed ? 0 : 1;
     return;

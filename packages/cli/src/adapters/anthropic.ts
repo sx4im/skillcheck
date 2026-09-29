@@ -6,6 +6,8 @@ export interface AnthropicConfig {
   baseUrl?: string;
   timeoutMs?: number;
   maxAttempts?: number;
+  /** Extra headers merged into every request (e.g. the x-skillcheck-run id). */
+  defaultHeaders?: Record<string, string>;
 }
 
 export class AnthropicClient implements LlmClient {
@@ -13,12 +15,14 @@ export class AnthropicClient implements LlmClient {
   private readonly baseUrl: string;
   private readonly timeoutMs: number;
   private readonly maxAttempts: number;
+  private readonly defaultHeaders: Record<string, string>;
 
   constructor(config: AnthropicConfig) {
     this.apiKey = config.apiKey;
     this.baseUrl = (config.baseUrl || 'https://api.anthropic.com/v1').replace(/\/+$/, '');
     this.timeoutMs = config.timeoutMs ?? 120000;
     this.maxAttempts = config.maxAttempts ?? 5;
+    this.defaultHeaders = config.defaultHeaders ?? {};
   }
 
   async complete(request: CompletionRequest): Promise<CompletionResponse> {
@@ -54,7 +58,8 @@ export class AnthropicClient implements LlmClient {
       headers: {
         'content-type': 'application/json',
         'x-api-key': this.apiKey,
-        'anthropic-version': '2023-06-01'
+        'anthropic-version': '2023-06-01',
+        ...this.defaultHeaders
       },
       body: JSON.stringify(payload),
       timeoutMs: this.timeoutMs,

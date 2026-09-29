@@ -137,7 +137,8 @@ export function createLlmClient(config: ProviderConfig, options: { defaultHeader
       apiKey: config.apiKey,
       baseUrl,
       timeoutMs: config.timeoutMs,
-      maxAttempts: config.maxAttempts
+      maxAttempts: config.maxAttempts,
+      defaultHeaders: options.defaultHeaders
     });
   }
 
@@ -146,7 +147,8 @@ export function createLlmClient(config: ProviderConfig, options: { defaultHeader
       apiKey: config.apiKey,
       baseUrl,
       timeoutMs: config.timeoutMs,
-      maxAttempts: config.maxAttempts
+      maxAttempts: config.maxAttempts,
+      defaultHeaders: options.defaultHeaders
     });
   }
 
