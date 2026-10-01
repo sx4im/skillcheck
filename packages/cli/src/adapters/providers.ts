@@ -15,8 +15,7 @@ export const DEFAULT_PROVIDER_BASE_URLS: Record<ProviderType, string> = {
 };
 
 // Defaults verified against official provider docs on 2026-09-26. When bumping,
-// keep the cost profile in mind: the CLI makes many calls per run, so the
-// default should be a capable-but-sane workhorse, not the priciest flagship.
+// keep the cost profile in mind: the CLI makes many calls per run.
 export const DEFAULT_PROVIDER_MODELS: Record<ProviderType, string> = {
   cloud: 'openai/gpt-oss-120b',
   nvidia: 'openai/gpt-oss-120b',
