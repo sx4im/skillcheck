@@ -1,5 +1,3 @@
-# Skillcheck — Controlled A/B Testing for AI Agent Skills, .cursorrules & CLAUDE.md
-
 <div align="center">
   <img src=".github/assets/skillcheck-wordmark.svg" alt="SKILLCHECK — is your skill actually helping the model?" width="760">
 </div>
@@ -32,12 +30,7 @@ Point it at any Markdown skill or rule file and it runs an automated A/B experim
 >
 > 📊 **[View live benchmark results on the Skillcheck Leaderboard →](https://skillcheck.page/#leaderboard)**
 
-<p align="center">
-  <video src="https://github.com/sx4im/skillcheck/raw/main/.github/assets/skillcheck-demo.mp4" controls="controls" width="100%" style="max-width: 760px; border-radius: 6px;">
-    <source src=".github/assets/skillcheck-demo.mp4" type="video/mp4">
-    <a href="https://github.com/sx4im/skillcheck/releases/download/v0.11.0/skillcheck-demo.mp4">Watch demo video</a>
-  </video>
-</p>
+https://github.com/user-attachments/assets/db79b704-b99d-469f-8c09-683afd757957
 
 ```
 $ skillcheck
