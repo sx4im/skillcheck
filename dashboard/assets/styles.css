@@ -628,6 +628,20 @@ input:focus, textarea:focus { outline: none; border-color: var(--ink); }
 .lb-table .skill-source { font-size: 12px; color: var(--muted); display: block; margin-top: 2px; }
 .lb-table .skill-source a { color: var(--accent-blue); }
 .lb-table .skill-source a:hover { text-decoration: underline; }
+.lb-table .badge-outline {
+  display: inline-block;
+  padding: 2px 7px;
+  font-size: 11px;
+  line-height: 1.4;
+  font-weight: 500;
+  letter-spacing: 0.3px;
+  text-transform: lowercase;
+  border-radius: 3px;
+  border: 1px solid var(--hairline);
+  color: var(--muted);
+  white-space: nowrap;
+  background: rgba(255, 255, 255, 0.03);
+}
 .lb-table .mono { font-family: var(--mono); font-size: 13px; }
 .lb-table .effect-pos { color: #2fbf5f; font-weight: 600; font-family: var(--mono); }
 .lb-table .effect-neu { color: var(--muted); font-family: var(--mono); }
