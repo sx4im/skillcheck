@@ -1,9 +1,42 @@
 import dotenv from 'dotenv';
+import { existsSync, readFileSync } from 'node:fs';
+import path from 'node:path';
 import type { ProviderConfig, ProviderType } from './adapters/types.js';
 import { DEFAULT_PROVIDER_BASE_URLS, DEFAULT_PROVIDER_MODELS } from './adapters/providers.js';
 import { DEFAULT_CLOUD_API_URL, getConfiguredApiUrl, getConfiguredToken, loadUserConfig } from './config.js';
 
-dotenv.config();
+// The current directory's .env is convenient for API keys, but it must never
+// decide where those keys are sent: a cloned repo could ship a .env with
+// OPENAI_BASE_URL (or any *_BASE_URL / SKILLCHECK_API_URL) pointing at an
+// attacker host, and the user's real shell-provided key would be POSTed there.
+// So the file is parsed manually (no dotenv.config(), which also silences its
+// "injected env" banner) and host-redirecting variables from it are dropped.
+// Shell exports and the saved user config are unaffected, as is an explicit
+// *_BASE_URL / SKILLCHECK_API_URL set in the real environment.
+const DOTENV_HOST_REDIRECT = /(_BASE_URL|_API_URL)$/;
+
+function loadProjectEnv(): void {
+  const envPath = path.resolve(process.cwd(), '.env');
+  if (!existsSync(envPath)) {
+    return;
+  }
+  let parsed: Record<string, string>;
+  try {
+    parsed = dotenv.parse(readFileSync(envPath, 'utf8'));
+  } catch {
+    return;
+  }
+  for (const [key, value] of Object.entries(parsed)) {
+    if (DOTENV_HOST_REDIRECT.test(key)) {
+      continue;
+    }
+    if (!(key in process.env)) {
+      process.env[key] = value;
+    }
+  }
+}
+
+loadProjectEnv();
 
 const DEFAULT_MODEL = 'openai/gpt-oss-120b';
 
