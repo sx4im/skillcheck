@@ -2,8 +2,10 @@ export type ShellType = 'bash' | 'zsh' | 'fish';
 
 const COMMANDS = [
   { name: 'check', desc: 'A/B check an agent skill against an unprompted baseline' },
+  { name: 'watch', desc: 'Hot-reload and re-evaluate a skill automatically on save' },
   { name: 'demo', desc: 'Instant 5-second simulated benchmark (zero keys required)' },
   { name: 'matrix', desc: 'Benchmark a skill across multiple models side-by-side' },
+  { name: 'hook', desc: 'Install or execute the git pre-commit regression guard' },
   { name: 'setup', desc: 'Connect via Skillcheck Cloud or Bring Your Own Key (BYOK)' },
   { name: 'logout', desc: 'Remove saved API keys and provider configurations' },
   { name: 'eval', desc: 'Full evaluation emitting machine-readable JSON' },

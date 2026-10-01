@@ -1,5 +1,6 @@
 import { execFile as execFileCallback } from 'node:child_process';
-import { chmodSync, existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { chmodSync, existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { promisify } from 'node:util';
 import { findWorkspaceRoot } from './discovery.js';
@@ -106,25 +107,51 @@ export async function findStagedSkillFiles(cwd = findWorkspaceRoot()): Promise<s
 }
 
 /**
+ * Write the staged blob (`git show :0:<path>`) to a temp file and return its
+ * path. The pre-commit hook evaluates this — the exact bytes about to be
+ * committed — rather than the working-tree file, which may hold unstaged
+ * edits that are not part of the commit.
+ */
+async function materializeStagedBlob(relPath: string, cwd: string): Promise<string> {
+  const { stdout } = await execFile('git', ['show', `:0:${relPath}`], {
+    cwd,
+    maxBuffer: 16 * 1024 * 1024
+  });
+  const ext = path.extname(relPath) || '.md';
+  const tmpFile = path.join(
+    tmpdir(),
+    `skillcheck-staged-${process.pid}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}${ext}`
+  );
+  writeFileSync(tmpFile, stdout, 'utf8');
+  return tmpFile;
+}
+
+/**
  * Run pre-commit check on staged prompt files with a fast micro-sample profile.
+ *
+ * Fail-closed: a file whose evaluation errors counts as a failure and blocks
+ * the commit. An evaluation that did not run is not a passed evaluation.
  */
 export async function runPreCommitCheck(options: { strict?: boolean; cwd?: string } = {}): Promise<{ passed: boolean; message: string }> {
   if (process.env.SKILLCHECK_SKIP_HOOK === '1') {
     return { passed: true, message: 'Pre-commit check skipped via SKILLCHECK_SKIP_HOOK=1.' };
   }
 
-  const staged = await findStagedSkillFiles(options.cwd);
+  const cwd = options.cwd ?? process.cwd();
+  const staged = await findStagedSkillFiles(cwd);
   if (staged.length === 0) {
     return { passed: true, message: 'No agent prompt files staged. Skipping check.' };
   }
 
   console.log(`[skillcheck] Checking staged prompt files: ${staged.join(', ')}...`);
 
+  const failed: string[] = [];
   for (const filePath of staged) {
-    const fullPath = path.resolve(options.cwd ?? process.cwd(), filePath);
+    let tmpFile: string | null = null;
     try {
+      tmpFile = await materializeStagedBlob(filePath, cwd);
       const result = await evalSkill({
-        inputPath: fullPath,
+        inputPath: tmpFile,
         tasks: 3,
         trials: 2,
         mode: 'forced',
@@ -148,8 +175,24 @@ export async function runPreCommitCheck(options: { strict?: boolean; cwd?: strin
 
       console.log(`[skillcheck] ✓ ${filePath}: ${result.result.verdict.toUpperCase()} (${result.result.effect_pp >= 0 ? '+' : ''}${result.result.effect_pp.toFixed(1)} pp)`);
     } catch (err) {
-      console.warn(`[skillcheck] Warning: Evaluation failed for ${filePath}: ${err instanceof Error ? err.message : String(err)}`);
+      failed.push(filePath);
+      console.error(`[skillcheck] ERROR: evaluation failed for ${filePath}: ${err instanceof Error ? err.message : String(err)}`);
+    } finally {
+      if (tmpFile) {
+        try {
+          rmSync(tmpFile, { force: true });
+        } catch {
+          // best effort cleanup
+        }
+      }
     }
+  }
+
+  if (failed.length > 0) {
+    return {
+      passed: false,
+      message: `Commit rejected: Skillcheck could not evaluate ${failed.length} staged file(s): ${failed.join(', ')}. Fix your provider configuration and retry, or bypass deliberately with git commit --no-verify / SKILLCHECK_SKIP_HOOK=1.`
+    };
   }
 
   return { passed: true, message: 'Skillcheck verified: all staged prompts passed.' };

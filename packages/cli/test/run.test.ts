@@ -78,4 +78,53 @@ describe('runTrials trial independence', () => {
     expect(calls).toBe(6); // second run is fully cached
     expect(second.map((output) => output.output)).toEqual(first.map((output) => output.output));
   });
+
+  it('skips already-completed jobs and reports only remaining work in progress totals', async () => {
+    const cacheDir = await mkdtemp(path.join(tmpdir(), 'skillcheck-run-skip-'));
+    let calls = 0;
+    const client = {
+      complete: async () => {
+        calls += 1;
+        return {
+          content: `output-${calls}`,
+          model: 'runner',
+          usage: { promptTokens: 10, completionTokens: 1, totalTokens: 11 }
+        };
+      }
+    } as unknown as LlmClient;
+
+    // Pretend trial 1 of both arms already completed (e.g. from a checkpoint).
+    const seenTotals: number[] = [];
+    const outputs = await runTrials(skill, tasks, 2, testProviderConfig, client, new JsonCache(cacheDir), (event) => {
+      if (event.phase === 'running') seenTotals.push(event.total ?? 0);
+    }, 4, {
+      skip: (job) => job.trial === 1
+    });
+
+    expect(calls).toBe(2); // only trial 2 x 2 arms ran
+    expect(outputs).toHaveLength(2);
+    expect(outputs.every((output) => output.trial === 2)).toBe(true);
+    expect(seenTotals.every((total) => total === 2)).toBe(true);
+  });
+
+  it('invokes onTrialComplete once per finished job for incremental checkpointing', async () => {
+    const cacheDir = await mkdtemp(path.join(tmpdir(), 'skillcheck-run-cb-'));
+    const client = {
+      complete: async () => ({
+        content: 'output',
+        model: 'runner',
+        usage: { promptTokens: 10, completionTokens: 1, totalTokens: 11 }
+      })
+    } as unknown as LlmClient;
+
+    const completed: string[] = [];
+    await runTrials(skill, tasks, 2, testProviderConfig, client, new JsonCache(cacheDir), undefined, 4, {
+      onTrialComplete: (output) => {
+        completed.push(`${output.taskId}:${output.trial}:${output.arm}`);
+      }
+    });
+
+    expect(completed).toHaveLength(4); // 1 task x 2 trials x 2 arms
+    expect(new Set(completed).size).toBe(4);
+  });
 });
