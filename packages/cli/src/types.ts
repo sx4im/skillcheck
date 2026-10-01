@@ -1,6 +1,12 @@
 export type SkillFormat = 'SKILL.md' | 'AGENTS.md' | '.cursorrules' | 'CLAUDE.md' | 'markdown';
 export type CriterionType = 'rubric' | 'deterministic';
 
+// Task-generation difficulty: harder levels ask the generator for edge
+// cases and traps where an unguided model typically fails, so capable
+// skills get headroom to show a positive effect instead of hitting the
+// baseline ceiling.
+export type TaskDifficulty = 'standard' | 'hard' | 'adversarial';
+
 // Progress reporting for a long eval run, so the CLI can show real phases
 // (generating tasks, running trials N/M, grading N/M) instead of a fake bar.
 export type ProgressPhase = 'generating' | 'running' | 'grading' | 'scoring';

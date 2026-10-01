@@ -151,6 +151,7 @@ export function printHelpUi(): void {
   console.log(`  ${paint.accent('Options')}`);
   opt('--tasks N', 'generated tasks per check (default 3, max 50)');
   opt('--trials K', 'trials per task and arm (default 3, max 10)');
+  opt('--difficulty LEVEL', 'task difficulty: standard, hard, adversarial (default standard)');
   opt('--concurrency C', 'parallel trial execution limit (default 4)');
   opt('--runner MODEL', 'runner model override (e.g. gpt-6-sol, claude-opus-5-5)');
   opt('--models M1,M2', 'models list for matrix command');
@@ -196,12 +197,14 @@ export function printCommandHelpUi(command: string): boolean {
     sec('Options');
     opt('--tasks N', 'evaluation tasks to generate (default 3, max 50)');
     opt('--trials K', 'trials per task and arm (default 3, max 10)');
+    opt('--difficulty LEVEL', 'task difficulty: standard, hard, adversarial (default standard)');
     opt('--concurrency C', 'parallel trial execution limit (default 4)');
     opt('--runner MODEL', 'runner model override (e.g. gpt-4o, claude-3-5-sonnet)');
     opt('--grader MODEL', 'grader model override');
     opt('--generator MODEL', 'task generator model override');
     opt('--output FILE', 'save the full JSON evaluation result');
     opt('--explain', 'show a per-task breakdown with example outputs');
+    opt('--markdown', 'print a GitHub-Flavored Markdown report (CI-friendly)');
     opt('--json', 'emit machine-readable JSON without terminal UI');
     opt('--help, -h', 'show this command help');
     sec('Examples');
@@ -293,8 +296,10 @@ export function printCommandHelpUi(command: string): boolean {
     sec('Options');
     opt('--tasks N', 'tasks to generate (default 10)');
     opt('--trials K', 'trials per task and arm (default 3)');
+    opt('--difficulty LEVEL', 'task difficulty: standard, hard, adversarial (default standard)');
     opt('--output FILE', 'save result JSON to file');
     opt('--explain', 'include per-task explain data in output\n');
+    opt('--markdown', 'print a GitHub-Flavored Markdown report instead of JSON');
     return true;
   }
 

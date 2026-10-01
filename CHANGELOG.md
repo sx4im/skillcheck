@@ -4,7 +4,16 @@ All notable changes to this project are documented here. The format is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres
 to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [0.13.0] - 2026-10-01
+
+### Added
+
+- Watch mode (`skillcheck watch`): re-evaluates the skill whenever its file is saved, with `r` to re-run manually and `q` to quit.
+- Git pre-commit hook (`skillcheck hook install`): regression guard that evaluates staged skill files before a commit lands.
+- Skillcheck Lens: alternate-screen trial inspector for drilling into per-trial outputs and grades.
+- Atomic checkpointing for resumable evaluations: `--resume` on `skillcheck eval` picks up where an interrupted run stopped.
+- Dashboard leaderboard of community skills, with an embedded demo video.
+- 21 regression tests covering adapter error/retry paths (Anthropic/Gemini payload shaping and HTTP error mapping, `Retry-After` handling in seconds/HTTP-date/Headers forms, request pacing, `fetchWithRetry` retry and degenerate `maxAttempts: 0`) and grader edge cases (unclosed/non-numeric grader JSON, explicit `score: 0` marker, unknown task reference, deterministic grading without an LLM call).
 
 ### Changed
 
@@ -19,24 +28,10 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - `skillcheck eval` accepts `--resume`; checkpoints flush atomically after every trial, resume skips only already-completed (task, trial, arm) jobs, and checkpoints record the runner/grader/generator models and invalidate when any of them change.
 - An explicit `--task-suite` file is evaluated in full unless `--tasks` was passed explicitly; explicit truncation prints a warning to stderr.
 - Checkpoints store the evaluated task list, so `--resume` reuses the interrupted run's tasks verbatim instead of asking the generator for a fresh (different) set. Checkpoints written before this change are treated as absent.
-- A `.env` file in the working directory can no longer redirect API traffic: `*_BASE_URL` and `SKILLCHECK_API_URL` from the file are ignored, so a hostile `.env` cannot capture the user's real API key. Ordinary keys still load from the file, and dotenv's "injected env" banner no longer prints.
+- A `.env` file in the working directory now uses an allow-list instead of a deny-list: only provider API keys, `SKILLCHECK_TOKEN` / `SKILLCHECK_API_KEY`, model settings, and timeout settings are read from the file. Everything else is ignored, so a hostile `.env` cannot redirect API traffic or point the CLI at an attacker-written config file. Shell exports and the saved user config are unaffected, and dotenv's "injected env" banner no longer prints.
 - Watch mode implements the advertised `r` (re-run) and `q` (quit) keys, survives atomic-save inode replacement, and queues saves that arrive mid-evaluation.
 - Shell completions include the `watch` and `hook` commands.
 - Dashboard leaderboard updated to the top 10 featured community skills.
-
-### Added
-
-- 21 regression tests covering adapter error/retry paths (Anthropic/Gemini payload shaping and HTTP error mapping, `Retry-After` handling in seconds/HTTP-date/Headers forms, request pacing, `fetchWithRetry` retry and degenerate `maxAttempts: 0`) and grader edge cases (unclosed/non-numeric grader JSON, explicit `score: 0` marker, unknown task reference, deterministic grading without an LLM call).
-
-## [0.13.0] - 2026-10-01
-
-### Added
-
-- Watch mode (`skillcheck watch`): re-evaluates the skill whenever its file is saved, with `r` to re-run manually and `q` to quit.
-- Git pre-commit hook (`skillcheck hook install`): regression guard that evaluates staged skill files before a commit lands.
-- Skillcheck Lens: alternate-screen trial inspector for drilling into per-trial outputs and grades.
-- Atomic checkpointing for resumable evaluations: `--resume` on `skillcheck eval` picks up where an interrupted run stopped.
-- Dashboard leaderboard of community skills, with an embedded demo video.
 
 ## [0.12.0] - 2026-10-01
 

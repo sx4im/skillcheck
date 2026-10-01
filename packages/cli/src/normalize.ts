@@ -119,11 +119,69 @@ function firstHeading(text: string): string | undefined {
     .find(Boolean);
 }
 
-function inferDomain(text: string): string {
-  return firstHeading(text) || 'general agent skill';
+// Headings that describe the file rather than the engineering domain it
+// governs. Official agent skills (CLAUDE.md, AGENTS.md, .cursorrules) almost
+// always open with one of these, which would otherwise become the domain.
+const GENERIC_HEADINGS = new Set([
+  'claude.md',
+  'agents.md',
+  'skill.md',
+  '.cursorrules',
+  'cursorrules',
+  'instructions',
+  'guidelines',
+  'rules',
+  'overview',
+  'developer guidelines'
+]);
+
+function isGenericHeading(heading: string): boolean {
+  return GENERIC_HEADINGS.has(heading.trim().toLowerCase().replace(/:$/, ''));
 }
 
-function extractDomain(text: string): string {
+function allHeadings(text: string): string[] {
+  const headings: string[] = [];
+  for (const line of text.split('\n')) {
+    const match = /^#{1,6}\s+(.+)$/.exec(line.trim());
+    if (match?.[1]?.trim()) {
+      headings.push(match[1].trim());
+    }
+  }
+  return headings;
+}
+
+function firstSubstantiveHeading(text: string): string | undefined {
+  return allHeadings(text).find((heading) => !isGenericHeading(heading));
+}
+
+function stripFrontMatter(text: string): string {
+  const normalized = text.replace(/\r\n/g, '\n');
+  if (!normalized.startsWith('---\n')) {
+    return text;
+  }
+  const end = normalized.indexOf('\n---', 4);
+  if (end === -1) {
+    return text;
+  }
+  return normalized.slice(end + 4);
+}
+
+function firstParagraphLine(text: string): string | undefined {
+  for (const line of stripFrontMatter(text).split('\n')) {
+    const trimmed = line.trim();
+    if (!trimmed || trimmed.startsWith('#') || trimmed === '---') {
+      continue;
+    }
+    return trimmed.slice(0, 120);
+  }
+  return undefined;
+}
+
+function inferDomain(text: string, dirName?: string): string {
+  return firstSubstantiveHeading(text) || firstParagraphLine(text) || dirName || 'general agent skill';
+}
+
+function extractDomain(text: string, dirName?: string): string {
   const frontMatter = extractFrontMatter(text);
   const declared =
     frontMatter.domain ||
@@ -144,7 +202,7 @@ function extractDomain(text: string): string {
     return whenLine;
   }
 
-  return inferDomain(text);
+  return inferDomain(text, dirName);
 }
 
 async function listAssets(skillFilePath: string): Promise<string[]> {
@@ -238,7 +296,7 @@ export async function normalizeSkill(inputPath: string): Promise<NormalizedSkill
     sourcePath: filePath,
     format,
     instructions,
-    domain: extractDomain(instructions),
+    domain: extractDomain(instructions, path.basename(path.dirname(filePath))),
     assets: await listAssets(filePath),
     versionHash: sha256(instructions),
     toolDependent: isToolDependent(instructions)

@@ -43,6 +43,32 @@ describe('friendly CLI check command', () => {
     expect(options.json).toBe(true);
   });
 
+  it('parses --difficulty and forwards it to task generation', () => {
+    const options = parseCheckOptions(['node', 'skillcheck', 'check', './SKILL.md', '--difficulty', 'hard']);
+
+    expect(options.evalOptions.difficulty).toBe('hard');
+  });
+
+  it('leaves difficulty unset when --difficulty is omitted', () => {
+    const options = parseCheckOptions(['node', 'skillcheck', 'check', './SKILL.md']);
+
+    expect(options.evalOptions.difficulty).toBeUndefined();
+  });
+
+  it('rejects an unknown --difficulty value', () => {
+    expect(() =>
+      parseCheckOptions(['node', 'skillcheck', 'check', './SKILL.md', '--difficulty', 'extreme'])
+    ).toThrow(/--difficulty must be one of standard, hard, adversarial/);
+  });
+
+  it('parses --markdown as a flag and leaves it off by default', () => {
+    const withFlag = parseCheckOptions(['node', 'skillcheck', 'check', './SKILL.md', '--markdown']);
+    expect(withFlag.markdown).toBe(true);
+
+    const withoutFlag = parseCheckOptions(['node', 'skillcheck', 'check', './SKILL.md']);
+    expect(withoutFlag.markdown).toBe(false);
+  });
+
   it('accepts options before or after the skill path', () => {
     const optsBefore = parseCheckOptions(['node', 'skillcheck', '--explain', './SKILL.md', '--tasks', '5'], 2);
     expect(optsBefore.evalOptions.inputPath).toBe('./SKILL.md');

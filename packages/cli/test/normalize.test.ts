@@ -1,4 +1,4 @@
-import { mkdtemp, writeFile } from 'node:fs/promises';
+import { mkdtemp, mkdir, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { describe, expect, it } from 'vitest';
@@ -78,6 +78,38 @@ describe('normalizeSkill', () => {
     expect(skill.domain).not.toContain('lint instruction');
   });
 
+  it('skips a generic CLAUDE.md heading for a substantive secondary heading', async () => {
+    const dir = await mkdtemp(path.join(tmpdir(), 'skillcheck-normalize-'));
+    const file = path.join(dir, 'CLAUDE.md');
+    await writeFile(file, '# CLAUDE.md\n\n## TypeScript & React Best Practices\n\nFollow these rules.\n');
+
+    const skill = await normalizeSkill(file);
+
+    expect(skill.domain).toBe('TypeScript & React Best Practices');
+  });
+
+  it('falls back to the first prose line when every heading is generic', async () => {
+    const dir = await mkdtemp(path.join(tmpdir(), 'skillcheck-normalize-'));
+    const file = path.join(dir, 'AGENTS.md');
+    await writeFile(file, '# AGENTS.md\n\nInstructions for building Golang microservices.\n');
+
+    const skill = await normalizeSkill(file);
+
+    expect(skill.domain).toBe('Instructions for building Golang microservices.');
+  });
+
+  it('falls back to the parent directory name when no substantive content exists', async () => {
+    const dir = await mkdtemp(path.join(tmpdir(), 'skillcheck-normalize-'));
+    const skillDir = path.join(dir, 'my-skill');
+    await mkdir(skillDir);
+    const file = path.join(skillDir, 'CLAUDE.md');
+    await writeFile(file, '# Instructions\n');
+
+    const skill = await normalizeSkill(file);
+
+    expect(skill.domain).toBe('my-skill');
+  });
+
   it('derives a readable name from a markdown filename', async () => {
     const dir = await mkdtemp(path.join(tmpdir(), 'skillcheck-norm-'));
     const file = path.join(dir, 'frontend-design.md');
@@ -85,7 +117,7 @@ describe('normalizeSkill', () => {
     const skill = await normalizeSkill(file);
     expect(skill.format).toBe('markdown');
     expect(skill.name).toBe('frontend design');
-    expect(skill.domain).toBe('general agent skill');
+    expect(skill.domain).toBe('Plain markdown body with no heading.');
   });
 
   it('falls back to the first .md by name inside a folder', async () => {
