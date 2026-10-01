@@ -33,6 +33,7 @@ export interface LeaderboardResult {
     trials: number;
     tasks: number;
     mode: string;
+    difficulty?: string;
   };
   result: {
     effect_pp: number;

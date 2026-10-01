@@ -86,3 +86,15 @@ export class ShiftingGeneratorClient extends FakeOpenAiCompatClient {
     return super.complete(request);
   }
 }
+
+export class OutOfOrderMockClient extends FakeOpenAiCompatClient {
+  async complete(request: { messages: Array<{ role: string; content: string }> }) {
+    const system = request.messages.find((m) => m.role === 'system')?.content ?? '';
+    const withSkill = /skill instructions/i.test(system);
+    // Add artificial delay to with_skill so no_skill resolves first under concurrency
+    if (withSkill) {
+      await new Promise((r) => setTimeout(r, 20));
+    }
+    return super.complete(request);
+  }
+}

@@ -42,6 +42,7 @@ describe('checkpointed evaluation persistence', () => {
       skillHash: 'hash-123',
       taskSuiteHash: 'suite-456',
       trials: 3,
+      difficulty: 'standard',
       runnerModel: 'runner-a',
       graderModel: 'grader-a',
       generatorModel: 'generator-a',
@@ -55,6 +56,7 @@ describe('checkpointed evaluation persistence', () => {
 
     expect(loaded).not.toBeNull();
     expect(loaded?.skillHash).toBe('hash-123');
+    expect(loaded?.difficulty).toBe('standard');
     expect(loaded?.runnerModel).toBe('runner-a');
     expect(loaded?.graderModel).toBe('grader-a');
     expect(loaded?.generatorModel).toBe('generator-a');
@@ -83,6 +85,7 @@ describe('checkpointed evaluation persistence', () => {
       skillHash: 'hash-123',
       taskSuiteHash: 'suite-456',
       trials: 3,
+      difficulty: 'standard',
       runnerModel: 'runner-a',
       graderModel: 'grader-a',
       generatorModel: 'generator-a',
@@ -125,6 +128,26 @@ describe('checkpointed evaluation persistence', () => {
         runnerModel: 'runner-a',
         graderModel: 'grader-a',
         generatorModel: 'generator-a',
+        completedOutputs: sampleOutputs,
+        updatedAt: new Date().toISOString()
+      })
+    );
+
+    expect(await loadCheckpoint(cpFile)).toBeNull();
+  });
+
+  it('rejects checkpoints missing the difficulty field or having an invalid difficulty', async () => {
+    const { writeFile } = await import('node:fs/promises');
+    await writeFile(
+      cpFile,
+      JSON.stringify({
+        skillHash: 'hash-123',
+        taskSuiteHash: 'suite-456',
+        trials: 3,
+        runnerModel: 'runner-a',
+        graderModel: 'grader-a',
+        generatorModel: 'generator-a',
+        tasks: [{ id: 't1', prompt: 'Do the thing', criterionType: 'rubric', criterion: 'It is done.' }],
         completedOutputs: sampleOutputs,
         updatedAt: new Date().toISOString()
       })

@@ -32,6 +32,9 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Watch mode implements the advertised `r` (re-run) and `q` (quit) keys, survives atomic-save inode replacement, and queues saves that arrive mid-evaluation.
 - Shell completions include the `watch` and `hook` commands.
 - Dashboard leaderboard updated to the top 10 featured community skills.
+- Checkpoints now record and validate the `--difficulty` level, preventing `--resume` from reusing tasks generated under a different difficulty (#88).
+- Published `EvalResult.config` records `difficulty` and rot detection groups history series by difficulty level (#89).
+- Output and `transcript_hashes` ordering strictly follows canonical job sequence, ensuring deterministic reproducibility under concurrent execution (#90).
 
 ## [0.12.0] - 2026-10-01
 

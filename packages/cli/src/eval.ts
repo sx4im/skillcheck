@@ -189,6 +189,7 @@ export interface EvalResult {
     tasks: number;
     temperature: number;
     mode: 'forced';
+    difficulty?: TaskDifficulty;
   };
   result: {
     effect_pp: number;
@@ -249,15 +250,17 @@ export async function evalSkill(options: EvalOptions): Promise<EvalResult> {
 
   const cpFile = checkpointPath(skill.versionHash);
   const trialKey = (taskId: string, trial: number, arm: string) => `${taskId}:${trial}:${arm}`;
+  const effectiveDifficulty: TaskDifficulty = options.difficulty ?? 'standard';
 
-  // A checkpoint is reusable when the skill, trial count, and all models match
-  // and its stored task hash is intact. A model change silently reusing stale
+  // A checkpoint is reusable when the skill, trial count, difficulty, and all models match
+  // and its stored task hash is intact. A model or difficulty change silently reusing stale
   // outputs would corrupt the comparison.
   const existingCp = options.resume ? await loadCheckpoint(cpFile) : null;
   const checkpointUsable =
     existingCp !== null &&
     existingCp.skillHash === skill.versionHash &&
     existingCp.trials === options.trials &&
+    existingCp.difficulty === effectiveDifficulty &&
     existingCp.runnerModel === (config.runnerModel ?? '') &&
     existingCp.graderModel === (config.graderModel ?? '') &&
     existingCp.generatorModel === (config.generatorModel ?? '') &&
@@ -300,37 +303,59 @@ export async function evalSkill(options: EvalOptions): Promise<EvalResult> {
     await writeJson(taskSuitePath, tasks);
   }
 
-  const doneKeys = new Set(outputs.map((o) => trialKey(o.taskId, o.trial, o.arm)));
+  const canonicalJobs: Array<{ taskId: string; trial: number; arm: TrialOutput['arm'] }> = [];
+  for (const task of tasks) {
+    for (let trial = 1; trial <= options.trials; trial += 1) {
+      canonicalJobs.push({ taskId: task.id, trial, arm: 'with_skill' });
+      canonicalJobs.push({ taskId: task.id, trial, arm: 'no_skill' });
+    }
+  }
+
+  const byKey = new Map<string, TrialOutput>();
+  for (const output of outputs) {
+    byKey.set(trialKey(output.taskId, output.trial, output.arm), output);
+  }
+
+  const doneKeys = new Set(byKey.keys());
 
   // Flush atomically after every trial so a crash, SIGKILL, or rate-limit
   // mid-run loses nothing — the next --resume run picks up where this one
   // stopped instead of re-billing completed trials.
-  const flushCheckpoint = (): Promise<void> =>
-    saveCheckpoint(
+  const flushCheckpoint = (): Promise<void> => {
+    const orderedSoFar = canonicalJobs
+      .map((j) => byKey.get(trialKey(j.taskId, j.trial, j.arm)))
+      .filter((o): o is TrialOutput => Boolean(o));
+    return saveCheckpoint(
       cpFile,
       {
         skillHash: skill.versionHash,
         taskSuiteHash,
         trials: options.trials,
+        difficulty: effectiveDifficulty,
         runnerModel: config.runnerModel ?? '',
         graderModel: config.graderModel ?? '',
         generatorModel: config.generatorModel ?? '',
         tasks,
-        completedOutputs: outputs,
+        completedOutputs: orderedSoFar,
         updatedAt: new Date().toISOString()
       }
     ).catch(() => {});
+  };
 
   await runTrials(skill, tasks, options.trials, config, client, cache, onProgress, options.concurrency, {
     skip: (job) => doneKeys.has(trialKey(job.task.id, job.trial, job.arm)),
     onTrialComplete: async (output) => {
-      outputs.push(output);
+      byKey.set(trialKey(output.taskId, output.trial, output.arm), output);
       await flushCheckpoint();
     }
   });
   await flushCheckpoint();
 
-  const graded = await gradeOutputs(tasks, outputs, config, client, cache, onProgress);
+  const orderedOutputs = canonicalJobs
+    .map((j) => byKey.get(trialKey(j.taskId, j.trial, j.arm)))
+    .filter((o): o is TrialOutput => Boolean(o));
+
+  const graded = await gradeOutputs(tasks, orderedOutputs, config, client, cache, onProgress);
   await clearCheckpoint(cpFile).catch(() => {});
   onProgress?.({ phase: 'scoring' });
   const score = scorePairedObservations(pairedObservations(graded));
@@ -360,7 +385,8 @@ export async function evalSkill(options: EvalOptions): Promise<EvalResult> {
       trials: options.trials,
       tasks: tasks.length,
       temperature: 0.7,
-      mode: 'forced'
+      mode: 'forced',
+      difficulty: effectiveDifficulty
     },
     result: {
       effect_pp: score.effectPp,

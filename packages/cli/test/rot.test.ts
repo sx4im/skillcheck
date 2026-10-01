@@ -5,7 +5,7 @@ import { describe, expect, it } from 'vitest';
 import { parseCorpusManifest } from '../src/corpus.js';
 import { buildRotReport } from '../src/rot.js';
 
-function result(verdict: 'helps' | 'placebo' | 'harms', runner: string, runDate: string) {
+function result(verdict: 'helps' | 'placebo' | 'harms', runner: string, runDate: string, difficulty?: string) {
   return {
     skill: {
       name: 'Rot Canary',
@@ -21,7 +21,8 @@ function result(verdict: 'helps' | 'placebo' | 'harms', runner: string, runDate:
       generator_model: 'generator',
       trials: 3,
       tasks: 1,
-      mode: 'forced-injection'
+      mode: 'forced-injection',
+      ...(difficulty ? { difficulty } : {})
     },
     result: {
       effect_pp: verdict === 'helps' ? 50 : 0,
@@ -64,6 +65,20 @@ describe('buildRotReport', () => {
 
     expect(report.summary.skills).toBe(1);
     expect(report.summary.new).toBe(1);
+  });
+
+  it('separates history series by difficulty so different difficulty levels do not mix into one series', async () => {
+    const dir = await mkdtemp(path.join(tmpdir(), 'skillcheck-rot-diff-'));
+    // Standard run that helped
+    await writeFile(path.join(dir, 'standard.json'), `${JSON.stringify(result('helps', 'model-a', '2026-06-03', 'standard'))}\n`);
+    // Hard run that was placebo
+    await writeFile(path.join(dir, 'hard.json'), `${JSON.stringify(result('placebo', 'model-a', '2026-06-04', 'hard'))}\n`);
+
+    const report = await buildRotReport(dir, 'model-a');
+    // If difficulty is separated, these are 2 distinct series (each having only 1 entry, so 0 rot).
+    // If difficulty is mixed, the hard run compares against the standard run and falsely flags rot!
+    expect(report.summary.rot).toBe(0);
+    expect(report.summary.skills).toBe(2);
   });
 });
 

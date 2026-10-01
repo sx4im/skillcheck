@@ -441,7 +441,7 @@ To bypass the hosted proxy, run `skillcheck setup` and select Bring Your Own Key
 ```bash
 npm ci
 npm run build          # compile to dist/
-npm test               # vitest (257 tests)
+npm test               # vitest (280 tests)
 npm run test:coverage  # vitest + v8 coverage gate (84% statements/lines, 85% functions, 68% branches)
 npm run lint           # eslint (flat config, typescript-eslint)
 npm run typecheck      # strict TS, src + tests

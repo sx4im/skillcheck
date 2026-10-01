@@ -17,6 +17,7 @@ interface StoredResult {
   config: {
     runner_model: string;
     runner_version?: string;
+    difficulty?: string;
   };
   result: {
     effect_pp: number;
@@ -69,7 +70,7 @@ export interface RotOptions {
 }
 
 function resultKey(result: StoredResult): string {
-  return `${slugify(result.skill.name)}:${result.skill.commit_hash}`;
+  return `${slugify(result.skill.name)}:${result.skill.commit_hash}:${result.config.difficulty ?? 'standard'}`;
 }
 
 function isVerdict(value: unknown): value is Verdict {
