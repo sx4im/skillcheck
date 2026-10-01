@@ -80,6 +80,19 @@ export async function asyncPool<T, R>(items: T[], limit: number, fn: (item: T) =
   return results;
 }
 
+export interface TrialJob {
+  task: GeneratedTask;
+  trial: number;
+  arm: TrialOutput['arm'];
+}
+
+export interface RunTrialsOptions {
+  /** Called after each trial completes — used for incremental checkpointing. */
+  onTrialComplete?: (output: TrialOutput) => void | Promise<void>;
+  /** Return true to skip an already-completed job (checkpoint resume). */
+  skip?: (job: TrialJob) => boolean;
+}
+
 export async function runTrials(
   skill: NormalizedSkill,
   tasks: GeneratedTask[],
@@ -88,10 +101,19 @@ export async function runTrials(
   client: LlmClient,
   cache: JsonCache,
   onProgress?: ProgressReporter,
-  concurrency = 4
+  concurrency = 4,
+  options: RunTrialsOptions = {}
 ): Promise<TrialOutput[]> {
   const debug = process.env.SKILLCHECK_DEBUG === '1';
-  const total = tasks.length * trials * 2; // two arms (with/without skill) per trial
+  const jobs: TrialJob[] = [];
+  for (const task of tasks) {
+    for (let trial = 1; trial <= trials; trial += 1) {
+      jobs.push({ task, trial, arm: 'with_skill' });
+      jobs.push({ task, trial, arm: 'no_skill' });
+    }
+  }
+  const activeJobs = options.skip ? jobs.filter((job) => !options.skip!(job)) : jobs;
+  const total = activeJobs.length;
   let completed = 0;
   let withSkillCompleted = 0;
   let noSkillCompleted = 0;
@@ -103,20 +125,13 @@ export async function runTrials(
   };
   onProgress?.({ phase: 'running', completed, total, withSkillCompleted: 0, noSkillCompleted: 0 });
 
-  const jobs: Array<{ task: GeneratedTask; trial: number; arm: TrialOutput['arm'] }> = [];
-  for (const task of tasks) {
-    for (let trial = 1; trial <= trials; trial += 1) {
-      jobs.push({ task, trial, arm: 'with_skill' });
-      jobs.push({ task, trial, arm: 'no_skill' });
-    }
-  }
-
-  return await asyncPool(jobs, Math.max(1, concurrency), async (job) => {
+  return await asyncPool(activeJobs, Math.max(1, concurrency), async (job) => {
     if (debug) {
       console.error(`[skillcheck] run ${job.task.id} trial ${job.trial}/${trials} ${job.arm}`);
     }
     const res = await runOne(skill, job.task, job.trial, job.arm, config, client, cache);
     tick(job.arm);
+    await options.onTrialComplete?.(res);
     return res;
   });
 }

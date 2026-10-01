@@ -42,6 +42,9 @@ describe('checkpointed evaluation persistence', () => {
       skillHash: 'hash-123',
       taskSuiteHash: 'suite-456',
       trials: 3,
+      runnerModel: 'runner-a',
+      graderModel: 'grader-a',
+      generatorModel: 'generator-a',
       completedOutputs: sampleOutputs,
       updatedAt: new Date().toISOString()
     };
@@ -51,6 +54,9 @@ describe('checkpointed evaluation persistence', () => {
 
     expect(loaded).not.toBeNull();
     expect(loaded?.skillHash).toBe('hash-123');
+    expect(loaded?.runnerModel).toBe('runner-a');
+    expect(loaded?.graderModel).toBe('grader-a');
+    expect(loaded?.generatorModel).toBe('generator-a');
     expect(loaded?.completedOutputs).toHaveLength(1);
     expect(loaded?.completedOutputs[0]?.transcriptHash).toBe('h1');
   });
@@ -74,6 +80,9 @@ describe('checkpointed evaluation persistence', () => {
       skillHash: 'hash-123',
       taskSuiteHash: 'suite-456',
       trials: 3,
+      runnerModel: 'runner-a',
+      graderModel: 'grader-a',
+      generatorModel: 'generator-a',
       completedOutputs: sampleOutputs,
       updatedAt: new Date().toISOString()
     };
@@ -83,5 +92,21 @@ describe('checkpointed evaluation persistence', () => {
 
     const after = await loadCheckpoint(cpFile);
     expect(after).toBeNull();
+  });
+
+  it('rejects legacy checkpoints missing model fields so a model change never reuses stale outputs', async () => {
+    const { writeFile } = await import('node:fs/promises');
+    await writeFile(
+      cpFile,
+      JSON.stringify({
+        skillHash: 'hash-123',
+        taskSuiteHash: 'suite-456',
+        trials: 3,
+        completedOutputs: sampleOutputs,
+        updatedAt: new Date().toISOString()
+      })
+    );
+
+    expect(await loadCheckpoint(cpFile)).toBeNull();
   });
 });

@@ -3,7 +3,7 @@ import { evalResultFixture } from './eval-result-fixture.js';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { main, parseCheckOptions } from '../src/cli.js';
+import { main, parseCheckOptions, parseEvalOptions } from '../src/cli.js';
 import { loadUserConfig, logoutUser, saveUserConfig } from '../src/config.js';
 import { formatFatalError, formatResultCard, validateSkillInput } from '../src/ui.js';
 import { currentVersion, isNewerVersion } from '../src/update.js';
@@ -343,6 +343,25 @@ describe('update notifier', () => {
     const opts = parseCheckOptions(['node', 'skillcheck', 'check', './SKILL.md', '--resume', '--inspect']);
     expect(opts.evalOptions.resume).toBe(true);
     expect(opts.inspect).toBe(true);
+  });
+
+  it('accepts --resume in eval options (was previously rejected as unknown)', () => {
+    const opts = parseEvalOptions(['node', 'skillcheck', 'eval', './SKILL.md', '--resume']);
+    expect(opts.resume).toBe(true);
+    expect(opts.inputPath).toBe('./SKILL.md');
+  });
+
+  it('detects explicit --tasks in both --tasks N and --tasks=N forms', () => {
+    const implicit = parseEvalOptions(['node', 'skillcheck', 'eval', './SKILL.md']);
+    expect(implicit.tasksExplicit).toBe(false);
+
+    const spaceForm = parseEvalOptions(['node', 'skillcheck', 'eval', './SKILL.md', '--tasks', '5']);
+    expect(spaceForm.tasks).toBe(5);
+    expect(spaceForm.tasksExplicit).toBe(true);
+
+    const equalsForm = parseEvalOptions(['node', 'skillcheck', 'eval', './SKILL.md', '--tasks=7']);
+    expect(equalsForm.tasks).toBe(7);
+    expect(equalsForm.tasksExplicit).toBe(true);
   });
 
   it('handles help for watch and hook commands', async () => {

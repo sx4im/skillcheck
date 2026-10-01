@@ -36,4 +36,12 @@ describe('shell completions generator', () => {
     expect(script).toContain('demo');
     expect(script).toContain('-l "clipboard"');
   });
+
+  it('includes the watch and hook commands in every shell', () => {
+    for (const shell of ['bash', 'zsh', 'fish'] as const) {
+      const script = generateCompletionScript(shell);
+      expect(script).toContain('watch');
+      expect(script).toContain('hook');
+    }
+  });
 });

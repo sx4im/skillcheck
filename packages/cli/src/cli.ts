@@ -339,6 +339,7 @@ function parseCommonEvalOptions(
     evalOptions: {
       output: readOption(argv, '--output'),
       tasks: readNumberOption(argv, '--tasks', defaultTasks, MAX_TASKS),
+      tasksExplicit: argv.some((token) => token === '--tasks' || token.startsWith('--tasks=')),
       trials: readNumberOption(argv, '--trials', 3, MAX_TRIALS),
       concurrency: readNumberOption(argv, '--concurrency', 4, MAX_CONCURRENCY),
       mode: 'forced',
@@ -351,16 +352,16 @@ function parseCommonEvalOptions(
   };
 }
 
-function parseEvalOptions(argv: string[], startIndex = 3): EvalOptions {
+export function parseEvalOptions(argv: string[], startIndex = 3): EvalOptions {
   const { inputPath, inputIndex, evalOptions } = parseCommonEvalOptions(argv, 10, startIndex);
   if (!inputPath) {
-    throw new Error('Usage: skillcheck eval <path> [--tasks N] [--trials K] [--concurrency C] [--output file.json]');
+    throw new Error('Usage: skillcheck eval <path> [--tasks N] [--trials K] [--concurrency C] [--output file.json] [--resume]');
   }
   assertKnownOptions(
     argv,
     startIndex,
     [...CHECK_VALUE_OPTIONS, '--mode'],
-    ['--explain'],
+    ['--explain', '--resume'],
     inputIndex
   );
 
@@ -371,7 +372,8 @@ function parseEvalOptions(argv: string[], startIndex = 3): EvalOptions {
 
   return {
     inputPath,
-    ...evalOptions
+    ...evalOptions,
+    resume: hasFlag(argv, '--resume')
   };
 }
 

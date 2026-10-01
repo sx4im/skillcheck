@@ -30,6 +30,8 @@ export interface EvalOptions {
   useCache?: boolean;
   concurrency?: number;
   resume?: boolean;
+  /** True when --tasks was passed explicitly (vs. the command default). */
+  tasksExplicit?: boolean;
 }
 
 function applyModelOverrides(config: ProviderConfig, options: EvalOptions): ProviderConfig {
@@ -212,6 +214,24 @@ export interface EvalResult {
   run_date: string;
 }
 
+/**
+ * Select tasks from an explicit --task-suite file. When the user hand-writes
+ * a suite without passing --tasks, the whole suite is evaluated — silently
+ * truncating to the command default would discard their work and widen the
+ * confidence interval without explanation.
+ */
+export function selectSuiteTasks(suite: GeneratedTask[], options: { tasks: number; tasksExplicit?: boolean }): GeneratedTask[] {
+  if (!options.tasksExplicit) {
+    return suite;
+  }
+  if (suite.length > options.tasks) {
+    console.error(
+      `[skillcheck] warning: --task-suite has ${suite.length} tasks but --tasks=${options.tasks}; evaluating only the first ${options.tasks}.`
+    );
+  }
+  return suite.slice(0, options.tasks);
+}
+
 export async function evalSkill(options: EvalOptions): Promise<EvalResult> {
   const skill = await normalizeSkill(options.inputPath);
   const baseConfig = loadProviderConfig();
@@ -225,7 +245,7 @@ export async function evalSkill(options: EvalOptions): Promise<EvalResult> {
   const onProgress = options.onProgress;
   onProgress?.({ phase: 'generating' });
   const tasks = options.taskSuite
-    ? parseTaskSuite(await readFile(options.taskSuite, 'utf8')).slice(0, options.tasks)
+    ? selectSuiteTasks(parseTaskSuite(await readFile(options.taskSuite, 'utf8')), options)
     : await generateTasks({ domain: skill.domain, count: options.tasks }, config, client, cache);
   if (tasks.length === 0) {
     throw new Error('No evaluation tasks available — the task suite is empty.');
@@ -238,21 +258,51 @@ export async function evalSkill(options: EvalOptions): Promise<EvalResult> {
   }
 
   const cpFile = checkpointPath(skill.versionHash);
-  let outputs: TrialOutput[];
+  const trialKey = (taskId: string, trial: number, arm: string) => `${taskId}:${trial}:${arm}`;
 
+  // Resume: reuse trial outputs from an interrupted run, but only when the
+  // task suite, trial count, AND models all match. A model change silently
+  // reusing stale outputs would corrupt the comparison.
+  let outputs: TrialOutput[] = [];
   const existingCp = options.resume ? await loadCheckpoint(cpFile) : null;
-  if (existingCp && existingCp.taskSuiteHash === taskSuiteHash && existingCp.trials === options.trials) {
+  if (
+    existingCp &&
+    existingCp.taskSuiteHash === taskSuiteHash &&
+    existingCp.trials === options.trials &&
+    existingCp.runnerModel === (config.runnerModel ?? '') &&
+    existingCp.graderModel === (config.graderModel ?? '') &&
+    existingCp.generatorModel === (config.generatorModel ?? '')
+  ) {
     outputs = existingCp.completedOutputs;
-  } else {
-    outputs = await runTrials(skill, tasks, options.trials, config, client, cache, onProgress, options.concurrency);
-    await saveCheckpoint(cpFile, {
-      skillHash: skill.versionHash,
-      taskSuiteHash,
-      trials: options.trials,
-      completedOutputs: outputs,
-      updatedAt: new Date().toISOString()
-    }).catch(() => {});
   }
+  const doneKeys = new Set(outputs.map((o) => trialKey(o.taskId, o.trial, o.arm)));
+
+  // Flush atomically after every trial so a crash, SIGKILL, or rate-limit
+  // mid-run loses nothing — the next --resume run picks up where this one
+  // stopped instead of re-billing completed trials.
+  const flushCheckpoint = (): Promise<void> =>
+    saveCheckpoint(
+      cpFile,
+      {
+        skillHash: skill.versionHash,
+        taskSuiteHash,
+        trials: options.trials,
+        runnerModel: config.runnerModel ?? '',
+        graderModel: config.graderModel ?? '',
+        generatorModel: config.generatorModel ?? '',
+        completedOutputs: outputs,
+        updatedAt: new Date().toISOString()
+      }
+    ).catch(() => {});
+
+  await runTrials(skill, tasks, options.trials, config, client, cache, onProgress, options.concurrency, {
+    skip: (job) => doneKeys.has(trialKey(job.task.id, job.trial, job.arm)),
+    onTrialComplete: async (output) => {
+      outputs.push(output);
+      await flushCheckpoint();
+    }
+  });
+  await flushCheckpoint();
 
   const graded = await gradeOutputs(tasks, outputs, config, client, cache, onProgress);
   await clearCheckpoint(cpFile).catch(() => {});

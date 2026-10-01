@@ -69,8 +69,12 @@ export async function runWatch(options: WatchOptions): Promise<void> {
   console.log(`  ${paint.dim(`Press ${paint.bold('r')} to re-run manually ${SYM.dot} Press ${paint.bold('q')} or ${paint.bold('Ctrl+C')} to exit`)}\n`);
 
   let running = false;
+  let reRunQueued = false;
   const executeEval = async (reason = 'Initial run'): Promise<void> => {
-    if (running) return;
+    if (running) {
+      reRunQueued = true;
+      return;
+    }
     running = true;
 
     try {
@@ -91,7 +95,12 @@ export async function runWatch(options: WatchOptions): Promise<void> {
       console.error(`  ${paint.err(SYM.cross)} ${err instanceof Error ? err.message : String(err)}`);
     } finally {
       running = false;
-      console.log(`\n  ${paint.dim(`Watching for changes in ${path.basename(fullPath)}...`)}`);
+      if (reRunQueued) {
+        reRunQueued = false;
+        await executeEval('Re-evaluating queued changes');
+      } else {
+        console.log(`\n  ${paint.dim(`Watching for changes in ${path.basename(fullPath)}...`)}`);
+      }
     }
   };
 
@@ -118,12 +127,45 @@ export async function runWatch(options: WatchOptions): Promise<void> {
     await executeEval('Re-evaluating changes');
   }, debounceMs);
 
-  const watcher = fsWatch(fullPath, () => {
-    onFileChange();
+  // Watch the parent directory, not the file inode: atomic-save editors
+  // (VS Code, vim) replace the inode on save, which silently kills a
+  // file-level watcher. The content comparison in onFileChange dedupes
+  // spurious events.
+  const dirName = path.dirname(fullPath);
+  const baseName = path.basename(fullPath);
+  const watcher = fsWatch(dirName, (_eventType, filename) => {
+    if (!filename || filename === baseName) {
+      onFileChange();
+    }
   });
+
+  const onKeypress = (data: Buffer) => {
+    const key = data.toString();
+    if (key === 'r' || key === 'R') {
+      void executeEval('Manual re-run');
+    } else if (key === 'q' || key === 'Q' || key === '\u0003') {
+      cleanup();
+    }
+  };
+
+  const stdinIsTty = process.stdin.isTTY === true;
+  if (stdinIsTty) {
+    process.stdin.setRawMode(true);
+    process.stdin.resume();
+    process.stdin.on('data', onKeypress);
+  }
 
   const cleanup = () => {
     watcher.close();
+    if (stdinIsTty) {
+      process.stdin.removeListener('data', onKeypress);
+      try {
+        process.stdin.setRawMode(false);
+      } catch {
+        // best effort
+      }
+      process.stdin.pause();
+    }
     process.exit(0);
   };
 

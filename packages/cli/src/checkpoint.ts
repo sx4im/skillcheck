@@ -7,6 +7,9 @@ export interface CheckpointData {
   skillHash: string;
   taskSuiteHash: string;
   trials: number;
+  runnerModel: string;
+  graderModel: string;
+  generatorModel: string;
   completedOutputs: TrialOutput[];
   updatedAt: string;
 }
@@ -48,6 +51,9 @@ export async function loadCheckpoint(filePath: string): Promise<CheckpointData |
       typeof parsed.skillHash !== 'string' ||
       typeof parsed.taskSuiteHash !== 'string' ||
       typeof parsed.trials !== 'number' ||
+      typeof parsed.runnerModel !== 'string' ||
+      typeof parsed.graderModel !== 'string' ||
+      typeof parsed.generatorModel !== 'string' ||
       !Array.isArray(parsed.completedOutputs)
     ) {
       return null;
