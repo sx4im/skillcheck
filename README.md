@@ -419,7 +419,7 @@ Optional environment variables:
 | `NO_COLOR` | — | Any non-empty value disables colour ([spec](https://no-color.org)) |
 | `FORCE_COLOR` | — | `1`/`2`/`3` forces colour on, even when piped |
 
-A `.env` file in the directory where you run skillcheck is loaded for convenience (API keys and the like), but it can never redirect where those keys are sent: `*_BASE_URL` and `SKILLCHECK_API_URL` entries in the file are ignored. Set those in your shell environment instead. This means running skillcheck inside a cloned repo cannot leak your keys to a third-party host via a hostile `.env`.
+A `.env` file in the directory where you run skillcheck is loaded for convenience, but only an explicit allow-list is read from it: provider API keys (`OPENAI_API_KEY`, `ANTHROPIC_API_KEY`, `GEMINI_API_KEY`, `GOOGLE_API_KEY`, `GROQ_API_KEY`, `MISTRAL_API_KEY`, `OPENROUTER_API_KEY`, `NVIDIA_API_KEY`), `SKILLCHECK_TOKEN` / `SKILLCHECK_API_KEY`, model settings, and timeout settings. Everything else in the file is ignored, so a hostile `.env` in a cloned repo cannot redirect where your keys are sent or point the CLI at a hostile config file. Set anything else in your shell environment instead.
 
 ## Model choice
 

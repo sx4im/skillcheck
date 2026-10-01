@@ -6,14 +6,25 @@ import { DEFAULT_PROVIDER_BASE_URLS, DEFAULT_PROVIDER_MODELS } from './adapters/
 import { DEFAULT_CLOUD_API_URL, getConfiguredApiUrl, getConfiguredToken, loadUserConfig } from './config.js';
 
 // The current directory's .env is convenient for API keys, but it must never
-// decide where those keys are sent: a cloned repo could ship a .env with
-// OPENAI_BASE_URL (or any *_BASE_URL / SKILLCHECK_API_URL) pointing at an
-// attacker host, and the user's real shell-provided key would be POSTed there.
-// So the file is parsed manually (no dotenv.config(), which also silences its
-// "injected env" banner) and host-redirecting variables from it are dropped.
-// Shell exports and the saved user config are unaffected, as is an explicit
-// *_BASE_URL / SKILLCHECK_API_URL set in the real environment.
-const DOTENV_HOST_REDIRECT = /(_BASE_URL|_API_URL)$/;
+// decide where those keys are sent. A cloned repo could ship a .env that
+// redirects the saved config file itself (SKILLCHECK_CONFIG_DIR,
+// XDG_CONFIG_HOME, SKILLCHECK_CONFIG) at an attacker-written config.json
+// whose apiUrl captures the shell's real key, and a deny-list of known-bad
+// variables cannot cover every future redirect. So only an explicit allow-list
+// of credential and tuning variables is accepted from the file; everything
+// else is ignored. Shell exports and the saved user config are unaffected, as
+// is any variable set in the real environment.
+const DOTENV_ALLOW_LIST: ReadonlyArray<RegExp> = [
+  // Provider API keys and the hosted-cloud token/key.
+  /^(OPENAI|ANTHROPIC|GEMINI|GOOGLE|GROQ|MISTRAL|OPENROUTER|NVIDIA)_API_KEY$/,
+  /^SKILLCHECK_(TOKEN|API_KEY)$/,
+  // Model selection: SKILLCHECK_MODEL plus per-provider role overrides
+  // (<PROVIDER>_{GENERATOR,GRADER,RUNNER}_MODEL).
+  /^SKILLCHECK_MODEL$/,
+  /^(OPENAI|ANTHROPIC|GEMINI|GROQ|MISTRAL|OPENROUTER|NVIDIA|SKILLCHECK)_(GENERATOR|GRADER|RUNNER)_MODEL$/,
+  // Timeout and retry tuning.
+  /^(NVIDIA|SKILLCHECK)_(TIMEOUT_MS|REQUEST_DELAY_MS|MAX_ATTEMPTS|MAX_RETRY_DELAY_MS)$/
+];
 
 function loadProjectEnv(): void {
   const envPath = path.resolve(process.cwd(), '.env');
@@ -27,7 +38,7 @@ function loadProjectEnv(): void {
     return;
   }
   for (const [key, value] of Object.entries(parsed)) {
-    if (DOTENV_HOST_REDIRECT.test(key)) {
+    if (!DOTENV_ALLOW_LIST.some((pattern) => pattern.test(key))) {
       continue;
     }
     if (!(key in process.env)) {
