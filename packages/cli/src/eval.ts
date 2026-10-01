@@ -11,7 +11,7 @@ import { normalizeSkill } from './normalize.js';
 import { runTrials } from './run.js';
 import { scorePairedObservations, pairedObservations, satisfactionFromEffect } from './score.js';
 import { checkpointPath, clearCheckpoint, loadCheckpoint, saveCheckpoint } from './checkpoint.js';
-import type { GeneratedTask, GradedOutput, ProgressReporter, SkillFormat, TaskBreakdown, TrialOutput } from './types.js';
+import type { GeneratedTask, GradedOutput, ProgressReporter, SkillFormat, TaskBreakdown, TaskDifficulty, TrialOutput } from './types.js';
 
 export interface EvalOptions {
   inputPath: string;
@@ -32,6 +32,8 @@ export interface EvalOptions {
   resume?: boolean;
   /** True when --tasks was passed explicitly (vs. the command default). */
   tasksExplicit?: boolean;
+  /** Task-generation difficulty; the generator prompt defaults to 'standard'. */
+  difficulty?: TaskDifficulty;
 }
 
 function applyModelOverrides(config: ProviderConfig, options: EvalOptions): ProviderConfig {
@@ -286,7 +288,7 @@ export async function evalSkill(options: EvalOptions): Promise<EvalResult> {
   } else {
     tasks = options.taskSuite
       ? selectSuiteTasks(parseTaskSuite(await readFile(options.taskSuite, 'utf8')), options)
-      : await generateTasks({ domain: skill.domain, count: options.tasks }, config, client, cache);
+      : await generateTasks({ domain: skill.domain, count: options.tasks, difficulty: options.difficulty }, config, client, cache);
   }
   if (tasks.length === 0) {
     throw new Error('No evaluation tasks available — the task suite is empty.');

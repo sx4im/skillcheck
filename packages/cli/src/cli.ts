@@ -2,6 +2,7 @@ import { existsSync } from 'node:fs';
 import { randomUUID } from 'node:crypto';
 import { verifyProviderKey, createLlmClient, PROVIDER_NAMES } from './adapters/providers.js';
 import type { ProviderType } from './adapters/types.js';
+import type { TaskDifficulty } from './types.js';
 import {
   cloudApiUrl,
   cloudWebUrl,
@@ -234,7 +235,7 @@ const MAX_CONCURRENCY = 8;
 
 // Options shared by `check` and `eval`; one list for the path-detector and the
 // unknown-option guard.
-const CHECK_VALUE_OPTIONS = ['--tasks', '--trials', '--concurrency', '--output', '--runner', '--grader', '--generator', '--task-suite'];
+const CHECK_VALUE_OPTIONS = ['--tasks', '--trials', '--concurrency', '--output', '--runner', '--grader', '--generator', '--task-suite', '--difficulty'];
 
 const VALUE_OPTIONS = new Set([...CHECK_VALUE_OPTIONS, '--mode', '--models', '--results', '--corpus', '--sample', '--limit']);
 
@@ -327,6 +328,17 @@ function assertKnownOptions(
   }
 }
 
+function readDifficultyOption(argv: string[]): TaskDifficulty | undefined {
+  const value = readOption(argv, '--difficulty');
+  if (value === undefined) {
+    return undefined;
+  }
+  if (value !== 'standard' && value !== 'hard' && value !== 'adversarial') {
+    throw new Error(`--difficulty must be one of standard, hard, adversarial (got "${value}")`);
+  }
+  return value;
+}
+
 function parseCommonEvalOptions(
   argv: string[],
   defaultTasks: number,
@@ -347,6 +359,7 @@ function parseCommonEvalOptions(
       grader: readOption(argv, '--grader'),
       generator: readOption(argv, '--generator'),
       taskSuite: readOption(argv, '--task-suite'),
+      difficulty: readDifficultyOption(argv),
       explain: hasFlag(argv, '--explain')
     }
   };

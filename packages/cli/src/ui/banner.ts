@@ -151,6 +151,7 @@ export function printHelpUi(): void {
   console.log(`  ${paint.accent('Options')}`);
   opt('--tasks N', 'generated tasks per check (default 3, max 50)');
   opt('--trials K', 'trials per task and arm (default 3, max 10)');
+  opt('--difficulty LEVEL', 'task difficulty: standard, hard, adversarial (default standard)');
   opt('--concurrency C', 'parallel trial execution limit (default 4)');
   opt('--runner MODEL', 'runner model override (e.g. gpt-6-sol, claude-opus-5-5)');
   opt('--models M1,M2', 'models list for matrix command');
@@ -196,6 +197,7 @@ export function printCommandHelpUi(command: string): boolean {
     sec('Options');
     opt('--tasks N', 'evaluation tasks to generate (default 3, max 50)');
     opt('--trials K', 'trials per task and arm (default 3, max 10)');
+    opt('--difficulty LEVEL', 'task difficulty: standard, hard, adversarial (default standard)');
     opt('--concurrency C', 'parallel trial execution limit (default 4)');
     opt('--runner MODEL', 'runner model override (e.g. gpt-4o, claude-3-5-sonnet)');
     opt('--grader MODEL', 'grader model override');
@@ -293,6 +295,7 @@ export function printCommandHelpUi(command: string): boolean {
     sec('Options');
     opt('--tasks N', 'tasks to generate (default 10)');
     opt('--trials K', 'trials per task and arm (default 3)');
+    opt('--difficulty LEVEL', 'task difficulty: standard, hard, adversarial (default standard)');
     opt('--output FILE', 'save result JSON to file');
     opt('--explain', 'include per-task explain data in output\n');
     return true;

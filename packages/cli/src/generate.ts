@@ -1,11 +1,12 @@
 import type { LlmClient } from './adapters/types.js';
 import type { JsonCache } from './cache.js';
 import { seededShuffle } from './hash.js';
-import type { GeneratedTask } from './types.js';
+import type { GeneratedTask, TaskDifficulty } from './types.js';
 
 export interface TaskGenerationInput {
   domain: string;
   count: number;
+  difficulty?: TaskDifficulty;
 }
 
 function extractJsonPayload(text: string): unknown {
@@ -69,12 +70,19 @@ export async function generateTasks(
   client: LlmClient,
   cache: JsonCache
 ): Promise<GeneratedTask[]> {
+  const difficulty: TaskDifficulty = input.difficulty ?? 'standard';
+  const difficultyGuidance =
+    difficulty === 'hard'
+      ? ' Generate challenging, multi-constraint evaluation tasks containing subtle domain edge cases, non-obvious failure modes, or strict requirements where an unguided model is prone to make mistakes.'
+      : difficulty === 'adversarial'
+        ? ' Generate adversarial evaluation tasks built on counter-intuitive inputs and boundary-condition traps that test whether the skill instructions prevent common agent anti-patterns.'
+        : '';
   const generatedCount = input.count * 2;
   let lastError: unknown;
   for (let attempt = 1; attempt <= 3; attempt += 1) {
     const response = await cache.getOrSet(
       'generator',
-      { model: config.generatorModel, input, generatedCount, promptVersion: 7, attempt },
+      { model: config.generatorModel, input: { domain: input.domain, count: input.count, difficulty }, generatedCount, promptVersion: 7, attempt },
       () =>
         client.complete({
           model: config.generatorModel,
@@ -88,7 +96,7 @@ export async function generateTasks(
             },
             {
               role: 'user',
-              content: `Declared domain:\n${input.domain}\n\nGenerate ${generatedCount} concise tasks. Return exactly {"tasks":[{"id":"t1","prompt":"one concrete task under 80 words","criterion":"one pass/fail rubric under 60 words"}]}. Keep every criterion a single string, not an array. Do not include markdown or commentary.`
+              content: `Declared domain:\n${input.domain}\n\nGenerate ${generatedCount} concise tasks. Return exactly {"tasks":[{"id":"t1","prompt":"one concrete task under 80 words","criterion":"one pass/fail rubric under 60 words"}]}. Keep every criterion a single string, not an array. Do not include markdown or commentary.${difficultyGuidance}`
             }
           ]
         })
