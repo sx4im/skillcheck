@@ -4,6 +4,7 @@ import { evalResultFixture } from './eval-result-fixture.js';
 import {
   bannerLines,
   formatExplain,
+  formatMarkdownReport,
   formatQuotaUpsell,
   formatResultCard,
   printBanner,
@@ -130,5 +131,82 @@ describe('ui formatters', () => {
     expect(text).toContain('helped');
     expect(text).toContain('with skill');
     expect(text).toContain('handle null user');
+  });
+});
+
+describe('formatMarkdownReport', () => {
+  function markdownResult(verdict: EvalResult['result']['verdict']): string {
+    return formatMarkdownReport(evalResultFixture({
+      result: {
+        verdict,
+        effect_pp: 25,
+        satisfaction: 75,
+        ci_pp: [5, 45],
+        with_skill_pass: 0.75,
+        no_skill_pass: 0.5,
+        token_overhead: 120
+      },
+      tasks: [
+        {
+          id: 't001',
+          prompt: 'Write a function that reverses a string without using built-in reverse helpers',
+          criterion_type: 'rubric',
+          criterion: 'Output reverses the string',
+          with_skill_pass_rate: 1,
+          no_skill_pass_rate: 0.5
+        }
+      ]
+    }));
+  }
+
+  it('renders a GFM report with verdict headline, stats, task table, and metadata', () => {
+    const report = markdownResult('helps');
+
+    expect(report).toContain('# Skillcheck Evaluation');
+    expect(report).toContain(':white_check_mark:');
+    expect(report).toContain('HELPS');
+    expect(report).toContain('75.0/100');
+    expect(report).toContain('+25.0 pp');
+    expect(report).toContain('[5.0, 45.0]');
+    expect(report).toContain('75.0%');
+    expect(report).toContain('50.0%');
+    expect(report).toContain('+120 tokens');
+    expect(report).toContain('| Task | Prompt | With Skill | Without Skill | Delta |');
+    expect(report).toContain('Write a function that reverses a string');
+    expect(report).toContain('| t001 |');
+    expect(report).toContain('runner');
+    expect(report).toContain('abc');
+    expect(report).toContain('2026-01-01');
+  });
+
+  it('renders the placebo badge', () => {
+    const report = markdownResult('placebo');
+
+    expect(report).toContain(':heavy_minus_sign:');
+    expect(report).toContain('PLACEBO');
+  });
+
+  it('renders the harms badge', () => {
+    const report = markdownResult('harms');
+
+    expect(report).toContain(':x:');
+    expect(report).toContain('HARMS');
+  });
+
+  it('escapes pipe characters in table cells so the GFM table stays valid', () => {
+    const report = formatMarkdownReport(evalResultFixture({
+      tasks: [
+        {
+          id: 't001',
+          prompt: 'Handle a | b choice',
+          criterion_type: 'rubric',
+          criterion: ' Picks correctly ',
+          with_skill_pass_rate: 1,
+          no_skill_pass_rate: 1
+        }
+      ]
+    }));
+
+    expect(report).toContain('Handle a \\| b choice');
   });
 });

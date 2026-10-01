@@ -40,6 +40,7 @@ import {
   startProgress,
   validateSkillInput,
   copyToClipboardOsc52,
+  formatMarkdownReport,
   formatPrMarkdown,
   openInspector,
   paint,
@@ -374,7 +375,7 @@ export function parseEvalOptions(argv: string[], startIndex = 3): EvalOptions {
     argv,
     startIndex,
     [...CHECK_VALUE_OPTIONS, '--mode'],
-    ['--explain', '--resume'],
+    ['--explain', '--resume', '--markdown'],
     inputIndex
   );
 
@@ -393,6 +394,7 @@ export function parseEvalOptions(argv: string[], startIndex = 3): EvalOptions {
 interface CheckOptions {
   evalOptions: EvalOptions;
   json: boolean;
+  markdown: boolean;
   output?: string;
   clipboard?: boolean;
   inspect?: boolean;
@@ -411,7 +413,7 @@ export function parseCheckOptions(argv: string[], startIndex = 3): CheckOptions 
     argv,
     startIndex,
     CHECK_VALUE_OPTIONS,
-    ['--json', '--explain', '--clipboard', '--resume', '--inspect'],
+    ['--json', '--explain', '--clipboard', '--resume', '--inspect', '--markdown'],
     inputIndex
   );
 
@@ -423,6 +425,7 @@ export function parseCheckOptions(argv: string[], startIndex = 3): CheckOptions 
       saveArtifacts: Boolean(evalOptions.output)
     },
     json: hasFlag(argv, '--json'),
+    markdown: hasFlag(argv, '--markdown'),
     output: evalOptions.output,
     clipboard: hasFlag(argv, '--clipboard'),
     inspect: hasFlag(argv, '--inspect'),
@@ -567,7 +570,7 @@ async function runCheck(options: CheckOptions, header: 'compact' | 'none' = 'com
   await validateSkillInput(options.evalOptions.inputPath);
   await ensureCloudConfigured(false);
 
-  const interactive = !options.json && process.stdin.isTTY === true && process.stdout.isTTY === true;
+  const interactive = !options.json && !options.markdown && process.stdin.isTTY === true && process.stdout.isTTY === true;
 
   // A direct `check <path>` on a TTY that didn't pin --tasks/--trials gets the same
   // effort menu as the no-arg flow, instead of silently running at the defaults.
@@ -581,7 +584,7 @@ async function runCheck(options: CheckOptions, header: 'compact' | 'none' = 'com
 
   // Skip the compact header when we just showed the effort menu — its confirmation
   // line ("✓ Effort  Standard · 3 tasks × 3 trials") already states the run size.
-  if (header === 'compact' && !options.json && !pickedEffort) {
+  if (header === 'compact' && !options.json && !options.markdown && !pickedEffort) {
     printCheckHeader(options.evalOptions.inputPath, options.evalOptions.tasks, options.evalOptions.trials);
   }
 
@@ -605,6 +608,10 @@ async function runCheck(options: CheckOptions, header: 'compact' | 'none' = 'com
   }
   if (options.json) {
     console.log(JSON.stringify(result, null, 2));
+    return;
+  }
+  if (options.markdown) {
+    console.log(formatMarkdownReport(result));
     return;
   }
   await printResultCard(result, options.output);
@@ -671,6 +678,7 @@ async function runInteractiveCheck(): Promise<void> {
       saveArtifacts: false
     },
     json: false,
+    markdown: false,
     effortPinned: true // already chosen above — don't let runCheck re-ask
   };
   await runCheck(options, 'none');
@@ -758,8 +766,13 @@ export async function main(argv: string[]): Promise<void> {
   }
 
   if (command === 'eval') {
-    const result = await evalSkill(parseEvalOptions(argv, 3));
-    console.log(JSON.stringify(result, null, 2));
+    const evalOptions = parseEvalOptions(argv, 3);
+    const result = await evalSkill(evalOptions);
+    if (argv.includes('--markdown')) {
+      console.log(formatMarkdownReport(result));
+    } else {
+      console.log(JSON.stringify(result, null, 2));
+    }
     return;
   }
 

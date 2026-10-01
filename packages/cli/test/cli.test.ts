@@ -61,6 +61,14 @@ describe('friendly CLI check command', () => {
     ).toThrow(/--difficulty must be one of standard, hard, adversarial/);
   });
 
+  it('parses --markdown as a flag and leaves it off by default', () => {
+    const withFlag = parseCheckOptions(['node', 'skillcheck', 'check', './SKILL.md', '--markdown']);
+    expect(withFlag.markdown).toBe(true);
+
+    const withoutFlag = parseCheckOptions(['node', 'skillcheck', 'check', './SKILL.md']);
+    expect(withoutFlag.markdown).toBe(false);
+  });
+
   it('accepts options before or after the skill path', () => {
     const optsBefore = parseCheckOptions(['node', 'skillcheck', '--explain', './SKILL.md', '--tasks', '5'], 2);
     expect(optsBefore.evalOptions.inputPath).toBe('./SKILL.md');
