@@ -154,12 +154,32 @@ export function exitOnInterrupt(cleanup: () => void): () => void {
 const PICKER_WINDOW = 10;
 const PICKER_LABEL_WIDTH = 34;
 
-function renderPicker(currentDir: string, entries: PickerEntry[], selected: number, message?: string): void {
+export function filterPickerEntries(entries: PickerEntry[], query: string): PickerEntry[] {
+  const clean = query.trim().toLowerCase();
+  if (!clean) return entries;
+
+  return entries.filter((entry) => {
+    if (entry.kind === 'parent') return true;
+    return entry.label.toLowerCase().includes(clean);
+  });
+}
+
+function renderPicker(
+  currentDir: string,
+  entries: PickerEntry[],
+  selected: number,
+  message?: string,
+  filterQuery = ''
+): void {
   const out: string[] = [...bannerLines()];
   const runnableCount = entries.filter((entry) => entry.runnable).length;
   out.push(`  ${paint.accent('Step 1 of 2')}  ${paint.bold('Choose the skill file you want to check')}`);
   out.push(`  ${paint.dim('Pick any')} ${paint.ok('green .md file')}${paint.dim('. Open a')} ${paint.accent('blue folder')} ${paint.dim('to look inside it.')}`);
   out.push(`  ${paint.dim('Folder:')} ${truncateDisplay(currentDir, 60)}  ${paint.dim(`${SYM.dot} ${runnableCount} markdown file${runnableCount === 1 ? '' : 's'} here`)}`);
+
+  if (filterQuery) {
+    out.push(`  ${paint.accent('Filter:')} ${paint.bold(filterQuery)} ${paint.dim('(type to refine, Backspace/Esc to clear)')}`);
+  }
   out.push('');
 
   if (message) {
@@ -194,7 +214,7 @@ function renderPicker(currentDir: string, entries: PickerEntry[], selected: numb
     out.push(`    ${paint.dim(`↓ ${below} more`)}`);
   }
   out.push('');
-  out.push(`  ${paint.dim(`↑/↓ move ${SYM.dot} Enter open folder / choose file ${SYM.dot} q quit`)}`);
+  out.push(`  ${paint.dim(`Type to search ${SYM.dot} ↑/↓ or j/k move ${SYM.dot} Enter open/select ${SYM.dot} Esc clear/quit`)}`);
   out.push('');
   process.stdout.write(`\x1b[2J\x1b[H${out.join('\n')}\n`);
 }
@@ -241,12 +261,13 @@ export async function selectSkillPath(startDir = process.cwd()): Promise<string>
   let selected = 0;
   let message: string | undefined;
   let chosen: string | undefined;
+  let filter = '';
 
   await withRawMode(async () => {
     for (;;) {
-      let entries: PickerEntry[];
+      let rawEntries: PickerEntry[];
       try {
-        entries = await listPickerEntries(currentDir);
+        rawEntries = await listPickerEntries(currentDir);
         lastGoodDir = currentDir;
       } catch (error) {
         if (currentDir === lastGoodDir) {
@@ -257,23 +278,39 @@ export async function selectSkillPath(startDir = process.cwd()): Promise<string>
         currentDir = lastGoodDir;
         continue;
       }
-      selected = Math.max(0, Math.min(selected, entries.length - 1));
-      renderPicker(currentDir, entries, selected, message);
+
+      const entries = filterPickerEntries(rawEntries, filter);
+      selected = Math.max(0, Math.min(selected, Math.max(0, entries.length - 1)));
+      renderPicker(currentDir, entries, selected, message, filter);
       message = undefined;
 
       const { input, key } = await readKey();
-      if ((key.ctrl && key.name === 'c') || input === 'q') {
+      if ((key.ctrl && key.name === 'c') || (filter === '' && input === 'q') || (filter === '' && key.name === 'escape')) {
         throw new CancelledError('Selection cancelled.');
       }
-      if (key.name === 'up' || input === 'k') {
-        selected = wrapIndex(selected, -1, entries.length);
+      if (key.name === 'escape') {
+        filter = '';
+        selected = 0;
         continue;
       }
-      if (key.name === 'down' || input === 'j') {
-        selected = wrapIndex(selected, 1, entries.length);
+      if (key.name === 'backspace') {
+        filter = filter.slice(0, -1);
+        selected = 0;
+        continue;
+      }
+      if (key.name === 'up' || (filter === '' && input === 'k')) {
+        selected = wrapIndex(selected, -1, Math.max(1, entries.length));
+        continue;
+      }
+      if (key.name === 'down' || (filter === '' && input === 'j')) {
+        selected = wrapIndex(selected, 1, Math.max(1, entries.length));
         continue;
       }
       if (key.name !== 'return') {
+        if (input && input.length === 1 && !key.ctrl && !key.meta && /^[\w.\- /]$/.test(input)) {
+          filter += input;
+          selected = 0;
+        }
         continue;
       }
 
@@ -284,6 +321,7 @@ export async function selectSkillPath(startDir = process.cwd()): Promise<string>
       if (entry.kind === 'parent' || entry.kind === 'directory') {
         currentDir = entry.fullPath;
         selected = 0;
+        filter = '';
         continue;
       }
       if (entry.runnable) {
