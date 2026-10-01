@@ -1,6 +1,6 @@
 {
   "name": "@sx4im/skillcheck",
-  "version": "0.12.0",
+  "version": "0.13.0",
   "description": "Controlled A/B testing for AI agent skills, .cursorrules, CLAUDE.md, and system prompts: blind grading, bootstrap confidence intervals, and HELPS/PLACEBO/HARMS effect size measurement.",
   "type": "module",
   "license": "MIT",

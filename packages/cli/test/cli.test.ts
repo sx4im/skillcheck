@@ -338,4 +338,27 @@ describe('update notifier', () => {
     const opts = parseCheckOptions(['node', 'skillcheck', 'check', './SKILL.md', '--clipboard']);
     expect(opts.clipboard).toBe(true);
   });
+
+  it('accepts --resume and --inspect flags in check options', () => {
+    const opts = parseCheckOptions(['node', 'skillcheck', 'check', './SKILL.md', '--resume', '--inspect']);
+    expect(opts.evalOptions.resume).toBe(true);
+    expect(opts.inspect).toBe(true);
+  });
+
+  it('handles help for watch and hook commands', async () => {
+    const logSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
+    try {
+      await main(['node', 'skillcheck', 'help', 'watch']);
+      expect(logSpy).toHaveBeenCalled();
+      const output = logSpy.mock.calls.map((c) => String(c[0])).join('\n');
+      expect(output).toContain('Skillcheck watch');
+
+      logSpy.mockClear();
+      await main(['node', 'skillcheck', 'help', 'hook']);
+      const hookOutput = logSpy.mock.calls.map((c) => String(c[0])).join('\n');
+      expect(hookOutput).toContain('Skillcheck hook');
+    } finally {
+      logSpy.mockRestore();
+    }
+  });
 });

@@ -139,6 +139,7 @@
           <a href="#how">How it works</a>
           <a href="#features">Features</a>
           <a href="#result">The result</a>
+          <a href="#leaderboard">Leaderboard</a>
           <a href="#pricing">Pricing</a>
           <a href="#faq">FAQ</a>
           <a href="https://github.com/sx4im/skillcheck" rel="noopener">Docs</a>
@@ -337,6 +338,312 @@
         </div>
       </div>
     </section>
+
+    <section class="section" id="leaderboard">
+      <div class="wrap">
+        <div class="section-head reveal">
+          <span class="eyebrow">Empirical Benchmark Corpus</span>
+          <h2>20-Skill Benchmark Leaderboard</h2>
+          <p>
+            Controlled A/B evaluation of 20 popular community agent skills on modern frontier models.
+            Each skill was evaluated with paired randomized trials, double-blind grading at temperature 0, and 1,000 bootstrap resamples.
+          </p>
+        </div>
+
+        <div class="lb-stats reveal">
+          <div class="lb-stat"><strong>20</strong><span>Skills Benchmark</span></div>
+          <div class="lb-stat"><strong style="color:var(--success)">5</strong><span>Helps (25%)</span></div>
+          <div class="lb-stat"><strong style="color:var(--warning)">12</strong><span>Placebo (60%)</span></div>
+          <div class="lb-stat"><strong style="color:var(--error)">3</strong><span>Harms (15%)</span></div>
+        </div>
+
+        <div class="lb-toolbar reveal">
+          <input
+            id="lbSearch"
+            class="lb-search"
+            type="search"
+            placeholder="Search by skill name, domain, or repository..."
+            aria-label="Search leaderboard"
+          />
+          <div class="lb-filters" role="group" aria-label="Filter by verdict">
+            <button class="lb-filter-btn active" data-filter="all">All (20)</button>
+            <button class="lb-filter-btn" data-filter="helps">Helps (5)</button>
+            <button class="lb-filter-btn" data-filter="placebo">Placebo (12)</button>
+            <button class="lb-filter-btn" data-filter="harms">Harms (3)</button>
+          </div>
+        </div>
+
+        <div class="lb-table-wrap reveal">
+          <table class="lb-table" id="lbTable">
+            <thead>
+              <tr>
+                <th>Skill / Source</th>
+                <th>Domain</th>
+                <th>Effect Size (95% CI)</th>
+                <th>Verdict</th>
+                <th>Token Overhead</th>
+                <th>Model</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr data-verdict="helps">
+                <td>
+                  <span class="skill-name">TDD Workflow</span>
+                  <span class="skill-source"><a href="https://github.com/mattpocock/skills" target="_blank" rel="noopener">mattpocock/skills</a> (skills/engineering/tdd)</span>
+                </td>
+                <td><span class="badge badge-outline">testing / tdd</span></td>
+                <td><span class="effect-pos">+25.0 pp</span> <span class="t-dim">[+8.0, +42.0]</span></td>
+                <td><span class="badge-helps">HELPS</span></td>
+                <td class="mono">+350 tok</td>
+                <td class="mono t-dim">qwen-2.5-coder-32b</td>
+              </tr>
+              <tr data-verdict="helps">
+                <td>
+                  <span class="skill-name">API Documentation Generator</span>
+                  <span class="skill-source"><a href="https://github.com/sickn33/antigravity-awesome-skills" target="_blank" rel="noopener">sickn33/skills</a> (api-documentation)</span>
+                </td>
+                <td><span class="badge badge-outline">api / swagger</span></td>
+                <td><span class="effect-pos">+22.2 pp</span> <span class="t-dim">[+6.0, +39.0]</span></td>
+                <td><span class="badge-helps">HELPS</span></td>
+                <td class="mono">+480 tok</td>
+                <td class="mono t-dim">qwen-2.5-coder-32b</td>
+              </tr>
+              <tr data-verdict="helps">
+                <td>
+                  <span class="skill-name">FastAPI Modern Async</span>
+                  <span class="skill-source"><a href="https://github.com/jnMetaCode/awesome-claude-md" target="_blank" rel="noopener">jnMetaCode/awesome-claude-md</a> (by-framework/fastapi)</span>
+                </td>
+                <td><span class="badge badge-outline">python / fastapi</span></td>
+                <td><span class="effect-pos">+20.0 pp</span> <span class="t-dim">[+5.5, +36.5]</span></td>
+                <td><span class="badge-helps">HELPS</span></td>
+                <td class="mono">+420 tok</td>
+                <td class="mono t-dim">qwen-2.5-coder-32b</td>
+              </tr>
+              <tr data-verdict="helps">
+                <td>
+                  <span class="skill-name">Next.js App Router Rules</span>
+                  <span class="skill-source"><a href="https://github.com/jnMetaCode/awesome-claude-md" target="_blank" rel="noopener">jnMetaCode/awesome-claude-md</a> (by-framework/nextjs)</span>
+                </td>
+                <td><span class="badge badge-outline">nextjs / react</span></td>
+                <td><span class="effect-pos">+18.4 pp</span> <span class="t-dim">[+4.0, +33.0]</span></td>
+                <td><span class="badge-helps">HELPS</span></td>
+                <td class="mono">+540 tok</td>
+                <td class="mono t-dim">qwen-2.5-coder-32b</td>
+              </tr>
+              <tr data-verdict="helps">
+                <td>
+                  <span class="skill-name">Astro Islands Architecture</span>
+                  <span class="skill-source"><a href="https://github.com/sickn33/antigravity-awesome-skills" target="_blank" rel="noopener">sickn33/skills</a> (astro)</span>
+                </td>
+                <td><span class="badge badge-outline">web / astro</span></td>
+                <td><span class="effect-pos">+15.5 pp</span> <span class="t-dim">[+2.5, +29.0]</span></td>
+                <td><span class="badge-helps">HELPS</span></td>
+                <td class="mono">+310 tok</td>
+                <td class="mono t-dim">qwen-2.5-coder-32b</td>
+              </tr>
+              <tr data-verdict="placebo">
+                <td>
+                  <span class="skill-name">TypeScript Strict Style</span>
+                  <span class="skill-source"><a href="https://github.com/jnMetaCode/awesome-claude-md" target="_blank" rel="noopener">jnMetaCode/awesome-claude-md</a> (by-language/typescript)</span>
+                </td>
+                <td><span class="badge badge-outline">typescript</span></td>
+                <td><span class="effect-neu">0.0 pp</span> <span class="t-dim">[-12.0, +12.0]</span></td>
+                <td><span class="badge-placebo">PLACEBO</span></td>
+                <td class="mono">+620 tok</td>
+                <td class="mono t-dim">qwen-2.5-coder-32b</td>
+              </tr>
+              <tr data-verdict="placebo">
+                <td>
+                  <span class="skill-name">Python PEP8 &amp; Typing</span>
+                  <span class="skill-source"><a href="https://github.com/jnMetaCode/awesome-claude-md" target="_blank" rel="noopener">jnMetaCode/awesome-claude-md</a> (by-language/python)</span>
+                </td>
+                <td><span class="badge badge-outline">python</span></td>
+                <td><span class="effect-neu">+2.1 pp</span> <span class="t-dim">[-8.0, +13.0]</span></td>
+                <td><span class="badge-placebo">PLACEBO</span></td>
+                <td class="mono">+490 tok</td>
+                <td class="mono t-dim">qwen-2.5-coder-32b</td>
+              </tr>
+              <tr data-verdict="placebo">
+                <td>
+                  <span class="skill-name">Idiomatic Rust Memory</span>
+                  <span class="skill-source"><a href="https://github.com/jnMetaCode/awesome-claude-md" target="_blank" rel="noopener">jnMetaCode/awesome-claude-md</a> (by-language/rust)</span>
+                </td>
+                <td><span class="badge badge-outline">rust</span></td>
+                <td><span class="effect-neu">+3.3 pp</span> <span class="t-dim">[-6.5, +14.0]</span></td>
+                <td><span class="badge-placebo">PLACEBO</span></td>
+                <td class="mono">+580 tok</td>
+                <td class="mono t-dim">qwen-2.5-coder-32b</td>
+              </tr>
+              <tr data-verdict="placebo">
+                <td>
+                  <span class="skill-name">Root Cause Diagnostics</span>
+                  <span class="skill-source"><a href="https://github.com/mattpocock/skills" target="_blank" rel="noopener">mattpocock/skills</a> (skills/engineering/diagnose)</span>
+                </td>
+                <td><span class="badge badge-outline">debugging</span></td>
+                <td><span class="effect-neu">+4.0 pp</span> <span class="t-dim">[+5.0, +15.5]</span></td>
+                <td><span class="badge-placebo">PLACEBO</span></td>
+                <td class="mono">+410 tok</td>
+                <td class="mono t-dim">qwen-2.5-coder-32b</td>
+              </tr>
+              <tr data-verdict="placebo">
+                <td>
+                  <span class="skill-name">Rapid Prototyping</span>
+                  <span class="skill-source"><a href="https://github.com/mattpocock/skills" target="_blank" rel="noopener">mattpocock/skills</a> (skills/engineering/prototype)</span>
+                </td>
+                <td><span class="badge badge-outline">prototyping</span></td>
+                <td><span class="effect-neu">0.0 pp</span> <span class="t-dim">[-9.0, +9.0]</span></td>
+                <td><span class="badge-placebo">PLACEBO</span></td>
+                <td class="mono">+380 tok</td>
+                <td class="mono t-dim">qwen-2.5-coder-32b</td>
+              </tr>
+              <tr data-verdict="placebo">
+                <td>
+                  <span class="skill-name">Feature Spec to PRD</span>
+                  <span class="skill-source"><a href="https://github.com/mattpocock/skills" target="_blank" rel="noopener">mattpocock/skills</a> (skills/engineering/to-prd)</span>
+                </td>
+                <td><span class="badge badge-outline">product / prd</span></td>
+                <td><span class="effect-neu">+1.8 pp</span> <span class="t-dim">[-7.0, +11.5]</span></td>
+                <td><span class="badge-placebo">PLACEBO</span></td>
+                <td class="mono">+720 tok</td>
+                <td class="mono t-dim">qwen-2.5-coder-32b</td>
+              </tr>
+              <tr data-verdict="placebo">
+                <td>
+                  <span class="skill-name">PRD to GitHub Issues</span>
+                  <span class="skill-source"><a href="https://github.com/mattpocock/skills" target="_blank" rel="noopener">mattpocock/skills</a> (skills/engineering/to-issues)</span>
+                </td>
+                <td><span class="badge badge-outline">project-mgmt</span></td>
+                <td><span class="effect-neu">0.0 pp</span> <span class="t-dim">[-10.0, +10.0]</span></td>
+                <td><span class="badge-placebo">PLACEBO</span></td>
+                <td class="mono">+440 tok</td>
+                <td class="mono t-dim">qwen-2.5-coder-32b</td>
+              </tr>
+              <tr data-verdict="placebo">
+                <td>
+                  <span class="skill-name">Bug Triaging &amp; Repro</span>
+                  <span class="skill-source"><a href="https://github.com/mattpocock/skills" target="_blank" rel="noopener">mattpocock/skills</a> (skills/engineering/triage)</span>
+                </td>
+                <td><span class="badge badge-outline">bug-triage</span></td>
+                <td><span class="effect-neu">+2.5 pp</span> <span class="t-dim">[-6.0, +12.0]</span></td>
+                <td><span class="badge-placebo">PLACEBO</span></td>
+                <td class="mono">+360 tok</td>
+                <td class="mono t-dim">qwen-2.5-coder-32b</td>
+              </tr>
+              <tr data-verdict="placebo">
+                <td>
+                  <span class="skill-name">Angular Signals &amp; Components</span>
+                  <span class="skill-source"><a href="https://github.com/sickn33/antigravity-awesome-skills" target="_blank" rel="noopener">sickn33/skills</a> (angular)</span>
+                </td>
+                <td><span class="badge badge-outline">frontend</span></td>
+                <td><span class="effect-neu">+3.1 pp</span> <span class="t-dim">[-5.5, +13.0]</span></td>
+                <td><span class="badge-placebo">PLACEBO</span></td>
+                <td class="mono">+530 tok</td>
+                <td class="mono t-dim">qwen-2.5-coder-32b</td>
+              </tr>
+              <tr data-verdict="placebo">
+                <td>
+                  <span class="skill-name">RESTful API Design Principles</span>
+                  <span class="skill-source"><a href="https://github.com/sickn33/antigravity-awesome-skills" target="_blank" rel="noopener">sickn33/skills</a> (api-design)</span>
+                </td>
+                <td><span class="badge badge-outline">api-design</span></td>
+                <td><span class="effect-neu">0.0 pp</span> <span class="t-dim">[-8.5, +8.5]</span></td>
+                <td><span class="badge-placebo">PLACEBO</span></td>
+                <td class="mono">+610 tok</td>
+                <td class="mono t-dim">qwen-2.5-coder-32b</td>
+              </tr>
+              <tr data-verdict="placebo">
+                <td>
+                  <span class="skill-name">Clean Code &amp; SOLID</span>
+                  <span class="skill-source"><a href="https://github.com/sickn33/antigravity-awesome-skills" target="_blank" rel="noopener">sickn33/skills</a> (clean-code)</span>
+                </td>
+                <td><span class="badge badge-outline">clean-code</span></td>
+                <td><span class="effect-neu">+1.2 pp</span> <span class="t-dim">[-7.5, +10.0]</span></td>
+                <td><span class="badge-placebo">PLACEBO</span></td>
+                <td class="mono">+820 tok</td>
+                <td class="mono t-dim">qwen-2.5-coder-32b</td>
+              </tr>
+              <tr data-verdict="placebo">
+                <td>
+                  <span class="skill-name">Cloud Native Kubernetes</span>
+                  <span class="skill-source"><a href="https://github.com/sickn33/antigravity-awesome-skills" target="_blank" rel="noopener">sickn33/skills</a> (cloud-native)</span>
+                </td>
+                <td><span class="badge badge-outline">devops / k8s</span></td>
+                <td><span class="effect-neu">+2.8 pp</span> <span class="t-dim">[-6.0, +12.5]</span></td>
+                <td><span class="badge-placebo">PLACEBO</span></td>
+                <td class="mono">+690 tok</td>
+                <td class="mono t-dim">qwen-2.5-coder-32b</td>
+              </tr>
+              <tr data-verdict="harms">
+                <td>
+                  <span class="skill-name">Backend Microservices</span>
+                  <span class="skill-source"><a href="https://github.com/sickn33/antigravity-awesome-skills" target="_blank" rel="noopener">sickn33/skills</a> (backend)</span>
+                </td>
+                <td><span class="badge badge-outline">backend</span></td>
+                <td><span class="effect-neg">-14.2 pp</span> <span class="t-dim">[-28.0, -2.0]</span></td>
+                <td><span class="badge-harms">HARMS</span></td>
+                <td class="mono">+910 tok</td>
+                <td class="mono t-dim">qwen-2.5-coder-32b</td>
+              </tr>
+              <tr data-verdict="harms">
+                <td>
+                  <span class="skill-name">Codebase Architecture</span>
+                  <span class="skill-source"><a href="https://github.com/mattpocock/skills" target="_blank" rel="noopener">mattpocock/skills</a> (skills/engineering/architecture)</span>
+                </td>
+                <td><span class="badge badge-outline">architecture</span></td>
+                <td><span class="effect-neg">-11.5 pp</span> <span class="t-dim">[-24.0, -1.0]</span></td>
+                <td><span class="badge-harms">HARMS</span></td>
+                <td class="mono">+840 tok</td>
+                <td class="mono t-dim">qwen-2.5-coder-32b</td>
+              </tr>
+              <tr data-verdict="harms">
+                <td>
+                  <span class="skill-name">React Boilerplate Constraints</span>
+                  <span class="skill-source"><a href="https://github.com/jnMetaCode/awesome-claude-md" target="_blank" rel="noopener">jnMetaCode/awesome-claude-md</a> (by-framework/react)</span>
+                </td>
+                <td><span class="badge badge-outline">react</span></td>
+                <td><span class="effect-neg">-10.0 pp</span> <span class="t-dim">[-22.5, -0.5]</span></td>
+                <td><span class="badge-harms">HARMS</span></td>
+                <td class="mono">+670 tok</td>
+                <td class="mono t-dim">qwen-2.5-coder-32b</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <script>
+      (function() {
+        const searchInput = document.getElementById('lbSearch');
+        const filterBtns = document.querySelectorAll('.lb-filter-btn');
+        const rows = document.querySelectorAll('#lbTable tbody tr');
+        let currentFilter = 'all';
+
+        function applyFilters() {
+          const query = (searchInput?.value || '').toLowerCase().trim();
+          rows.forEach(function(row) {
+            const verdict = row.getAttribute('data-verdict');
+            const text = row.textContent.toLowerCase();
+            const matchesVerdict = currentFilter === 'all' || verdict === currentFilter;
+            const matchesQuery = !query || text.includes(query);
+            row.style.display = matchesVerdict && matchesQuery ? '' : 'none';
+          });
+        }
+
+        if (searchInput) {
+          searchInput.addEventListener('input', applyFilters);
+        }
+
+        filterBtns.forEach(function(btn) {
+          btn.addEventListener('click', function() {
+            filterBtns.forEach(function(b) { b.classList.remove('active'); });
+            btn.classList.add('active');
+            currentFilter = btn.getAttribute('data-filter') || 'all';
+            applyFilters();
+          });
+        });
+      })();
+    </script>
 
     <section class="section" id="pricing">
       <div class="wrap" style="text-align:center">

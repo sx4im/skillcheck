@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from 'vitest';
+import { describe, expect, it } from 'vitest';
 import { createDebouncedWatcher, calculateTokenDelta } from '../src/watch.js';
 
 describe('watch mode hot-reloading', () => {

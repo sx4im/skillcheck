@@ -2,7 +2,7 @@ import { watch as fsWatch } from 'node:fs';
 import { readFile } from 'node:fs/promises';
 import path from 'node:path';
 import { evalSkill } from './eval.js';
-import { printBanner, printCheckHeader, printResultCard, startProgress } from './ui.js';
+import { printBanner, printResultCard, startProgress } from './ui.js';
 import { SYM, paint } from './ui/theme.js';
 
 export interface WatchOptions {

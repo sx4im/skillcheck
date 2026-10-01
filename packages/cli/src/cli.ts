@@ -40,6 +40,7 @@ import {
   validateSkillInput,
   copyToClipboardOsc52,
   formatPrMarkdown,
+  openInspector,
   paint,
   SYM
 } from './ui.js';
@@ -49,10 +50,12 @@ import { runDemo } from './demo.js';
 import { findWorkspaceSkills } from './discovery.js';
 import { probeLocalLlm } from './local-llm.js';
 import { generateCompletionScript, detectShell, type ShellType } from './completion.js';
+import { installGitHook, runPreCommitCheck } from './hook.js';
+import { runWatch } from './watch.js';
 
 // Commands that emit machine-readable output or run unattended — never interrupt
 // these with the interactive "update available?" prompt.
-const MACHINE_COMMANDS = new Set(['eval', 'm0', 'corpus', 'rot', 'verify', 'matrix', 'demo', 'completion']);
+const MACHINE_COMMANDS = new Set(['eval', 'm0', 'corpus', 'rot', 'verify', 'matrix', 'demo', 'completion', 'hook']);
 
 // First-run onboarding. Supports hosted mode (Skillcheck Cloud) as default,
 // or Bring-Your-Own-Key (BYOK) for OpenAI, Anthropic, Gemini, Groq, Mistral, OpenRouter, NVIDIA NIM.
@@ -377,6 +380,7 @@ interface CheckOptions {
   json: boolean;
   output?: string;
   clipboard?: boolean;
+  inspect?: boolean;
   effortPinned: boolean;
 }
 
@@ -392,7 +396,7 @@ export function parseCheckOptions(argv: string[], startIndex = 3): CheckOptions 
     argv,
     startIndex,
     CHECK_VALUE_OPTIONS,
-    ['--json', '--explain', '--clipboard'],
+    ['--json', '--explain', '--clipboard', '--resume', '--inspect'],
     inputIndex
   );
 
@@ -400,11 +404,13 @@ export function parseCheckOptions(argv: string[], startIndex = 3): CheckOptions 
     evalOptions: {
       inputPath,
       ...evalOptions,
+      resume: hasFlag(argv, '--resume'),
       saveArtifacts: Boolean(evalOptions.output)
     },
     json: hasFlag(argv, '--json'),
     output: evalOptions.output,
     clipboard: hasFlag(argv, '--clipboard'),
+    inspect: hasFlag(argv, '--inspect'),
     effortPinned: readOption(argv, '--tasks') !== undefined || readOption(argv, '--trials') !== undefined
   };
 }
@@ -595,6 +601,10 @@ async function runCheck(options: CheckOptions, header: 'compact' | 'none' = 'com
     }
   }
 
+  if (options.inspect && interactive) {
+    await openInspector(result);
+  }
+
   const breakdown = formatExplain(result);
   if (!breakdown) {
     return;
@@ -603,9 +613,11 @@ async function runCheck(options: CheckOptions, header: 'compact' | 'none' = 'com
     console.log(breakdown);
     return;
   }
-  if (interactive) {
-    const answer = (await promptText('See the per-task breakdown? [y/N] ')).trim().toLowerCase();
-    if (answer === 'y' || answer === 'yes') {
+  if (interactive && !options.inspect) {
+    const answer = (await promptText('Press [i] to inspect in Skillcheck Lens, [y] for breakdown, or [Enter] to finish: ')).trim().toLowerCase();
+    if (answer === 'i' || answer === 'inspect') {
+      await openInspector(result);
+    } else if (answer === 'y' || answer === 'yes') {
       console.log(breakdown);
     }
   }
@@ -765,6 +777,41 @@ export async function main(argv: string[]): Promise<void> {
       console.log(JSON.stringify(result, null, 2));
     }
     return;
+  }
+
+  if (command === 'watch') {
+    const { path: inputPath, index: inputIndex } = findInputArgument(argv, 3);
+    if (!inputPath) {
+      throw new Error('Usage: skillcheck watch <path-to-skill-file>\nExample: skillcheck watch ./SKILL.md');
+    }
+    assertKnownOptions(argv, 3, ['--tasks', '--trials'], [], inputIndex);
+    await runWatch({
+      inputPath,
+      tasks: readNumberOption(argv, '--tasks', 3, MAX_TASKS),
+      trials: readNumberOption(argv, '--trials', 2, MAX_TRIALS)
+    });
+    return;
+  }
+
+  if (command === 'hook') {
+    const subcommand = argv[3];
+    if (subcommand === 'install') {
+      const res = installGitHook();
+      console.log(`\n  ${paint.ok(SYM.tick)} ${paint.bold('Git hook installed')} ${paint.dim(`at ${res.path}`)}`);
+      console.log(`  ${paint.dim('Pre-commit will now automatically evaluate staged agent prompts and reject regressions.')}\n`);
+      return;
+    }
+    if (subcommand === 'run') {
+      const check = await runPreCommitCheck({ strict: hasFlag(argv, '--strict') });
+      if (!check.passed) {
+        console.error(`\n  ${paint.err(SYM.cross)} ${paint.bold('Pre-commit check failed')}\n  ${check.message}\n`);
+        process.exitCode = 1;
+        return;
+      }
+      console.log(`\n  ${paint.ok(SYM.tick)} ${check.message}\n`);
+      return;
+    }
+    throw new Error('Usage: skillcheck hook [install|run] [--strict]');
   }
 
   if (command === 'completion') {

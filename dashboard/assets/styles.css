@@ -588,6 +588,56 @@ input:focus, textarea:focus { outline: none; border-color: var(--ink); }
   .hero-pill { font-size: 11px; letter-spacing: 1px; align-items: flex-start; }
   .hero-pill .dot { margin-top: 4px; flex-shrink: 0; }
 }
+/* ---------- Leaderboard Table Styles ---------- */
+.badge-placebo { background: #555555; color: #fff; font-weight: 700; padding: 1px 9px; letter-spacing: 0.05em; font-size: 11px; text-transform: uppercase; }
+.badge-harms { background: var(--error); color: #fff; font-weight: 700; padding: 1px 9px; letter-spacing: 0.05em; font-size: 11px; text-transform: uppercase; }
+
+.lb-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin: 32px 0 24px; }
+.lb-stat { background: var(--surface-card); border: 1px solid var(--hairline-strong); padding: 16px 20px; text-align: left; }
+.lb-stat strong { display: block; font-size: 28px; font-weight: 700; color: var(--ink); line-height: 1.1; margin-bottom: 4px; }
+.lb-stat span { font-size: 13px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; }
+
+.lb-toolbar { display: flex; gap: 16px; align-items: center; justify-content: space-between; margin-bottom: 20px; flex-wrap: wrap; }
+.lb-search {
+  flex: 1; min-width: 240px; height: 44px; padding: 0 16px;
+  background: var(--surface-soft); border: 1px solid var(--hairline);
+  color: var(--ink); font-family: var(--font); font-size: 14px;
+}
+.lb-search:focus { outline: 1px solid var(--ink); }
+
+.lb-filters { display: flex; gap: 8px; flex-wrap: wrap; }
+.lb-filter-btn {
+  height: 44px; padding: 0 16px; background: var(--surface-soft);
+  border: 1px solid var(--hairline); color: var(--body);
+  font-family: var(--font); font-size: 13px; font-weight: 600;
+  cursor: pointer; transition: all var(--fast);
+}
+.lb-filter-btn:hover { border-color: var(--ink); color: var(--ink); }
+.lb-filter-btn.active { background: var(--surface-elevated); color: var(--ink); border-color: var(--ink); }
+
+.lb-table-wrap { overflow-x: auto; border: 1px solid var(--hairline-strong); background: var(--surface-soft); margin-top: 12px; }
+.lb-table { width: 100%; border-collapse: collapse; text-align: left; font-size: 13.5px; }
+.lb-table th {
+  background: var(--surface-card); color: var(--muted); font-size: 11px;
+  text-transform: uppercase; letter-spacing: 1px; padding: 14px 16px;
+  border-bottom: 1px solid var(--hairline-strong); font-weight: 600; white-space: nowrap;
+}
+.lb-table td { padding: 14px 16px; border-bottom: 1px solid var(--hairline-strong); vertical-align: middle; }
+.lb-table tr:hover td { background: rgba(255, 255, 255, 0.02); }
+.lb-table .skill-name { font-weight: 600; color: var(--ink); display: block; }
+.lb-table .skill-source { font-size: 12px; color: var(--muted); display: block; margin-top: 2px; }
+.lb-table .skill-source a { color: var(--accent-blue); }
+.lb-table .skill-source a:hover { text-decoration: underline; }
+.lb-table .mono { font-family: var(--mono); font-size: 13px; }
+.lb-table .effect-pos { color: #2fbf5f; font-weight: 600; font-family: var(--mono); }
+.lb-table .effect-neu { color: var(--muted); font-family: var(--mono); }
+.lb-table .effect-neg { color: var(--error); font-weight: 600; font-family: var(--mono); }
+
+@media (max-width: 760px) {
+  .lb-stats { grid-template-columns: repeat(2, 1fr); }
+  .lb-toolbar { flex-direction: column; align-items: stretch; }
+}
+
 @media (max-width: 480px) {
   /* Keep one clear action in the nav; sign-in stays available in the footer
      and through the primary CTA. */

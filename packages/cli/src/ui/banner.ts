@@ -134,8 +134,10 @@ export function printHelpUi(): void {
 
   console.log(`  ${paint.accent('Commands')}`);
   cmd('check <path>', 'A/B check a skill with a readable result card');
+  cmd('watch <path>', 'hot-reloads & re-evaluates skill automatically on save');
   cmd('demo', 'instant 5-second simulated benchmark (zero keys required)');
   cmd('matrix <path>', 'benchmark a skill across multiple models side-by-side');
+  cmd('hook [install|run]', 'install or execute git pre-commit regression guard');
   cmd('setup', 'connect via Skillcheck Cloud or Bring Your Own Key (BYOK)');
   cmd('logout', 'remove the saved API key or provider config');
   cmd('eval <path>', 'full evaluation, JSON output');
@@ -155,6 +157,8 @@ export function printHelpUi(): void {
   opt('--output FILE', 'save the full JSON result');
   opt('--explain', 'show a per-task breakdown with example outputs');
   opt('--clipboard', 'copy GitHub PR review markdown to clipboard');
+  opt('--resume', 'resume interrupted run from last saved checkpoint');
+  opt('--inspect', 'open interactive alternate-screen trial inspector');
   opt('--json', 'machine-readable output, no UI');
   opt('--version', 'print the installed version');
   opt('--help', 'show this help (works after any command)');
@@ -257,6 +261,26 @@ export function printCommandHelpUi(command: string): boolean {
     console.log(`    ${paint.bold('skillcheck logout')}`);
     sec('Description');
     console.log(`    Removes saved API keys and provider configurations from ~/.config/skillcheck/config.json.\n`);
+    return true;
+  }
+
+  if (norm === 'watch' || norm === 'w') {
+    console.log(`\n  ${paint.bold('Skillcheck watch')} ${paint.dim('— Hot-reloading development loop')}`);
+    sec('Usage');
+    console.log(`    ${paint.bold('skillcheck watch')} ${paint.accent('<path> [--tasks N] [--trials K]')}`);
+    sec('Description');
+    console.log(`    Watches your skill file for changes, computes real-time token count deltas,`);
+    console.log(`    and automatically re-evaluates in the background upon save.\n`);
+    return true;
+  }
+
+  if (norm === 'hook') {
+    console.log(`\n  ${paint.bold('Skillcheck hook')} ${paint.dim('— Git pre-commit regression guard')}`);
+    sec('Usage');
+    console.log(`    ${paint.bold('skillcheck hook install')}`);
+    console.log(`    ${paint.bold('skillcheck hook run')} ${paint.accent('[--strict]')}`);
+    sec('Description');
+    console.log(`    Installs or executes git pre-commit checks on staged prompt files, rejecting regressions (HARMS).\n`);
     return true;
   }
 

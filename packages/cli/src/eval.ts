@@ -11,7 +11,7 @@ import { normalizeSkill } from './normalize.js';
 import { runTrials } from './run.js';
 import { scorePairedObservations, pairedObservations, satisfactionFromEffect } from './score.js';
 import { checkpointPath, clearCheckpoint, loadCheckpoint, saveCheckpoint } from './checkpoint.js';
-import type { GeneratedTask, GradedOutput, ProgressReporter, SkillFormat, TaskBreakdown } from './types.js';
+import type { GeneratedTask, GradedOutput, ProgressReporter, SkillFormat, TaskBreakdown, TrialOutput } from './types.js';
 
 export interface EvalOptions {
   inputPath: string;

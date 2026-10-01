@@ -30,9 +30,14 @@ Point it at any Markdown skill or rule file and it runs an automated A/B experim
 > - **15% actively HARMED accuracy** — over-constraining the model and causing cognitive tunnel vision.
 > - **Only 25% genuinely HELPED** — delivering verified `+15` to `+35 pp` lifts on nuanced edge cases.
 >
-> 📊 **[View live benchmark results on the Skillcheck Leaderboard →](https://skillcheck.page)**
+> 📊 **[View live benchmark results on the Skillcheck Leaderboard →](https://skillcheck.page/#leaderboard)**
 
-https://github.com/sx4im/skillcheck/releases/download/v0.11.0/skillcheck-demo.mp4
+<p align="center">
+  <video src="https://github.com/sx4im/skillcheck/raw/main/.github/assets/skillcheck-demo.mp4" controls="controls" width="100%" style="max-width: 760px; border-radius: 6px;">
+    <source src=".github/assets/skillcheck-demo.mp4" type="video/mp4">
+    <a href="https://github.com/sx4im/skillcheck/releases/download/v0.11.0/skillcheck-demo.mp4">Watch demo video</a>
+  </video>
+</p>
 
 ```
 $ skillcheck
