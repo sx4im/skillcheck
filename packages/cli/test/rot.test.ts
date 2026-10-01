@@ -65,6 +65,28 @@ describe('buildRotReport', () => {
     expect(report.summary.skills).toBe(1);
     expect(report.summary.new).toBe(1);
   });
+
+  it('separates history series by difficulty so different difficulty runs do not fabricate rot', async () => {
+    const dir = await mkdtemp(path.join(tmpdir(), 'skillcheck-rot-diff-'));
+    const standardRun = {
+      ...result('helps', 'test-model', '2026-06-03'),
+      config: { ...result('helps', 'test-model', '2026-06-03').config, difficulty: 'standard' }
+    };
+    const adversarialRun = {
+      ...result('placebo', 'test-model', '2026-06-04'),
+      config: { ...result('placebo', 'test-model', '2026-06-04').config, difficulty: 'adversarial' }
+    };
+    await writeFile(path.join(dir, 'standard.json'), `${JSON.stringify(standardRun)}\n`);
+    await writeFile(path.join(dir, 'adversarial.json'), `${JSON.stringify(adversarialRun)}\n`);
+
+    const report = await buildRotReport(dir);
+
+    // Two distinct series: one for standard, one for adversarial. Neither should rot the other.
+    expect(report.summary.skills).toBe(2);
+    expect(report.summary.rot).toBe(0);
+    expect(report.skills.map((s) => s.key)).toContain('rot-canary:rot-canary-hash:standard');
+    expect(report.skills.map((s) => s.key)).toContain('rot-canary:rot-canary-hash:adversarial');
+  });
 });
 
 describe('parseCorpusManifest', () => {

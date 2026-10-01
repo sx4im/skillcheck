@@ -189,6 +189,7 @@ export interface EvalResult {
     tasks: number;
     temperature: number;
     mode: 'forced';
+    difficulty: TaskDifficulty;
   };
   result: {
     effect_pp: number;
@@ -360,7 +361,8 @@ export async function evalSkill(options: EvalOptions): Promise<EvalResult> {
       trials: options.trials,
       tasks: tasks.length,
       temperature: 0.7,
-      mode: 'forced'
+      mode: 'forced',
+      difficulty: options.difficulty ?? 'standard'
     },
     result: {
       effect_pp: score.effectPp,

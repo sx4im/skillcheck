@@ -33,6 +33,7 @@ export interface LeaderboardResult {
     trials: number;
     tasks: number;
     mode: string;
+    difficulty?: string;
   };
   result: {
     effect_pp: number;
@@ -114,8 +115,8 @@ function rotReportPath(root: string): string {
 function resultKey(result: Omit<LeaderboardResult, 'id' | 'filePath' | 'rot'>): string {
   // Must match rot.ts resultKey — the string the rot report's `key` field is
   // built with. Cannot import rot.ts here (it pulls the whole CLI graph);
-  // the format stays trivial: slugify(name):commit_hash.
-  return `${slugify(result.skill.name)}:${result.skill.commit_hash}`;
+  // the format stays trivial: slugify(name):commit_hash:difficulty.
+  return `${slugify(result.skill.name)}:${result.skill.commit_hash}:${result.config.difficulty ?? 'standard'}`;
 }
 
 // Recursive *.json walk, mirroring rot.ts listJsonFiles (kept local for the
