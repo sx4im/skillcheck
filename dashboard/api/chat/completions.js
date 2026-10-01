@@ -3,7 +3,7 @@
 // forward to NVIDIA with the server-side key and return the response unchanged.
 
 import { sendJson, methodNotAllowed, proxyCors, bearerToken, readJsonBody } from '../_lib/http.js';
-import { uidForApiKey, getUser, consumeRun } from '../_lib/users.js';
+import { uidForApiKey, getUser, consumeRun, rollbackRun } from '../_lib/users.js';
 import { forwardChatCompletion } from '../_lib/nvidia.js';
 import { NVIDIA_API_KEY, appUrl } from '../_lib/config.js';
 
@@ -50,6 +50,9 @@ export default async function handler(req, res) {
     res.setHeader('x-skillcheck-runs-used', String(meter.used));
     res.end(result.text);
   } catch (error) {
+    if (meter.counted) {
+      await rollbackRun(uid, runId).catch(() => {});
+    }
     sendJson(res, 502, { error: { message: 'Upstream model provider error.', detail: String((error instanceof Error && error.message) || error) } });
   }
 }

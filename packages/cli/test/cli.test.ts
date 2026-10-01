@@ -279,4 +279,14 @@ describe('update notifier', () => {
   it('reports this package\'s own version', () => {
     expect(currentVersion()).toMatch(/^\d+\.\d+\.\d+/);
   });
+
+  it('runs demo command without throwing', async () => {
+    const logSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
+    try {
+      await main(['node', 'skillcheck', 'demo']);
+      expect(logSpy).toHaveBeenCalled();
+    } finally {
+      logSpy.mockRestore();
+    }
+  });
 });

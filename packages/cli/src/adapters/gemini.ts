@@ -62,6 +62,7 @@ export class GeminiClient implements LlmClient {
     const result = await fetchWithRetry(url, {
       headers: {
         'content-type': 'application/json',
+        'x-goog-api-key': this.apiKey,
         ...this.defaultHeaders
       },
       body: JSON.stringify(payload),

@@ -1,4 +1,4 @@
-import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { chmodSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { homedir } from 'node:os';
 import path from 'node:path';
 
@@ -58,7 +58,8 @@ export async function verifyCloudKey(apiUrl: string, token: string): Promise<Clo
     response = await fetch(`${base}/key/verify`, {
       method: 'POST',
       headers: { authorization: `Bearer ${token}`, 'content-type': 'application/json' },
-      body: '{}'
+      body: '{}',
+      signal: AbortSignal.timeout(15000)
     });
   } catch (error) {
     return { valid: false, reachable: false, message: error instanceof Error ? error.message : String(error) };
@@ -173,6 +174,11 @@ export function saveUserConfig(config: SkillcheckUserConfig): string {
   const filePath = userConfigPath();
   mkdirSync(path.dirname(filePath), { recursive: true, mode: 0o700 });
   writeFileSync(filePath, `${JSON.stringify(config, null, 2)}\n`, { mode: 0o600 });
+  try {
+    chmodSync(filePath, 0o600);
+  } catch {
+    // Ignore on non-POSIX / Windows environments
+  }
   return filePath;
 }
 

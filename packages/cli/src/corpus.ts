@@ -178,21 +178,31 @@ function sourceLabel(manifest: CorpusManifest, skill: CorpusSkill): string {
 }
 
 async function prepareGitSource(source: string, repo: string, commit: string | undefined, paths: string[]): Promise<string> {
+  if (repo.startsWith('-') || !/^(https?:\/\/|git@|ssh:\/\/|[a-zA-Z0-9_.-]+@[a-zA-Z0-9_.-]+:)/.test(repo)) {
+    throw new Error(`Invalid or unsafe git repository URL: ${repo}`);
+  }
+  if (commit && (commit.startsWith('-') || !/^[a-zA-Z0-9_./-]+$/.test(commit))) {
+    throw new Error(`Invalid or unsafe git commit ref: ${commit}`);
+  }
+
   const checkoutDir = path.join('.cache', 'sources', `${slugify(source)}-${repoSlug(repo)}-${(commit ?? 'head').slice(0, 12)}`);
   const sparseDirs = [...new Set(paths.map(sparseDir))].sort();
+  const safeSparseDirs = sparseDirs.filter((d) => !d.startsWith('-'));
 
   if (!(await pathExists(path.join(checkoutDir, '.git')))) {
     await mkdir(path.dirname(checkoutDir), { recursive: true });
-    await execFile('git', ['clone', '--filter=blob:none', '--no-checkout', repo, checkoutDir]);
+    await execFile('git', ['clone', '--filter=blob:none', '--no-checkout', '--', repo, checkoutDir]);
   }
 
   await execFile('git', ['-C', checkoutDir, 'sparse-checkout', 'init', '--cone']);
-  await execFile('git', ['-C', checkoutDir, 'sparse-checkout', 'set', ...sparseDirs]);
+  if (safeSparseDirs.length > 0) {
+    await execFile('git', ['-C', checkoutDir, 'sparse-checkout', 'set', '--', ...safeSparseDirs]);
+  }
   if (commit) {
     await execFile('git', ['-C', checkoutDir, 'fetch', '--depth', '1', 'origin', commit]);
-    await execFile('git', ['-C', checkoutDir, 'checkout', '--quiet', commit]);
+    await execFile('git', ['-C', checkoutDir, 'checkout', '--quiet', '--', commit]);
   } else {
-    await execFile('git', ['-C', checkoutDir, 'checkout', '--quiet']);
+    await execFile('git', ['-C', checkoutDir, 'checkout', '--quiet', '--', 'HEAD']);
   }
   return checkoutDir;
 }
@@ -250,8 +260,13 @@ export async function runCorpus(options: CorpusRunOptions): Promise<CorpusRunRep
       throw new Error(`No prepared source root for ${source}`);
     }
 
+    const resolvedRoot = path.resolve(root);
+    const inputPath = path.resolve(root, skill.path);
+    if (inputPath !== resolvedRoot && !inputPath.startsWith(resolvedRoot + path.sep)) {
+      throw new Error(`Path traversal detected: "${skill.path}" resolves outside source root "${root}"`);
+    }
+
     const outputPath = path.join(options.outputDir, `${slugify(source)}-${slugify(skill.id)}.json`);
-    const inputPath = path.join(root, skill.path);
     const entry: CorpusRunEntry = {
       id: skill.id,
       source,

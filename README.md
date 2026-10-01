@@ -1,9 +1,12 @@
+# Skillcheck — Controlled A/B Testing for AI Agent Skills, .cursorrules & CLAUDE.md
+
 <div align="center">
   <img src=".github/assets/skillcheck-wordmark.svg" alt="SKILLCHECK — is your skill actually helping the model?" width="760">
 </div>
 
 <p align="center">
   <a href="https://www.npmjs.com/package/@sx4im/skillcheck"><img src="https://img.shields.io/npm/v/@sx4im/skillcheck" alt="npm version"></a>
+  <a href="https://github.com/sx4im/skillcheck/stargazers"><img src="https://img.shields.io/github/stars/sx4im/skillcheck?style=flat&color=10b981" alt="GitHub stars"></a>
   <a href="https://www.npmjs.com/package/@sx4im/skillcheck"><img src="https://img.shields.io/npm/dt/@sx4im/skillcheck" alt="lifetime downloads"></a>
   <a href="https://github.com/sx4im/skillcheck/actions/workflows/ci.yml"><img src="https://github.com/sx4im/skillcheck/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
   <a href="https://github.com/sx4im/skillcheck/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22"><img src="https://img.shields.io/github/issues/sx4im/skillcheck/good%20first%20issue?color=7057ff&label=good%20first%20issues" alt="Good First Issues"></a>
@@ -19,6 +22,15 @@ Not a syntax linter or basic assertion check — a controlled scientific experim
 Most published `SKILL.md` files, `.cursorrules`, and agent prompts have never been tested against an unprompted baseline. You cannot tell whether they help your model, make it worse, or are purely decorative prompt bloat. Skillcheck replaces vibe checks with empirical AI evaluation: paired control vs. treatment trials, double-blind grading, and bootstrap confidence intervals.
 
 Point it at any Markdown skill or rule file and it runs an automated A/B experiment: it generates fresh domain-specific tasks, has the model solve each task **with** and **without** the skill injected, grades both arms **blind**, and reports the measured effect with a 95% bootstrap confidence interval and a 0–100 satisfaction score.
+
+> [!IMPORTANT]
+> **Empirical Findings from our 20-Skill Seed Corpus:**
+> We benchmarked 20 popular community agent skills (`mattpocock/skills`, `awesome-claude-md`, etc.) across 600+ blind-graded tasks:
+> - **60% were statistical PLACEBOS** — consuming hundreds of extra prompt tokens with `0.0 pp` net lift.
+> - **15% actively HARMED accuracy** — over-constraining the model and causing cognitive tunnel vision.
+> - **Only 25% genuinely HELPED** — delivering verified `+15` to `+35 pp` lifts on nuanced edge cases.
+>
+> 📊 **[View live benchmark results on the Skillcheck Leaderboard →](https://skillcheck.page)**
 
 ```
 $ skillcheck
@@ -86,19 +98,35 @@ Skillcheck checks npm for a newer version about once a day and offers to update
 
 ## Quick start
 
+### 1. Instant 5-Second Demo (No API Keys Required)
+
+Experience Skillcheck's interactive step tracker and satisfaction scorecard immediately:
+
+```bash
+npx @sx4im/skillcheck demo
+```
+
+### 2. Zero-Signup Evaluation (Bring Your Own Key)
+
+If you already have any standard model API key set in your environment, Skillcheck runs out of the box with zero registration:
+
+```bash
+# Works instantly with OpenAI, Anthropic, Gemini, Groq, Mistral, OpenRouter, or NVIDIA NIM:
+export OPENAI_API_KEY="sk-..."       # or ANTHROPIC_API_KEY, GEMINI_API_KEY, etc.
+npx @sx4im/skillcheck check ./SKILL.md
+```
+
+### 3. Interactive Mode & Hosted Cloud (10 Free Checks Included)
+
+Don't have API keys handy? Run the interactive assistant:
+
 ```bash
 skillcheck
 ```
 
-On first run it asks for your Skillcheck API key (grab a free one from the dashboard —
-the URL is built in, and the free tier includes 10 checks). Key entry is masked, the
-key is verified before it's saved, then a full-screen file picker opens: navigate
-folders with the arrow keys, pick any `.md` file, choose an effort level from the
-arrow-key menu, and watch the live progress tracker until the result card lands.
-The picker runs on the terminal's alternate screen, so quitting hands your
-scrollback right back.
+On first run without an existing key, it offers to use Skillcheck Cloud (grab a free token from [skillcheck.page](https://skillcheck.page) — includes 10 free cloud evaluations). Key entry is masked, verified securely before saving, and launches a full-screen terminal file picker: navigate folders with the arrow keys, pick any `.md` file, select an effort level, and watch the live progress tracker until the result card lands.
 
-Point it straight at a file or folder to skip the picker:
+Point it straight at a file or folder:
 
 ```bash
 skillcheck check ./SKILL.md
@@ -107,10 +135,10 @@ skillcheck check ./SKILL.md --json      # machine-readable output
 skillcheck check ./SKILL.md --output result.json
 ```
 
-Fully headless (CI, scripts) — set the key via environment variable:
+Fully headless in CI / scripts:
 
 ```bash
-export SKILLCHECK_TOKEN=chk_live_...
+export SKILLCHECK_TOKEN=chk_live_...    # or OPENAI_API_KEY, etc.
 skillcheck check ./SKILL.md --tasks 5 --trials 3 --json
 ```
 
@@ -438,11 +466,11 @@ re-runs the live corpus weekly and opens a PR when a skill's verdict regresses.
 
 If Skillcheck saved you from shipping a placebo skill, a ⭐ helps other people find it.
 
-<a href="https://www.star-history.com/?repos=sx4im%2Fskillcheck&type=date&legend=top-left">
+<a href="https://star-history.com/#sx4im/skillcheck&Date">
   <picture>
-    <source media="(prefers-color-scheme: dark)" srcset=".github/assets/star-history-dark.svg" />
-    <source media="(prefers-color-scheme: light)" srcset=".github/assets/star-history.svg" />
-    <img alt="Star history chart for sx4im/skillcheck" src=".github/assets/star-history.svg" />
+    <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=sx4im/skillcheck&type=Date&theme=dark" />
+    <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=sx4im/skillcheck&type=Date" />
+    <img alt="Star history chart for sx4im/skillcheck" src="https://api.star-history.com/svg?repos=sx4im/skillcheck&type=Date" />
   </picture>
 </a>
 

@@ -39,6 +39,18 @@ export interface HttpResult {
   text: string;
 }
 
+function sanitizeUrlForLog(rawUrl: string): string {
+  try {
+    const parsed = new URL(rawUrl);
+    if (parsed.searchParams.has('key')) {
+      parsed.searchParams.set('key', '[REDACTED]');
+    }
+    return parsed.toString();
+  } catch {
+    return rawUrl.replace(/([?&]key=)[^&]+/g, '$1[REDACTED]');
+  }
+}
+
 // POSTs with retries on 429/5xx. Network/timeout errors surface immediately;
 // a non-retryable HTTP status is returned to the caller to turn into a
 // provider-specific error.
@@ -68,5 +80,5 @@ export async function fetchWithRetry(
     }
     await sleep(1000 * 2 ** attempt);
   }
-  throw new Error(`fetchWithRetry exhausted ${options.maxAttempts} attempts for ${url}`);
+  throw new Error(`fetchWithRetry exhausted ${options.maxAttempts} attempts for ${sanitizeUrlForLog(url)}`);
 }

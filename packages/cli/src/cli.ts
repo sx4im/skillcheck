@@ -39,10 +39,11 @@ import {
 } from './ui.js';
 import { currentVersion, maybeNotifyUpdate } from './update.js';
 import { verifyResult } from './verify.js';
+import { runDemo } from './demo.js';
 
 // Commands that emit machine-readable output or run unattended — never interrupt
 // these with the interactive "update available?" prompt.
-const MACHINE_COMMANDS = new Set(['eval', 'm0', 'corpus', 'rot', 'verify', 'matrix']);
+const MACHINE_COMMANDS = new Set(['eval', 'm0', 'corpus', 'rot', 'verify', 'matrix', 'demo']);
 
 // First-run onboarding. Supports hosted mode (Skillcheck Cloud) as default,
 // or Bring-Your-Own-Key (BYOK) for OpenAI, Anthropic, Gemini, Groq, Mistral, OpenRouter, NVIDIA NIM.
@@ -594,6 +595,11 @@ export async function main(argv: string[]): Promise<void> {
 
   if (!command) {
     await runInteractiveCheck();
+    return;
+  }
+
+  if (command === 'demo' || argv.includes('--demo')) {
+    await runDemo();
     return;
   }
 

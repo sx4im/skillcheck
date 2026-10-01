@@ -39,6 +39,8 @@ export const PROVIDER_NAMES: Record<ProviderType, string> = {
   nvidia: 'NVIDIA NIM'
 };
 
+const PROVIDER_TIMEOUT_MS = 15000;
+
 export async function fetchProviderModels(
   provider: ProviderType,
   apiKey: string,
@@ -52,7 +54,8 @@ export async function fetchProviderModels(
       headers: {
         'x-api-key': apiKey,
         'anthropic-version': '2023-06-01'
-      }
+      },
+      signal: AbortSignal.timeout(PROVIDER_TIMEOUT_MS)
     });
 
     if (!response.ok) {
@@ -71,7 +74,8 @@ export async function fetchProviderModels(
     const url = `${baseUrl}/models?key=${encodeURIComponent(apiKey)}`;
     const response = await fetch(url, {
       method: 'GET',
-      headers: { 'content-type': 'application/json' }
+      headers: { 'content-type': 'application/json', 'x-goog-api-key': apiKey },
+      signal: AbortSignal.timeout(PROVIDER_TIMEOUT_MS)
     });
 
     if (!response.ok) {
@@ -96,7 +100,8 @@ export async function fetchProviderModels(
     method: 'GET',
     headers: {
       authorization: `Bearer ${apiKey}`
-    }
+    },
+    signal: AbortSignal.timeout(PROVIDER_TIMEOUT_MS)
   });
 
   if (!response.ok) {

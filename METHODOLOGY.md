@@ -88,4 +88,4 @@ The leaderboard renders the latest rot status and the per-skill history timeline
 - LLM-graded tasks inherit the limitations of the grader model, even with blind labels.
 - Assets are recorded but not executed in v1.
 - The v1 launch seed corpus is intentionally capped at 20 skills; it is launch evidence, not a comprehensive public corpus.
-- NVIDIA NIM availability affects live corpus completion. Failed or interrupted runs are recorded separately from gate-passing evidence, and the M5 launch findings use only the completed Qwen Next launch run.
+- Remote provider availability and network rate limits can affect live corpus runs. Failed or interrupted runs are recorded separately from gate-passing evidence, and benchmark findings report results from verified, completed runs.

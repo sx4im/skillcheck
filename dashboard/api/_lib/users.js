@@ -194,25 +194,55 @@ const MAX_CALLS_PER_RUN = 200;
  */
 export async function consumeRun(uid, runId, plan) {
   const limit = runLimitFor(plan);
+  const month = currentMonthTag();
 
   if (runId) {
-    const isNewRun = (await kvSet(`run:${uid}:${runId}`, '1', { nx: true, ex: 86400 })) === 'OK';
-    const calls = isNewRun ? 1 : await kvIncr(`run:${uid}:${runId}`);
-    if (calls > MAX_CALLS_PER_RUN) {
-      return { allowed: false, counted: false, used: await getRunsUsed(uid), limit, reason: 'run_call_limit' };
-    }
-    if (!isNewRun) {
-      // A later call of an already-counted run: let it through without re-charging.
+    // If this run has already been recorded and granted, subsequent calls dedupe without recharging.
+    const existing = await kvGet(`run:${uid}:${runId}`);
+    if (existing !== null) {
+      const calls = await kvIncr(`run:${uid}:${runId}`);
+      if (calls > MAX_CALLS_PER_RUN) {
+        return { allowed: false, counted: false, used: await getRunsUsed(uid), limit, reason: 'run_call_limit' };
+      }
       return { allowed: true, counted: false, used: await getRunsUsed(uid), limit };
     }
   }
 
-  const month = currentMonthTag();
+  // Atomically claim a run quota slot BEFORE granting or creating the run.
   const nowUsed = await kvIncr(`runsused:${uid}:${month}`);
   if (nowUsed > limit) {
-    await kvDecr(`runsused:${uid}:${month}`); // roll back — a rejected request consumes nothing
-    if (runId) await kvDel(`run:${uid}:${runId}`);
+    await kvDecr(`runsused:${uid}:${month}`); // roll back — rejected requests consume nothing
     return { allowed: false, counted: false, used: nowUsed - 1, limit, reason: 'quota_exceeded' };
   }
+
+  if (runId) {
+    // Try to register this runId.
+    const isFirst = (await kvSet(`run:${uid}:${runId}`, '1', { nx: true, ex: 86400 })) === 'OK';
+    if (!isFirst) {
+      // Another concurrent request initialized this runId at the same time:
+      // release the duplicate quota reservation and dedupe against the existing run.
+      await kvDecr(`runsused:${uid}:${month}`);
+      const calls = await kvIncr(`run:${uid}:${runId}`);
+      if (calls > MAX_CALLS_PER_RUN) {
+        return { allowed: false, counted: false, used: await getRunsUsed(uid), limit, reason: 'run_call_limit' };
+      }
+      return { allowed: true, counted: false, used: await getRunsUsed(uid), limit };
+    }
+  }
+
   return { allowed: true, counted: true, used: nowUsed, limit };
+}
+
+/**
+ * Roll back quota if an upstream call fails with a 5xx error after being counted.
+ * @param {string} uid
+ * @param {string} [runId]
+ * @returns {Promise<void>}
+ */
+export async function rollbackRun(uid, runId) {
+  const month = currentMonthTag();
+  await kvDecr(`runsused:${uid}:${month}`);
+  if (runId) {
+    await kvDel(`run:${uid}:${runId}`);
+  }
 }
