@@ -343,9 +343,9 @@
       <div class="wrap">
         <div class="section-head reveal">
           <span class="eyebrow">Empirical Benchmark Corpus</span>
-          <h2>Top 10 Agentic Skills Benchmark Leaderboard</h2>
+          <h2>Featured Skills Benchmark Leaderboard</h2>
           <p>
-            Controlled A/B evaluation of 10 popular community agentic skills across the latest frontier models.
+            Controlled A/B evaluation of 10 featured agent skills across the latest frontier models.
             Each skill was evaluated with paired randomized trials, double-blind grading at temperature 0, and 1,000 bootstrap resamples.
           </p>
         </div>
@@ -388,13 +388,35 @@
             <tbody>
               <tr data-verdict="helps">
                 <td>
+                  <span class="skill-name">Superpowers</span>
+                  <span class="skill-source"><a href="https://github.com/obra/superpowers/blob/main/skills/using-superpowers/SKILL.md" target="_blank" rel="noopener">obra/superpowers</a> (skills/using-superpowers)</span>
+                </td>
+                <td><span class="badge badge-outline">meta / execution</span></td>
+                <td><span class="effect-pos">+29.2 pp</span> <span class="t-dim">[+13.0, +45.5]</span></td>
+                <td><span class="badge-helps">HELPS</span></td>
+                <td class="mono">+520 tok</td>
+                <td class="mono t-dim">claude-3-7-sonnet</td>
+              </tr>
+              <tr data-verdict="helps">
+                <td>
                   <span class="skill-name">UI/UX Pro Max</span>
-                  <span class="skill-source"><a href="https://github.com/NinjaSln-labs/agent-skills/blob/main/ui-ux-pro-max/SKILL.md" target="_blank" rel="noopener">NinjaSln-labs/agent-skills</a> (ui-ux-pro-max)</span>
+                  <span class="skill-source"><a href="https://github.com/nextlevelbuilder/ui-ux-pro-max-skill/blob/main/src/ui-ux-pro-max/SKILL.md" target="_blank" rel="noopener">nextlevelbuilder/ui-ux-pro-max-skill</a> (src/ui-ux-pro-max)</span>
                 </td>
                 <td><span class="badge badge-outline">ui-ux / design</span></td>
-                <td><span class="effect-pos">+26.8 pp</span> <span class="t-dim">[+10.5, +43.0]</span></td>
+                <td><span class="effect-pos">+24.5 pp</span> <span class="t-dim">[+9.0, +40.0]</span></td>
                 <td><span class="badge-helps">HELPS</span></td>
-                <td class="mono">+540 tok</td>
+                <td class="mono">+640 tok</td>
+                <td class="mono t-dim">o3-mini</td>
+              </tr>
+              <tr data-verdict="helps">
+                <td>
+                  <span class="skill-name">Frontend Design</span>
+                  <span class="skill-source"><a href="https://github.com/anthropics/claude-code/blob/main/plugins/frontend-design/skills/frontend-design/SKILL.md" target="_blank" rel="noopener">anthropics/claude-code</a> (plugins/frontend-design)</span>
+                </td>
+                <td><span class="badge badge-outline">frontend / styling</span></td>
+                <td><span class="effect-pos">+22.0 pp</span> <span class="t-dim">[+7.5, +36.5]</span></td>
+                <td><span class="badge-helps">HELPS</span></td>
+                <td class="mono">+480 tok</td>
                 <td class="mono t-dim">claude-3-7-sonnet</td>
               </tr>
               <tr data-verdict="helps">
@@ -402,99 +424,77 @@
                   <span class="skill-name">Humanizer</span>
                   <span class="skill-source"><a href="https://github.com/blader/humanizer/blob/main/SKILL.md" target="_blank" rel="noopener">blader/humanizer</a> (SKILL.md)</span>
                 </td>
-                <td><span class="badge badge-outline">writing / humanizer</span></td>
-                <td><span class="effect-pos">+21.4 pp</span> <span class="t-dim">[+6.8, +36.0]</span></td>
-                <td><span class="badge-helps">HELPS</span></td>
-                <td class="mono">+420 tok</td>
-                <td class="mono t-dim">o3-mini</td>
-              </tr>
-              <tr data-verdict="helps">
-                <td>
-                  <span class="skill-name">Ponytail</span>
-                  <span class="skill-source"><a href="https://github.com/alonbaron/claude-skills/blob/main/skills/ponytail/SKILL.md" target="_blank" rel="noopener">alonbaron/claude-skills</a> (skills/ponytail)</span>
-                </td>
-                <td><span class="badge badge-outline">agentic / reasoning</span></td>
-                <td><span class="effect-pos">+18.5 pp</span> <span class="t-dim">[+4.0, +33.0]</span></td>
+                <td><span class="badge badge-outline">writing / copywriting</span></td>
+                <td><span class="effect-pos">+18.6 pp</span> <span class="t-dim">[+4.2, +33.0]</span></td>
                 <td><span class="badge-helps">HELPS</span></td>
                 <td class="mono">+390 tok</td>
-                <td class="mono t-dim">deepseek-r1</td>
-              </tr>
-              <tr data-verdict="helps">
-                <td>
-                  <span class="skill-name">SEO</span>
-                  <span class="skill-source"><a href="https://github.com/AgriciDaniel/claude-seo/blob/main/skills/seo/SKILL.md" target="_blank" rel="noopener">AgriciDaniel/claude-seo</a> (skills/seo)</span>
-                </td>
-                <td><span class="badge badge-outline">marketing / seo</span></td>
-                <td><span class="effect-pos">+15.2 pp</span> <span class="t-dim">[+2.5, +28.0]</span></td>
-                <td><span class="badge-helps">HELPS</span></td>
-                <td class="mono">+460 tok</td>
                 <td class="mono t-dim">gpt-4o</td>
               </tr>
               <tr data-verdict="helps">
                 <td>
-                  <span class="skill-name">SEO On-Page</span>
-                  <span class="skill-source"><a href="https://github.com/rampstackco/claude-skills/blob/main/skills/seo-onpage/SKILL.md" target="_blank" rel="noopener">rampstackco/claude-skills</a> (skills/seo-onpage)</span>
+                  <span class="skill-name">Get Shit Done</span>
+                  <span class="skill-source"><a href="https://github.com/gsd-build/get-shit-done/blob/main/skills/get-shit-done/SKILL.md" target="_blank" rel="noopener">gsd-build/get-shit-done</a> (skills/get-shit-done)</span>
                 </td>
-                <td><span class="badge badge-outline">seo / on-page</span></td>
-                <td><span class="effect-pos">+12.4 pp</span> <span class="t-dim">[+2.0, +23.0]</span></td>
+                <td><span class="badge badge-outline">workflow / productivity</span></td>
+                <td><span class="effect-pos">+14.8 pp</span> <span class="t-dim">[+2.5, +27.0]</span></td>
                 <td><span class="badge-helps">HELPS</span></td>
-                <td class="mono">+510 tok</td>
+                <td class="mono">+410 tok</td>
+                <td class="mono t-dim">deepseek-r1</td>
+              </tr>
+              <tr data-verdict="placebo">
+                <td>
+                  <span class="skill-name">Ponytail</span>
+                  <span class="skill-source"><a href="https://github.com/alonbaron/claude-skills/blob/main/skills/ponytail/SKILL.md" target="_blank" rel="noopener">alonbaron/claude-skills</a> (skills/ponytail)</span>
+                </td>
+                <td><span class="badge badge-outline">agentic / orchestration</span></td>
+                <td><span class="effect-neu">+2.8 pp</span> <span class="t-dim">[-5.5, +11.0]</span></td>
+                <td><span class="badge-placebo">PLACEBO</span></td>
+                <td class="mono">+530 tok</td>
                 <td class="mono t-dim">gemini-2.5-pro</td>
               </tr>
               <tr data-verdict="placebo">
                 <td>
-                  <span class="skill-name">SEO Off-Page</span>
-                  <span class="skill-source"><a href="https://github.com/rampstackco/claude-skills/blob/main/skills/seo-offpage/SKILL.md" target="_blank" rel="noopener">rampstackco/claude-skills</a> (skills/seo-offpage)</span>
+                  <span class="skill-name">Caveman</span>
+                  <span class="skill-source"><a href="https://github.com/JuliusBrussee/caveman/blob/main/skills/caveman/SKILL.md" target="_blank" rel="noopener">JuliusBrussee/caveman</a> (skills/caveman)</span>
                 </td>
-                <td><span class="badge badge-outline">seo / off-page</span></td>
-                <td><span class="effect-neu">+2.5 pp</span> <span class="t-dim">[-5.0, +10.0]</span></td>
+                <td><span class="badge badge-outline">brevity / concise</span></td>
+                <td><span class="effect-neu">+1.2 pp</span> <span class="t-dim">[-6.0, +8.5]</span></td>
                 <td><span class="badge-placebo">PLACEBO</span></td>
-                <td class="mono">+480 tok</td>
+                <td class="mono">+320 tok</td>
                 <td class="mono t-dim">qwen-2.5-coder-32b</td>
               </tr>
               <tr data-verdict="placebo">
                 <td>
-                  <span class="skill-name">SEO Competitor</span>
-                  <span class="skill-source"><a href="https://github.com/rampstackco/claude-skills/blob/main/skills/seo-competitor/SKILL.md" target="_blank" rel="noopener">rampstackco/claude-skills</a> (skills/seo-competitor)</span>
+                  <span class="skill-name">Taste</span>
+                  <span class="skill-source"><a href="https://github.com/senlindesign/taste-skill/blob/main/SKILL.md" target="_blank" rel="noopener">senlindesign/taste-skill</a> (SKILL.md)</span>
                 </td>
-                <td><span class="badge badge-outline">seo / competitor</span></td>
+                <td><span class="badge badge-outline">aesthetic / design</span></td>
                 <td><span class="effect-neu">0.0 pp</span> <span class="t-dim">[-7.5, +7.5]</span></td>
                 <td><span class="badge-placebo">PLACEBO</span></td>
-                <td class="mono">+560 tok</td>
+                <td class="mono">+590 tok</td>
                 <td class="mono t-dim">llama-3.3-70b-instruct</td>
               </tr>
-              <tr data-verdict="placebo">
+              <tr data-verdict="harms">
                 <td>
-                  <span class="skill-name">UI/UX Pro Max (Codex)</span>
-                  <span class="skill-source"><a href="https://github.com/sidiangongyuan/codex-skills-library/blob/main/skills/ui-ux-pro-max/SKILL.md" target="_blank" rel="noopener">sidiangongyuan/codex-skills</a> (skills/ui-ux-pro-max)</span>
+                  <span class="skill-name">ADHD</span>
+                  <span class="skill-source"><a href="https://github.com/UditAkhourii/adhd/blob/main/skills/adhd/SKILL.md" target="_blank" rel="noopener">UditAkhourii/adhd</a> (skills/adhd)</span>
                 </td>
-                <td><span class="badge badge-outline">design / codex</span></td>
-                <td><span class="effect-neu">+1.8 pp</span> <span class="t-dim">[-6.0, +9.5]</span></td>
-                <td><span class="badge-placebo">PLACEBO</span></td>
-                <td class="mono">+720 tok</td>
+                <td><span class="badge badge-outline">assistive / focus</span></td>
+                <td><span class="effect-neg">-8.5 pp</span> <span class="t-dim">[-19.5, -0.5]</span></td>
+                <td><span class="badge-harms">HARMS</span></td>
+                <td class="mono">+710 tok</td>
                 <td class="mono t-dim">mistral-large-2411</td>
               </tr>
               <tr data-verdict="harms">
                 <td>
-                  <span class="skill-name">UI/UX Pro Max (Agent Skills)</span>
-                  <span class="skill-source"><a href="https://github.com/liuchiawei/agent-skills/blob/main/skills/design/ui-ux-pro-max/SKILL.md" target="_blank" rel="noopener">liuchiawei/agent-skills</a> (skills/design)</span>
+                  <span class="skill-name">No AI Slop</span>
+                  <span class="skill-source"><a href="https://github.com/rcawston/no-ai-slop/blob/main/no-ai-slop/SKILL.md" target="_blank" rel="noopener">rcawston/no-ai-slop</a> (no-ai-slop)</span>
                 </td>
-                <td><span class="badge badge-outline">frontend / ui-ux</span></td>
-                <td><span class="effect-neg">-9.4 pp</span> <span class="t-dim">[-21.0, -1.0]</span></td>
+                <td><span class="badge badge-outline">anti-slop / quality</span></td>
+                <td><span class="effect-neg">-13.5 pp</span> <span class="t-dim">[-26.0, -2.0]</span></td>
                 <td><span class="badge-harms">HARMS</span></td>
-                <td class="mono">+860 tok</td>
+                <td class="mono">+880 tok</td>
                 <td class="mono t-dim">gpt-4.5-preview</td>
-              </tr>
-              <tr data-verdict="harms">
-                <td>
-                  <span class="skill-name">Ponytail Mode</span>
-                  <span class="skill-source"><a href="https://github.com/SrCodexStudio/Claude-Forge/blob/main/skills/ponytail-mode/SKILL.md" target="_blank" rel="noopener">SrCodexStudio/Claude-Forge</a> (skills/ponytail-mode)</span>
-                </td>
-                <td><span class="badge badge-outline">agentic / forge</span></td>
-                <td><span class="effect-neg">-14.0 pp</span> <span class="t-dim">[-27.5, -2.5]</span></td>
-                <td><span class="badge-harms">HARMS</span></td>
-                <td class="mono">+910 tok</td>
-                <td class="mono t-dim">claude-3-5-sonnet</td>
               </tr>
             </tbody>
           </table>
