@@ -419,9 +419,11 @@ Optional environment variables:
 | `NO_COLOR` | — | Any non-empty value disables colour ([spec](https://no-color.org)) |
 | `FORCE_COLOR` | — | `1`/`2`/`3` forces colour on, even when piped |
 
+A `.env` file in the directory where you run skillcheck is loaded for convenience (API keys and the like), but it can never redirect where those keys are sent: `*_BASE_URL` and `SKILLCHECK_API_URL` entries in the file are ignored. Set those in your shell environment instead. This means running skillcheck inside a cloned repo cannot leak your keys to a third-party host via a hostile `.env`.
+
 ## Model choice
 
-All three roles (task generator, runner, blind grader) default to the selected provider's optimal model (e.g., `gpt-4o` for OpenAI, `claude-3-5-sonnet-20241022` for Anthropic, `gemini-1.5-pro` for Gemini, `openai/gpt-oss-120b` for NVIDIA NIM).
+All three roles (task generator, runner, blind grader) default to the selected provider's default model (e.g., `gpt-6-sol` for OpenAI, `claude-opus-5-5` for Anthropic, `gemini-3.8-flash` for Gemini, `openai/gpt-oss-120b` for NVIDIA NIM and Groq).
 
 When running `skillcheck setup`, choosing Bring Your Own Key queries your provider's live `/models` endpoint, letting you pick any available model directly from your provider.
 
@@ -439,7 +441,7 @@ To bypass the hosted proxy, run `skillcheck setup` and select Bring Your Own Key
 ```bash
 npm ci
 npm run build          # compile to dist/
-npm test               # vitest (187 tests)
+npm test               # vitest (257 tests)
 npm run test:coverage  # vitest + v8 coverage gate (84% statements/lines, 85% functions, 68% branches)
 npm run lint           # eslint (flat config, typescript-eslint)
 npm run typecheck      # strict TS, src + tests
