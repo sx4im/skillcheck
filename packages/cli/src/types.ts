@@ -8,6 +8,8 @@ export interface ProgressUpdate {
   phase: ProgressPhase;
   completed?: number;
   total?: number;
+  withSkillCompleted?: number;
+  noSkillCompleted?: number;
 }
 export type ProgressReporter = (update: ProgressUpdate) => void;
 

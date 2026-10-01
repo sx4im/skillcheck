@@ -93,11 +93,15 @@ export async function runTrials(
   const debug = process.env.SKILLCHECK_DEBUG === '1';
   const total = tasks.length * trials * 2; // two arms (with/without skill) per trial
   let completed = 0;
-  const tick = () => {
+  let withSkillCompleted = 0;
+  let noSkillCompleted = 0;
+  const tick = (arm: TrialOutput['arm']) => {
     completed += 1;
-    onProgress?.({ phase: 'running', completed, total });
+    if (arm === 'with_skill') withSkillCompleted += 1;
+    else noSkillCompleted += 1;
+    onProgress?.({ phase: 'running', completed, total, withSkillCompleted, noSkillCompleted });
   };
-  onProgress?.({ phase: 'running', completed, total });
+  onProgress?.({ phase: 'running', completed, total, withSkillCompleted: 0, noSkillCompleted: 0 });
 
   const jobs: Array<{ task: GeneratedTask; trial: number; arm: TrialOutput['arm'] }> = [];
   for (const task of tasks) {
@@ -112,7 +116,7 @@ export async function runTrials(
       console.error(`[skillcheck] run ${job.task.id} trial ${job.trial}/${trials} ${job.arm}`);
     }
     const res = await runOne(skill, job.task, job.trial, job.arm, config, client, cache);
-    tick();
+    tick(job.arm);
     return res;
   });
 }

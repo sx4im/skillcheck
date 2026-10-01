@@ -23,10 +23,16 @@ export function formatElapsed(ms: number): string {
   return minutes > 0 ? `${minutes}m ${String(seconds % 60).padStart(2, '0')}s` : `${seconds}s`;
 }
 
-function progressBar(completed: number, total: number, width = 16): string {
+export function formatProgressBar(completed: number, total: number, width = 16): string {
   const ratio = total > 0 ? completed / total : 0;
   const filled = Math.max(0, Math.min(width, Math.floor(ratio * width)));
   return `${epaint.accent(SYM.barOn.repeat(filled))}${epaint.dim(SYM.barOff.repeat(width - filled))}`;
+}
+
+export function formatDualArmBar(withCompleted: number, noCompleted: number, armTotal: number, width = 8): string {
+  const barA = formatProgressBar(withCompleted, armTotal, width);
+  const barB = formatProgressBar(noCompleted, armTotal, width);
+  return `A:${barA} ${withCompleted}/${armTotal} ${SYM.dot} B:${barB} ${noCompleted}/${armTotal}`;
 }
 
 function indeterminateBar(frame: number, width = 16): string {
@@ -80,9 +86,21 @@ export function startProgress(): ProgressController {
     const label = epaint.bold(ACTIVE_PHASE_LABELS[current.phase]);
     const counted = typeof current.completed === 'number' && typeof current.total === 'number' && current.total > 0;
     const pct = counted ? Math.floor((current.completed! / current.total!) * 100) : 0;
-    const bar = counted
-      ? ` ${progressBar(current.completed!, current.total!)} ${epaint.dim(`${current.completed}/${current.total} (${pct}%)`)}`
-      : ` ${indeterminateBar(frame)}`;
+    const hasDual =
+      typeof current.withSkillCompleted === 'number' &&
+      typeof current.noSkillCompleted === 'number' &&
+      typeof current.total === 'number' &&
+      current.total > 0;
+    const armTotal = Math.floor((current.total ?? 0) / 2);
+
+    let bar: string;
+    if (hasDual && armTotal > 0) {
+      bar = ` ${formatDualArmBar(current.withSkillCompleted!, current.noSkillCompleted!, armTotal, 6)}`;
+    } else if (counted) {
+      bar = ` ${formatProgressBar(current.completed!, current.total!)} ${epaint.dim(`${current.completed}/${current.total} (${pct}%)`)}`;
+    } else {
+      bar = ` ${indeterminateBar(frame)}`;
+    }
     const elapsed = epaint.dim(` ${SYM.dot} ${formatElapsed(Date.now() - startedAt)}`);
     stream.write(`\r\x1b[2K${spinner} ${label}${bar}${elapsed}`);
   };
