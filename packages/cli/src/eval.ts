@@ -10,6 +10,7 @@ import { gradeOutputs } from './grade.js';
 import { normalizeSkill } from './normalize.js';
 import { runTrials } from './run.js';
 import { scorePairedObservations, pairedObservations, satisfactionFromEffect } from './score.js';
+import { checkpointPath, clearCheckpoint, loadCheckpoint, saveCheckpoint } from './checkpoint.js';
 import type { GeneratedTask, GradedOutput, ProgressReporter, SkillFormat, TaskBreakdown } from './types.js';
 
 export interface EvalOptions {
@@ -28,6 +29,7 @@ export interface EvalOptions {
   onProgress?: ProgressReporter;
   useCache?: boolean;
   concurrency?: number;
+  resume?: boolean;
 }
 
 function applyModelOverrides(config: ProviderConfig, options: EvalOptions): ProviderConfig {
@@ -235,8 +237,25 @@ export async function evalSkill(options: EvalOptions): Promise<EvalResult> {
     await writeJson(taskSuitePath, tasks);
   }
 
-  const outputs = await runTrials(skill, tasks, options.trials, config, client, cache, onProgress, options.concurrency);
+  const cpFile = checkpointPath(skill.versionHash);
+  let outputs: TrialOutput[];
+
+  const existingCp = options.resume ? await loadCheckpoint(cpFile) : null;
+  if (existingCp && existingCp.taskSuiteHash === taskSuiteHash && existingCp.trials === options.trials) {
+    outputs = existingCp.completedOutputs;
+  } else {
+    outputs = await runTrials(skill, tasks, options.trials, config, client, cache, onProgress, options.concurrency);
+    await saveCheckpoint(cpFile, {
+      skillHash: skill.versionHash,
+      taskSuiteHash,
+      trials: options.trials,
+      completedOutputs: outputs,
+      updatedAt: new Date().toISOString()
+    }).catch(() => {});
+  }
+
   const graded = await gradeOutputs(tasks, outputs, config, client, cache, onProgress);
+  await clearCheckpoint(cpFile).catch(() => {});
   onProgress?.({ phase: 'scoring' });
   const score = scorePairedObservations(pairedObservations(graded));
   const breakdowns = taskBreakdowns(tasks, graded);
