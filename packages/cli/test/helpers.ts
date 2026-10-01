@@ -44,3 +44,45 @@ export class FakeOpenAiCompatClient {
     return { content: pass ? `${PASS_MARKER} the task is handled` : 'baseline', model: 'fake', usage };
   }
 }
+
+// Variant whose task generator returns a DIFFERENT task set on every call (the
+// real LLM behavior that breaks naive hash-based resume). Counts calls per
+// role so tests can assert the generator was not re-invoked on --resume, and
+// can throw mid-run to simulate an interrupted evaluation.
+export class ShiftingGeneratorClient extends FakeOpenAiCompatClient {
+  static generateCalls = 0;
+  static otherCalls = 0;
+  static failAfterCalls = Number.POSITIVE_INFINITY;
+
+  static reset() {
+    ShiftingGeneratorClient.generateCalls = 0;
+    ShiftingGeneratorClient.otherCalls = 0;
+    ShiftingGeneratorClient.failAfterCalls = Number.POSITIVE_INFINITY;
+  }
+
+  async complete(request: { messages: Array<{ role: string; content: string }> }) {
+    const system = request.messages.find((m) => m.role === 'system')?.content ?? '';
+    if (/evaluation tasks/i.test(system)) {
+      ShiftingGeneratorClient.generateCalls += 1;
+      if (ShiftingGeneratorClient.generateCalls + ShiftingGeneratorClient.otherCalls > ShiftingGeneratorClient.failAfterCalls) {
+        throw new Error('simulated interruption');
+      }
+      const n = ShiftingGeneratorClient.generateCalls;
+      const tasks = Array.from({ length: 8 }, (_, i) => ({
+        id: `t${i + 1}`,
+        prompt: `Task ${i + 1} from generation ${n}`,
+        criterion: `Criterion ${i + 1}`
+      }));
+      return {
+        content: JSON.stringify({ tasks }),
+        model: 'fake',
+        usage: { promptTokens: 10, completionTokens: 5, totalTokens: 15 }
+      };
+    }
+    ShiftingGeneratorClient.otherCalls += 1;
+    if (ShiftingGeneratorClient.generateCalls + ShiftingGeneratorClient.otherCalls > ShiftingGeneratorClient.failAfterCalls) {
+      throw new Error('simulated interruption');
+    }
+    return super.complete(request);
+  }
+}

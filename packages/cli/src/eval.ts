@@ -244,9 +244,50 @@ export async function evalSkill(options: EvalOptions): Promise<EvalResult> {
 
   const onProgress = options.onProgress;
   onProgress?.({ phase: 'generating' });
-  const tasks = options.taskSuite
-    ? selectSuiteTasks(parseTaskSuite(await readFile(options.taskSuite, 'utf8')), options)
-    : await generateTasks({ domain: skill.domain, count: options.tasks }, config, client, cache);
+
+  const cpFile = checkpointPath(skill.versionHash);
+  const trialKey = (taskId: string, trial: number, arm: string) => `${taskId}:${trial}:${arm}`;
+
+  // A checkpoint is reusable when the skill, trial count, and all models match
+  // and its stored task hash is intact. A model change silently reusing stale
+  // outputs would corrupt the comparison.
+  const existingCp = options.resume ? await loadCheckpoint(cpFile) : null;
+  const checkpointUsable =
+    existingCp !== null &&
+    existingCp.skillHash === skill.versionHash &&
+    existingCp.trials === options.trials &&
+    existingCp.runnerModel === (config.runnerModel ?? '') &&
+    existingCp.graderModel === (config.graderModel ?? '') &&
+    existingCp.generatorModel === (config.generatorModel ?? '') &&
+    existingCp.tasks.length > 0 &&
+    existingCp.taskSuiteHash === hashJson({ skill: skill.versionHash, tasks: existingCp.tasks });
+
+  let tasks: GeneratedTask[];
+  let outputs: TrialOutput[] = [];
+  if (existingCp && checkpointUsable) {
+    if (options.taskSuite) {
+      // Explicit suite: re-parse the file so edits are picked up. When the
+      // parsed suite still matches the stored hash, its completed outputs are
+      // reused; a changed file starts a fresh run instead.
+      const suiteTasks = selectSuiteTasks(parseTaskSuite(await readFile(options.taskSuite, 'utf8')), options);
+      if (existingCp.taskSuiteHash === hashJson({ skill: skill.versionHash, tasks: suiteTasks })) {
+        tasks = suiteTasks;
+        outputs = existingCp.completedOutputs;
+      } else {
+        tasks = suiteTasks;
+      }
+    } else {
+      // Generated tasks: reuse the stored tasks verbatim. Asking the generator
+      // for a fresh set would produce different tasks, the suite hash would
+      // never match, and resume would silently restart (and re-bill) from zero.
+      tasks = existingCp.tasks;
+      outputs = existingCp.completedOutputs;
+    }
+  } else {
+    tasks = options.taskSuite
+      ? selectSuiteTasks(parseTaskSuite(await readFile(options.taskSuite, 'utf8')), options)
+      : await generateTasks({ domain: skill.domain, count: options.tasks }, config, client, cache);
+  }
   if (tasks.length === 0) {
     throw new Error('No evaluation tasks available — the task suite is empty.');
   }
@@ -257,24 +298,6 @@ export async function evalSkill(options: EvalOptions): Promise<EvalResult> {
     await writeJson(taskSuitePath, tasks);
   }
 
-  const cpFile = checkpointPath(skill.versionHash);
-  const trialKey = (taskId: string, trial: number, arm: string) => `${taskId}:${trial}:${arm}`;
-
-  // Resume: reuse trial outputs from an interrupted run, but only when the
-  // task suite, trial count, AND models all match. A model change silently
-  // reusing stale outputs would corrupt the comparison.
-  let outputs: TrialOutput[] = [];
-  const existingCp = options.resume ? await loadCheckpoint(cpFile) : null;
-  if (
-    existingCp &&
-    existingCp.taskSuiteHash === taskSuiteHash &&
-    existingCp.trials === options.trials &&
-    existingCp.runnerModel === (config.runnerModel ?? '') &&
-    existingCp.graderModel === (config.graderModel ?? '') &&
-    existingCp.generatorModel === (config.generatorModel ?? '')
-  ) {
-    outputs = existingCp.completedOutputs;
-  }
   const doneKeys = new Set(outputs.map((o) => trialKey(o.taskId, o.trial, o.arm)));
 
   // Flush atomically after every trial so a crash, SIGKILL, or rate-limit
@@ -290,6 +313,7 @@ export async function evalSkill(options: EvalOptions): Promise<EvalResult> {
         runnerModel: config.runnerModel ?? '',
         graderModel: config.graderModel ?? '',
         generatorModel: config.generatorModel ?? '',
+        tasks,
         completedOutputs: outputs,
         updatedAt: new Date().toISOString()
       }

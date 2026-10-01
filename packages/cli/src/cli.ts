@@ -680,7 +680,15 @@ export async function main(argv: string[]): Promise<void> {
     return;
   }
 
-  if (command === '--version' || command === '-v' || command === 'version' || command === 'v') {
+  // --version and -v work after a command too (e.g. `check --version`),
+  // not just as the command itself.
+  const wantsVersion =
+    command === '--version' ||
+    command === '-v' ||
+    command === 'version' ||
+    command === 'v' ||
+    argv.slice(2).some((a) => a === '--version' || a === '-v');
+  if (wantsVersion) {
     console.log(currentVersion());
     return;
   }

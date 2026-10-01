@@ -280,6 +280,26 @@ describe('update notifier', () => {
     expect(currentVersion()).toMatch(/^\d+\.\d+\.\d+/);
   });
 
+  it('prints the version when --version follows a command', async () => {
+    const logSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
+    try {
+      await main(['node', 'skillcheck', 'check', '--version']);
+      expect(logSpy).toHaveBeenCalledWith(currentVersion());
+    } finally {
+      logSpy.mockRestore();
+    }
+  });
+
+  it('prints the version when -v follows a command', async () => {
+    const logSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
+    try {
+      await main(['node', 'skillcheck', 'eval', '-v']);
+      expect(logSpy).toHaveBeenCalledWith(currentVersion());
+    } finally {
+      logSpy.mockRestore();
+    }
+  });
+
   it('runs demo command without throwing', async () => {
     const logSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
     try {

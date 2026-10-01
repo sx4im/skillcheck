@@ -1,7 +1,7 @@
 import { mkdir, readFile, rename, rm, writeFile } from 'node:fs/promises';
 import { homedir } from 'node:os';
 import path from 'node:path';
-import type { TrialOutput } from './types.js';
+import type { GeneratedTask, TrialOutput } from './types.js';
 
 export interface CheckpointData {
   skillHash: string;
@@ -10,6 +10,8 @@ export interface CheckpointData {
   runnerModel: string;
   graderModel: string;
   generatorModel: string;
+  /** The exact tasks the interrupted run used — reused verbatim on --resume. */
+  tasks: GeneratedTask[];
   completedOutputs: TrialOutput[];
   updatedAt: string;
 }
@@ -54,6 +56,7 @@ export async function loadCheckpoint(filePath: string): Promise<CheckpointData |
       typeof parsed.runnerModel !== 'string' ||
       typeof parsed.graderModel !== 'string' ||
       typeof parsed.generatorModel !== 'string' ||
+      !Array.isArray(parsed.tasks) ||
       !Array.isArray(parsed.completedOutputs)
     ) {
       return null;
