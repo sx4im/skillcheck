@@ -258,6 +258,7 @@ export async function evalSkill(options: EvalOptions): Promise<EvalResult> {
     existingCp !== null &&
     existingCp.skillHash === skill.versionHash &&
     existingCp.trials === options.trials &&
+    existingCp.difficulty === (options.difficulty ?? 'standard') &&
     existingCp.runnerModel === (config.runnerModel ?? '') &&
     existingCp.graderModel === (config.graderModel ?? '') &&
     existingCp.generatorModel === (config.generatorModel ?? '') &&
@@ -312,6 +313,7 @@ export async function evalSkill(options: EvalOptions): Promise<EvalResult> {
         skillHash: skill.versionHash,
         taskSuiteHash,
         trials: options.trials,
+        difficulty: options.difficulty ?? 'standard',
         runnerModel: config.runnerModel ?? '',
         graderModel: config.graderModel ?? '',
         generatorModel: config.generatorModel ?? '',

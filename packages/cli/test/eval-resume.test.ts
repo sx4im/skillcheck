@@ -104,4 +104,31 @@ describe('evalSkill --resume with generated tasks', () => {
     // The resumed run kept the FIRST generation's tasks, not a fresh set.
     expect(result.tasks[0].prompt).toContain('from generation 1');
   });
+
+  it('refuses to reuse a checkpoint from a different difficulty and regenerates tasks', async () => {
+    const options = {
+      inputPath: path.join(workDir, 'SKILL.md'),
+      tasks: 2,
+      trials: 2,
+      mode: 'forced' as const,
+      useCache: false,
+      saveArtifacts: false,
+      concurrency: 1,
+      difficulty: 'standard' as const
+    };
+
+    // Interrupt mid-trials under standard difficulty:
+    ShiftingGeneratorClient.failAfterCalls = 5;
+    await expect(evalSkill(options)).rejects.toThrow('simulated interruption');
+    expect(ShiftingGeneratorClient.generateCalls).toBe(1);
+
+    // Resume under hard difficulty:
+    ShiftingGeneratorClient.failAfterCalls = Number.POSITIVE_INFINITY;
+    const result = await evalSkill({ ...options, difficulty: 'hard', resume: true });
+
+    // The generator must be invoked again for a fresh set of hard tasks:
+    expect(ShiftingGeneratorClient.generateCalls).toBe(2);
+    expect(result.config.tasks).toBe(2);
+    expect(result.tasks[0].prompt).toContain('from generation 2');
+  });
 });

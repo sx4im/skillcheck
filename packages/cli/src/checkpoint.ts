@@ -1,12 +1,13 @@
 import { mkdir, readFile, rename, rm, writeFile } from 'node:fs/promises';
 import { homedir } from 'node:os';
 import path from 'node:path';
-import type { GeneratedTask, TrialOutput } from './types.js';
+import type { GeneratedTask, TaskDifficulty, TrialOutput } from './types.js';
 
 export interface CheckpointData {
   skillHash: string;
   taskSuiteHash: string;
   trials: number;
+  difficulty: TaskDifficulty;
   runnerModel: string;
   graderModel: string;
   generatorModel: string;
@@ -53,6 +54,7 @@ export async function loadCheckpoint(filePath: string): Promise<CheckpointData |
       typeof parsed.skillHash !== 'string' ||
       typeof parsed.taskSuiteHash !== 'string' ||
       typeof parsed.trials !== 'number' ||
+      (parsed.difficulty !== 'standard' && parsed.difficulty !== 'hard' && parsed.difficulty !== 'adversarial') ||
       typeof parsed.runnerModel !== 'string' ||
       typeof parsed.graderModel !== 'string' ||
       typeof parsed.generatorModel !== 'string' ||
