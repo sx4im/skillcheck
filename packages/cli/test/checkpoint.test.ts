@@ -45,6 +45,7 @@ describe('checkpointed evaluation persistence', () => {
       runnerModel: 'runner-a',
       graderModel: 'grader-a',
       generatorModel: 'generator-a',
+      tasks: [{ id: 't1', prompt: 'Do the thing', criterionType: 'rubric', criterion: 'It is done.' }],
       completedOutputs: sampleOutputs,
       updatedAt: new Date().toISOString()
     };
@@ -57,6 +58,8 @@ describe('checkpointed evaluation persistence', () => {
     expect(loaded?.runnerModel).toBe('runner-a');
     expect(loaded?.graderModel).toBe('grader-a');
     expect(loaded?.generatorModel).toBe('generator-a');
+    expect(loaded?.tasks).toHaveLength(1);
+    expect(loaded?.tasks[0]?.id).toBe('t1');
     expect(loaded?.completedOutputs).toHaveLength(1);
     expect(loaded?.completedOutputs[0]?.transcriptHash).toBe('h1');
   });
@@ -83,6 +86,7 @@ describe('checkpointed evaluation persistence', () => {
       runnerModel: 'runner-a',
       graderModel: 'grader-a',
       generatorModel: 'generator-a',
+      tasks: [{ id: 't1', prompt: 'Do the thing', criterionType: 'rubric', criterion: 'It is done.' }],
       completedOutputs: sampleOutputs,
       updatedAt: new Date().toISOString()
     };
@@ -102,6 +106,25 @@ describe('checkpointed evaluation persistence', () => {
         skillHash: 'hash-123',
         taskSuiteHash: 'suite-456',
         trials: 3,
+        completedOutputs: sampleOutputs,
+        updatedAt: new Date().toISOString()
+      })
+    );
+
+    expect(await loadCheckpoint(cpFile)).toBeNull();
+  });
+
+  it('rejects legacy checkpoints missing the tasks field so resume cannot run without the original task set', async () => {
+    const { writeFile } = await import('node:fs/promises');
+    await writeFile(
+      cpFile,
+      JSON.stringify({
+        skillHash: 'hash-123',
+        taskSuiteHash: 'suite-456',
+        trials: 3,
+        runnerModel: 'runner-a',
+        graderModel: 'grader-a',
+        generatorModel: 'generator-a',
         completedOutputs: sampleOutputs,
         updatedAt: new Date().toISOString()
       })
