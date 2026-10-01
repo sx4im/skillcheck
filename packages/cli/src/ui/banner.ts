@@ -134,6 +134,7 @@ export function printHelpUi(): void {
 
   console.log(`  ${paint.accent('Commands')}`);
   cmd('check <path>', 'A/B check a skill with a readable result card');
+  cmd('demo', 'instant 5-second simulated benchmark (zero keys required)');
   cmd('matrix <path>', 'benchmark a skill across multiple models side-by-side');
   cmd('setup', 'connect via Skillcheck Cloud or Bring Your Own Key (BYOK)');
   cmd('logout', 'remove the saved API key or provider config');
@@ -141,6 +142,7 @@ export function printHelpUi(): void {
   cmd('verify <file>', 're-grade a saved result to confirm it reproduces');
   cmd('corpus run', 'batch-check every skill in a corpus file');
   cmd('rot', 're-score saved results against the current model');
+  cmd('help [command]', 'show general help or detailed help for a command');
   console.log('');
 
   console.log(`  ${paint.accent('Options')}`);
@@ -166,4 +168,165 @@ export function printHelpUi(): void {
   console.log(`  ${paint.dim('Supported providers (BYOK): OpenAI, Anthropic, Gemini, Groq, Mistral, OpenRouter, NVIDIA NIM')}`);
   console.log(`  ${paint.dim('Supported inputs: any Markdown (.md) file — e.g.')} ${paint.dim(CONVENTIONAL_SKILL_FILES.join(', '))} ${paint.dim('— or a folder.')}`);
   console.log(`  ${paint.dim('Docs:')} https://${REPO_URL}\n`);
+}
+
+export function printCommandHelpUi(command: string): boolean {
+  const norm = command.toLowerCase().trim();
+  const opt = (name: string, blurb: string) =>
+    console.log(`    ${paint.accent(name.padEnd(22))}${paint.dim(blurb)}`);
+  const sec = (title: string) => console.log(`\n  ${paint.accent(title)}`);
+
+  if (norm === 'check' || norm === 'c' || norm === 'run') {
+    console.log(`\n  ${paint.bold('Skillcheck check')} ${paint.dim('— A/B test an agent skill')}`);
+    sec('Usage');
+    console.log(`    ${paint.bold('skillcheck check')} ${paint.accent('<path> [options]')}`);
+    console.log(`    ${paint.bold('skillcheck')} ${paint.accent('<path> [options]')}`);
+    sec('Description');
+    console.log(`    Runs a controlled A/B experiment comparing model performance with and without your skill.`);
+    console.log(`    Synthesizes domain tasks, runs paired trials, grades double-blind, and outputs effect size.`);
+    sec('Arguments');
+    console.log(`    ${paint.accent('<path>')}                 ${paint.dim('Path to a Markdown file (.md) or a folder containing one.')}`);
+    console.log(`                           ${paint.dim('Supported: SKILL.md, .cursorrules, CLAUDE.md, AGENTS.md, etc.')}`);
+    sec('Options');
+    opt('--tasks N', 'evaluation tasks to generate (default 3, max 50)');
+    opt('--trials K', 'trials per task and arm (default 3, max 10)');
+    opt('--concurrency C', 'parallel trial execution limit (default 4)');
+    opt('--runner MODEL', 'runner model override (e.g. gpt-4o, claude-3-5-sonnet)');
+    opt('--grader MODEL', 'grader model override');
+    opt('--generator MODEL', 'task generator model override');
+    opt('--output FILE', 'save the full JSON evaluation result');
+    opt('--explain', 'show a per-task breakdown with example outputs');
+    opt('--json', 'emit machine-readable JSON without terminal UI');
+    opt('--help, -h', 'show this command help');
+    sec('Examples');
+    console.log(`    ${paint.dim('$')} skillcheck check ./SKILL.md`);
+    console.log(`    ${paint.dim('$')} skillcheck check ./SKILL.md --tasks 5 --trials 3`);
+    console.log(`    ${paint.dim('$')} skillcheck check ./SKILL.md --explain`);
+    console.log(`    ${paint.dim('$')} skillcheck check ./SKILL.md --runner claude-3-5-sonnet --output result.json\n`);
+    return true;
+  }
+
+  if (norm === 'demo') {
+    console.log(`\n  ${paint.bold('Skillcheck demo')} ${paint.dim('— Instant zero-setup demonstration')}`);
+    sec('Usage');
+    console.log(`    ${paint.bold('skillcheck demo')}`);
+    sec('Description');
+    console.log(`    Runs an instant 5-second simulated benchmark on an exemplary code review skill.`);
+    console.log(`    Demonstrates the live step tracker, spinner, and satisfaction card with zero API keys required.`);
+    sec('Examples');
+    console.log(`    ${paint.dim('$')} skillcheck demo\n`);
+    return true;
+  }
+
+  if (norm === 'matrix' || norm === 'compare') {
+    console.log(`\n  ${paint.bold('Skillcheck matrix')} ${paint.dim('— Cross-model benchmark')}`);
+    sec('Usage');
+    console.log(`    ${paint.bold('skillcheck matrix')} ${paint.accent('<path> [options]')}`);
+    sec('Description');
+    console.log(`    Benchmarks an agent skill across multiple LLM models side-by-side to detect`);
+    console.log(`    model-specific gains, placebos, or regressions.`);
+    sec('Options');
+    opt('--models M1,M2', 'comma-separated list of models to evaluate');
+    opt('--tasks N', 'evaluation tasks per model (default 3, max 50)');
+    opt('--trials K', 'trials per task and arm (default 3, max 10)');
+    opt('--concurrency C', 'parallel execution limit (default 4)');
+    opt('--json', 'output matrix results as JSON');
+    opt('--help, -h', 'show this command help');
+    sec('Examples');
+    console.log(`    ${paint.dim('$')} skillcheck matrix ./SKILL.md`);
+    console.log(`    ${paint.dim('$')} skillcheck matrix ./SKILL.md --models gpt-6-sol,claude-opus-5-5\n`);
+    return true;
+  }
+
+  if (norm === 'setup' || norm === 'config' || norm === 'login' || norm === 'auth' || norm === 'init') {
+    console.log(`\n  ${paint.bold('Skillcheck setup')} ${paint.dim('— Connect model provider or cloud')}`);
+    sec('Usage');
+    console.log(`    ${paint.bold('skillcheck setup')}`);
+    sec('Description');
+    console.log(`    Interactive setup wizard. Connect via Skillcheck Cloud (10 free evaluations)`);
+    console.log(`    or Bring Your Own Key (BYOK) supporting:`);
+    console.log(`    OpenAI, Anthropic, Google Gemini, Groq, Mistral AI, OpenRouter, NVIDIA NIM.\n`);
+    return true;
+  }
+
+  if (norm === 'logout' || norm === 'signout' || norm === 'deauth') {
+    console.log(`\n  ${paint.bold('Skillcheck logout')} ${paint.dim('— Disconnect credentials')}`);
+    sec('Usage');
+    console.log(`    ${paint.bold('skillcheck logout')}`);
+    sec('Description');
+    console.log(`    Removes saved API keys and provider configurations from ~/.config/skillcheck/config.json.\n`);
+    return true;
+  }
+
+  if (norm === 'eval') {
+    console.log(`\n  ${paint.bold('Skillcheck eval')} ${paint.dim('— Headless evaluation (JSON)')}`);
+    sec('Usage');
+    console.log(`    ${paint.bold('skillcheck eval')} ${paint.accent('<path> [options]')}`);
+    sec('Description');
+    console.log(`    Runs a full A/B evaluation and emits raw JSON to stdout. Designed for CI and scripts.`);
+    sec('Options');
+    opt('--tasks N', 'tasks to generate (default 10)');
+    opt('--trials K', 'trials per task and arm (default 3)');
+    opt('--output FILE', 'save result JSON to file');
+    opt('--explain', 'include per-task explain data in output\n');
+    return true;
+  }
+
+  if (norm === 'verify') {
+    console.log(`\n  ${paint.bold('Skillcheck verify')} ${paint.dim('— Reproducibility verifier')}`);
+    sec('Usage');
+    console.log(`    ${paint.bold('skillcheck verify')} ${paint.accent('<result.json> [--sample N]')}`);
+    sec('Description');
+    console.log(`    Re-evaluates a previously saved result to verify that measured effect size reproduces.\n`);
+    return true;
+  }
+
+  if (norm === 'corpus') {
+    console.log(`\n  ${paint.bold('Skillcheck corpus')} ${paint.dim('— Batch corpus runner')}`);
+    sec('Usage');
+    console.log(`    ${paint.bold('skillcheck corpus run')} ${paint.accent('--corpus corpus.json [--results dir]')}`);
+    sec('Description');
+    console.log(`    Batch-evaluates an entire collection of skills declared in a corpus manifest.\n`);
+    return true;
+  }
+
+  if (norm === 'rot') {
+    console.log(`\n  ${paint.bold('Skillcheck rot')} ${paint.dim('— Prompt rot detection')}`);
+    sec('Usage');
+    console.log(`    ${paint.bold('skillcheck rot')} ${paint.accent('[--corpus file.json] [--results dir]')}`);
+    sec('Description');
+    console.log(`    Re-scores saved benchmark results against the current model to detect prompt rot.\n`);
+    return true;
+  }
+
+  return false;
+}
+
+function levenshtein(a: string, b: string): number {
+  const m = a.length;
+  const n = b.length;
+  const dp: number[][] = Array.from({ length: m + 1 }, () => Array(n + 1).fill(0));
+  for (let i = 0; i <= m; i += 1) dp[i]![0] = i;
+  for (let j = 0; j <= n; j += 1) dp[0]![j] = j;
+  for (let i = 1; i <= m; i += 1) {
+    for (let j = 1; j <= n; j += 1) {
+      const cost = a[i - 1] === b[j - 1] ? 0 : 1;
+      dp[i]![j] = Math.min(dp[i - 1]![j]! + 1, dp[i]![j - 1]! + 1, dp[i - 1]![j - 1]! + cost);
+    }
+  }
+  return dp[m]![n]!;
+}
+
+export function findClosestCommand(input: string, knownCommands: string[]): string | undefined {
+  let closest: string | undefined;
+  let minDistance = 3;
+  const clean = input.toLowerCase().trim();
+  for (const cmd of knownCommands) {
+    const dist = levenshtein(clean, cmd.toLowerCase());
+    if (dist < minDistance) {
+      minDistance = dist;
+      closest = cmd;
+    }
+  }
+  return closest;
 }

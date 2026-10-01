@@ -289,4 +289,36 @@ describe('update notifier', () => {
       logSpy.mockRestore();
     }
   });
+
+  it('prints general help when running `help`', async () => {
+    const logSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
+    try {
+      await main(['node', 'skillcheck', 'help']);
+      expect(logSpy).toHaveBeenCalled();
+      const output = logSpy.mock.calls.map((c) => String(c[0])).join('\n');
+      expect(output).toContain('Usage');
+      expect(output).toContain('Commands');
+    } finally {
+      logSpy.mockRestore();
+    }
+  });
+
+  it('prints command-specific help for `help check` and `check --help`', async () => {
+    const logSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
+    try {
+      await main(['node', 'skillcheck', 'help', 'check']);
+      const output = logSpy.mock.calls.map((c) => String(c[0])).join('\n');
+      expect(output).toContain('Skillcheck check');
+      expect(output).toContain('--tasks');
+      expect(output).toContain('--trials');
+    } finally {
+      logSpy.mockRestore();
+    }
+  });
+
+  it('suggests closest match on mistyped command', async () => {
+    await expect(main(['node', 'skillcheck', 'chek'])).rejects.toThrow(
+      /Unknown command: chek[\s\S]*Did you mean: `skillcheck check`\?/
+    );
+  });
 });

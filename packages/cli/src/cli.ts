@@ -20,6 +20,8 @@ import {
   printResultCard,
   formatExplain,
   printHelpUi,
+  printCommandHelpUi,
+  findClosestCommand,
   printBanner,
   printCheckHeader,
   printSetupIntro,
@@ -574,15 +576,21 @@ async function runInteractiveCheck(): Promise<void> {
 export async function main(argv: string[]): Promise<void> {
   const command = argv[2];
 
-  // `--help`/`-h` anywhere on the line prints usage. Without this, `skillcheck
-  // check --help` parses `--help` as the skill path and dies with a confusing
-  // "missing path" error instead of showing help.
-  if (argv.includes('--help') || argv.includes('-h')) {
+  const hasHelpFlag = argv.includes('--help') || argv.includes('-h');
+  const isHelpCommand = command === 'help';
+
+  if (hasHelpFlag || isHelpCommand) {
+    const target = isHelpCommand ? argv[3] : command;
+    if (target && !target.startsWith('-') && target !== 'help') {
+      if (printCommandHelpUi(target)) {
+        return;
+      }
+    }
     printHelpUi();
     return;
   }
 
-  if (command === '--version' || command === '-v' || command === 'version') {
+  if (command === '--version' || command === '-v' || command === 'version' || command === 'v') {
     console.log(currentVersion());
     return;
   }
@@ -603,12 +611,20 @@ export async function main(argv: string[]): Promise<void> {
     return;
   }
 
-  if (command === 'setup' || command === '--setup' || command === 'config' || command === '--config' || command === 'login') {
+  if (
+    command === 'setup' ||
+    command === '--setup' ||
+    command === 'config' ||
+    command === '--config' ||
+    command === 'login' ||
+    command === 'auth' ||
+    command === 'init'
+  ) {
     await ensureCloudConfigured(true);
     return;
   }
 
-  if (command === 'logout' || command === 'signout') {
+  if (command === 'logout' || command === 'signout' || command === 'deauth') {
     printLogout(logoutUser());
     return;
   }
@@ -625,7 +641,7 @@ export async function main(argv: string[]): Promise<void> {
     return;
   }
 
-  if (command === 'check') {
+  if (command === 'check' || command === 'c' || command === 'run' || command === 'test') {
     await runCheck(parseCheckOptions(argv, 3));
     return;
   }
@@ -666,7 +682,7 @@ export async function main(argv: string[]): Promise<void> {
     return;
   }
 
-  if (command === 'matrix') {
+  if (command === 'matrix' || command === 'compare') {
     const options = parseMatrixOptions(argv, 3);
     const result = await runMatrix(options);
     if (options.json) {
@@ -694,5 +710,9 @@ export async function main(argv: string[]): Promise<void> {
     return;
   }
 
-  throw new Error(`Unknown command: ${command}\nRun \`skillcheck --help\` to see available commands.`);
+  const KNOWN_COMMANDS = ['check', 'demo', 'matrix', 'setup', 'logout', 'eval', 'verify', 'corpus', 'rot', 'help', 'version'];
+  const suggestion = findClosestCommand(command, KNOWN_COMMANDS);
+  const didYouMean = suggestion ? `\nDid you mean: \`skillcheck ${suggestion}\`?` : '';
+
+  throw new Error(`Unknown command: ${command}${didYouMean}\nRun \`skillcheck --help\` to see available commands.`);
 }
