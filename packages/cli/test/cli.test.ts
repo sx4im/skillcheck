@@ -321,4 +321,21 @@ describe('update notifier', () => {
       /Unknown command: chek[\s\S]*Did you mean: `skillcheck check`\?/
     );
   });
+
+  it('outputs completion script when running `completion`', async () => {
+    const writeSpy = vi.spyOn(process.stdout, 'write').mockImplementation(() => true);
+    try {
+      await main(['node', 'skillcheck', 'completion', 'bash']);
+      expect(writeSpy).toHaveBeenCalled();
+      const output = writeSpy.mock.calls.map((c) => String(c[0])).join('');
+      expect(output).toContain('_skillcheck_completions()');
+    } finally {
+      writeSpy.mockRestore();
+    }
+  });
+
+  it('accepts --clipboard flag in check options', () => {
+    const opts = parseCheckOptions(['node', 'skillcheck', 'check', './SKILL.md', '--clipboard']);
+    expect(opts.clipboard).toBe(true);
+  });
 });

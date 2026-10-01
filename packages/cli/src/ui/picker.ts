@@ -307,7 +307,7 @@ export async function selectSkillPath(startDir = process.cwd()): Promise<string>
         continue;
       }
       if (key.name !== 'return') {
-        if (input && input.length === 1 && !key.ctrl && !key.meta && /^[\w.\- /]$/.test(input)) {
+        if (input && input.length === 1 && !key.ctrl && /^[\w.\- /]$/.test(input)) {
           filter += input;
           selected = 0;
         }

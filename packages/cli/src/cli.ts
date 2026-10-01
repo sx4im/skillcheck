@@ -37,15 +37,22 @@ import {
   selectEffort,
   selectMenuOption,
   startProgress,
-  validateSkillInput
+  validateSkillInput,
+  copyToClipboardOsc52,
+  formatPrMarkdown,
+  paint,
+  SYM
 } from './ui.js';
 import { currentVersion, maybeNotifyUpdate } from './update.js';
 import { verifyResult } from './verify.js';
 import { runDemo } from './demo.js';
+import { findWorkspaceSkills } from './discovery.js';
+import { probeLocalLlm } from './local-llm.js';
+import { generateCompletionScript, detectShell, type ShellType } from './completion.js';
 
 // Commands that emit machine-readable output or run unattended — never interrupt
 // these with the interactive "update available?" prompt.
-const MACHINE_COMMANDS = new Set(['eval', 'm0', 'corpus', 'rot', 'verify', 'matrix', 'demo']);
+const MACHINE_COMMANDS = new Set(['eval', 'm0', 'corpus', 'rot', 'verify', 'matrix', 'demo', 'completion']);
 
 // First-run onboarding. Supports hosted mode (Skillcheck Cloud) as default,
 // or Bring-Your-Own-Key (BYOK) for OpenAI, Anthropic, Gemini, Groq, Mistral, OpenRouter, NVIDIA NIM.
@@ -76,14 +83,58 @@ async function ensureCloudConfigured(force = false): Promise<void> {
 
   printBanner();
 
+  // Non-blocking micro-probe for running local LLMs (Ollama, LM Studio, vLLM)
+  const localLlm = await probeLocalLlm(120);
+
+  const modeOptions = [
+    { key: '1', name: 'Skillcheck Cloud (Hosted)', value: 'hosted', blurb: 'recommended — free 10 checks' },
+    { key: '2', name: 'Bring Your Own Key (BYOK)', value: 'byok', blurb: 'OpenAI, Anthropic, Gemini, Groq, Mistral, OpenRouter, NIM' }
+  ];
+
+  if (localLlm && localLlm.models.length > 0) {
+    modeOptions.unshift({
+      key: '0',
+      name: `Local ${localLlm.name.toUpperCase()} (Detected on ${localLlm.baseUrl})`,
+      value: 'local',
+      blurb: `offline & free — ${localLlm.models.length} models installed`
+    });
+  }
+
   const mode = await selectMenuOption(
     'How do you want to connect to models?',
     'Hosted mode is free & ready in 30 seconds. Bring Your Own Key uses your provider key directly.',
-    [
-      { key: '1', name: 'Skillcheck Cloud (Hosted)', value: 'hosted', blurb: 'recommended — free 10 checks' },
-      { key: '2', name: 'Bring Your Own Key (BYOK)', value: 'byok', blurb: 'OpenAI, Anthropic, Gemini, Groq, Mistral, OpenRouter, NIM' }
-    ]
+    modeOptions
   );
+
+  if (mode === 'local' && localLlm) {
+    const modelOptions = localLlm.models.slice(0, 30).map((m, idx) => ({
+      key: String(idx + 1),
+      name: m,
+      value: m
+    }));
+
+    const selectedModel =
+      localLlm.suggestedModel ??
+      (await selectMenuOption(
+        `Select Local Model (${localLlm.name.toUpperCase()})`,
+        'Choose which locally installed model to evaluate with',
+        modelOptions
+      ));
+
+    const savedPath = saveUserConfig({
+      ...current,
+      provider: 'openai',
+      providerKey: 'local',
+      providerBaseUrl: localLlm.baseUrl,
+      generatorModel: selectedModel,
+      runnerModel: selectedModel,
+      graderModel: selectedModel
+    });
+
+    console.log(`✓ You're all set with Local ${localLlm.name.toUpperCase()}! Model: ${selectedModel}`);
+    console.log(`Config saved to ${savedPath}\n`);
+    return;
+  }
 
   if (mode === 'hosted') {
     const apiUrl = cloudApiUrl();
@@ -325,6 +376,7 @@ interface CheckOptions {
   evalOptions: EvalOptions;
   json: boolean;
   output?: string;
+  clipboard?: boolean;
   effortPinned: boolean;
 }
 
@@ -340,7 +392,7 @@ export function parseCheckOptions(argv: string[], startIndex = 3): CheckOptions 
     argv,
     startIndex,
     CHECK_VALUE_OPTIONS,
-    ['--json', '--explain'],
+    ['--json', '--explain', '--clipboard'],
     inputIndex
   );
 
@@ -352,6 +404,7 @@ export function parseCheckOptions(argv: string[], startIndex = 3): CheckOptions 
     },
     json: hasFlag(argv, '--json'),
     output: evalOptions.output,
+    clipboard: hasFlag(argv, '--clipboard'),
     effortPinned: readOption(argv, '--tasks') !== undefined || readOption(argv, '--trials') !== undefined
   };
 }
@@ -535,6 +588,13 @@ async function runCheck(options: CheckOptions, header: 'compact' | 'none' = 'com
   }
   await printResultCard(result, options.output);
 
+  if (options.clipboard) {
+    const prMd = formatPrMarkdown(result);
+    if (copyToClipboardOsc52(prMd)) {
+      console.log(`\n  ${paint.ok(SYM.tick)} ${paint.bold('Copied GitHub PR review comment to clipboard')} ${paint.dim('(via OSC 52)')}\n`);
+    }
+  }
+
   const breakdown = formatExplain(result);
   if (!breakdown) {
     return;
@@ -553,7 +613,23 @@ async function runCheck(options: CheckOptions, header: 'compact' | 'none' = 'com
 
 async function runInteractiveCheck(): Promise<void> {
   await ensureCloudConfigured(false);
-  const selectedPath = await selectSkillPath();
+
+  let selectedPath: string;
+  const workspaceSkills = await findWorkspaceSkills();
+  if (workspaceSkills.length === 1 && process.stdin.isTTY) {
+    const single = workspaceSkills[0]!;
+    printBanner();
+    console.log(`  ${paint.accent('◆')} ${paint.bold('Detected workspace skill:')} ${paint.ok(single.relativePath)}\n`);
+    const ans = (await promptText(`Check ${single.relativePath}? [Y/n/browse] `)).trim().toLowerCase();
+    if (ans === '' || ans === 'y' || ans === 'yes') {
+      selectedPath = single.path;
+    } else {
+      selectedPath = await selectSkillPath();
+    }
+  } else {
+    selectedPath = await selectSkillPath();
+  }
+
   const effort = await selectEffort();
   // Same defaults parseCheckOptions would produce for a direct `check <path>`;
   // built directly because there is no argv to parse in the interactive flow.
@@ -688,6 +764,16 @@ export async function main(argv: string[]): Promise<void> {
     if (options.json) {
       console.log(JSON.stringify(result, null, 2));
     }
+    return;
+  }
+
+  if (command === 'completion') {
+    const rawShell = argv[3];
+    const shell: ShellType =
+      rawShell === 'bash' || rawShell === 'zsh' || rawShell === 'fish'
+        ? rawShell
+        : detectShell();
+    process.stdout.write(generateCompletionScript(shell));
     return;
   }
 

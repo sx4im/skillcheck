@@ -72,7 +72,10 @@ export async function findWorkspaceSkills(root = findWorkspaceRoot(), maxDepth =
     }
 
     for (const entry of entries) {
-      if (IGNORED_DIRECTORIES.has(entry) || entry.startsWith('.' && entry !== '.cursorrules' && entry !== '.cursor' && entry !== '.claude')) {
+      if (
+        IGNORED_DIRECTORIES.has(entry) ||
+        (entry.startsWith('.') && entry !== '.cursorrules' && entry !== '.cursor' && entry !== '.claude')
+      ) {
         continue;
       }
 

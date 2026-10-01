@@ -32,6 +32,8 @@ Point it at any Markdown skill or rule file and it runs an automated A/B experim
 >
 > 📊 **[View live benchmark results on the Skillcheck Leaderboard →](https://skillcheck.page)**
 
+https://github.com/sx4im/skillcheck/releases/download/v0.11.0/skillcheck-demo.mp4
+
 ```
 $ skillcheck
 

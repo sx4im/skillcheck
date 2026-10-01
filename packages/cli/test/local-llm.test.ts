@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import { probeLocalLlm, pickSuggestedModel } from '../src/local-llm.js';
 
 describe('local LLM auto-discovery', () => {

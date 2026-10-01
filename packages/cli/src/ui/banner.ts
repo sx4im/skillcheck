@@ -142,6 +142,7 @@ export function printHelpUi(): void {
   cmd('verify <file>', 're-grade a saved result to confirm it reproduces');
   cmd('corpus run', 'batch-check every skill in a corpus file');
   cmd('rot', 're-score saved results against the current model');
+  cmd('completion [sh]', 'generate tab completion script (bash, zsh, fish)');
   cmd('help [command]', 'show general help or detailed help for a command');
   console.log('');
 
@@ -153,6 +154,7 @@ export function printHelpUi(): void {
   opt('--models M1,M2', 'models list for matrix command');
   opt('--output FILE', 'save the full JSON result');
   opt('--explain', 'show a per-task breakdown with example outputs');
+  opt('--clipboard', 'copy GitHub PR review markdown to clipboard');
   opt('--json', 'machine-readable output, no UI');
   opt('--version', 'print the installed version');
   opt('--help', 'show this help (works after any command)');

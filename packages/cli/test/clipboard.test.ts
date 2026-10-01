@@ -17,6 +17,20 @@ describe('OSC 52 clipboard export', () => {
     expect(seq).toBe(`\x1bPtmux;\x1b\x1b]52;c;${b64}\x07\x1b\\`);
   });
 
+  it('writes OSC 52 sequence to stream via copyToClipboardOsc52', () => {
+    const chunks: string[] = [];
+    const fakeStream = {
+      write: (data: string) => {
+        chunks.push(data);
+        return true;
+      }
+    };
+    const ok = copyToClipboardOsc52('copied content', fakeStream as unknown as NodeJS.WriteStream);
+    expect(ok).toBe(true);
+    expect(chunks.length).toBe(1);
+    expect(chunks[0]).toContain(Buffer.from('copied content').toString('base64'));
+  });
+
   it('formats comprehensive GitHub PR markdown from EvalResult', () => {
     const sampleResult: EvalResult = {
       skill: {
