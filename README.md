@@ -17,7 +17,7 @@
 
 Not a syntax linter or basic assertion check — a controlled scientific experiment that measures statistical effect size.
 
-Most published `SKILL.md` files, `.cursorrules`, and agent prompts have never been tested against an unprompted baseline. You cannot tell whether they help your model, make it worse, or are purely decorative prompt bloat. Skillcheck replaces vibe checks with empirical AI evaluation: paired control vs. treatment trials, double-blind grading, and bootstrap confidence intervals.
+Most published `SKILL.md` files, `.cursorrules`, and agent prompts have never been tested against an unprompted baseline. You cannot tell whether they help your model, make it worse, or are purely decorative prompt bloat. Skillcheck replaces vibe checks with empirical AI evaluation: paired control vs. treatment trials, blind grading, and bootstrap confidence intervals.
 
 Point it at any Markdown skill or rule file and it runs an automated A/B experiment: it generates fresh domain-specific tasks, has the model solve each task **with** and **without** the skill injected, grades both arms **blind**, and reports the measured effect with a 95% bootstrap confidence interval and a 0–100 satisfaction score.
 
@@ -26,7 +26,7 @@ Point it at any Markdown skill or rule file and it runs an automated A/B experim
 >
 > Evaluate your own agent skills, prompt instructions, and rule files against an unprompted baseline:
 > - **Paired evaluation arms**: Runs identical tasks with and without the skill injected.
-> - **Double-blind grading**: Evaluates outputs blind with candidate order shuffled using a seeded hash.
+> - **Blind grading**: Evaluates outputs blind (the grader is blind to which arm produced an output, the subject model cannot be) with candidate order shuffled using a seeded hash.
 > - **Bootstrap confidence intervals**: 1,000 paired resamples produce statistical effect sizes and clear verdicts (`HELPS`, `PLACEBO`, or `HARMS`).
 >
 > 📊 **[View the Skillcheck Example Report and Format Demo →](https://skillcheck.page/#leaderboard)**
@@ -178,7 +178,7 @@ Most prompt tools and eval frameworks test whether an output matches a static re
 | **Evaluation Design** | Ad-hoc single prompts | Treatment-only (no control arm) | **Controlled A/B Trial** (With-skill vs. Without-skill) |
 | **Primary Metric** | Subjective opinion | Boolean pass/fail rate | **Net Effect Size ($\Delta$ Pass Rate)** with 95% Bootstrap CI |
 | **Task Generation** | Manual prompt typing | Manual YAML test authoring | **Domain-Adaptive Synthesis** (zero instruction leakage) |
-| **Grading Objectivity** | High confirmation bias | Single-arm evaluation | **Double-Blind Grading** (grader never knows which arm produced output) |
+| **Grading Objectivity** | High confirmation bias | Single-arm evaluation | **Blind Grading** (the grader is blind to which arm produced an output, the subject model cannot be) |
 | **Outcome** | Anecdotal | Test matrix table | **Statistical Verdict** (`HELPS` / `PLACEBO` / `HARMS`) |
 | **Token Overhead** | Unmeasured | Static token count | **Marginal token cost measured against performance lift** |
 

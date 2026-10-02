@@ -190,7 +190,7 @@ export function printCommandHelpUi(command: string): boolean {
     console.log(`    ${paint.bold('skillcheck')} ${paint.accent('<path> [options]')}`);
     sec('Description');
     console.log(`    Runs a controlled A/B experiment comparing model performance with and without your skill.`);
-    console.log(`    Synthesizes domain tasks, runs paired trials, grades double-blind, and outputs effect size.`);
+    console.log(`    Synthesizes domain tasks, runs paired trials, uses blind grading, and outputs effect size.`);
     sec('Arguments');
     console.log(`    ${paint.accent('<path>')}                 ${paint.dim('Path to a Markdown file (.md) or a folder containing one.')}`);
     console.log(`                           ${paint.dim('Supported: SKILL.md, .cursorrules, CLAUDE.md, AGENTS.md, etc.')}`);
