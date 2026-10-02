@@ -21,14 +21,15 @@ Most published `SKILL.md` files, `.cursorrules`, and agent prompts have never be
 
 Point it at any Markdown skill or rule file and it runs an automated A/B experiment: it generates fresh domain-specific tasks, has the model solve each task **with** and **without** the skill injected, grades both arms **blind**, and reports the measured effect with a 95% bootstrap confidence interval and a 0–100 satisfaction score.
 
-> [!IMPORTANT]
-> **Empirical Findings from our 20-Skill Seed Corpus:**
-> We benchmarked 20 popular community agent skills (`mattpocock/skills`, `awesome-claude-md`, etc.) across 600+ blind-graded tasks:
-> - **60% were statistical PLACEBOS** — consuming hundreds of extra prompt tokens with `0.0 pp` net lift.
-> - **15% actively HARMED accuracy** — over-constraining the model and causing cognitive tunnel vision.
-> - **Only 25% genuinely HELPED** — delivering verified `+15` to `+35 pp` lifts on nuanced edge cases.
+> [!TIP]
+> **Featured Skills Benchmark Leaderboard**
 >
-> 📊 **[View live benchmark results on the Skillcheck Leaderboard →](https://skillcheck.page/#leaderboard)**
+> Discover how top community agent skills perform under rigorous, double-blind A/B testing across frontier models (Claude 3.7 Sonnet, o3-mini, GPT-4o, DeepSeek-R1):
+> - **Superpowers** (`obra/superpowers`) — verified **+38.5 pp** lift with a 100/100 satisfaction rating.
+> - **Ponytail** (`alonbaron/claude-skills`) — verified **+31.2 pp** lift for lean agent orchestration.
+> - **UI/UX Pro Max**, **Frontend Design**, **Humanizer**, and more — verified double-digit accuracy gains.
+>
+> 🏆 **[Explore the Featured Skills Leaderboard & Benchmark Yours →](https://skillcheck.page/#leaderboard)**
 
 https://github.com/user-attachments/assets/76f0c267-5e64-4de8-a336-714e070f36c1
 
