@@ -30,7 +30,7 @@ Point it at any Markdown skill or rule file and it runs an automated A/B experim
 >
 > 📊 **[View live benchmark results on the Skillcheck Leaderboard →](https://skillcheck.page/#leaderboard)**
 
-https://github.com/user-attachments/assets/db79b704-b99d-469f-8c09-683afd757957
+https://github.com/user-attachments/assets/76f0c267-5e64-4de8-a336-714e070f36c1
 
 ```
 $ skillcheck
