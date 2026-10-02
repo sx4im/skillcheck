@@ -29,7 +29,7 @@ Point it at any Markdown skill or rule file and it runs an automated A/B experim
 > - **Double-blind grading**: Evaluates outputs blind with candidate order shuffled using a seeded hash.
 > - **Bootstrap confidence intervals**: 1,000 paired resamples produce statistical effect sizes and clear verdicts (`HELPS`, `PLACEBO`, or `HARMS`).
 >
-> 📊 **[View the Skillcheck Report Format and Leaderboard Demo →](https://skillcheck.page/#leaderboard)**
+> 📊 **[View the Skillcheck Example Report and Format Demo →](https://skillcheck.page/#leaderboard)**
 
 https://github.com/user-attachments/assets/76f0c267-5e64-4de8-a336-714e070f36c1
 
