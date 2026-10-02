@@ -4,6 +4,12 @@ All notable changes to this project are documented here. The format is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres
 to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Changed
+
+- Removed unreproducible leaderboard and corpus-percentage claims from the README and landing page.
+
 ## [0.13.0] - 2026-10-01
 
 ### Added
@@ -182,7 +188,11 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 - Recalibrated effort-level time estimates to observed `gpt-oss-120b` runs.
 
-[Unreleased]: https://github.com/sx4im/skillcheck/compare/v0.7.0...HEAD
+[Unreleased]: https://github.com/sx4im/skillcheck/compare/v0.13.0...HEAD
+[0.13.0]: https://github.com/sx4im/skillcheck/compare/v0.12.0...v0.13.0
+[0.12.0]: https://github.com/sx4im/skillcheck/compare/v0.11.0...v0.12.0
+[0.11.0]: https://github.com/sx4im/skillcheck/compare/v0.10.0...v0.11.0
+[0.10.0]: https://github.com/sx4im/skillcheck/compare/v0.9.3...v0.10.0
 [0.7.0]: https://github.com/sx4im/skillcheck/compare/v0.6.0...v0.7.0
 [0.6.0]: https://github.com/sx4im/skillcheck/compare/v0.5.3...v0.6.0
 [0.5.3]: https://github.com/sx4im/skillcheck/releases/tag/v0.5.3
