@@ -21,15 +21,15 @@ Most published `SKILL.md` files, `.cursorrules`, and agent prompts have never be
 
 Point it at any Markdown skill or rule file and it runs an automated A/B experiment: it generates fresh domain-specific tasks, has the model solve each task **with** and **without** the skill injected, grades both arms **blind**, and reports the measured effect with a 95% bootstrap confidence interval and a 0–100 satisfaction score.
 
-> [!TIP]
-> **Featured Skills Benchmark Leaderboard**
+> [!NOTE]
+> **Empirical AI Evaluation with Controlled A/B Testing**
 >
-> Discover how top community agent skills perform under rigorous, double-blind A/B testing across frontier models (Claude 3.7 Sonnet, o3-mini, GPT-4o, DeepSeek-R1):
-> - **Superpowers** (`obra/superpowers`) — verified **+38.5 pp** lift with a 100/100 satisfaction rating.
-> - **Ponytail** (`alonbaron/claude-skills`) — verified **+31.2 pp** lift for lean agent orchestration.
-> - **UI/UX Pro Max**, **Frontend Design**, **Humanizer**, and more — verified double-digit accuracy gains.
+> Evaluate your own agent skills, prompt instructions, and rule files against an unprompted baseline:
+> - **Paired evaluation arms**: Runs identical tasks with and without the skill injected.
+> - **Double-blind grading**: Evaluates outputs blind with candidate order shuffled using a seeded hash.
+> - **Bootstrap confidence intervals**: 1,000 paired resamples produce statistical effect sizes and clear verdicts (`HELPS`, `PLACEBO`, or `HARMS`).
 >
-> 🏆 **[Explore the Featured Skills Leaderboard & Benchmark Yours →](https://skillcheck.page/#leaderboard)**
+> 📊 **[View the Skillcheck Report Format and Leaderboard Demo →](https://skillcheck.page/#leaderboard)**
 
 https://github.com/user-attachments/assets/76f0c267-5e64-4de8-a336-714e070f36c1
 
