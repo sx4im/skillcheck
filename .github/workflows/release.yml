@@ -47,7 +47,13 @@ jobs:
       - run: npm run test:coverage
 
       - name: Tarball smoke test
-        run: node scripts/tarball-smoke.mjs
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/release-tarball
+          node scripts/tarball-smoke.mjs /tmp/release-tarball/package.tgz
+          SMOKE_SHA="$(sha256sum /tmp/release-tarball/package.tgz | awk '{print $1}')"
+          echo "SMOKE_SHA=$SMOKE_SHA" >> "$GITHUB_ENV"
+          echo "Smoke validated tarball SHA-256: $SMOKE_SHA"
 
       - name: Verify NPM_TOKEN secret
         run: |
@@ -73,7 +79,15 @@ jobs:
 
       - name: Publish to npm (with provenance)
         if: steps.check_version.outputs.already_published != 'true'
-        run: npm publish --provenance --access public
+        run: |
+          set -euo pipefail
+          PUBLISH_SHA="$(sha256sum /tmp/release-tarball/package.tgz | awk '{print $1}')"
+          echo "Publish tarball SHA-256: $PUBLISH_SHA"
+          if [ "$SMOKE_SHA" != "$PUBLISH_SHA" ]; then
+            echo "::error::Tarball SHA-256 mismatch before publish! Smoke SHA: $SMOKE_SHA vs Publish SHA: $PUBLISH_SHA"
+            exit 1
+          fi
+          npm publish /tmp/release-tarball/package.tgz --provenance --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 

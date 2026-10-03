@@ -1,5 +1,6 @@
 import http from 'node:http';
 import { execFileSync, spawn } from 'node:child_process';
+import crypto from 'node:crypto';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
@@ -14,12 +15,26 @@ function main() {
   }
   const tarballPath = path.resolve(rootDir, tarballName);
 
+  const customOut = process.argv[2];
+  let finalTarballPath = tarballPath;
+  if (customOut) {
+    finalTarballPath = path.resolve(rootDir, customOut);
+    fs.mkdirSync(path.dirname(finalTarballPath), { recursive: true });
+    fs.copyFileSync(tarballPath, finalTarballPath);
+  }
+
+  const sha256 = crypto.createHash('sha256').update(fs.readFileSync(finalTarballPath)).digest('hex');
+  console.log(`Validated tarball sha256: ${sha256}`);
+  if (customOut) {
+    console.log(`Preserved tarball at: ${finalTarballPath}`);
+  }
+
   const prefixDir = fs.mkdtempSync(path.join(os.tmpdir(), 'skillcheck-smoke-prefix-'));
   const runDir = fs.mkdtempSync(path.join(os.tmpdir(), 'skillcheck-smoke-run-'));
 
   try {
-    console.log(`Installing ${tarballName} into clean prefix ${prefixDir}...`);
-    execFileSync('npm', ['install', '-g', '--prefix', prefixDir, tarballPath], {
+    console.log(`Installing ${path.basename(finalTarballPath)} into clean prefix ${prefixDir}...`);
+    execFileSync('npm', ['install', '-g', '--prefix', prefixDir, finalTarballPath], {
       cwd: rootDir,
       stdio: 'inherit'
     });
@@ -139,7 +154,9 @@ function main() {
       });
     });
   } finally {
-    if (fs.existsSync(tarballPath)) {
+    if (!customOut && fs.existsSync(tarballPath)) {
+      fs.unlinkSync(tarballPath);
+    } else if (customOut && fs.existsSync(tarballPath) && tarballPath !== finalTarballPath) {
       fs.unlinkSync(tarballPath);
     }
     // Clean up temporary directories on exit
