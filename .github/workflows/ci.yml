@@ -37,6 +37,14 @@ jobs:
       - name: Lint
         run: npm run lint
 
+      - name: Lint GitHub Actions workflows
+        if: matrix.node == '20'
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/actionlint-bin
+          curl -fsSL https://github.com/rhysd/actionlint/releases/download/v1.7.7/actionlint_1.7.7_linux_amd64.tar.gz | tar -xz -C /tmp/actionlint-bin actionlint
+          /tmp/actionlint-bin/actionlint
+
       - name: Typecheck (src + tests)
         run: npm run typecheck
 
