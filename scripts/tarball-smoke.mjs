@@ -48,12 +48,18 @@ function main() {
     console.log(`Testing binary --version at ${binPath}...`);
     const versionOutput = execFileSync(binPath, ['--version'], { encoding: 'utf8' }).trim();
     console.log(`Reported version: ${versionOutput}`);
-    if (!versionOutput) {
-      throw new Error('Version output was empty');
+    const packageJsonVersion = JSON.parse(fs.readFileSync(path.join(rootDir, 'package.json'), 'utf8')).version;
+    const expectedVersion = process.env.TEST_SABOTAGE_VERSION || packageJsonVersion;
+    if (versionOutput !== expectedVersion) {
+      throw new Error(`Installed binary version mismatch: expected ${expectedVersion}, got ${versionOutput}`);
     }
 
     console.log('Testing mocked --json evaluation...');
     const server = http.createServer((req, res) => {
+      if (process.env.TEST_SABOTAGE_TIMEOUT === '1') {
+        // Intentionally hang request to simulate hanging LLM endpoint for timeout test
+        return;
+      }
       let body = '';
       req.on('data', (chunk) => { body += chunk; });
       req.on('end', () => {
@@ -132,10 +138,29 @@ function main() {
       let stderr = '';
       child.stdout.on('data', (d) => { stdout += d.toString(); });
       child.stderr.on('data', (d) => { stderr += d.toString(); });
-      child.on('exit', (code) => {
+
+      const timeoutMs = Number(process.env.SMOKE_TIMEOUT_MS || 90_000);
+      let timedOut = false;
+      const timer = setTimeout(() => {
+        timedOut = true;
+        console.error(`Mock check exceeded ${timeoutMs / 1000}s deadline. Killing child process...`);
+        child.kill('SIGTERM');
+        setTimeout(() => {
+          if (!child.killed) {
+            child.kill('SIGKILL');
+          }
+        }, 2000);
+      }, timeoutMs);
+
+      child.on('exit', (code, signal) => {
+        clearTimeout(timer);
         server.close();
+        if (timedOut) {
+          console.error(`Mock check timed out after ${timeoutMs / 1000} seconds`);
+          process.exit(1);
+        }
         if (code !== 0) {
-          console.error('Mock check failed with exit code', code);
+          console.error('Mock check failed with exit code', code, signal ? `(signal: ${signal})` : '');
           console.error(stderr);
           process.exit(1);
         }
