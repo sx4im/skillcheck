@@ -75,3 +75,26 @@ jobs:
         run: npm publish --provenance --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Verify provenance attestations
+        if: steps.check_token.outputs.skip != 'true' && steps.check_version.outputs.already_published != 'true'
+        run: |
+          set -euo pipefail
+          pkg="$(node -p "require('./package.json').version")"
+          verified=false
+          for attempt in $(seq 1 6); do
+            attestations="$(npm view "@sx4im/skillcheck@$pkg" dist.attestations --json 2>/dev/null || true)"
+            if [ -n "$attestations" ] && [ "$attestations" != "{}" ] && [ "$attestations" != "null" ]; then
+              echo "Provenance attestations verified for @sx4im/skillcheck@$pkg:"
+              echo "$attestations"
+              verified=true
+              break
+            fi
+            echo "Waiting for npm registry to index attestations (attempt $attempt/6)..."
+            sleep 5
+          done
+
+          if [ "$verified" != "true" ]; then
+            echo "::error::npm view @sx4im/skillcheck@$pkg dist.attestations is empty. Provenance attestation was not published."
+            exit 1
+          fi
