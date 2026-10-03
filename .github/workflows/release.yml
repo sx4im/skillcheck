@@ -46,6 +46,9 @@ jobs:
       - run: npm run build
       - run: npm run test:coverage
 
+      - name: Tarball smoke test
+        run: node scripts/tarball-smoke.mjs
+
       - name: Check NPM_TOKEN secret
         id: check_token
         run: |
