@@ -49,14 +49,12 @@ jobs:
       - name: Tarball smoke test
         run: node scripts/tarball-smoke.mjs
 
-      - name: Check NPM_TOKEN secret
-        id: check_token
+      - name: Verify NPM_TOKEN secret
         run: |
+          set -euo pipefail
           if [ -z "${NODE_AUTH_TOKEN:-}" ]; then
-            echo "::warning::NPM_TOKEN secret is not set in GitHub repository secrets. Skipping automated npm publish step."
-            echo "skip=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "skip=false" >> "$GITHUB_OUTPUT"
+            echo "::error::NPM_TOKEN secret is not set in GitHub repository secrets"
+            exit 1
           fi
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
@@ -74,13 +72,13 @@ jobs:
           fi
 
       - name: Publish to npm (with provenance)
-        if: steps.check_token.outputs.skip != 'true' && steps.check_version.outputs.already_published != 'true'
+        if: steps.check_version.outputs.already_published != 'true'
         run: npm publish --provenance --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       - name: Verify provenance attestations
-        if: steps.check_token.outputs.skip != 'true' && steps.check_version.outputs.already_published != 'true'
+        if: steps.check_version.outputs.already_published != 'true'
         run: |
           set -euo pipefail
           pkg="$(node -p "require('./package.json').version")"
