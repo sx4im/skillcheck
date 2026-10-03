@@ -457,13 +457,15 @@ retry adapter, metering, and every command) without a single API call. The
 interactive terminal shell is verified behaviourally rather than counted toward the
 coverage percentage.
 
-Every push and pull request runs [`ci.yml`](.github/workflows/ci.yml) — lint,
-typecheck, coverage, and a clean build on Node 20 and 22, a published-tarball
-validation, and the dashboard's offline tests — and it makes no model calls, so it
-runs on forks too. Tagging a release (`npm version patch && git push --follow-tags`)
-triggers [`release.yml`](.github/workflows/release.yml), which republishes to npm
-with provenance. Separately, a scheduled [rot workflow](.github/workflows/rot.yml)
-re-runs the live corpus weekly and opens a PR when a skill's verdict regresses.
+Every push and pull request runs [`ci.yml`](.github/workflows/ci.yml) (lint,
+typecheck, coverage, a clean build on Node 20 and 22, full test suite execution
+on Windows, a published-tarball validation, and the dashboard's offline tests). It
+makes no model calls, so it runs on forks too. Tagging a release
+(`npm version patch && git push --follow-tags`) triggers
+[`release.yml`](.github/workflows/release.yml), which publishes to npm with
+cryptographic provenance and verifies that attestations are recorded on the registry.
+Separately, a scheduled [rot workflow](.github/workflows/rot.yml) re-runs the live
+corpus weekly and opens a PR when a skill's verdict regresses.
 
 ## Star history
 

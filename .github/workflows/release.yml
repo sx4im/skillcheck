@@ -21,9 +21,9 @@ jobs:
   publish:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
           node-version: '20'
           cache: npm
@@ -46,6 +46,9 @@ jobs:
       - run: npm run build
       - run: npm run test:coverage
 
+      - name: Tarball smoke test
+        run: node scripts/tarball-smoke.mjs
+
       - name: Check NPM_TOKEN secret
         id: check_token
         run: |
@@ -58,11 +61,43 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
+      - name: Check if version is already published
+        id: check_version
+        run: |
+          set -euo pipefail
+          pkg="$(node -p "require('./package.json').version")"
+          if npm view "@sx4im/skillcheck@$pkg" version >/dev/null 2>&1; then
+            echo "Package @sx4im/skillcheck@$pkg is already published on npm. Skipping publish."
+            echo "already_published=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "already_published=false" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Publish to npm (with provenance)
-        if: steps.check_token.outputs.skip != 'true'
-        # Single-quoted: the plain scalar contains "Notice: ...", and a
-        # colon+space inside a plain YAML scalar is a parse error — which made
-        # every run of this workflow die in 0s before this fix.
-        run: 'npm publish --provenance --access public || echo "Notice: Package already published or skipped."'
+        if: steps.check_token.outputs.skip != 'true' && steps.check_version.outputs.already_published != 'true'
+        run: npm publish --provenance --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Verify provenance attestations
+        if: steps.check_token.outputs.skip != 'true' && steps.check_version.outputs.already_published != 'true'
+        run: |
+          set -euo pipefail
+          pkg="$(node -p "require('./package.json').version")"
+          verified=false
+          for attempt in $(seq 1 6); do
+            attestations="$(npm view "@sx4im/skillcheck@$pkg" dist.attestations --json 2>/dev/null || true)"
+            if [ -n "$attestations" ] && [ "$attestations" != "{}" ] && [ "$attestations" != "null" ]; then
+              echo "Provenance attestations verified for @sx4im/skillcheck@$pkg:"
+              echo "$attestations"
+              verified=true
+              break
+            fi
+            echo "Waiting for npm registry to index attestations (attempt $attempt/6)..."
+            sleep 5
+          done
+
+          if [ "$verified" != "true" ]; then
+            echo "::error::npm view @sx4im/skillcheck@$pkg dist.attestations is empty. Provenance attestation was not published."
+            exit 1
+          fi
