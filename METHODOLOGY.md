@@ -42,7 +42,7 @@ Each arm runs `K` trials. The default is `K=3`; single-trial results are not acc
 
 ## Grading
 
-Deterministic assertions run first when a task has one. Otherwise, the grader model receives the output and the criterion, but not the arm label. This keeps grading blind to whether an answer came from the skill-injected arm.
+Deterministic assertions run first when a task has one. Otherwise, the grader model receives the output and the criterion, but not the arm label. This keeps grading blind to whether an answer came from the skill-injected arm (the grader is blind to which arm produced an output, while the subject model cannot be).
 
 The generator, runner, and grader model IDs are separate environment variables so they can be swapped independently.
 

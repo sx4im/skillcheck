@@ -230,6 +230,12 @@ describe('help', () => {
     expect(out).toMatch(/Usage/);
     expect(out).toMatch(/check <path>/);
   });
+
+  it('describes evaluation with blind grading instead of double-blind in check --help', async () => {
+    const out = await runMain(['node', 'skillcheck', 'check', '--help']);
+    expect(out).toContain('blind grading');
+    expect(out).not.toContain('double-blind');
+  });
 });
 
 describe('logout', () => {

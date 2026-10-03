@@ -94,5 +94,7 @@ describe('OSC 52 clipboard export', () => {
     expect(markdown).toContain('<details>');
     expect(markdown).toContain('Per-task breakdown (2 tasks)');
     expect(markdown).toContain('github.com/sx4im/skillcheck');
+    expect(markdown).toContain('Paired, blind grading');
+    expect(markdown).not.toContain('double-blind');
   });
 });

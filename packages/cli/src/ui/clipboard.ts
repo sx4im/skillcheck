@@ -54,7 +54,7 @@ export function formatPrMarkdown(result: EvalResult): string {
     '| Metric | With Skill | Without Skill | Effect Size |',
     '|---|---|---|---|',
     `| **Pass Rate** | **${pct(result.result.with_skill_pass)}** | ${pct(result.result.no_skill_pass)} | **${pp(result.result.effect_pp)}** |`,
-    `| **Evaluation Size** | ${result.config.tasks} tasks × ${result.config.trials} trials | ${result.config.tasks} tasks × ${result.config.trials} trials | Paired, double-blind |`,
+    `| **Evaluation Size** | ${result.config.tasks} tasks × ${result.config.trials} trials | ${result.config.tasks} tasks × ${result.config.trials} trials | Paired, blind grading |`,
     `| **Models** | Runner: \`${result.config.runner_model}\` | Grader: \`${result.config.grader_model}\` | Temp: ${result.config.temperature} |`,
     ''
   ];

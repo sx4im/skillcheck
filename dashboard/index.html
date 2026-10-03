@@ -139,7 +139,7 @@
           <a href="#how">How it works</a>
           <a href="#features">Features</a>
           <a href="#result">The result</a>
-          <a href="#leaderboard">Leaderboard</a>
+          <a href="#leaderboard">Example report</a>
           <a href="#pricing">Pricing</a>
           <a href="#faq">FAQ</a>
           <a href="https://github.com/sx4im/skillcheck" rel="noopener">Docs</a>
@@ -343,10 +343,10 @@
       <div class="wrap">
         <div class="section-head reveal">
           <span class="eyebrow">Benchmark Report Format</span>
-          <h2>Example Evaluation Output</h2>
+          <h2>Example report</h2>
           <p>
             Illustrative report showing the Skillcheck A/B evaluation format and output schema.
-            Each evaluation runs paired trials with and without the skill, applies double-blind grading with presentation order determined by a seeded shuffle, and computes effect sizes with a 1,000-iteration paired bootstrap confidence interval.
+            Each evaluation runs paired trials with and without the skill, applies blind grading (the grader is blind to which arm produced an output, the subject model cannot be) with presentation order determined by a seeded shuffle, and computes effect sizes with a 1,000-iteration paired bootstrap confidence interval.
           </p>
           <p class="dim" style="margin-top: 8px; font-size: 13px;">
             <em>Note: The table below shows sample evaluation output schema for illustration. Skillcheck does not publish performance claims for third-party skills without committed, reproducible evaluation result files.</em>
@@ -366,7 +366,7 @@
             class="lb-search"
             type="search"
             placeholder="Search by sample skill name, domain, or model..."
-            aria-label="Search leaderboard"
+            aria-label="Search example report"
           />
           <div class="lb-filters" role="group" aria-label="Filter by verdict">
             <button class="lb-filter-btn active" data-filter="all">All (4)</button>
@@ -391,8 +391,11 @@
             <tbody>
               <tr data-verdict="helps">
                 <td>
-                  <span class="skill-name">nextjs-app-router</span>
-                  <span class="skill-source">examples/skills/nextjs.md</span>
+                  <div style="display:flex; align-items:center; gap:8px;">
+                    <span class="skill-name">nextjs-app-router</span>
+                    <span class="badge badge-outline" style="text-transform:uppercase; font-size:10px; font-weight:700;">EXAMPLE</span>
+                  </div>
+                  <span class="skill-source">example, not a real file</span>
                 </td>
                 <td><span class="badge badge-outline">web / routing</span></td>
                 <td><span class="effect-pos">+24.0 pp</span> <span class="t-dim">[+8.0, +40.0]</span></td>
@@ -402,8 +405,11 @@
               </tr>
               <tr data-verdict="helps">
                 <td>
-                  <span class="skill-name">typescript-strict-types</span>
-                  <span class="skill-source">examples/skills/typescript.md</span>
+                  <div style="display:flex; align-items:center; gap:8px;">
+                    <span class="skill-name">typescript-strict-types</span>
+                    <span class="badge badge-outline" style="text-transform:uppercase; font-size:10px; font-weight:700;">EXAMPLE</span>
+                  </div>
+                  <span class="skill-source">example, not a real file</span>
                 </td>
                 <td><span class="badge badge-outline">type-safety</span></td>
                 <td><span class="effect-pos">+18.5 pp</span> <span class="t-dim">[+5.0, +32.0]</span></td>
@@ -413,8 +419,11 @@
               </tr>
               <tr data-verdict="placebo">
                 <td>
-                  <span class="skill-name">git-commit-standards</span>
-                  <span class="skill-source">examples/skills/git-commits.md</span>
+                  <div style="display:flex; align-items:center; gap:8px;">
+                    <span class="skill-name">git-commit-standards</span>
+                    <span class="badge badge-outline" style="text-transform:uppercase; font-size:10px; font-weight:700;">EXAMPLE</span>
+                  </div>
+                  <span class="skill-source">example, not a real file</span>
                 </td>
                 <td><span class="badge badge-outline">developer-tools</span></td>
                 <td><span class="effect-neu">+1.5 pp</span> <span class="t-dim">[-4.0, +7.0]</span></td>
@@ -424,14 +433,20 @@
               </tr>
               <tr data-verdict="harms">
                 <td>
-                  <span class="skill-name">python-async-patterns</span>
-                  <span class="skill-source">examples/skills/python-async.md</span>
+                  <div style="display:flex; align-items:center; gap:8px;">
+                    <span class="skill-name">python-async-patterns</span>
+                    <span class="badge badge-outline" style="text-transform:uppercase; font-size:10px; font-weight:700;">EXAMPLE</span>
+                  </div>
+                  <span class="skill-source">example, not a real file</span>
                 </td>
                 <td><span class="badge badge-outline">concurrency</span></td>
                 <td><span class="effect-neg">-6.0 pp</span> <span class="t-dim">[-14.0, -1.0]</span></td>
                 <td><span class="badge-harms">HARMS</span></td>
                 <td class="mono">+620 tok</td>
                 <td class="mono t-dim">claude-sonnet-4-5</td>
+              </tr>
+              <tr id="lbNoMatches" style="display:none;">
+                <td colspan="6" style="text-align:center; padding:32px 16px; color:var(--muted);">No matching example skills found.</td>
               </tr>
             </tbody>
           </table>
@@ -443,18 +458,25 @@
       (function() {
         const searchInput = document.getElementById('lbSearch');
         const filterBtns = document.querySelectorAll('.lb-filter-btn');
-        const rows = document.querySelectorAll('#lbTable tbody tr');
+        const rows = document.querySelectorAll('#lbTable tbody tr:not(#lbNoMatches)');
+        const noMatchesRow = document.getElementById('lbNoMatches');
         let currentFilter = 'all';
 
         function applyFilters() {
           const query = (searchInput?.value || '').toLowerCase().trim();
+          let visibleCount = 0;
           rows.forEach(function(row) {
             const verdict = row.getAttribute('data-verdict');
             const text = row.textContent.toLowerCase();
             const matchesVerdict = currentFilter === 'all' || verdict === currentFilter;
             const matchesQuery = !query || text.includes(query);
-            row.style.display = matchesVerdict && matchesQuery ? '' : 'none';
+            const show = matchesVerdict && matchesQuery;
+            row.style.display = show ? '' : 'none';
+            if (show) visibleCount++;
           });
+          if (noMatchesRow) {
+            noMatchesRow.style.display = visibleCount === 0 ? '' : 'none';
+          }
         }
 
         if (searchInput) {
