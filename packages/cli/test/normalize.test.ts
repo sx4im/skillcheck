@@ -186,6 +186,28 @@ describe('normalizeSkill', () => {
     expect(skill.domain).toBe('Explicit Custom Domain');
   });
 
+  it('collapses whitespace and newlines in domain option', async () => {
+    const dir = await mkdtemp(path.join(tmpdir(), 'skillcheck-normalize-'));
+    const file = path.join(dir, 'AGENTS.md');
+    await writeFile(file, '# Agent Rules\n\nSome body text.\n');
+
+    const skill = await normalizeSkill(file, { domain: '  TypeScript   \n\n  migration  and   refactoring \t rules  ' });
+
+    expect(skill.domain).toBe('TypeScript migration and refactoring rules');
+  });
+
+  it('caps domain option at 200 characters', async () => {
+    const dir = await mkdtemp(path.join(tmpdir(), 'skillcheck-normalize-'));
+    const file = path.join(dir, 'AGENTS.md');
+    await writeFile(file, '# Agent Rules\n\nSome body text.\n');
+
+    const longDomain = 'a'.repeat(250);
+    const skill = await normalizeSkill(file, { domain: longDomain });
+
+    expect(skill.domain).toBe('a'.repeat(200));
+    expect(skill.domain).toHaveLength(200);
+  });
+
   it('produces byte-identical generator prompt for files with front matter', async () => {
     const dir = await mkdtemp(path.join(tmpdir(), 'skillcheck-normalize-'));
     const file = path.join(dir, 'SKILL.md');

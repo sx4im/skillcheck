@@ -187,7 +187,7 @@ Most prompt tools and eval frameworks test whether an output matches a static re
 Skillcheck treats a skill like a drug trial treats a drug:
 
 1. **Normalize** — the skill file is parsed; its *declared domain* is read from
-   front matter (`domain:`/`description:`) or the first heading.
+   front matter (`domain:`/`description:`) or headings. Headings are used as the declared domain, but a heading that is itself an instruction leaks into task generation; use `--domain "<neutral topic>"` for a blind run.
 2. **Generate** — a task generator sees **only the domain, never the skill body**,
    so the tasks can't leak the skill's instructions. It produces 2× candidate
    tasks; a seeded shuffle picks the final set.
@@ -261,10 +261,10 @@ Key properties:
 
 ```bash
 skillcheck                                  # interactive: pick a file, pick effort, run
-skillcheck check <path> [--tasks N] [--trials K] [--output file.json] [--json] [--explain]
+skillcheck check <path> [--tasks N] [--trials K] [--domain "<topic>"] [--output file.json] [--json] [--explain]
 skillcheck setup                            # connect / change your API key
 skillcheck logout                           # remove your saved API key
-skillcheck eval <path> [--tasks N] [--trials K] [--output file.json]   # raw JSON evaluator
+skillcheck eval <path> [--tasks N] [--trials K] [--domain "<topic>"] [--output file.json]   # raw JSON evaluator
 skillcheck verify <result.json> [--sample n]  # independently re-measure a published result
 skillcheck corpus run --corpus corpus.json [--results dir]             # batch-evaluate many skills
 skillcheck rot [--results dir] [--output report.json]                  # detect skills that stopped helping
@@ -272,8 +272,10 @@ skillcheck --version
 ```
 
 Accepted inputs: any Markdown (`.md`) file — `SKILL.md`, `AGENTS.md`, `CLAUDE.md`,
-or any other `.md` — or a folder containing one. `--tasks` is capped at 50 and
-`--trials` at 10; mistyped options are rejected rather than silently ignored.
+or any other `.md` — or a folder containing one. Headings are used as the declared domain
+when front matter is absent; if a heading is itself an instruction, pass `--domain "<neutral topic>"`
+for a blind run. `--tasks` is capped at 50 and `--trials` at 10; mistyped options are
+rejected rather than silently ignored.
 
 ## CI/CD integration
 

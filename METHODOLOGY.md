@@ -29,6 +29,8 @@ Each skill is normalized into:
 
 The task generator receives only the normalized `domain`. It never receives the instruction body.
 
+Headings are used as the declared domain when front matter is absent. However, a heading that is itself an instruction (e.g. `# Always write concise commit messages`) leaks into task generation, causing generated tasks to test that exact rule. Use `--domain "<neutral topic>"` for a blind run with an unprompted task generator.
+
 For each run, the generator creates `2N` tasks and `skillcheck` deterministically samples `N` tasks. This reduces dependence on a single generation order while preserving reproducibility for the same domain and generator model.
 
 ## A/B Runner
