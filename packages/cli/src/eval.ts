@@ -170,8 +170,9 @@ export function parseTaskSuite(text: string): GeneratedTask[] {
   });
 }
 
-// Threshold for small-sample honesty (below Standard 3 tasks × 3 trials = 9 observations).
-export const LOW_SAMPLE_THRESHOLD = 9;
+// Threshold for small-sample honesty (fewer than 5 tasks produces elevated false-verdict rates when effects vary).
+export const LOW_SAMPLE_THRESHOLD = 5;
+export const LOW_SAMPLE_TASK_THRESHOLD = 5;
 
 // The published result JSON shape. Typed so every consumer (matrix, the card,
 // verify, the leaderboard) reads the same contract instead of re-guessing it.
@@ -374,11 +375,10 @@ export async function evalSkill(options: EvalOptions): Promise<EvalResult> {
   // it varies smoothly rather than snapping to coarse multiples of the sample step.
   const satisfaction = satisfactionFromEffect(score.meanEffectPp);
   const runDate = new Date().toISOString().slice(0, 10);
-  const observationCount = tasks.length * options.trials;
-  const isLowSample = observationCount < LOW_SAMPLE_THRESHOLD;
+  const isLowSample = tasks.length < LOW_SAMPLE_TASK_THRESHOLD;
   if (isLowSample) {
     console.error(
-      `[skillcheck] warning: low sample size (${tasks.length} tasks × ${options.trials} trial${options.trials === 1 ? '' : 's'} = ${observationCount} observations < ${LOW_SAMPLE_THRESHOLD}). Verdicts and confidence intervals may be noisy.`
+      `[skillcheck] warning: few tasks evaluated (${tasks.length} tasks < ${LOW_SAMPLE_TASK_THRESHOLD}). When task difficulty or effect varies across a domain, verdicts can be wrong more often than the 95% interval suggests.`
     );
   }
 

@@ -31,10 +31,9 @@ describe('small sample honesty', () => {
     vi.restoreAllMocks();
   });
 
-  it('flags low_sample: true and logs a warning when tasks x trials is below threshold', async () => {
+  it('flags low_sample: true and logs a warning for Quick profile (2 tasks)', async () => {
     const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
-    // Quick profile: 2 tasks x 1 trial = 2 observations (< 9 threshold)
     const result = await evalSkill({
       inputPath: path.join(workDir, 'SKILL.md'),
       tasks: 2,
@@ -49,18 +48,54 @@ describe('small sample honesty', () => {
     expect(['helps', 'placebo', 'harms']).toContain(result.result.verdict);
 
     const warningLogged = errorSpy.mock.calls.some((args) =>
-      args.some((arg) => typeof arg === 'string' && /low sample/i.test(arg))
+      args.some((arg) => typeof arg === 'string' && /few tasks evaluated/i.test(arg) && /wrong more often than the 95% interval suggests/i.test(arg))
     );
     expect(warningLogged).toBe(true);
   });
 
-  it('flags low_sample: false and does not log a warning when tasks x trials is at or above threshold', async () => {
+  it('flags low_sample: true for Standard profile (3 tasks) because tasks < 5', async () => {
     const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
-    // Standard profile: 3 tasks x 3 trials = 9 observations (>= 9 threshold)
+    // Standard profile: 3 tasks x 3 trials (previously passed 9-observation threshold, now warns on < 5 tasks)
     const result = await evalSkill({
       inputPath: path.join(workDir, 'SKILL.md'),
       tasks: 3,
+      trials: 3,
+      mode: 'forced',
+      useCache: false,
+      saveArtifacts: false
+    });
+
+    expect(result.result.low_sample).toBe(true);
+    expect(result.low_sample).toBe(true);
+
+    const warningLogged = errorSpy.mock.calls.some((args) =>
+      args.some((arg) => typeof arg === 'string' && /few tasks evaluated/i.test(arg))
+    );
+    expect(warningLogged).toBe(true);
+  });
+
+  it('flags low_sample: true when trials are high but tasks are few (2 tasks x 10 trials)', async () => {
+    const result = await evalSkill({
+      inputPath: path.join(workDir, 'SKILL.md'),
+      tasks: 2,
+      trials: 10,
+      mode: 'forced',
+      useCache: false,
+      saveArtifacts: false
+    });
+
+    expect(result.result.low_sample).toBe(true);
+    expect(result.low_sample).toBe(true);
+  });
+
+  it('flags low_sample: false for Thorough profile (5 tasks >= 5)', async () => {
+    const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+
+    // Thorough profile: 5 tasks x 3 trials (>= 5 tasks)
+    const result = await evalSkill({
+      inputPath: path.join(workDir, 'SKILL.md'),
+      tasks: 5,
       trials: 3,
       mode: 'forced',
       useCache: false,
@@ -71,14 +106,14 @@ describe('small sample honesty', () => {
     expect(result.low_sample).toBe(false);
 
     const warningLogged = errorSpy.mock.calls.some((args) =>
-      args.some((arg) => typeof arg === 'string' && /low sample/i.test(arg))
+      args.some((arg) => typeof arg === 'string' && /few tasks evaluated/i.test(arg))
     );
     expect(warningLogged).toBe(false);
   });
 
   it('renders a warning note on the result card when low_sample is true', () => {
     const lowSampleResult = evalResultFixture({
-      config: { tasks: 2, trials: 1 },
+      config: { tasks: 3, trials: 3 },
       result: {
         effect_pp: 20,
         mean_effect_pp: 20,
@@ -95,6 +130,7 @@ describe('small sample honesty', () => {
     });
 
     const card = formatResultCard(lowSampleResult);
-    expect(card).toMatch(/small sample/i);
+    expect(card).toMatch(/under 5 tasks/i);
+    expect(card).toMatch(/wrong more often than the 95% interval suggests/i);
   });
 });
