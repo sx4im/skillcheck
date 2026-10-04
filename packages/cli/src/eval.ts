@@ -15,6 +15,7 @@ import type { GeneratedTask, GradedOutput, ProgressReporter, SkillFormat, TaskBr
 
 export interface EvalOptions {
   inputPath: string;
+  domain?: string;
   output?: string;
   tasks: number;
   trials: number;
@@ -169,6 +170,9 @@ export function parseTaskSuite(text: string): GeneratedTask[] {
   });
 }
 
+// Threshold for small-sample honesty (below Standard 3 tasks × 3 trials = 9 observations).
+export const LOW_SAMPLE_THRESHOLD = 9;
+
 // The published result JSON shape. Typed so every consumer (matrix, the card,
 // verify, the leaderboard) reads the same contract instead of re-guessing it.
 export interface EvalResult {
@@ -201,7 +205,9 @@ export interface EvalResult {
     no_skill_pass: number;
     token_overhead: number;
     value_per_1k_tokens: number;
+    low_sample?: boolean;
   };
+  low_sample?: boolean;
   tasks: TaskBreakdown[];
   explain?: { tasks: ExplainTask[] };
   reproducibility: {
@@ -236,7 +242,7 @@ export function selectSuiteTasks(suite: GeneratedTask[], options: { tasks: numbe
 }
 
 export async function evalSkill(options: EvalOptions): Promise<EvalResult> {
-  const skill = await normalizeSkill(options.inputPath);
+  const skill = await normalizeSkill(options.inputPath, { domain: options.domain });
   const baseConfig = loadProviderConfig();
   const config = applyModelOverrides(baseConfig, options);
   const runId = randomUUID();
@@ -368,6 +374,13 @@ export async function evalSkill(options: EvalOptions): Promise<EvalResult> {
   // it varies smoothly rather than snapping to coarse multiples of the sample step.
   const satisfaction = satisfactionFromEffect(score.meanEffectPp);
   const runDate = new Date().toISOString().slice(0, 10);
+  const observationCount = tasks.length * options.trials;
+  const isLowSample = observationCount < LOW_SAMPLE_THRESHOLD;
+  if (isLowSample) {
+    console.error(
+      `[skillcheck] warning: low sample size (${tasks.length} tasks × ${options.trials} trial${options.trials === 1 ? '' : 's'} = ${observationCount} observations < ${LOW_SAMPLE_THRESHOLD}). Verdicts and confidence intervals may be noisy.`
+    );
+  }
 
   const result: EvalResult = {
     skill: {
@@ -397,8 +410,10 @@ export async function evalSkill(options: EvalOptions): Promise<EvalResult> {
       with_skill_pass: score.withSkillPass,
       no_skill_pass: score.noSkillPass,
       token_overhead: tokenOverhead,
-      value_per_1k_tokens: valuePer1kTokens
+      value_per_1k_tokens: valuePer1kTokens,
+      low_sample: isLowSample
     },
+    low_sample: isLowSample,
     tasks: breakdowns,
     ...(options.explain ? { explain: buildExplain(tasks, graded) } : {}),
     reproducibility: {

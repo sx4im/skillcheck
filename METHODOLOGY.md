@@ -62,6 +62,30 @@ The confidence interval is a paired bootstrap over task/trial observations. Verd
 
 Results also report token overhead and value per 1k extra prompt tokens.
 
+## Calibration
+
+Statistical evaluations based on small samples can exhibit elevated false discovery rates (Type I errors). When total observations (`tasks × trials`) falls below 9 (the size of the Standard 3 tasks × 3 trials profile), `skillcheck` emits a warning and sets `low_sample: true` in the JSON result to maintain scientific honesty.
+
+### Empirical False Discovery Rates under True Null
+
+Using the seeded Monte Carlo simulation (`node scripts/simulate-null.mjs`, seed 42, 5,000 replications per profile), false HELPS and false HARMS rates were evaluated under a true null hypothesis (population mean effect = 0.0 pp):
+
+| Profile | Tasks | Trials | Total N | Homogeneous Null (p = 0.50) | Heterogeneous Null (p in [0.20, 0.80]) | Varying Effects (±15 pp, net 0 pp) |
+|---|---|---|---|---|---|---|
+| **Quick** | 2 | 1 | 2 | 11.98% (6.00% H / 5.98% H) | 4.86% (2.46% H / 2.40% H) | 10.98% (5.48% H / 5.50% H) |
+| **Standard** | 3 | 3 | 9 | 8.02% (3.98% H / 4.04% H) | 7.48% (3.70% H / 3.78% H) | 7.62% (5.56% H / 2.06% H) |
+| **Thorough** | 5 | 3 | 15 | 5.94% (3.08% H / 2.86% H) | 5.54% (2.84% H / 2.70% H) | 5.06% (3.24% H / 1.82% H) |
+
+### Simulation Assumptions
+
+1. **Independent Bernoulli Trials**: Outcomes for each trial are independent Bernoulli variables conditional on task difficulty and treatment probability.
+2. **Paired Observations**: For each task and trial, `with_skill` and `no_skill` are paired.
+3. **Percentile Bootstrap**: 1,000 resamples per evaluation using 2.5% and 97.5% quantiles (nominal 95% two-sided confidence interval).
+4. **Decision Boundary**: `helps` requires the entire 95% CI to be strictly positive; `harms` requires the entire 95% CI to be strictly negative; `placebo` is assigned when the CI spans zero.
+5. **True Null**: Population mean effect across the domain is exactly 0.0 pp. Any `helps` or `harms` verdict represents a Type I error.
+
+Due to the discrete granularity of paired differences at N = 2, Quick profile runs have higher false discovery rates (~11% to 12% under symmetric nulls). Standard (N = 9) and Thorough (N = 15) reduce false discoveries toward the nominal 5% level. Quick effort is designed for fast developer iteration, while launch-quality decisions should use Standard or Thorough effort.
+
 ## Reproducibility
 
 Every published result records:

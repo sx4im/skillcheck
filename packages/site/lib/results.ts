@@ -43,7 +43,9 @@ export interface LeaderboardResult {
     no_skill_pass: number;
     token_overhead: number;
     value_per_1k_tokens: number;
+    low_sample?: boolean;
   };
+  low_sample?: boolean;
   tasks: Array<{
     id: string;
     prompt: string;

@@ -55,6 +55,11 @@ describe('friendly CLI check command', () => {
     expect(options.evalOptions.difficulty).toBeUndefined();
   });
 
+  it('parses --domain option for check and overrides domain in evalOptions', () => {
+    const options = parseCheckOptions(['node', 'skillcheck', 'check', './SKILL.md', '--domain', 'Custom Domain Override']);
+    expect(options.evalOptions.domain).toBe('Custom Domain Override');
+  });
+
   it('rejects an unknown --difficulty value', () => {
     expect(() =>
       parseCheckOptions(['node', 'skillcheck', 'check', './SKILL.md', '--difficulty', 'extreme'])

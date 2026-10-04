@@ -117,6 +117,14 @@ function resultHeaderLines(geometry: CardGeometry, result: EvalResult, outputPat
       lines.push(cardRow(geometry, paint.warn(wrapped)));
     }
   }
+  if (score.low_sample ?? result.low_sample) {
+    for (const wrapped of wrapText(
+      'Warning: small sample (under 9 observations). Verdict and confidence interval may be noisy.',
+      geometry.content
+    )) {
+      lines.push(cardRow(geometry, paint.warn(wrapped)));
+    }
+  }
   lines.push(cardRow(geometry, ''));
   lines.push(cardLabelRow(geometry, 'With skill', `${formatPercent(score.with_skill_pass)} of tasks passed`));
   lines.push(cardLabelRow(geometry, 'Without skill', `${formatPercent(score.no_skill_pass)} of tasks passed`));
