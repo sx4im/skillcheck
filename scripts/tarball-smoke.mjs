@@ -49,17 +49,12 @@ function main() {
     const versionOutput = execFileSync(binPath, ['--version'], { encoding: 'utf8' }).trim();
     console.log(`Reported version: ${versionOutput}`);
     const packageJsonVersion = JSON.parse(fs.readFileSync(path.join(rootDir, 'package.json'), 'utf8')).version;
-    const expectedVersion = process.env.TEST_SABOTAGE_VERSION || packageJsonVersion;
-    if (versionOutput !== expectedVersion) {
-      throw new Error(`Installed binary version mismatch: expected ${expectedVersion}, got ${versionOutput}`);
+    if (versionOutput !== packageJsonVersion) {
+      throw new Error(`Installed binary version mismatch: expected ${packageJsonVersion}, got ${versionOutput}`);
     }
 
     console.log('Testing mocked --json evaluation...');
     const server = http.createServer((req, res) => {
-      if (process.env.TEST_SABOTAGE_TIMEOUT === '1') {
-        // Intentionally hang request to simulate hanging LLM endpoint for timeout test
-        return;
-      }
       let body = '';
       req.on('data', (chunk) => { body += chunk; });
       req.on('end', () => {
