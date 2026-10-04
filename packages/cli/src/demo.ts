@@ -60,8 +60,10 @@ export async function runDemo(): Promise<void> {
       with_skill_pass: 0.778,
       no_skill_pass: 0.556,
       token_overhead: 412,
-      value_per_1k_tokens: 53.88
+      value_per_1k_tokens: 53.88,
+      low_sample: false
     },
+    low_sample: false,
     tasks: [
       {
         id: 'task-1',
