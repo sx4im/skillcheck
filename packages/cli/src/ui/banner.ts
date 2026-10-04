@@ -151,6 +151,7 @@ export function printHelpUi(): void {
   console.log(`  ${paint.accent('Options')}`);
   opt('--tasks N', 'generated tasks per check (default 3, max 50)');
   opt('--trials K', 'trials per task and arm (default 3, max 10)');
+  opt('--domain TEXT', 'domain override for task generation');
   opt('--difficulty LEVEL', 'task difficulty: standard, hard, adversarial (default standard)');
   opt('--concurrency C', 'parallel trial execution limit (default 4)');
   opt('--runner MODEL', 'runner model override (e.g. gpt-6-sol, claude-opus-5-5)');
@@ -197,6 +198,7 @@ export function printCommandHelpUi(command: string): boolean {
     sec('Options');
     opt('--tasks N', 'evaluation tasks to generate (default 3, max 50)');
     opt('--trials K', 'trials per task and arm (default 3, max 10)');
+    opt('--domain TEXT', 'domain override for task generation');
     opt('--difficulty LEVEL', 'task difficulty: standard, hard, adversarial (default standard)');
     opt('--concurrency C', 'parallel trial execution limit (default 4)');
     opt('--runner MODEL', 'runner model override (e.g. gpt-4o, claude-3-5-sonnet)');

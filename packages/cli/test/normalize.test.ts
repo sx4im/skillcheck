@@ -2,7 +2,11 @@ import { mkdtemp, mkdir, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { describe, expect, it } from 'vitest';
+import type { LlmClient } from '../src/adapters/types.js';
+import { JsonCache } from '../src/cache.js';
+import { generateTasks } from '../src/generate.js';
 import { isToolDependent, normalizeSkill } from '../src/normalize.js';
+import { testProviderConfig } from './helpers.js';
 
 describe('normalizeSkill', () => {
   it('normalizes SKILL.md front matter', async () => {
@@ -88,17 +92,17 @@ describe('normalizeSkill', () => {
     expect(skill.domain).toBe('TypeScript & React Best Practices');
   });
 
-  it('falls back to the first prose line when every heading is generic', async () => {
+  it('falls back to general agent skill when every heading is generic', async () => {
     const dir = await mkdtemp(path.join(tmpdir(), 'skillcheck-normalize-'));
     const file = path.join(dir, 'AGENTS.md');
     await writeFile(file, '# AGENTS.md\n\nInstructions for building Golang microservices.\n');
 
     const skill = await normalizeSkill(file);
 
-    expect(skill.domain).toBe('Instructions for building Golang microservices.');
+    expect(skill.domain).toBe('general agent skill');
   });
 
-  it('falls back to the parent directory name when no substantive content exists', async () => {
+  it('falls back to general agent skill when no substantive heading exists', async () => {
     const dir = await mkdtemp(path.join(tmpdir(), 'skillcheck-normalize-'));
     const skillDir = path.join(dir, 'my-skill');
     await mkdir(skillDir);
@@ -107,17 +111,17 @@ describe('normalizeSkill', () => {
 
     const skill = await normalizeSkill(file);
 
-    expect(skill.domain).toBe('my-skill');
+    expect(skill.domain).toBe('general agent skill');
   });
 
-  it('derives a readable name from a markdown filename', async () => {
+  it('derives a readable name from a markdown filename without using body prose for domain', async () => {
     const dir = await mkdtemp(path.join(tmpdir(), 'skillcheck-norm-'));
     const file = path.join(dir, 'frontend-design.md');
     await writeFile(file, 'Plain markdown body with no heading.\n');
     const skill = await normalizeSkill(file);
     expect(skill.format).toBe('markdown');
     expect(skill.name).toBe('frontend design');
-    expect(skill.domain).toBe('Plain markdown body with no heading.');
+    expect(skill.domain).toBe('general agent skill');
   });
 
   it('falls back to the first .md by name inside a folder', async () => {
@@ -133,6 +137,80 @@ describe('normalizeSkill', () => {
     await writeFile(path.join(dir, 'notes.txt'), 'nope');
     await expect(normalizeSkill(dir)).rejects.toThrow(/No \.md file/);
     await expect(normalizeSkill(path.join(dir, 'notes.txt'))).rejects.toThrow(/only analyzes Markdown/);
+  });
+
+  it('never uses sentences from the skill body as declared domain for headingless AGENTS.md', async () => {
+    const dir = await mkdtemp(path.join(tmpdir(), 'skillcheck-normalize-'));
+    const file = path.join(dir, 'AGENTS.md');
+    const firstLine = 'Always answer in formal English and never use contractions.';
+    await writeFile(file, `${firstLine}\n\nAdditional instructions for the agent.\n`);
+
+    const skill = await normalizeSkill(file);
+
+    expect(skill.domain).not.toContain(firstLine);
+    expect(skill.domain).toBe('general agent skill');
+  });
+
+  it('asserts the generator request contains no sentence from the skill body', async () => {
+    const dir = await mkdtemp(path.join(tmpdir(), 'skillcheck-normalize-'));
+    const file = path.join(dir, 'AGENTS.md');
+    const firstLine = 'Always answer in formal English and never use contractions.';
+    await writeFile(file, `${firstLine}\n\nAdditional instructions.\n`);
+
+    const skill = await normalizeSkill(file);
+    let capturedUserPrompt = '';
+    const fakeClient = {
+      complete: async (req: { messages: Array<{ role: string; content: string }> }) => {
+        capturedUserPrompt = req.messages[1]?.content ?? '';
+        return {
+          content: '{"tasks":[{"id":"t1","prompt":"test","criterion":"crit"}]}',
+          model: 'gen',
+          usage: { promptTokens: 1, completionTokens: 1, totalTokens: 2 }
+        };
+      }
+    } as unknown as LlmClient;
+
+    await generateTasks({ domain: skill.domain, count: 1 }, testProviderConfig, fakeClient, JsonCache.disabled());
+
+    expect(capturedUserPrompt).not.toContain(firstLine);
+    expect(capturedUserPrompt).toContain('Declared domain:\ngeneral agent skill');
+  });
+
+  it('overrides inferred domain when explicit domain option is provided', async () => {
+    const dir = await mkdtemp(path.join(tmpdir(), 'skillcheck-normalize-'));
+    const file = path.join(dir, 'AGENTS.md');
+    await writeFile(file, '# Agent Rules\n\nSome body text.\n');
+
+    const skill = await normalizeSkill(file, { domain: 'Explicit Custom Domain' });
+
+    expect(skill.domain).toBe('Explicit Custom Domain');
+  });
+
+  it('produces byte-identical generator prompt for files with front matter', async () => {
+    const dir = await mkdtemp(path.join(tmpdir(), 'skillcheck-normalize-'));
+    const file = path.join(dir, 'SKILL.md');
+    await writeFile(
+      file,
+      `---\nname: doc-editor\ndescription: API documentation editing\n---\n# Doc Editor\n\nUse precise docs language.\n`
+    );
+
+    const skill = await normalizeSkill(file);
+    let capturedUserPrompt = '';
+    const fakeClient = {
+      complete: async (req: { messages: Array<{ role: string; content: string }> }) => {
+        capturedUserPrompt = req.messages[1]?.content ?? '';
+        return {
+          content: '{"tasks":[{"id":"t1","prompt":"test","criterion":"crit"}]}',
+          model: 'gen',
+          usage: { promptTokens: 1, completionTokens: 1, totalTokens: 2 }
+        };
+      }
+    } as unknown as LlmClient;
+
+    await generateTasks({ domain: skill.domain, count: 3 }, testProviderConfig, fakeClient, JsonCache.disabled());
+
+    const expectedPrompt = `Declared domain:\nAPI documentation editing\n\nGenerate 6 concise tasks. Return exactly {"tasks":[{"id":"t1","prompt":"one concrete task under 80 words","criterion":"one pass/fail rubric under 60 words"}]}. Keep every criterion a single string, not an array. Do not include markdown or commentary.`;
+    expect(capturedUserPrompt).toBe(expectedPrompt);
   });
 });
 

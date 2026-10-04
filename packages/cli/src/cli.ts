@@ -236,7 +236,7 @@ const MAX_CONCURRENCY = 8;
 
 // Options shared by `check` and `eval`; one list for the path-detector and the
 // unknown-option guard.
-const CHECK_VALUE_OPTIONS = ['--tasks', '--trials', '--concurrency', '--output', '--runner', '--grader', '--generator', '--task-suite', '--difficulty'];
+const CHECK_VALUE_OPTIONS = ['--tasks', '--trials', '--concurrency', '--output', '--runner', '--grader', '--generator', '--task-suite', '--difficulty', '--domain'];
 
 const VALUE_OPTIONS = new Set([...CHECK_VALUE_OPTIONS, '--mode', '--models', '--results', '--corpus', '--sample', '--limit']);
 
@@ -361,6 +361,7 @@ function parseCommonEvalOptions(
       generator: readOption(argv, '--generator'),
       taskSuite: readOption(argv, '--task-suite'),
       difficulty: readDifficultyOption(argv),
+      domain: readOption(argv, '--domain'),
       explain: hasFlag(argv, '--explain')
     }
   };

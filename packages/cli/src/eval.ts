@@ -15,6 +15,7 @@ import type { GeneratedTask, GradedOutput, ProgressReporter, SkillFormat, TaskBr
 
 export interface EvalOptions {
   inputPath: string;
+  domain?: string;
   output?: string;
   tasks: number;
   trials: number;
@@ -236,7 +237,7 @@ export function selectSuiteTasks(suite: GeneratedTask[], options: { tasks: numbe
 }
 
 export async function evalSkill(options: EvalOptions): Promise<EvalResult> {
-  const skill = await normalizeSkill(options.inputPath);
+  const skill = await normalizeSkill(options.inputPath, { domain: options.domain });
   const baseConfig = loadProviderConfig();
   const config = applyModelOverrides(baseConfig, options);
   const runId = randomUUID();
