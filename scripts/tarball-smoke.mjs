@@ -49,17 +49,12 @@ function main() {
     const versionOutput = execFileSync(binPath, ['--version'], { encoding: 'utf8' }).trim();
     console.log(`Reported version: ${versionOutput}`);
     const packageJsonVersion = JSON.parse(fs.readFileSync(path.join(rootDir, 'package.json'), 'utf8')).version;
-    const expectedVersion = process.env.TEST_SABOTAGE_VERSION || packageJsonVersion;
-    if (versionOutput !== expectedVersion) {
-      throw new Error(`Installed binary version mismatch: expected ${expectedVersion}, got ${versionOutput}`);
+    if (versionOutput !== packageJsonVersion) {
+      throw new Error(`Installed binary version mismatch: expected ${packageJsonVersion}, got ${versionOutput}`);
     }
 
     console.log('Testing mocked --json evaluation...');
     const server = http.createServer((req, res) => {
-      if (process.env.TEST_SABOTAGE_TIMEOUT === '1') {
-        // Intentionally hang request to simulate hanging LLM endpoint for timeout test
-        return;
-      }
       let body = '';
       req.on('data', (chunk) => { body += chunk; });
       req.on('end', () => {
@@ -146,9 +141,15 @@ function main() {
         console.error(`Mock check exceeded ${timeoutMs / 1000}s deadline. Killing child process...`);
         child.kill('SIGTERM');
         setTimeout(() => {
-          if (!child.killed) {
-            child.kill('SIGKILL');
+          if (child.exitCode === null && child.signalCode === null) {
+            console.error('Child did not exit after SIGTERM grace period. Sending SIGKILL...');
+            try {
+              child.kill('SIGKILL');
+            } catch {
+              // Ignore if already dead
+            }
           }
+          process.exit(1);
         }, 2000);
       }, timeoutMs);
 
