@@ -141,9 +141,15 @@ function main() {
         console.error(`Mock check exceeded ${timeoutMs / 1000}s deadline. Killing child process...`);
         child.kill('SIGTERM');
         setTimeout(() => {
-          if (!child.killed) {
-            child.kill('SIGKILL');
+          if (child.exitCode === null && child.signalCode === null) {
+            console.error('Child did not exit after SIGTERM grace period. Sending SIGKILL...');
+            try {
+              child.kill('SIGKILL');
+            } catch {
+              // Ignore if already dead
+            }
           }
+          process.exit(1);
         }, 2000);
       }, timeoutMs);
 
