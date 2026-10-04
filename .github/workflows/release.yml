@@ -22,6 +22,16 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          fetch-depth: 0
+
+      - name: Require tagged commit to be on main
+        run: |
+          set -euo pipefail
+          if ! git merge-base --is-ancestor "$GITHUB_SHA" origin/main; then
+            echo "::error::Tagged commit $GITHUB_SHA is not an ancestor of origin/main"
+            exit 1
+          fi
 
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
@@ -47,16 +57,20 @@ jobs:
       - run: npm run test:coverage
 
       - name: Tarball smoke test
-        run: node scripts/tarball-smoke.mjs
-
-      - name: Check NPM_TOKEN secret
-        id: check_token
         run: |
+          set -euo pipefail
+          mkdir -p /tmp/release-tarball
+          node scripts/tarball-smoke.mjs /tmp/release-tarball/package.tgz
+          SMOKE_SHA="$(sha256sum /tmp/release-tarball/package.tgz | awk '{print $1}')"
+          echo "SMOKE_SHA=$SMOKE_SHA" >> "$GITHUB_ENV"
+          echo "Smoke validated tarball SHA-256: $SMOKE_SHA"
+
+      - name: Verify NPM_TOKEN secret
+        run: |
+          set -euo pipefail
           if [ -z "${NODE_AUTH_TOKEN:-}" ]; then
-            echo "::warning::NPM_TOKEN secret is not set in GitHub repository secrets. Skipping automated npm publish step."
-            echo "skip=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "skip=false" >> "$GITHUB_OUTPUT"
+            echo "::error::NPM_TOKEN secret is not set in GitHub repository secrets"
+            exit 1
           fi
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
@@ -74,13 +88,21 @@ jobs:
           fi
 
       - name: Publish to npm (with provenance)
-        if: steps.check_token.outputs.skip != 'true' && steps.check_version.outputs.already_published != 'true'
-        run: npm publish --provenance --access public
+        if: steps.check_version.outputs.already_published != 'true'
+        run: |
+          set -euo pipefail
+          PUBLISH_SHA="$(sha256sum /tmp/release-tarball/package.tgz | awk '{print $1}')"
+          echo "Publish tarball SHA-256: $PUBLISH_SHA"
+          if [ "$SMOKE_SHA" != "$PUBLISH_SHA" ]; then
+            echo "::error::Tarball SHA-256 mismatch before publish! Smoke SHA: $SMOKE_SHA vs Publish SHA: $PUBLISH_SHA"
+            exit 1
+          fi
+          npm publish /tmp/release-tarball/package.tgz --provenance --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       - name: Verify provenance attestations
-        if: steps.check_token.outputs.skip != 'true' && steps.check_version.outputs.already_published != 'true'
+        if: steps.check_version.outputs.already_published != 'true'
         run: |
           set -euo pipefail
           pkg="$(node -p "require('./package.json').version")"
