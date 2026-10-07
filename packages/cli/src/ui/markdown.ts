@@ -19,9 +19,19 @@ function excerpt(prompt: string, max = 80): string {
   return single.length > max ? `${single.slice(0, max - 1).trimEnd()}…` : single;
 }
 
-// A literal `|` would split a GFM table cell, so escape it.
-function escapeCell(text: string): string {
-  return text.replace(/\|/g, '\\|').replace(/\r?\n/g, ' ');
+// Escapes untrusted text so it cannot ping users, break out of headings,
+// or inject links, HTML, code spans, or table columns in GitHub-Flavored Markdown.
+export function escapeMarkdown(text: string): string {
+  return text
+    .replace(/\r?\n/g, ' ')
+    .replace(/\\/g, '\\\\')
+    .replace(/@/g, '@​')
+    .replace(/\[/g, '\\[')
+    .replace(/\]/g, '\\]')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/`/g, '\\`')
+    .replace(/\|/g, '\\|');
 }
 
 /**
@@ -33,7 +43,7 @@ export function formatMarkdownReport(result: EvalResult): string {
   const [ciLow, ciHigh] = outcome.ci_pp;
 
   const lines: string[] = [
-    `# Skillcheck Evaluation: ${skill.name}`,
+    `# Skillcheck Evaluation: ${escapeMarkdown(skill.name)}`,
     '',
     `## ${VERDICT_BADGE[outcome.verdict]}`,
     ''
@@ -71,7 +81,7 @@ export function formatMarkdownReport(result: EvalResult): string {
     for (const task of result.tasks) {
       const delta = (task.with_skill_pass_rate - task.no_skill_pass_rate) * 100;
       lines.push(
-        `| ${escapeCell(task.id)} | ${escapeCell(excerpt(task.prompt))} | ${pct(task.with_skill_pass_rate)} | ${pct(task.no_skill_pass_rate)} | ${pp(delta)} |`
+        `| ${escapeMarkdown(task.id)} | ${escapeMarkdown(excerpt(task.prompt))} | ${pct(task.with_skill_pass_rate)} | ${pct(task.no_skill_pass_rate)} | ${pp(delta)} |`
       );
     }
     lines.push('');
