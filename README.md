@@ -201,7 +201,8 @@ Skillcheck treats a skill like a drug trial treats a drug:
    `HELPS` (CI fully above zero), `HARMS` (fully below), or `PLACEBO` (overlaps zero).
 
 Every run is fresh: tasks and outputs are generated anew each time and `check`
-stores nothing locally, so a repeated check is an independent measurement. Full
+stores nothing locally (aside from checkpoints retained after an interrupted
+run for `--resume`), so a repeated check is an independent measurement. Full
 methodology in [`METHODOLOGY.md`](METHODOLOGY.md).
 
 ## Architecture
