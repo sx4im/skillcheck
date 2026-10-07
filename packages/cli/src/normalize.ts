@@ -283,8 +283,11 @@ export async function normalizeSkill(
   const name =
     extractFrontMatter(instructions).name || firstHeading(instructions) || nameFromPath(filePath, format);
 
+  const explicitDomain = options?.domain
+    ? options.domain.replace(/\s+/g, ' ').trim().slice(0, 200)
+    : undefined;
   const domain =
-    options?.domain?.trim() ||
+    explicitDomain ||
     extractDomain(instructions, path.basename(filePath));
 
   return {

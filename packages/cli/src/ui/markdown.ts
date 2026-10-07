@@ -36,7 +36,17 @@ export function formatMarkdownReport(result: EvalResult): string {
     `# Skillcheck Evaluation: ${skill.name}`,
     '',
     `## ${VERDICT_BADGE[outcome.verdict]}`,
-    '',
+    ''
+  ];
+
+  if (outcome.low_sample ?? result.low_sample) {
+    lines.push(
+      `> :warning: **Small sample:** Evaluated on fewer than 5 tasks (${config.tasks} tasks). When task difficulty or effect varies across a domain, verdicts can be wrong more often than the 95% interval suggests.`,
+      ''
+    );
+  }
+
+  lines.push(
     `**Satisfaction:** ${outcome.satisfaction.toFixed(1)}/100 · **Effect size:** ${pp(outcome.effect_pp)}`,
     '',
     '## Statistical Summary',
@@ -49,7 +59,7 @@ export function formatMarkdownReport(result: EvalResult): string {
     `| Without-skill pass rate | ${pct(outcome.no_skill_pass)} |`,
     `| Token overhead | +${outcome.token_overhead} tokens |`,
     ''
-  ];
+  );
 
   if (result.tasks.length > 0) {
     lines.push(

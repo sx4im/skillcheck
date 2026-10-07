@@ -209,4 +209,34 @@ describe('formatMarkdownReport', () => {
 
     expect(report).toContain('Handle a \\| b choice');
   });
+
+  it('renders a visible warning note under the verdict when low_sample is true', () => {
+    const report = formatMarkdownReport(evalResultFixture({
+      config: { tasks: 3, trials: 3 },
+      result: {
+        verdict: 'helps',
+        low_sample: true
+      },
+      low_sample: true
+    }));
+
+    expect(report).toContain('## :white_check_mark: HELPS');
+    expect(report).toContain('> :warning: **Small sample:**');
+    expect(report).toMatch(/fewer than 5 tasks/i);
+    expect(report).toMatch(/wrong more often than the 95% interval suggests/i);
+  });
+
+  it('does not render small sample warning note when low_sample is false', () => {
+    const report = formatMarkdownReport(evalResultFixture({
+      config: { tasks: 5, trials: 3 },
+      result: {
+        verdict: 'helps',
+        low_sample: false
+      },
+      low_sample: false
+    }));
+
+    expect(report).not.toContain(':warning:');
+    expect(report).not.toContain('Small sample');
+  });
 });

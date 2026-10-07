@@ -119,7 +119,7 @@ function resultHeaderLines(geometry: CardGeometry, result: EvalResult, outputPat
   }
   if (score.low_sample ?? result.low_sample) {
     for (const wrapped of wrapText(
-      'Warning: small sample (under 9 observations). Verdict and confidence interval may be noisy.',
+      'Warning: small sample (under 5 tasks). When task difficulty varies across a domain, verdicts can be wrong more often than the 95% interval suggests.',
       geometry.content
     )) {
       lines.push(cardRow(geometry, paint.warn(wrapped)));
