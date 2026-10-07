@@ -46,6 +46,22 @@ describe('normalizeSkill', () => {
     expect(skill.domain).toBe('React accessibility reviews');
   });
 
+  it('normalizes .cursor/rules/*.mdc by path and folder', async () => {
+    const dir = await mkdtemp(path.join(tmpdir(), 'skillcheck-normalize-'));
+    const rulesDir = path.join(dir, '.cursor', 'rules');
+    await mkdir(rulesDir, { recursive: true });
+    const file = path.join(rulesDir, 'api.mdc');
+    await writeFile(file, '---\ndescription: API documentation editing\n---\n# API Guide\n\nUse precise docs language.\n');
+
+    const skill = await normalizeSkill(file);
+    expect(skill.format).toBe('mdc');
+    expect(skill.name).toBe('API Guide');
+    expect(skill.domain).toBe('API documentation editing');
+
+    const dirSkill = await normalizeSkill(rulesDir);
+    expect(dirSkill.format).toBe('mdc');
+  });
+
   it('normalizes CLAUDE.md for awesome-claude-md corpus entries', async () => {
     const dir = await mkdtemp(path.join(tmpdir(), 'skillcheck-normalize-'));
     await writeFile(path.join(dir, 'CLAUDE.md'), '# Next.js Rules\n\ndescription: Next.js app development\n');

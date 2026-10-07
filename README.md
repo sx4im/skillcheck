@@ -271,8 +271,7 @@ skillcheck rot [--results dir] [--output report.json]                  # detect 
 skillcheck --version
 ```
 
-Accepted inputs: any Markdown (`.md`) file — `SKILL.md`, `AGENTS.md`, `CLAUDE.md`,
-or any other `.md` — or a folder containing one. Headings are used as the declared domain
+Accepted inputs: any Markdown (`.md`, `.mdc`) or `.cursorrules` file (`SKILL.md`, `AGENTS.md`, `CLAUDE.md`, `.cursorrules`, `.cursor/rules/*.mdc`, or any other `.md`), or a folder containing one. Headings are used as the declared domain
 when front matter is absent; if a heading is itself an instruction, pass `--domain "<neutral topic>"`
 for a blind run. `--tasks` is capped at 50 and `--trials` at 10; mistyped options are
 rejected rather than silently ignored.

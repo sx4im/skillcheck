@@ -5,8 +5,15 @@ import readline from 'node:readline';
 import { SYM, padDisplay, paint, truncateDisplay } from './theme.js';
 import { bannerLines, printBanner } from './banner.js';
 
-const CONVENTIONAL_SKILL_FILES = ['SKILL.md', 'AGENTS.md', 'CLAUDE.md'];
-const isMarkdownFile = (filePath: string): boolean => path.extname(filePath).toLowerCase() === '.md';
+const CONVENTIONAL_SKILL_FILES = ['SKILL.md', 'AGENTS.md', 'CLAUDE.md', '.cursorrules'];
+const isMarkdownFile = (filePath: string): boolean => {
+  const base = path.basename(filePath);
+  if (base === '.cursorrules') {
+    return true;
+  }
+  const ext = path.extname(filePath).toLowerCase();
+  return ext === '.md' || ext === '.mdc';
+};
 
 export class CancelledError extends Error {
   readonly exitCode = 130;
@@ -31,7 +38,7 @@ export interface Keypress {
 }
 
 export function supportedSkillFilesText(): string {
-  return `a Markdown (.md) file (e.g. ${CONVENTIONAL_SKILL_FILES.join(', ')}), or a folder containing one`;
+  return `a Markdown (.md, .mdc) or .cursorrules file (e.g. ${CONVENTIONAL_SKILL_FILES.join(', ')}), or a folder containing one`;
 }
 
 export async function directoryHasMarkdown(dirPath: string): Promise<boolean> {
@@ -51,13 +58,13 @@ export async function validateSkillInput(inputPath: string): Promise<string> {
       if (await directoryHasMarkdown(resolved)) {
         return inputPath;
       }
-      throw new Error(`That folder has no .md file. Skillcheck only checks Markdown (.md) files — open a folder that contains one, or pick a .md file directly.`);
+      throw new Error(`That folder has no supported skill file (.md, .mdc, .cursorrules). Skillcheck only checks Markdown (.md, .mdc) and .cursorrules files — open a folder that contains one, or pick a file directly.`);
     }
     if (stats.isFile()) {
       if (isMarkdownFile(resolved)) {
         return inputPath;
       }
-      throw new Error(`Skillcheck only checks Markdown (.md) files. "${path.basename(resolved)}" is not a .md file.`);
+      throw new Error(`Skillcheck only checks Markdown (.md, .mdc) and .cursorrules files. "${path.basename(resolved)}" is not a supported file.`);
     }
   } catch (error) {
     const code = (error as NodeJS.ErrnoException).code;
@@ -328,7 +335,7 @@ export async function selectSkillPath(startDir = process.cwd()): Promise<string>
         chosen = entry.fullPath;
         break;
       }
-      message = 'We only check Markdown (.md) files. Open a folder to find one, or pick a .md file.';
+      message = 'We only check Markdown (.md, .mdc) and .cursorrules files. Open a folder to find one, or pick a supported file.';
     }
   }, { altScreen: true });
 
