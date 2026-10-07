@@ -418,6 +418,12 @@ export function parseCheckOptions(argv: string[], startIndex = 3): CheckOptions 
     inputIndex
   );
 
+  const json = hasFlag(argv, '--json');
+  const markdown = hasFlag(argv, '--markdown');
+  if (json && markdown) {
+    throw new Error('Cannot combine --markdown and --json. Choose one output format.');
+  }
+
   return {
     evalOptions: {
       inputPath,
@@ -425,8 +431,8 @@ export function parseCheckOptions(argv: string[], startIndex = 3): CheckOptions 
       resume: hasFlag(argv, '--resume'),
       saveArtifacts: Boolean(evalOptions.output)
     },
-    json: hasFlag(argv, '--json'),
-    markdown: hasFlag(argv, '--markdown'),
+    json,
+    markdown,
     output: evalOptions.output,
     clipboard: hasFlag(argv, '--clipboard'),
     inspect: hasFlag(argv, '--inspect'),

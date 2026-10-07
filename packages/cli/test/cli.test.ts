@@ -74,6 +74,12 @@ describe('friendly CLI check command', () => {
     expect(withoutFlag.markdown).toBe(false);
   });
 
+  it('rejects combining --markdown and --json with a clear error', () => {
+    expect(() =>
+      parseCheckOptions(['node', 'skillcheck', 'check', './SKILL.md', '--markdown', '--json'])
+    ).toThrow(/Cannot combine --markdown and --json/);
+  });
+
   it('accepts options before or after the skill path', () => {
     const optsBefore = parseCheckOptions(['node', 'skillcheck', '--explain', './SKILL.md', '--tasks', '5'], 2);
     expect(optsBefore.evalOptions.inputPath).toBe('./SKILL.md');
