@@ -239,4 +239,41 @@ describe('formatMarkdownReport', () => {
     expect(report).not.toContain(':warning:');
     expect(report).not.toContain('Small sample');
   });
+
+  it('escapes user mentions, links, HTML tags, backticks, pipes, and newlines in skill name', () => {
+    const report = formatMarkdownReport(evalResultFixture({
+      skill: {
+        name: 'Docs @octocat [claim your prize](http://evil.example) <script> `test` | other\nheading'
+      }
+    }));
+
+    expect(report).toContain('# Skillcheck Evaluation: Docs @​octocat \\[claim your prize\\](http://evil.example) &lt;script&gt; \\`test\\` \\| other heading');
+    expect(report).not.toContain('@octocat');
+    expect(report).not.toContain('[claim your prize]');
+    expect(report).not.toContain('<script>');
+  });
+
+  it('escapes user mentions, links, HTML tags, backticks, pipes, and newlines in task prompt excerpts', () => {
+    const report = formatMarkdownReport(evalResultFixture({
+      tasks: [
+        {
+          id: 't001',
+          prompt: 'Review @octocat [bad link](http://evil.example) <danger> `drop db` | choice\nnext line',
+          criterion_type: 'rubric',
+          criterion: 'Picks correctly',
+          with_skill_pass_rate: 1,
+          no_skill_pass_rate: 0
+        }
+      ]
+    }));
+
+    expect(report).toContain('@​octocat');
+    expect(report).toContain('\\[bad link\\]');
+    expect(report).toContain('&lt;danger&gt;');
+    expect(report).toContain('\\`drop db\\`');
+    expect(report).toContain('\\| choice');
+    expect(report).not.toContain('@octocat');
+    expect(report).not.toContain('[bad link]');
+    expect(report).not.toContain('<danger>');
+  });
 });

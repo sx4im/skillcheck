@@ -1,4 +1,4 @@
-export type SkillFormat = 'SKILL.md' | 'AGENTS.md' | '.cursorrules' | 'CLAUDE.md' | 'markdown';
+export type SkillFormat = 'SKILL.md' | 'AGENTS.md' | '.cursorrules' | 'CLAUDE.md' | 'markdown' | 'mdc';
 export type CriterionType = 'rubric' | 'deterministic';
 
 // Task-generation difficulty: harder levels ask the generator for edge

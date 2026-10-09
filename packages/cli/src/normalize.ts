@@ -16,8 +16,12 @@ function formatForFile(filePath: string): SkillFormat | undefined {
   if (known) {
     return known.format;
   }
+  const ext = path.extname(basename).toLowerCase();
+  if (ext === '.mdc') {
+    return 'mdc';
+  }
   // Any Markdown file is accepted as a generic skill document.
-  if (path.extname(basename).toLowerCase() === '.md') {
+  if (ext === '.md') {
     return 'markdown';
   }
   return undefined;
@@ -40,11 +44,16 @@ async function firstMarkdownInDir(dirPath: string): Promise<{ filePath: string; 
 
   const entries = await readdir(dirPath, { withFileTypes: true });
   const markdown = entries
-    .filter((entry) => entry.isFile() && path.extname(entry.name).toLowerCase() === '.md')
+    .filter((entry) => {
+      if (!entry.isFile()) return false;
+      const ext = path.extname(entry.name).toLowerCase();
+      return ext === '.md' || ext === '.mdc';
+    })
     .map((entry) => entry.name)
     .sort();
   if (markdown[0]) {
-    return { filePath: path.join(dirPath, markdown[0]), format: 'markdown' };
+    const filePath = path.join(dirPath, markdown[0]);
+    return { filePath, format: formatForFile(filePath) ?? 'markdown' };
   }
   return undefined;
 }
@@ -54,14 +63,14 @@ async function resolveSkillFile(inputPath: string): Promise<{ filePath: string; 
   if (stats.isDirectory()) {
     const found = await firstMarkdownInDir(inputPath);
     if (!found) {
-      throw new Error(`No .md file found in ${inputPath}. Skillcheck only analyzes Markdown (.md) skill files.`);
+      throw new Error(`No .md file found in ${inputPath}. Skillcheck only analyzes Markdown (.md, .mdc) and .cursorrules skill files.`);
     }
     return found;
   }
 
   const format = formatForFile(inputPath);
   if (!format) {
-    throw new Error(`Skillcheck only analyzes Markdown (.md) files. "${path.basename(inputPath)}" is not a .md file.`);
+    throw new Error(`Skillcheck only analyzes Markdown (.md, .mdc) and .cursorrules files. "${path.basename(inputPath)}" is not supported.`);
   }
   return { filePath: inputPath, format };
 }
@@ -142,7 +151,7 @@ function isGenericHeading(heading: string, fileName?: string): boolean {
   }
   if (fileName) {
     const fileNorm = fileName.trim().toLowerCase();
-    const fileBase = fileNorm.replace(/\.md$/, '');
+    const fileBase = fileNorm.replace(/\.(md|mdc)$/, '');
     if (norm === fileNorm || norm === fileBase) {
       return true;
     }
@@ -210,10 +219,10 @@ async function listAssets(skillFilePath: string): Promise<string[]> {
 
 function nameFromPath(filePath: string, format: SkillFormat): string {
   const base = path.basename(filePath);
-  if (format === 'markdown') {
+  if (format === 'markdown' || format === 'mdc') {
     // A user-named file (e.g. frontend-design.md) is more meaningful than its
     // parent folder — turn "frontend-design.md" into "frontend design".
-    const stem = base.replace(/\.md$/i, '').replace(/[-_]+/g, ' ').trim();
+    const stem = base.replace(/\.(md|mdc)$/i, '').replace(/[-_]+/g, ' ').trim();
     return stem || path.basename(path.dirname(filePath)) || base;
   }
   // Conventional files (SKILL.md, AGENTS.md, …) take their identity from the folder.

@@ -1,4 +1,4 @@
-import { mkdtemp, writeFile } from 'node:fs/promises';
+import { mkdir, mkdtemp, writeFile } from 'node:fs/promises';
 import { evalResultFixture } from './eval-result-fixture.js';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
@@ -72,6 +72,12 @@ describe('friendly CLI check command', () => {
 
     const withoutFlag = parseCheckOptions(['node', 'skillcheck', 'check', './SKILL.md']);
     expect(withoutFlag.markdown).toBe(false);
+  });
+
+  it('rejects combining --markdown and --json with a clear error', () => {
+    expect(() =>
+      parseCheckOptions(['node', 'skillcheck', 'check', './SKILL.md', '--markdown', '--json'])
+    ).toThrow(/Cannot combine --markdown and --json/);
   });
 
   it('accepts options before or after the skill path', () => {
@@ -196,6 +202,27 @@ describe('friendly CLI check command', () => {
     const md = path.join(dir, 'my-skill.md');
     await writeFile(md, '# My Skill\n\nDo the thing.\n');
     await expect(validateSkillInput(md)).resolves.toBe(md);
+  });
+
+  it('accepts .cursorrules and .cursor/rules/*.mdc files', async () => {
+    const dir = await mkdtemp(path.join(tmpdir(), 'skillcheck-validate-'));
+    const cursorrules = path.join(dir, '.cursorrules');
+    await writeFile(cursorrules, '# Cursor rules\n\nAlways write tests.\n');
+    await expect(validateSkillInput(cursorrules)).resolves.toBe(cursorrules);
+
+    const rulesDir = path.join(dir, '.cursor', 'rules');
+    await mkdir(rulesDir, { recursive: true });
+    const mdc = path.join(rulesDir, 'api.mdc');
+    await writeFile(mdc, '---\ndescription: API rules\n---\n# API rules\n\nFollow REST.\n');
+    await expect(validateSkillInput(mdc)).resolves.toBe(mdc);
+
+    const cursorrulesDir = await mkdtemp(path.join(tmpdir(), 'skillcheck-dir-cursorrules-'));
+    await writeFile(path.join(cursorrulesDir, '.cursorrules'), '# Rules\n');
+    await expect(validateSkillInput(cursorrulesDir)).resolves.toBe(cursorrulesDir);
+
+    const mdcDir = await mkdtemp(path.join(tmpdir(), 'skillcheck-dir-mdc-'));
+    await writeFile(path.join(mdcDir, 'rule.mdc'), '# MDC Rule\n');
+    await expect(validateSkillInput(mdcDir)).resolves.toBe(mdcDir);
   });
 
   it('rejects files that are not Markdown', async () => {
