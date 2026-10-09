@@ -6,9 +6,28 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [0.13.1] - 2026-10-09
+
+### Added
+
+- Support for `.cursorrules` and `.cursor/rules/*.mdc` files: evaluate Cursor rules directly as Markdown skills without renaming.
+- `--domain` CLI option to override automatic domain inference, capped by Unicode code points to preserve multi-byte character and emoji boundaries.
+- `--markdown` flag to generate GitHub-Flavored Markdown evaluation reports suitable for PR comments and job summaries.
+- `low_sample` field in result JSON and small-sample warning in CLI, result cards, and markdown reports when evaluating fewer than 5 tasks (Standard profile 3-task runs now warn by default).
+
 ### Changed
 
-- Removed unreproducible leaderboard and corpus-percentage claims from the README and landing page.
+- Replaced "double-blind" wording with "blind grading" across CLI help text, error messages, and documentation to accurately reflect single-blind grader evaluation.
+- Removed unreproducible leaderboard ranking and corpus lift percentage claims from the README, landing page, and dashboard, replacing rankings with verified example reports.
+- Refined methodology documentation to clarify that false-verdict rates exceed ~11% when task effects vary moderately or more (SD 0.30 or higher).
+
+### Fixed
+
+- Restricted `.env` loading in the working directory to a strict allow-list (provider API keys, tokens, model overrides, and timeouts), ignoring unknown or attacker-controlled keys.
+- Prevented automatic domain inference from using sentences from headingless skill body text as the domain.
+- Checkpoint `--resume` now isolates cache files by difficulty level, preventing resumption across mismatched difficulty profiles.
+- Escaped Markdown formatting and user mentions (`@`, `[`, `]`, `<`, `>`, backticks, pipes, and newlines) in skill names and task excerpts in Markdown reports to prevent PR mention pings and table breakout.
+- Exited with a clear error when combining `--markdown` and `--json` flags instead of silently selecting JSON.
 
 ## [0.13.0] - 2026-10-01
 
@@ -188,11 +207,17 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 - Recalibrated effort-level time estimates to observed `gpt-oss-120b` runs.
 
-[Unreleased]: https://github.com/sx4im/skillcheck/compare/v0.13.0...HEAD
-[0.13.0]: https://github.com/sx4im/skillcheck/compare/v0.12.0...v0.13.0
-[0.12.0]: https://github.com/sx4im/skillcheck/compare/v0.11.0...v0.12.0
-[0.11.0]: https://github.com/sx4im/skillcheck/compare/v0.10.0...v0.11.0
-[0.10.0]: https://github.com/sx4im/skillcheck/compare/v0.9.3...v0.10.0
-[0.7.0]: https://github.com/sx4im/skillcheck/compare/v0.6.0...v0.7.0
-[0.6.0]: https://github.com/sx4im/skillcheck/compare/v0.5.3...v0.6.0
+[Unreleased]: https://github.com/sx4im/skillcheck/compare/v0.13.1...HEAD
+[0.13.1]: https://github.com/sx4im/skillcheck/compare/v0.13.0...v0.13.1
+[0.13.0]: https://github.com/sx4im/skillcheck/compare/v0.11.0...v0.13.0
+[0.12.0]: https://github.com/sx4im/skillcheck/commit/6fbd150c7fc01768686f05e04cb2410a5628b030
+[0.11.0]: https://github.com/sx4im/skillcheck/compare/v0.9.7...v0.11.0
+[0.10.0]: https://github.com/sx4im/skillcheck/commit/b500a92d47da14e410b0ff124d782626e3c0ee03
+[0.9.3]: https://github.com/sx4im/skillcheck/compare/v0.9.1...v0.9.3
+[0.9.1]: https://github.com/sx4im/skillcheck/compare/v0.9.0...v0.9.1
+[0.9.0]: https://github.com/sx4im/skillcheck/compare/v0.8.0...v0.9.0
+[0.8.0]: https://github.com/sx4im/skillcheck/releases/tag/v0.8.0
+[0.7.1]: https://github.com/sx4im/skillcheck/releases/tag/v0.7.1
+[0.7.0]: https://github.com/sx4im/skillcheck/releases/tag/v0.7.0
+[0.6.0]: https://github.com/sx4im/skillcheck/releases/tag/v0.6.0
 [0.5.3]: https://github.com/sx4im/skillcheck/releases/tag/v0.5.3
