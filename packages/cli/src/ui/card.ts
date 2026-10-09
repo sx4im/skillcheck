@@ -1,6 +1,6 @@
 import process from 'node:process';
 import { cloudPricingUrl } from '../config.js';
-import type { EvalResult, ExplainTask } from '../eval.js';
+import { LOW_SAMPLE_TASK_THRESHOLD, type EvalResult, type ExplainTask } from '../eval.js';
 import { BOX, SYM, epaint, layoutWidth, padDisplay, paint, truncateDisplay, wrapText } from './theme.js';
 import { CancelledError, exitOnInterrupt } from './picker.js';
 
@@ -119,7 +119,7 @@ function resultHeaderLines(geometry: CardGeometry, result: EvalResult, outputPat
   }
   if (score.low_sample ?? result.low_sample) {
     for (const wrapped of wrapText(
-      'Warning: small sample (under 5 tasks). When task difficulty varies across a domain, verdicts can be wrong more often than the 95% interval suggests.',
+      `Warning: small sample (under ${LOW_SAMPLE_TASK_THRESHOLD} tasks). When task difficulty varies across a domain, verdicts can be wrong more often than the 95% interval suggests.`,
       geometry.content
     )) {
       lines.push(cardRow(geometry, paint.warn(wrapped)));

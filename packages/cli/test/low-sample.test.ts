@@ -133,4 +133,10 @@ describe('small sample honesty', () => {
     expect(card).toMatch(/under 5 tasks/i);
     expect(card).toMatch(/wrong more often than the 95% interval suggests/i);
   });
+
+  it('does not export unused LOW_SAMPLE_THRESHOLD and exports LOW_SAMPLE_TASK_THRESHOLD', async () => {
+    const evalModule = await import('../src/eval.js');
+    expect((evalModule as Record<string, unknown>).LOW_SAMPLE_THRESHOLD).toBeUndefined();
+    expect(evalModule.LOW_SAMPLE_TASK_THRESHOLD).toBe(5);
+  });
 });

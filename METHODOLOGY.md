@@ -93,7 +93,7 @@ Varying trial counts on few tasks demonstrates that extra trials on the same tas
 
 Under moderate heterogeneity (SD = 0.30), increasing trials on 2 tasks from 1 to 10 trials raises the false verdict rate from 13.96% to 22.80% because repeated trials reduce noise around an unrepresentative task sample without expanding domain coverage. Conversely, evaluating 10 tasks with 1 trial each (Total N = 10) holds false verdict rates to 6.84%.
 
-The nominal ~5% false discovery rate holds only when every task responds the same way to the skill (SD = 0.00). When per-task effects vary across a domain (SD = 0.15 to 0.50), false verdict rates range from 9.8% to 18.7% for Standard (3 tasks) and 6.0% to 15.3% for Thorough (5 tasks). When fewer than 5 tasks are evaluated, false verdict rates exceed ~11% whenever effects vary, so `skillcheck` sets `low_sample: true` and warns that verdicts can be wrong more often than the nominal 95% interval suggests.
+The nominal ~5% false discovery rate holds only when every task responds the same way to the skill (SD = 0.00). When per-task effects vary across a domain (SD = 0.15 to 0.50), false verdict rates range from 9.8% to 18.7% for Standard (3 tasks) and 6.0% to 15.3% for Thorough (5 tasks). When fewer than 5 tasks are evaluated, false verdict rates exceed ~11% when effects vary moderately or more (sd 0.30 or higher), so `skillcheck` sets `low_sample: true` and warns that verdicts can be wrong more often than the nominal 95% interval suggests.
 
 ### Simulation Assumptions
 
