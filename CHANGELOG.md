@@ -17,7 +17,7 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ### Changed
 
 - Replaced "double-blind" wording with "blind grading" across CLI help text, error messages, and documentation to accurately reflect single-blind grader evaluation.
-- Removed unreproducible leaderboard ranking and corpus lift percentage claims from the README, landing page, and dashboard, replacing rankings with verified example reports.
+- Removed unreproducible leaderboard ranking and corpus lift percentage claims from the README, landing page, and dashboard, replacing rankings with clearly labeled example reports (illustrative output, not real runs).
 - Refined methodology documentation to clarify that false-verdict rates exceed ~11% when fewer than 5 tasks are evaluated and effects vary moderately or more (sd 0.30 or higher).
 
 ### Fixed
