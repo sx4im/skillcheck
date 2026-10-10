@@ -171,7 +171,6 @@ export function parseTaskSuite(text: string): GeneratedTask[] {
 }
 
 // Threshold for small-sample honesty (fewer than 5 tasks produces elevated false-verdict rates when effects vary).
-export const LOW_SAMPLE_THRESHOLD = 5;
 export const LOW_SAMPLE_TASK_THRESHOLD = 5;
 
 // The published result JSON shape. Typed so every consumer (matrix, the card,

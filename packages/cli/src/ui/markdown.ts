@@ -1,4 +1,4 @@
-import type { EvalResult } from '../eval.js';
+import { LOW_SAMPLE_TASK_THRESHOLD, type EvalResult } from '../eval.js';
 
 const VERDICT_BADGE = {
   helps: ':white_check_mark: HELPS',
@@ -51,7 +51,7 @@ export function formatMarkdownReport(result: EvalResult): string {
 
   if (outcome.low_sample ?? result.low_sample) {
     lines.push(
-      `> :warning: **Small sample:** Evaluated on fewer than 5 tasks (${config.tasks} tasks). When task difficulty or effect varies across a domain, verdicts can be wrong more often than the 95% interval suggests.`,
+      `> :warning: **Small sample:** Evaluated on fewer than ${LOW_SAMPLE_TASK_THRESHOLD} tasks (${config.tasks} tasks). When task difficulty or effect varies across a domain, verdicts can be wrong more often than the 95% interval suggests.`,
       ''
     );
   }

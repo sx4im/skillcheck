@@ -293,7 +293,7 @@ export async function normalizeSkill(
     extractFrontMatter(instructions).name || firstHeading(instructions) || nameFromPath(filePath, format);
 
   const explicitDomain = options?.domain
-    ? options.domain.replace(/\s+/g, ' ').trim().slice(0, 200)
+    ? Array.from(options.domain.replace(/\s+/g, ' ').trim()).slice(0, 200).join('')
     : undefined;
   const domain =
     explicitDomain ||

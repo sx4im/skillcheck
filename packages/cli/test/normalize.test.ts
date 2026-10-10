@@ -224,6 +224,17 @@ describe('normalizeSkill', () => {
     expect(skill.domain).toHaveLength(200);
   });
 
+  it('caps domain option by code points so an emoji at the 200-character boundary is preserved', async () => {
+    const dir = await mkdtemp(path.join(tmpdir(), 'skillcheck-normalize-'));
+    const file = path.join(dir, 'AGENTS.md');
+    await writeFile(file, '# Agent Rules\n\nSome body text.\n');
+
+    const domainWithEmojiAtBoundary = 'a'.repeat(199) + '🎯';
+    const skill = await normalizeSkill(file, { domain: domainWithEmojiAtBoundary });
+
+    expect(skill.domain).toBe('a'.repeat(199) + '🎯');
+  });
+
   it('produces byte-identical generator prompt for files with front matter', async () => {
     const dir = await mkdtemp(path.join(tmpdir(), 'skillcheck-normalize-'));
     const file = path.join(dir, 'SKILL.md');

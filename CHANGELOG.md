@@ -6,9 +6,29 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [0.13.1] - 2026-10-09
+
+### Added
+
+- Support for `.cursorrules` and `.cursor/rules/*.mdc` files: evaluate Cursor rules directly as Markdown skills without renaming.
+- `--domain` CLI option to override automatic domain inference, capped by Unicode code points to preserve multi-byte character and emoji boundaries.
+- `low_sample` field in result JSON and small-sample warning in CLI, result cards, and markdown reports when evaluating fewer than 5 tasks (Standard profile 3-task runs now warn by default).
+
 ### Changed
 
-- Removed unreproducible leaderboard and corpus-percentage claims from the README and landing page.
+- Replaced "double-blind" wording with "blind grading" across CLI help text, error messages, and documentation to accurately reflect single-blind grader evaluation.
+- Removed unreproducible leaderboard ranking and corpus lift percentage claims from the README, landing page, and dashboard, replacing rankings with clearly labeled example reports (illustrative output, not real runs).
+- Refined methodology documentation to clarify that false-verdict rates exceed ~11% when fewer than 5 tasks are evaluated and effects vary moderately or more (sd 0.30 or higher).
+
+### Fixed
+
+- Prevented automatic domain inference from using sentences from headingless skill body text as the domain.
+- Escaped Markdown formatting and user mentions (`@`, `[`, `]`, `<`, `>`, backticks, pipes, and newlines) in skill names and task excerpts in Markdown reports to prevent PR mention pings and table breakout.
+- Exited with a clear error when combining `--markdown` and `--json` flags instead of silently selecting JSON.
+
+### Dependencies
+
+- Updated dotenv to 18.0.5.
 
 ## [0.13.0] - 2026-10-01
 
@@ -20,6 +40,8 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Atomic checkpointing for resumable evaluations: `--resume` on `skillcheck eval` picks up where an interrupted run stopped.
 - Dashboard leaderboard of community skills, with an embedded demo video.
 - 21 regression tests covering adapter error/retry paths (Anthropic/Gemini payload shaping and HTTP error mapping, `Retry-After` handling in seconds/HTTP-date/Headers forms, request pacing, `fetchWithRetry` retry and degenerate `maxAttempts: 0`) and grader edge cases (unclosed/non-numeric grader JSON, explicit `score: 0` marker, unknown task reference, deterministic grading without an LLM call).
+- CLI option `--difficulty` to control task-generation difficulty (standard, hard, adversarial) (omitted from 0.13.0 release notes).
+- CLI `--markdown` flag to generate GitHub-Flavored Markdown evaluation reports (omitted from 0.13.0 release notes).
 
 ### Changed
 
@@ -128,7 +150,7 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Role-based model overrides per provider (`OPENAI_RUNNER_MODEL`, `ANTHROPIC_RUNNER_MODEL`, etc.).
 - Refactored CLI UI modules under `packages/cli/src/ui/`.
 
-## [0.7.1] - 2026-06-16
+## 0.7.1 - 2026-06-16
 
 ### Added
 
@@ -149,7 +171,7 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   silently running at the defaults. Pinning `--tasks`/`--trials`, `--json`, and
   non-interactive sessions are unaffected.
 
-## [0.7.0] - 2026-06-16
+## 0.7.0 - 2026-06-16
 
 ### Added
 
@@ -158,7 +180,7 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   result card, and includes it in `--json` output under `explain`. Reuses the run's
   existing outputs, so it makes no extra model calls.
 
-## [0.6.0] - 2026-06-16
+## 0.6.0 - 2026-06-16
 
 ### Added
 
@@ -184,15 +206,17 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - `prepublishOnly` now runs lint, typecheck, build, and the coverage gate before a
   publish.
 
-## [0.5.3]
+## 0.5.3
 
 - Recalibrated effort-level time estimates to observed `gpt-oss-120b` runs.
 
-[Unreleased]: https://github.com/sx4im/skillcheck/compare/v0.13.0...HEAD
-[0.13.0]: https://github.com/sx4im/skillcheck/compare/v0.12.0...v0.13.0
-[0.12.0]: https://github.com/sx4im/skillcheck/compare/v0.11.0...v0.12.0
-[0.11.0]: https://github.com/sx4im/skillcheck/compare/v0.10.0...v0.11.0
-[0.10.0]: https://github.com/sx4im/skillcheck/compare/v0.9.3...v0.10.0
-[0.7.0]: https://github.com/sx4im/skillcheck/compare/v0.6.0...v0.7.0
-[0.6.0]: https://github.com/sx4im/skillcheck/compare/v0.5.3...v0.6.0
-[0.5.3]: https://github.com/sx4im/skillcheck/releases/tag/v0.5.3
+[Unreleased]: https://github.com/sx4im/skillcheck/compare/v0.13.1...HEAD
+[0.13.1]: https://github.com/sx4im/skillcheck/compare/v0.13.0...v0.13.1
+[0.13.0]: https://github.com/sx4im/skillcheck/compare/v0.11.0...v0.13.0
+[0.12.0]: https://github.com/sx4im/skillcheck/commit/6fbd1505f6cb347b77606bfaf762cf8afdfcc580
+[0.11.0]: https://github.com/sx4im/skillcheck/compare/v0.9.7...v0.11.0
+[0.10.0]: https://github.com/sx4im/skillcheck/commit/b500a9253dfeeb445911c8cc0de2af17e83d4a77
+[0.9.3]: https://github.com/sx4im/skillcheck/compare/v0.9.1...v0.9.3
+[0.9.1]: https://github.com/sx4im/skillcheck/compare/v0.9.0...v0.9.1
+[0.9.0]: https://github.com/sx4im/skillcheck/compare/v0.8.0...v0.9.0
+[0.8.0]: https://github.com/sx4im/skillcheck/releases/tag/v0.8.0
