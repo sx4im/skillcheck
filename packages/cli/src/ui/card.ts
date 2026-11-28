@@ -1,3 +1,5 @@
+import { SkillcheckError } from '../errors.js';
+import { sanitizeTerminal, singleLine } from '../core/security/output.js';
 import process from 'node:process';
 import { cloudPricingUrl } from '../config.js';
 import { LOW_SAMPLE_TASK_THRESHOLD, type EvalResult, type ExplainTask } from '../eval.js';
@@ -101,7 +103,7 @@ function resultHeaderLines(geometry: CardGeometry, result: EvalResult, outputPat
     cardEdge(geometry, 'top'),
     cardRow(geometry, paint.bold('SKILLCHECK RESULT')),
     cardEdge(geometry, 'mid'),
-    cardLabelRow(geometry, 'Skill', skill.name),
+    cardLabelRow(geometry, 'Skill', singleLine(skill.name)),
     cardLabelRow(geometry, 'Run size', `${countNoun(config.tasks, 'task')} × ${countNoun(config.trials, 'trial')}`),
     cardRow(geometry, ''),
     cardLabelRow(geometry, 'Verdict', verdictBadge(verdict))
@@ -137,7 +139,7 @@ function resultHeaderLines(geometry: CardGeometry, result: EvalResult, outputPat
   }
   lines.push(cardLabelRow(geometry, 'Token cost', `+${score.token_overhead} ${paint.dim('tokens to include the skill')}`));
   if (outputPath) {
-    lines.push(cardLabelRow(geometry, 'Saved JSON', outputPath));
+    lines.push(cardLabelRow(geometry, 'Saved JSON', singleLine(outputPath)));
   }
   lines.push(cardEdge(geometry, 'mid'));
   return lines;
@@ -155,7 +157,7 @@ function explainExampleLines(armLabel: string, mark: Paint, example: ExplainTask
   }
   const verdict = example.pass ? paint.ok('pass') : paint.err('fail');
   const lines = [`      ${mark(armLabel)} ${paint.dim(SYM.dot)} ${verdict}`];
-  for (const wrapped of wrapText(example.output, width - 8)) {
+  for (const wrapped of wrapText(sanitizeTerminal(example.output), width - 8)) {
     lines.push(`        ${paint.dim(wrapped)}`);
   }
   return lines;
@@ -175,9 +177,9 @@ export function formatExplain(result: EvalResult): string {
     const label = task.label;
     const labelPaint = label === 'helped' ? paint.ok : label === 'hurt' ? paint.err : paint.dim;
     lines.push(
-      `  ${paint.accent(task.id)}  ${paint.dim('with')} ${String(withPct).padStart(3)}%  ${paint.dim('without')} ${String(noPct).padStart(3)}%  ${signedPp(task.delta_pp)}  ${labelPaint(label)}`
+      `  ${paint.accent(singleLine(task.id))}  ${paint.dim('with')} ${String(withPct).padStart(3)}%  ${paint.dim('without')} ${String(noPct).padStart(3)}%  ${signedPp(task.delta_pp)}  ${labelPaint(label)}`
     );
-    for (const wrapped of wrapText(task.prompt, width - 6)) {
+    for (const wrapped of wrapText(sanitizeTerminal(task.prompt), width - 6)) {
       lines.push(`      ${paint.dim(wrapped)}`);
     }
     lines.push(...explainExampleLines('with skill', paint.ok, task.example_with, width));
@@ -244,7 +246,8 @@ function isQuotaError(error: unknown): boolean {
 }
 
 export function sanitizeCliError(error: unknown): string {
-  const raw = error instanceof Error ? error.message : String(error);
+  const raw = sanitizeTerminal(error instanceof Error ? error.message : String(error));
+  if (error instanceof SkillcheckError) return raw;
   if (/quota[_ ]?exceeded|payment required|free .*runs|\b402\b/i.test(raw)) {
     return raw.replace(/^\d+\s+/, '').replace(/NVIDIA(?:[_ -]?NIM)?/gi, 'Skillcheck Cloud');
   }
@@ -275,17 +278,17 @@ export function printUpdateAvailable(current: string, latest: string): void {
   const geometry = cardGeometry();
   console.log('');
   console.log(cardEdge(geometry, 'top'));
-  console.log(cardRow(geometry, `${paint.bold('Update available')}   ${paint.dim(`v${current}`)} ${paint.accent(SYM.arrow)} ${paint.ok(`v${latest}`)}`));
+  console.log(cardRow(geometry, `${paint.bold('Update available')}   ${paint.dim(`v${singleLine(current)}`)} ${paint.accent(SYM.arrow)} ${paint.ok(`v${singleLine(latest)}`)}`));
   console.log(cardRow(geometry, paint.dim('A newer version of Skillcheck is ready to install.')));
   console.log(cardEdge(geometry, 'bottom'));
 }
 
 export function printUpdateApplied(latest: string): void {
-  console.log(`${paint.ok(SYM.tick)} ${paint.bold(`Updated to v${latest}.`)} ${paint.dim('Re-run skillcheck to use the new version.')}\n`);
+  console.log(`${paint.ok(SYM.tick)} ${paint.bold(`Updated to v${singleLine(latest)}.`)} ${paint.dim('Re-run skillcheck to use the new version.')}\n`);
 }
 
 export function printUpdateSkipped(latest: string): void {
-  console.log(`${paint.dim('Skipped. Update any time with')} ${paint.bold('npm install -g @sx4im/skillcheck@latest')}${paint.dim(`  (v${latest})`)}\n`);
+  console.log(`${paint.dim('Skipped. Update any time with')} ${paint.bold('npm install -g @sx4im/skillcheck@latest')}${paint.dim(`  (v${singleLine(latest)})`)}\n`);
 }
 
 export function printUpdateFailed(): void {

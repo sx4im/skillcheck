@@ -9,7 +9,6 @@
  * @returns {Promise<Response>}
  */
 export function fetchWithTimeout(url, init = {}, timeoutMs = 10000) {
-  const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), timeoutMs);
-  return fetch(url, { ...init, signal: controller.signal }).finally(() => clearTimeout(timer));
+  // Keep the deadline active while the caller reads the body, too.
+  return fetch(url, { ...init, signal: AbortSignal.timeout(timeoutMs) });
 }

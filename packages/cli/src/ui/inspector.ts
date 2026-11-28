@@ -1,3 +1,4 @@
+import { singleLine } from '../core/security/output.js';
 import type { EvalResult } from '../eval.js';
 import { copyToClipboardOsc52, formatPrMarkdown } from './clipboard.js';
 import { readKey, withRawMode, wrapIndex } from './picker.js';
@@ -22,7 +23,7 @@ export function renderInspectorScreen(result: EvalResult, selectedIndex: number,
   const selectedTask = tasks[selectedIndex];
 
   // Header Bar
-  const title = ` ${paint.bold('Skillcheck Lens')} ${SYM.dot} ${result.skill.name} ${paint.dim(`(${pp(result.result.effect_pp)})`)} `;
+  const title = ` ${paint.bold('Skillcheck Lens')} ${SYM.dot} ${singleLine(result.skill.name)} ${paint.dim(`(${pp(result.result.effect_pp)})`)} `;
   lines.push(paint.accent(`${BOX.tl}${BOX.h.repeat(2)}${title}${BOX.h.repeat(Math.max(0, width - 2 - 2 - title.length))}${BOX.tr}`));
 
   // Task List Navigation Pane

@@ -1,3 +1,8 @@
+import { baseUrl as checkedBaseUrl } from '../core/security/endpoint.js';
+import { registerSecret, sanitizeTerminal } from '../core/security/output.js';
+import { ProviderHttpError, ProviderResponseError } from '../errors.js';
+import { record } from './http.js';
+import { providerFetch, readProviderJson } from './transport.js';
 import { AnthropicClient } from './anthropic.js';
 import { GeminiClient } from './gemini.js';
 import { OpenAiCompatClient } from './openai-compat.js';
@@ -45,75 +50,32 @@ export async function fetchProviderModels(
   apiKey: string,
   customBaseUrl?: string
 ): Promise<ModelInfo[]> {
-  const baseUrl = (customBaseUrl || DEFAULT_PROVIDER_BASE_URLS[provider]).replace(/\/+$/, '');
-
-  if (provider === 'anthropic') {
-    const response = await fetch(`${baseUrl}/models`, {
-      method: 'GET',
-      headers: {
-        'x-api-key': apiKey,
-        'anthropic-version': '2023-06-01'
-      },
-      signal: AbortSignal.timeout(PROVIDER_TIMEOUT_MS)
-    });
-
-    if (!response.ok) {
-      const errText = await response.text().catch(() => '');
-      throw new Error(`Failed to fetch models from Anthropic (HTTP ${response.status}): ${errText}`);
-    }
-
-    const data = (await response.json()) as { data?: { id: string; display_name?: string }[] };
-    if (!Array.isArray(data.data)) {
-      return [{ id: DEFAULT_PROVIDER_MODELS.anthropic }];
-    }
-    return data.data.map((m) => ({ id: m.id, name: m.display_name ?? m.id }));
-  }
-
-  if (provider === 'gemini') {
-    const url = `${baseUrl}/models?key=${encodeURIComponent(apiKey)}`;
-    const response = await fetch(url, {
-      method: 'GET',
-      headers: { 'content-type': 'application/json', 'x-goog-api-key': apiKey },
-      signal: AbortSignal.timeout(PROVIDER_TIMEOUT_MS)
-    });
-
-    if (!response.ok) {
-      const errText = await response.text().catch(() => '');
-      throw new Error(`Failed to fetch models from Gemini (HTTP ${response.status}): ${errText}`);
-    }
-
-    const data = (await response.json()) as { models?: { name: string; displayName?: string }[] };
-    if (!Array.isArray(data.models)) {
-      return [{ id: DEFAULT_PROVIDER_MODELS.gemini }];
-    }
-    return data.models
-      .map((m) => {
-        const id = m.name.replace(/^models\//, '');
-        return { id, name: m.displayName ?? id };
-      })
-      .filter((m) => m.id.startsWith('gemini'));
-  }
-
-  // OpenAI-compatible providers: openai, groq, mistral, openrouter, nvidia, cloud
-  const response = await fetch(`${baseUrl}/models`, {
-    method: 'GET',
-    headers: {
-      authorization: `Bearer ${apiKey}`
-    },
-    signal: AbortSignal.timeout(PROVIDER_TIMEOUT_MS)
-  });
-
+  registerSecret(apiKey);
+  const baseUrl = checkedBaseUrl(customBaseUrl || DEFAULT_PROVIDER_BASE_URLS[provider]);
+  const headers: Record<string, string> = provider === 'anthropic'
+    ? { 'x-api-key': apiKey, 'anthropic-version': '2023-06-01' }
+    : provider === 'gemini'
+      ? { 'content-type': 'application/json', 'x-goog-api-key': apiKey }
+      : { authorization: 'Bearer ' + apiKey };
+  const url = baseUrl + '/models' + (provider === 'gemini' ? '?key=' + encodeURIComponent(apiKey) : '');
+  const response = await providerFetch(url, { method: 'GET', headers, signal: AbortSignal.timeout(PROVIDER_TIMEOUT_MS) });
   if (!response.ok) {
-    const errText = await response.text().catch(() => '');
-    throw new Error(`Failed to fetch models from ${PROVIDER_NAMES[provider]} (HTTP ${response.status}): ${errText}`);
+    await response.body?.cancel().catch(() => {});
+    throw new ProviderHttpError('Failed to fetch models from ' + PROVIDER_NAMES[provider] + ' (HTTP ' + response.status + ').', response.status);
   }
-
-  const data = (await response.json()) as { data?: { id: string; name?: string }[] };
-  if (!Array.isArray(data.data)) {
-    return [{ id: DEFAULT_PROVIDER_MODELS[provider] }];
-  }
-
-  return data.data.map((m) => ({ id: m.id, name: m.name ?? m.id }));
+  const data = record(await readProviderJson(response, 'Model list'), 'Model list');
+  const list = provider === 'gemini' ? data.models : data.data;
+  if (!Array.isArray(list)) throw new ProviderResponseError('Provider model list must be an array.');
+  return list.map((entry) => {
+    const item = record(entry, 'Model entry');
+    const id = provider === 'gemini' ? item.name : item.id;
+    const name = provider === 'anthropic' ? item.display_name : provider === 'gemini' ? item.displayName : item.name;
+    if (typeof id !== 'string' || !id.trim() || (name !== undefined && typeof name !== 'string')) {
+      throw new ProviderResponseError('Provider returned an invalid model ID or name.');
+    }
+    const normalized = provider === 'gemini' ? id.replace(/^models\//, '') : id;
+    return { id: normalized, name: name ?? normalized };
+  }).filter(({ id }) => provider !== 'gemini' || id.startsWith('gemini'));
 }
 
 export async function verifyProviderKey(
@@ -128,13 +90,14 @@ export async function verifyProviderKey(
     return {
       valid: false,
       models: [],
-      message: error instanceof Error ? error.message : String(error)
+      message: sanitizeTerminal(error instanceof Error ? error.message : String(error))
     };
   }
 }
 
 export function createLlmClient(config: ProviderConfig, options: { defaultHeaders?: Record<string, string> } = {}): LlmClient {
-  const baseUrl = config.baseUrl || DEFAULT_PROVIDER_BASE_URLS[config.provider] || DEFAULT_PROVIDER_BASE_URLS.nvidia;
+  const baseUrl = checkedBaseUrl(config.baseUrl || DEFAULT_PROVIDER_BASE_URLS[config.provider]);
+  registerSecret(config.apiKey);
 
   if (config.provider === 'anthropic') {
     return new AnthropicClient({
@@ -142,6 +105,8 @@ export function createLlmClient(config: ProviderConfig, options: { defaultHeader
       baseUrl,
       timeoutMs: config.timeoutMs,
       maxAttempts: config.maxAttempts,
+      maxRetryDelayMs: config.maxRetryDelayMs,
+      requestDelayMs: config.requestDelayMs,
       defaultHeaders: options.defaultHeaders
     });
   }
@@ -152,6 +117,8 @@ export function createLlmClient(config: ProviderConfig, options: { defaultHeader
       baseUrl,
       timeoutMs: config.timeoutMs,
       maxAttempts: config.maxAttempts,
+      maxRetryDelayMs: config.maxRetryDelayMs,
+      requestDelayMs: config.requestDelayMs,
       defaultHeaders: options.defaultHeaders
     });
   }

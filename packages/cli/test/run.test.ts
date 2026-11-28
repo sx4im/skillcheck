@@ -2,7 +2,7 @@ import { mkdtemp } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { describe, expect, it } from 'vitest';
-import type { LlmClient } from '../src/adapters/types.js';
+import type { LlmClient } from '../src/providers/types.js';
 import { JsonCache } from '../src/cache.js';
 import { runTrials } from '../src/run.js';
 import type { GeneratedTask, NormalizedSkill } from '../src/types.js';

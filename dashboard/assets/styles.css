@@ -33,6 +33,8 @@
   --fast: 160ms ease;
 }
 
+.dashboard-page { --muted: #858585; }
+
 * { box-sizing: border-box; }
 
 html {

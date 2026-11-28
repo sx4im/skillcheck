@@ -4,6 +4,31 @@ All notable changes to this project are documented here. The format is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres
 to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.14.0] - 2026-11-28
+
+### Added
+
+- `compose` measures how adding one skill changes pass rates for an existing stack.
+- `route` compares BM25 and model-based discovery, reports false triggers, and proposes a description patch when routing fails.
+- `audit` adds offline checks, SARIF, and an optional simulated tool audit. `fix` previews a repair patch. `doctor` checks local configuration and can verify the provider connection.
+- Added the `skillcheck` companion skill for agents that author and review skills.
+
+### Changed
+
+- `check` and `eval` return exit 3 for HARMS. Add `--fail-on placebo` to require measurable improvement in CI.
+- The CLI loads commands on demand. Providers share request pacing, timed retries, and response validation.
+- The dashboard validates requests before metering and limits traffic by API key and IP. New keys are shown once and stored as hashes.
+
+### Fixed
+
+- Escaped model IDs, task text, and other untrusted fields in Markdown reports and PR clipboard output (#97).
+- The npm tarball smoke test now routes requests by model role and verifies that every trial reaches the grader (#96).
+- Config writes are atomic. Provider requests block redirects and link-local addresses. Graders reject responses outside the required JSON format.
+
+### Security
+
+- CI audits both lockfiles and runs CodeQL. npm releases verify the published provenance against the smoke-tested tarball.
+
 ## [0.13.1] - 2026-10-09
 
 ### Added
@@ -208,6 +233,7 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 - Recalibrated effort-level time estimates to observed `gpt-oss-120b` runs.
 
+[0.14.0]: https://github.com/sx4im/skillcheck/compare/v0.13.1...v0.14.0
 [0.13.1]: https://github.com/sx4im/skillcheck/compare/v0.13.0...v0.13.1
 [0.13.0]: https://github.com/sx4im/skillcheck/compare/v0.11.0...v0.13.0
 [0.12.0]: https://github.com/sx4im/skillcheck/commit/6fbd1505f6cb347b77606bfaf762cf8afdfcc580

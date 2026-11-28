@@ -207,7 +207,14 @@ methodology in [`METHODOLOGY.md`](METHODOLOGY.md).
 
 ## Architecture
 
-How a check flows from your terminal to the result card:
+`packages/cli/src/core` handles normalization, paired evaluation, routing,
+auditing, and repair. The provider adapters validate model responses and handle
+request deadlines, pacing, and retries. The CLI loads commands on demand,
+formats results, and assigns exit codes. The core accepts an injected model
+adapter so tests can run offline.
+
+The hosted proxy lives in `dashboard/` and meters each run before forwarding
+validated requests to NVIDIA.
 
 ```mermaid
 flowchart LR
@@ -266,6 +273,11 @@ skillcheck check <path> [--tasks N] [--trials K] [--domain "<topic>"] [--output 
 skillcheck setup                            # connect / change your API key
 skillcheck logout                           # remove your saved API key
 skillcheck eval <path> [--tasks N] [--trials K] [--domain "<topic>"] [--output file.json]   # raw JSON evaluator
+skillcheck compose <path> --with <path1,path2|dir> [--compare-isolated] [--json|--markdown]
+skillcheck route <path> [--against dir] [--queries N] [--json]
+skillcheck audit <path> [--dynamic] [--format terminal|json|sarif] [--output file]
+skillcheck fix <path> [--dry-run|--write] [--recheck]
+skillcheck doctor [--ping]
 skillcheck verify <result.json> [--sample n]  # independently re-measure a published result
 skillcheck corpus run --corpus corpus.json [--results dir]             # batch-evaluate many skills
 skillcheck rot [--results dir] [--output report.json]                  # detect skills that stopped helping
@@ -276,6 +288,38 @@ Accepted inputs: any Markdown (`.md`, `.mdc`) or `.cursorrules` file (`SKILL.md`
 when front matter is absent; if a heading is itself an instruction, pass `--domain "<neutral topic>"`
 for a blind run. `--tasks` is capped at 50 and `--trials` at 10; mistyped options are
 rejected rather than silently ignored.
+
+`compose` compares a skill stack with and without the target skill. `route`
+tests discovery and false triggers against competing descriptions. Static
+`audit` and `doctor` run offline. `audit --dynamic` calls the configured model and
+simulates tools against synthetic data. `fix` previews a patch by default and
+uses the configured model when available. It applies changes only with `--write`.
+
+Markdown is limited to 1 MiB per skill by default. Use `--max-file-bytes N`
+to change the limit and `--allow-external-symlinks` for explicitly trusted input
+symlinks. Linked files inside a skill must stay within its directory.
+
+### Exit codes
+
+| Code | Meaning |
+| --- | --- |
+| 0 | Success, including PLACEBO unless promoted to a failure |
+| 1 | Operational error or invalid provider configuration |
+| 2 | Invalid arguments or malformed input |
+| 3 | HARMS, a failed routing gate, or PLACEBO with `--fail-on placebo` |
+| 4 | Critical audit or repair finding, including a simulated capability failure |
+| 130 | Cancelled |
+
+### Companion skill
+
+Install the authoring and review workflow for agents such as Claude Code,
+Codex, or Cursor.
+
+~~~bash
+npx skills add sx4im/skillcheck --skill skillcheck
+~~~
+
+[Agent Skills specification](https://agentskills.io/specification) · [Skills CLI commands](https://github.com/vercel-labs/skills/blob/main/docs/commands.md)
 
 ## CI/CD integration
 
@@ -295,16 +339,30 @@ jobs:
   eval:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
           node-version: 22
 
       - name: Run Skillcheck evaluation
-        run: npx @sx4im/skillcheck@latest check ./SKILL.md --tasks 5 --trials 3 --json --output skillcheck-result.json
+        run: npx @sx4im/skillcheck@0.14.0 check ./SKILL.md --tasks 5 --trials 3 --fail-on placebo --json --output skillcheck-result.json
         env:
           SKILLCHECK_TOKEN: ${{ secrets.SKILLCHECK_TOKEN }}
 ```
+
+For static audit findings, grant the upload job `contents: read` and
+`security-events: write`. Run both steps even when the audit exits 4 so
+Code Scanning receives critical findings and CI still fails.
+
+~~~yaml
+- name: Audit SKILL.md
+  run: npx @sx4im/skillcheck@0.14.0 audit ./SKILL.md --format sarif --output skillcheck.sarif
+- name: Upload findings
+  if: always() && hashFiles('skillcheck.sarif') != ''
+  uses: github/codeql-action/upload-sarif@915412ff23e8b7659517e607487dbeae018f2934 # v4.39.5
+  with:
+    sarif_file: skillcheck.sarif
+~~~
 
 ## Badges for your repository
 

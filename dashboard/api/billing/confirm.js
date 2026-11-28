@@ -1,10 +1,10 @@
 // Fulfillment on return from Stripe Checkout. Verifies the session server-side
 // (no webhook needed): if it is paid and belongs to the signed-in user, mark pro.
 
-import { sendJson, methodNotAllowed } from '../_lib/http.js';
+import { sendJson, methodNotAllowed, isObject } from '../_lib/http.js';
 import { getClerkUserId } from '../_lib/clerk.js';
 import { setPlan } from '../_lib/users.js';
-import { billingEnabled, appUrl } from '../_lib/config.js';
+import { billingEnabled, STRIPE_MODE, STRIPE_PRICE_ID, publicAppUrl } from '../_lib/config.js';
 import { getCheckoutSession } from '../_lib/stripe.js';
 
 /** @param {import("http").IncomingMessage} req @param {import("http").ServerResponse} res */
@@ -17,19 +17,23 @@ export default async function handler(req, res) {
   const userId = await getClerkUserId(req);
   if (!userId) return sendJson(res, 401, { error: { message: 'Not signed in' } });
 
-  const url = new URL(req.url ?? '/', appUrl(req));
-  const sessionId = url.searchParams.get('session_id');
-  if (!sessionId) return sendJson(res, 400, { error: { message: 'Missing session_id' } });
-
   try {
+    const url = new URL(req.url ?? '/', publicAppUrl);
+    const [sessionId, ...duplicates] = url.searchParams.getAll('session_id');
+    if (!sessionId || duplicates.length || !/^cs_(?:test|live)_[a-zA-Z0-9]{1,200}$/.test(sessionId)) {
+      return sendJson(res, 400, { error: { message: 'Invalid session_id.' } });
+    }
     const checkout = await getCheckoutSession(sessionId);
-    const paid = checkout.payment_status === 'paid' || checkout.status === 'complete';
-    if (paid && checkout.client_reference_id === userId) {
-      await setPlan(userId, 'pro');
+    const items = isObject(checkout.line_items) ? checkout.line_items.data : undefined;
+    const item = Array.isArray(items) && items.length === 1 ? items[0] : undefined;
+    const purchasedPlan = isObject(item?.price) && item.price.id === STRIPE_PRICE_ID && item.quantity === 1;
+    if (checkout.id === sessionId && checkout.mode === STRIPE_MODE && checkout.status === 'complete' &&
+      checkout.payment_status === 'paid' && checkout.client_reference_id === userId && purchasedPlan) {
+      if (!await setPlan(userId, 'pro')) return sendJson(res, 404, { error: { message: 'Account not found' } });
       return sendJson(res, 200, { plan: 'pro' });
     }
-    sendJson(res, 200, { plan: 'free', paid: false });
-  } catch (error) {
-    sendJson(res, 502, { error: { message: String((error instanceof Error && error.message) || error) } });
+    return sendJson(res, 200, { plan: 'free', paid: false });
+  } catch {
+    return sendJson(res, 502, { error: { message: 'Could not verify Stripe payment.' } });
   }
 }

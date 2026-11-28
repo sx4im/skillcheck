@@ -1,5 +1,4 @@
-import type { ChatCompletionMessageParam } from 'openai/resources/chat/completions';
-import type { LlmClient } from '../adapters/types.js';
+import type { CompletionMessage, LlmClient } from '../providers/types.js';
 import { loadProviderConfig } from '../env.js';
 import { runnerMessages } from '../run.js';
 import {
@@ -55,7 +54,7 @@ export interface M0GateReport {
 // The gate runs the production runner prompt (runnerMessages from run.ts), so
 // it calibrates the exact prompt shape real evals use — a hand-rolled variant
 // here would silently validate a different pipeline.
-function buildMessages(skill: string, prompt: string): ChatCompletionMessageParam[] {
+function buildMessages(skill: string, prompt: string): CompletionMessage[] {
   return runnerMessages(skill, prompt);
 }
 

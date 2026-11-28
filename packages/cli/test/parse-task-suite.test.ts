@@ -40,6 +40,12 @@ describe('parseTaskSuite deterministic criteria', () => {
       parseTaskSuite(suite([{ prompt: 'p', criterionType: 'fuzzy', criterion: 'whatever' }]))
     ).toThrow(/Unsupported criterion type/);
   });
+
+  it('rejects duplicates and non-string prompts', () => {
+    expect(() => parseTaskSuite(suite([{ id: 't1', prompt: 7, criterion: 'p' }]))).toThrow(/unique string ID/);
+    const task = { id: 't1', prompt: 'p', criterion: 'c' };
+    expect(() => parseTaskSuite(suite([task, task]))).toThrow(/unique string ID/);
+  });
 });
 
 describe('selectSuiteTasks explicit-suite handling', () => {

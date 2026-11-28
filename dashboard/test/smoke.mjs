@@ -3,8 +3,9 @@
 
 import assert from 'node:assert/strict';
 import { generateApiKey, hashApiKey, maskApiKey } from '../api/_lib/keys.js';
-import { getOrCreateUser, uidForApiKey, consumeRun, getRunsUsed, setPlan, rotateApiKey } from '../api/_lib/users.js';
+import { getOrCreateUser, userForApiKey, consumeRun, getRunsUsed, rollbackRun, setPlan, rotateApiKey } from '../api/_lib/users.js';
 import { FREE_RUNS } from '../api/_lib/config.js';
+import { kvGet, kvSet, kvIncrWithExpiry } from '../api/_lib/store.js';
 
 let passed = 0;
 function ok(label) { passed += 1; console.log('  ✓', label); }
@@ -21,11 +22,25 @@ ok('keys: generate / hash / mask');
 const user = await getOrCreateUser({ userId: 'clerk_user_1', email: 'a@b.com', name: 'A' });
 assert.equal(user.uid, 'clerk_user_1', 'uid is the Clerk user id');
 assert.ok(user.apiKey.startsWith('chk_live_'), 'issued an api key');
-assert.equal(await uidForApiKey(user.apiKey), user.uid, 'key resolves to uid');
+assert.equal((await userForApiKey(hashApiKey(user.apiKey))).uid, user.uid, 'key resolves to uid');
+assert.ok(!(await kvGet(`user:${user.uid}`)).includes(user.apiKey), 'account row omits plaintext key');
 const again = await getOrCreateUser({ userId: 'clerk_user_1' });
 assert.equal(again.uid, user.uid, 'returning user is stable');
-assert.equal(again.apiKey, user.apiKey, 'key is preserved across sign-ins');
+assert.equal(again.apiKey, undefined, 'secret is only issued once');
+assert.equal(again.apiKeyMasked, user.apiKeyMasked, 'dashboard keeps a masked key');
 ok('users: create / lookup / idempotent');
+
+const legacyKey = generateApiKey();
+const legacyDigest = hashApiKey(legacyKey);
+const legacyUid = 'clerk_legacy_user';
+await kvSet(`user:${legacyUid}`, JSON.stringify({ uid: legacyUid, plan: 'free', apiKey: legacyKey }));
+await kvSet(`key:${legacyDigest}`, legacyUid);
+assert.equal((await userForApiKey(legacyDigest)).uid, legacyUid, 'legacy keys authenticate after migration');
+const migrated = JSON.parse(await kvGet(`user:${legacyUid}`));
+assert.equal(migrated.apiKey, undefined);
+assert.equal(migrated.apiKeyHash, legacyDigest);
+assert.equal(migrated.apiKeyMasked, maskApiKey(legacyKey));
+ok('users: legacy key migrates without invalidating the saved CLI token');
 
 // 10 distinct runs allowed and counted
 for (let i = 1; i <= FREE_RUNS; i += 1) {
@@ -61,6 +76,17 @@ assert.equal(firstNoId.counted, true, 'no-run-id consumes a run');
 assert.equal(await getRunsUsed(metered.uid), 1, 'no-run-id incremented usage');
 ok('metering: 10 free runs, dedupe, gate at 11, no run-id bypass');
 
+const concurrent = await getOrCreateUser({ userId: 'clerk_concurrent_runs' });
+for (let i = 1; i < FREE_RUNS; i += 1) await consumeRun(concurrent.uid, `warmup-${i}`, 'free');
+const sharedRun = await Promise.all([
+  consumeRun(concurrent.uid, 'last-slot', 'free'), consumeRun(concurrent.uid, 'last-slot', 'free')
+]);
+assert.ok(sharedRun.every(entry => entry.allowed), 'concurrent calls share the last quota slot');
+assert.equal(sharedRun.filter(entry => entry.counted).length, 1, 'parallel calls charge one run');
+await rollbackRun(concurrent.uid, 'last-slot', sharedRun[0].month);
+assert.equal(await getRunsUsed(concurrent.uid), FREE_RUNS, 'failure of one call cannot refund a shared run');
+ok('metering: concurrent calls share a quota slot and preserve the charge');
+
 // upgrading to pro lifts the cap
 await setPlan(user.uid, 'pro');
 const pro = await consumeRun(user.uid, 'run-pro', 'pro');
@@ -72,8 +98,26 @@ ok('metering: pro is unlimited');
 const oldKey = user.apiKey;
 const rotated = await rotateApiKey(user.uid);
 assert.notEqual(rotated.apiKey, oldKey, 'new key differs');
-assert.equal(await uidForApiKey(oldKey), null, 'old key no longer resolves');
-assert.equal(await uidForApiKey(rotated.apiKey), user.uid, 'new key resolves');
+assert.equal(await userForApiKey(hashApiKey(oldKey)), null, 'old key no longer resolves');
+await kvSet(`key:${hashApiKey(oldKey)}`, user.uid);
+assert.equal(await userForApiKey(hashApiKey(oldKey)), null, 'a stale index entry cannot reactivate the key');
+assert.equal((await userForApiKey(hashApiKey(rotated.apiKey))).uid, user.uid, 'new key resolves');
 ok('keys: rotation invalidates the old key');
+
+const contenders = await Promise.all([rotateApiKey(user.uid), rotateApiKey(user.uid)]);
+assert.equal(contenders.filter(Boolean).length, 1, 'one concurrent rotation wins');
+assert.equal((await userForApiKey(hashApiKey(contenders.find(Boolean).apiKey))).uid, user.uid);
+ok('keys: concurrent rotation returns only the winning key');
+
+const originalClock = Date.now;
+const now = originalClock();
+assert.deepEqual(await Promise.all([kvIncrWithExpiry('rate-window', 60), kvIncrWithExpiry('rate-window', 60)]), [1, 2]);
+try {
+  Date.now = () => now + 61000;
+  assert.equal(await kvIncrWithExpiry('rate-window', 60), 1);
+} finally {
+  Date.now = originalClock;
+}
+ok('rate limit counters expire and restart');
 
 console.log(`\nAll smoke checks passed (${passed} groups).`);

@@ -1,5 +1,5 @@
 import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
-import { fetchProviderModels, verifyProviderKey, createLlmClient } from '../src/adapters/providers.js';
+import { fetchProviderModels, verifyProviderKey, createLlmClient } from '../src/providers/providers.js';
 
 describe('providers abstraction', () => {
   const originalFetch = global.fetch;
@@ -13,12 +13,9 @@ describe('providers abstraction', () => {
   });
 
   it('fetches models for OpenAI with Bearer token header', async () => {
-    const mockFetch = vi.fn().mockResolvedValue({
-      ok: true,
-      json: async () => ({
-        data: [{ id: 'gpt-4o' }, { id: 'gpt-4o-mini' }]
-      })
-    });
+    const mockFetch = vi.fn().mockResolvedValue(Response.json({
+      data: [{ id: 'gpt-4o' }, { id: 'gpt-4o-mini' }]
+    }));
     global.fetch = mockFetch as unknown as typeof fetch;
 
     const models = await fetchProviderModels('openai', 'sk-test-key');
@@ -32,12 +29,9 @@ describe('providers abstraction', () => {
   });
 
   it('fetches models for Anthropic with x-api-key and anthropic-version headers', async () => {
-    const mockFetch = vi.fn().mockResolvedValue({
-      ok: true,
-      json: async () => ({
-        data: [{ id: 'claude-3-5-sonnet-20241022', display_name: 'Claude 3.5 Sonnet' }]
-      })
-    });
+    const mockFetch = vi.fn().mockResolvedValue(Response.json({
+      data: [{ id: 'claude-3-5-sonnet-20241022', display_name: 'Claude 3.5 Sonnet' }]
+    }));
     global.fetch = mockFetch as unknown as typeof fetch;
 
     const models = await fetchProviderModels('anthropic', 'ant-key');
@@ -54,12 +48,9 @@ describe('providers abstraction', () => {
   });
 
   it('fetches models for Google Gemini with key query parameter', async () => {
-    const mockFetch = vi.fn().mockResolvedValue({
-      ok: true,
-      json: async () => ({
-        models: [{ name: 'models/gemini-1.5-pro', displayName: 'Gemini 1.5 Pro' }]
-      })
-    });
+    const mockFetch = vi.fn().mockResolvedValue(Response.json({
+      models: [{ name: 'models/gemini-1.5-pro', displayName: 'Gemini 1.5 Pro' }]
+    }));
     global.fetch = mockFetch as unknown as typeof fetch;
 
     const models = await fetchProviderModels('gemini', 'gemini-key');
@@ -74,10 +65,10 @@ describe('providers abstraction', () => {
 
   it('fetches models for Groq, Mistral, OpenRouter, and NVIDIA NIM', async () => {
     const mockFetch = vi.fn().mockImplementation((url: string) => {
-      if (url.includes('groq')) return Promise.resolve({ ok: true, json: async () => ({ data: [{ id: 'llama-3.3-70b-versatile' }] }) });
-      if (url.includes('mistral')) return Promise.resolve({ ok: true, json: async () => ({ data: [{ id: 'mistral-large-latest' }] }) });
-      if (url.includes('openrouter')) return Promise.resolve({ ok: true, json: async () => ({ data: [{ id: 'anthropic/claude-3.5-sonnet' }] }) });
-      return Promise.resolve({ ok: true, json: async () => ({ data: [{ id: 'openai/gpt-oss-120b' }] }) });
+      if (url.includes('groq')) return Promise.resolve(Response.json({ data: [{ id: 'llama-3.3-70b-versatile' }] }));
+      if (url.includes('mistral')) return Promise.resolve(Response.json({ data: [{ id: 'mistral-large-latest' }] }));
+      if (url.includes('openrouter')) return Promise.resolve(Response.json({ data: [{ id: 'anthropic/claude-3.5-sonnet' }] }));
+      return Promise.resolve(Response.json({ data: [{ id: 'openai/gpt-oss-120b' }] }));
     });
     global.fetch = mockFetch as unknown as typeof fetch;
 
@@ -87,11 +78,16 @@ describe('providers abstraction', () => {
     expect(await fetchProviderModels('nvidia', 'key')).toEqual([{ id: 'openai/gpt-oss-120b', name: 'openai/gpt-oss-120b' }]);
   });
 
+  it('rejects malformed or oversized model lists through the provider interface', async () => {
+    vi.spyOn(globalThis, 'fetch')
+      .mockResolvedValueOnce(new Response('not JSON'))
+      .mockResolvedValueOnce(Response.json({ data: [{ id: 'x'.repeat(2 * 1024 * 1024) }] }));
+    await expect(fetchProviderModels('openai', 'test-key')).rejects.toMatchObject({ code: 'INVALID_PROVIDER_RESPONSE' });
+    await expect(fetchProviderModels('openai', 'test-key')).rejects.toThrow(/size limit/);
+  });
+
   it('verifyProviderKey handles valid and invalid responses', async () => {
-    const okFetch = vi.fn().mockResolvedValue({
-      ok: true,
-      json: async () => ({ data: [{ id: 'gpt-4o' }] })
-    });
+    const okFetch = vi.fn().mockResolvedValue(Response.json({ data: [{ id: 'gpt-4o' }] }));
     global.fetch = okFetch as unknown as typeof fetch;
 
     const validResult = await verifyProviderKey('openai', 'valid-key');

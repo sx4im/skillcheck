@@ -1,4 +1,4 @@
-import { sleep } from './adapters/http.js';
+import { sleep } from './providers/transport.js';
 import type { EvalResult } from './eval.js';
 import { printBanner, printCheckHeader, printResultCard, startProgress } from './ui.js';
 import { paint } from './ui/theme.js';

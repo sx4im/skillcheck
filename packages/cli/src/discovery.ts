@@ -1,5 +1,5 @@
 import { existsSync } from 'node:fs';
-import { readdir, stat } from 'node:fs/promises';
+import { readdir, realpath } from 'node:fs/promises';
 import path from 'node:path';
 
 export interface DiscoveredSkill {
@@ -59,19 +59,20 @@ export function findWorkspaceRoot(startDir = process.cwd()): string {
  */
 export async function findWorkspaceSkills(root = findWorkspaceRoot(), maxDepth = 4): Promise<DiscoveredSkill[]> {
   const discovered: DiscoveredSkill[] = [];
-  const baseDir = path.resolve(root);
+  const baseDir = await realpath(root).catch(() => path.resolve(root));
 
   async function walk(dir: string, depth: number): Promise<void> {
     if (depth > maxDepth) return;
 
-    let entries: string[];
+    let entries;
     try {
-      entries = await readdir(dir);
+      entries = await readdir(dir, { withFileTypes: true });
     } catch {
       return;
     }
 
-    for (const entry of entries) {
+    for (const entryStat of entries) {
+      const entry = entryStat.name;
       if (
         IGNORED_DIRECTORIES.has(entry) ||
         (entry.startsWith('.') && entry !== '.cursorrules' && entry !== '.cursor' && entry !== '.claude')
@@ -80,13 +81,6 @@ export async function findWorkspaceSkills(root = findWorkspaceRoot(), maxDepth =
       }
 
       const fullPath = path.join(dir, entry);
-      let entryStat;
-      try {
-        entryStat = await stat(fullPath);
-      } catch {
-        continue;
-      }
-
       if (entryStat.isDirectory()) {
         await walk(fullPath, depth + 1);
       } else if (entryStat.isFile()) {

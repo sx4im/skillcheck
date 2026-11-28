@@ -3,6 +3,7 @@
 //   node test/proxy.mjs
 
 import assert from 'node:assert/strict';
+import { Readable } from 'node:stream';
 
 process.env.NVIDIA_API_KEY = 'test-upstream-key';
 process.env.NVIDIA_BASE_URL = 'http://upstream.local/v1';
@@ -11,17 +12,18 @@ process.env.FREE_RUNS = '10';
 
 // Stub the upstream model call.
 let upstreamCalls = 0;
-const realFetch = globalThis.fetch;
+let upstreamStatus = 200;
+let forwarded;
 globalThis.fetch = async (url, init) => {
   if (String(url).includes('upstream.local')) {
     upstreamCalls += 1;
-    return {
-      status: 200,
-      headers: { get: () => 'application/json' },
-      text: async () => JSON.stringify({ choices: [{ message: { content: 'ok' } }], usage: { prompt_tokens: 5, completion_tokens: 1, total_tokens: 6 } })
-    };
+    forwarded = JSON.parse(init.body);
+    const body = upstreamStatus === 200
+      ? { choices: [{ message: { content: 'ok' } }], usage: { prompt_tokens: 5, completion_tokens: 1, total_tokens: 6 } }
+      : { error: { message: process.env.NVIDIA_API_KEY } };
+    return Response.json(body, { status: upstreamStatus });
   }
-  return realFetch(url, init);
+  throw new Error(`Unexpected outbound request to ${url}`);
 };
 
 const { getOrCreateUser } = await import('../api/_lib/users.js');
@@ -37,17 +39,21 @@ function mockRes() {
     end(chunk) { if (chunk) this.body += chunk; this.ended = true; }
   };
 }
-async function call(key, runId) {
-  const req = {
+const validBody = { model: 'openai/gpt-oss-120b', messages: [{ role: 'user', content: 'hi' }] };
+
+async function call(key, runId, body = validBody, ip = '192.0.2.1') {
+  const req = body instanceof Readable ? body : { body };
+  Object.assign(req, {
     method: 'POST',
     headers: {
       host: 'app.local',
+      'content-type': 'application/json',
       'x-forwarded-proto': 'https',
       ...(key ? { authorization: `Bearer ${key}` } : {}),
       ...(runId ? { 'x-skillcheck-run': runId } : {})
     },
-    body: { messages: [{ role: 'user', content: 'hi' }] }
-  };
+    socket: { remoteAddress: ip }
+  });
   const res = mockRes();
   await handler(req, res);
   let json = null;
@@ -57,6 +63,31 @@ async function call(key, runId) {
 
 const user = await getOrCreateUser({ userId: 'clerk_proxy_1', email: 'p@x.com', name: 'P' });
 
+for (const invalid of [
+  { ...validBody, model: 'unsupported/model' },
+  { ...validBody, max_tokens: 16001 },
+  { ...validBody, max_tokens: '1000' },
+  { ...validBody, messages: [{ role: 'user', content: [{ type: 'text', text: 'hi' }] }] },
+  { ...validBody, tools: [] },
+  { ...validBody, stream: true },
+  '{bad JSON',
+  '[]'
+]) {
+  assert.equal((await call(user.apiKey, 'invalid', invalid)).status, 400);
+}
+assert.equal((await call(user.apiKey, 'large', { ...validBody, messages: [{ role: 'user', content: 'é'.repeat(300000) }] })).status, 413);
+assert.equal((await call(user.apiKey, 'large-stream', Readable.from([Buffer.alloc(300000), Buffer.alloc(300000)]))).status, 413);
+assert.equal((await call(user.apiKey, 'invalid-stream', Readable.from([Buffer.from([0xff])]))).status, 400);
+assert.equal((await call(user.apiKey, 'invalid/run')).status, 400);
+assert.equal(upstreamCalls, 0, 'invalid requests never reach the provider');
+
+upstreamStatus = 503;
+const failed = await call(user.apiKey, 'failed', validBody);
+assert.equal(failed.status, 502);
+assert.ok(!JSON.stringify(failed.json).includes(process.env.NVIDIA_API_KEY));
+assert.equal(failed.headers['cache-control'], 'no-store');
+upstreamStatus = 200;
+
 // 1. Missing key → 401
 assert.equal((await call('', 'r1')).status, 401, 'missing key rejected');
 
@@ -65,10 +96,17 @@ assert.equal((await call('chk_live_nope', 'r1')).status, 401, 'invalid key rejec
 
 // 3. Ten valid runs forward and succeed
 for (let i = 1; i <= 10; i += 1) {
-  const r = await call(user.apiKey, `run-${i}`);
+  const r = await call(user.apiKey, `run-${i}`, {
+    ...validBody, max_tokens: 8000, temperature: 0.7,
+    response_format: { type: 'json_object' }, stream: false, chat_template_kwargs: { enable_thinking: false }, extra_body: {}
+  });
   assert.equal(r.status, 200, `run ${i} forwarded`);
   assert.equal(r.headers['x-skillcheck-runs-used'], String(i), `run ${i} usage header`);
 }
+assert.deepEqual(forwarded, {
+  ...validBody, stream: false, n: 1, max_tokens: 8000, temperature: 0.7,
+  response_format: { type: 'json_object' }, chat_template_kwargs: { enable_thinking: false }
+});
 
 // 4. Many calls within one run id only count once
 const before = upstreamCalls;
@@ -91,5 +129,9 @@ const user2 = await getOrCreateUser({ userId: 'clerk_proxy_2', email: 'q@x.com',
 const fresh = await call(user2.apiKey, '');
 assert.equal(fresh.status, 200, 'no-run-id call forwards when under quota');
 assert.equal(fresh.headers['x-skillcheck-runs-used'], '1', 'no-run-id call consumes a run');
+
+const streamed = Readable.from([Buffer.from(JSON.stringify(validBody))]);
+Object.defineProperty(streamed, 'body', { get() { throw new Error('Lazy body parser should not run.'); } });
+assert.equal((await call(user2.apiKey, 'stream-input', streamed)).status, 200, 'bounded Node request stream reaches the provider');
 
 console.log('Proxy integration checks passed (upstream calls:', upstreamCalls + ').');

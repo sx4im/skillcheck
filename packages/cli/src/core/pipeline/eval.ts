@@ -1,0 +1,438 @@
+import { ValidationError } from '../../errors.js';
+import { readBoundedFile } from '../normalize/files.js';
+import type { LlmClient } from '../../providers/types.js';
+import type { NormalizedSkill } from '../types.js';
+import { JsonCache } from './cache.js';
+import { generateTasks, tasksArrayFrom } from './generate.js';
+import { hashJson, writeJson } from './hash.js';
+import { gradeOutputs } from './grade.js';
+import { runTrials, trialJobs } from './run.js';
+import { scorePairedObservations, pairedObservations, satisfactionFromEffect } from './score.js';
+import { checkpointPath, clearCheckpoint, loadCheckpoint, saveCheckpoint } from './checkpoint.js';
+import type { GeneratedTask, GradedOutput, ProgressReporter, SkillFormat, TaskBreakdown, TaskDifficulty, TrialOutput } from '../types.js';
+
+export interface EvalOptions {
+  inputPath: string;
+  domain?: string;
+  output?: string;
+  tasks: number;
+  trials: number;
+  mode: 'forced';
+  runner?: string;
+  grader?: string;
+  generator?: string;
+  taskSuite?: string;
+  sourceLabel?: string;
+  saveArtifacts?: boolean;
+  explain?: boolean;
+  onProgress?: ProgressReporter;
+  useCache?: boolean;
+  concurrency?: number;
+  resume?: boolean;
+  maxBytes?: number;
+  workspaceRoot?: string;
+  allowExternalSymlinks?: boolean;
+  onWarning?: (message: string) => void;
+  /** True when --tasks was passed explicitly (vs. the command default). */
+  tasksExplicit?: boolean;
+  /** Task-generation difficulty; the generator prompt defaults to 'standard'. */
+  difficulty?: TaskDifficulty;
+}
+
+// Pass rate of one arm's graded outputs. Shared by the per-task breakdown and
+// the explain view so both compute it identically (empty arm = 0, never NaN).
+function armPassRate(items: GradedOutput[]): number {
+  return items.length ? items.filter((item) => item.pass).length / items.length : 0;
+}
+
+function taskBreakdowns(tasks: GeneratedTask[], graded: GradedOutput[]): TaskBreakdown[] {
+  return tasks.map((task) => {
+    const taskGrades = graded.filter((item) => item.taskId === task.id);
+    return {
+      id: task.id,
+      prompt: task.prompt,
+      criterion_type: task.criterionType,
+      criterion: task.criterion,
+      with_skill_pass_rate: armPassRate(taskGrades.filter((item) => item.arm === 'with_skill')),
+      no_skill_pass_rate: armPassRate(taskGrades.filter((item) => item.arm === 'no_skill'))
+    };
+  });
+}
+
+function mean(values: number[]): number {
+  return values.length === 0 ? 0 : values.reduce((sum, value) => sum + value, 0) / values.length;
+}
+
+interface ExplainExample {
+  output: string;
+  pass: boolean;
+}
+
+export interface ExplainTask {
+  id: string;
+  prompt: string;
+  criterion: string;
+  with_skill_pass_rate: number;
+  no_skill_pass_rate: number;
+  delta_pp: number;
+  label: 'helped' | 'hurt' | 'no change';
+  example_with: ExplainExample | null;
+  example_without: ExplainExample | null;
+}
+
+// Collapse whitespace and cap a raw model output to a readable snippet.
+function snippet(text: string, max = 240): string {
+  const collapsed = text.replace(/\s+/g, ' ').trim();
+  return collapsed.length > max ? `${collapsed.slice(0, max - 1)}…` : collapsed;
+}
+
+function buildExplain(tasks: GeneratedTask[], graded: GradedOutput[]): { tasks: ExplainTask[] } {
+  const example = (list: GradedOutput[], preferPass?: boolean): ExplainExample | null => {
+    const pick = (preferPass === undefined ? undefined : list.find((item) => item.pass === preferPass)) ?? list[0];
+    return pick ? { output: snippet(pick.output), pass: pick.pass } : null;
+  };
+
+  return {
+    tasks: tasks.map((task) => {
+      const taskGrades = graded.filter((item) => item.taskId === task.id);
+      const withSkill = taskGrades.filter((item) => item.arm === 'with_skill');
+      const noSkill = taskGrades.filter((item) => item.arm === 'no_skill');
+      const withRate = armPassRate(withSkill);
+      const noRate = armPassRate(noSkill);
+      const delta = Number(((withRate - noRate) * 100).toFixed(1));
+      return {
+        id: task.id,
+        prompt: task.prompt,
+        criterion: task.criterion,
+        with_skill_pass_rate: Number(withRate.toFixed(4)),
+        no_skill_pass_rate: Number(noRate.toFixed(4)),
+        delta_pp: delta,
+        label: delta > 0 ? 'helped' : delta < 0 ? 'hurt' : 'no change',
+        // Show the sharpest contrast: when the skill helped here, surface a
+        // passing with-skill output against a failing without-skill one.
+        example_with: example(withSkill, delta > 0 ? true : undefined),
+        example_without: example(noSkill, delta > 0 ? false : undefined)
+      };
+    })
+  };
+}
+
+// Fail fast on malformed deterministic regex criteria. Without this, an
+// invalid `regex:`/`not_regex:` pattern in a hand-written task suite throws a
+// bare SyntaxError from deep inside gradeOutputs — after every runner call has
+// already been paid for — instead of a clear error naming the offending task
+// before the run starts.
+function validateDeterministicCriterion(id: string, criterion: string): void {
+  for (const prefix of ['regex:', 'not_regex:']) {
+    if (criterion.startsWith(prefix)) {
+      const pattern = criterion.slice(prefix.length);
+      try {
+        new RegExp(pattern, 's');
+      } catch (error) {
+        throw new ValidationError(
+          `Invalid regex in deterministic criterion of task ${id}: ${error instanceof Error ? error.message : String(error)}`
+        );
+      }
+    }
+  }
+}
+
+export function parseTaskSuite(text: string): GeneratedTask[] {
+  let tasks: unknown[];
+  try {
+    tasks = tasksArrayFrom(JSON.parse(text));
+  } catch (cause) {
+    throw new ValidationError('Task suite must be JSON with a tasks array.', { cause });
+  }
+  if (tasks.length > 500) throw new ValidationError('Task suite is limited to 500 tasks.');
+  const ids = new Set<string>();
+  return tasks.map((task, index) => {
+    if (!task || typeof task !== 'object' || Array.isArray(task)) {
+      throw new ValidationError('Task ' + (index + 1) + ' must be an object.');
+    }
+    const item = task as Record<string, unknown>;
+    const criterionType = item.criterionType ?? item.criterion_type ?? 'rubric';
+    if (criterionType !== 'rubric' && criterionType !== 'deterministic') {
+      throw new ValidationError('Unsupported criterion type in task ' + (index + 1));
+    }
+    const id = item.id ?? 't' + String(index + 1).padStart(3, '0');
+    const { criterion, prompt } = item;
+    if (typeof id !== 'string' || !id.trim() || ids.has(id) || typeof prompt !== 'string' || !prompt.trim() ||
+        typeof criterion !== 'string' || !criterion.trim()) {
+      throw new ValidationError('Task ' + (index + 1) + ' requires a unique string ID, prompt, and criterion.');
+    }
+    ids.add(id);
+    if (criterionType === 'deterministic') validateDeterministicCriterion(id, criterion);
+    return { id, prompt, criterionType, criterion };
+  });
+}
+
+// Threshold for small-sample honesty (fewer than 5 tasks produces elevated false-verdict rates when effects vary).
+export const LOW_SAMPLE_TASK_THRESHOLD = 5;
+
+// The published result JSON shape. Typed so every consumer (matrix, the card,
+// verify, the leaderboard) reads the same contract instead of re-guessing it.
+export interface EvalResult {
+  skill: {
+    name: string;
+    source: string;
+    format: SkillFormat;
+    commit_hash: string;
+    domain: string;
+    tool_dependent: boolean;
+  };
+  config: {
+    runner_model: string;
+    grader_model: string;
+    generator_model: string;
+    trials: number;
+    // Actual task count — the generator may deliver fewer than requested.
+    tasks: number;
+    temperature: number;
+    mode: 'forced';
+    difficulty?: TaskDifficulty;
+  };
+  result: {
+    effect_pp: number;
+    mean_effect_pp: number;
+    satisfaction: number;
+    ci_pp: [number, number];
+    verdict: 'helps' | 'placebo' | 'harms';
+    with_skill_pass: number;
+    no_skill_pass: number;
+    token_overhead: number;
+    value_per_1k_tokens: number;
+    low_sample?: boolean;
+  };
+  low_sample?: boolean;
+  tasks: TaskBreakdown[];
+  explain?: { tasks: ExplainTask[] };
+  reproducibility: {
+    task_suite_path?: string;
+    transcript_hashes: string[];
+  };
+  history: Array<{
+    runner_model: string;
+    run_date: string;
+    effect_pp: number;
+    verdict: 'helps' | 'placebo' | 'harms';
+  }>;
+  run_date: string;
+}
+
+/**
+ * Select tasks from an explicit --task-suite file. When the user hand-writes
+ * a suite without passing --tasks, the whole suite is evaluated — silently
+ * truncating to the command default would discard their work and widen the
+ * confidence interval without explanation.
+ */
+export function selectSuiteTasks(suite: GeneratedTask[], options: { tasks: number; tasksExplicit?: boolean; onWarning?: (message: string) => void }): GeneratedTask[] {
+  if (!options.tasksExplicit) {
+    return suite;
+  }
+  if (suite.length > options.tasks) {
+    options.onWarning?.(
+      `[skillcheck] warning: --task-suite has ${suite.length} tasks but --tasks=${options.tasks}; evaluating only the first ${options.tasks}.`
+    );
+  }
+  return suite.slice(0, options.tasks);
+}
+
+export interface PipelineModels {
+  generatorModel: string;
+  runnerModel: string;
+  graderModel: string;
+}
+
+export async function evaluateSkill(
+  options: EvalOptions, skill: NormalizedSkill, config: PipelineModels, client: LlmClient
+): Promise<EvalResult> {
+  // Fresh by default: a disabled cache neither reads nor writes, so repeating the
+  // same skill at the same effort always re-runs from scratch and leaves no files.
+  const cache = options.useCache ? new JsonCache() : JsonCache.disabled();
+
+  const onProgress = options.onProgress;
+  onProgress?.({ phase: 'generating' });
+
+  const cpFile = checkpointPath(skill.versionHash);
+  const trialKey = (taskId: string, trial: number, arm: string) => `${taskId}:${trial}:${arm}`;
+  const effectiveDifficulty: TaskDifficulty = options.difficulty ?? 'standard';
+
+  // A checkpoint is reusable when the skill, trial count, difficulty, and all models match
+  // and its stored task hash is intact. A model or difficulty change silently reusing stale
+  // outputs would corrupt the comparison.
+  const existingCp = options.resume ? await loadCheckpoint(cpFile) : null;
+  const checkpointUsable =
+    existingCp !== null &&
+    existingCp.skillHash === skill.versionHash &&
+    existingCp.trials === options.trials &&
+    existingCp.difficulty === effectiveDifficulty &&
+    existingCp.runnerModel === (config.runnerModel ?? '') &&
+    existingCp.graderModel === (config.graderModel ?? '') &&
+    existingCp.generatorModel === (config.generatorModel ?? '') &&
+    existingCp.tasks.length > 0 &&
+    existingCp.taskSuiteHash === hashJson({ skill: skill.versionHash, tasks: existingCp.tasks });
+
+  let tasks: GeneratedTask[];
+  let outputs: TrialOutput[] = [];
+  if (existingCp && checkpointUsable) {
+    if (options.taskSuite) {
+      // Explicit suite: re-parse the file so edits are picked up. When the
+      // parsed suite still matches the stored hash, its completed outputs are
+      // reused; a changed file starts a fresh run instead.
+      const suiteTasks = selectSuiteTasks(parseTaskSuite(await readBoundedFile(options.taskSuite)), options);
+      if (existingCp.taskSuiteHash === hashJson({ skill: skill.versionHash, tasks: suiteTasks })) {
+        tasks = suiteTasks;
+        outputs = existingCp.completedOutputs;
+      } else {
+        tasks = suiteTasks;
+      }
+    } else {
+      // Generated tasks: reuse the stored tasks verbatim. Asking the generator
+      // for a fresh set would produce different tasks, the suite hash would
+      // never match, and resume would silently restart (and re-bill) from zero.
+      tasks = existingCp.tasks;
+      outputs = existingCp.completedOutputs;
+    }
+  } else {
+    tasks = options.taskSuite
+      ? selectSuiteTasks(parseTaskSuite(await readBoundedFile(options.taskSuite)), options)
+      : await generateTasks({ domain: skill.domain, count: options.tasks, difficulty: options.difficulty }, config, client, cache);
+  }
+  if (tasks.length === 0) {
+    throw new ValidationError('No evaluation tasks available — the task suite is empty.');
+  }
+  const taskSuiteHash = hashJson({ skill: skill.versionHash, tasks });
+  const shouldSaveArtifacts = options.saveArtifacts ?? true;
+  const taskSuitePath = options.taskSuite ?? (shouldSaveArtifacts ? `results/tasks/${taskSuiteHash}.json` : undefined);
+  if (!options.taskSuite && taskSuitePath) {
+    await writeJson(taskSuitePath, tasks);
+  }
+
+  const canonicalJobs = trialJobs(tasks, options.trials);
+
+  const byKey = new Map<string, TrialOutput>();
+  for (const output of outputs) {
+    byKey.set(trialKey(output.taskId, output.trial, output.arm), output);
+  }
+
+  const doneKeys = new Set(byKey.keys());
+
+  // Flush atomically after every trial so a crash, SIGKILL, or rate-limit
+  // mid-run loses nothing — the next --resume run picks up where this one
+  // stopped instead of re-billing completed trials.
+  let pendingSave = Promise.resolve();
+  const saveLatest = (): Promise<void> => {
+    const orderedSoFar = canonicalJobs
+      .map((j) => byKey.get(trialKey(j.task.id, j.trial, j.arm)))
+      .filter((o): o is TrialOutput => Boolean(o));
+    return saveCheckpoint(
+      cpFile,
+      {
+        skillHash: skill.versionHash,
+        taskSuiteHash,
+        trials: options.trials,
+        difficulty: effectiveDifficulty,
+        runnerModel: config.runnerModel ?? '',
+        graderModel: config.graderModel ?? '',
+        generatorModel: config.generatorModel ?? '',
+        tasks,
+        completedOutputs: orderedSoFar,
+        updatedAt: new Date().toISOString()
+      }
+    ).catch(() => {});
+  };
+
+  // Rename order must match snapshot order when runner workers finish together.
+  const flushCheckpoint = () => {
+    pendingSave = pendingSave.then(saveLatest);
+    return pendingSave;
+  };
+
+  await runTrials(skill, tasks, options.trials, config, client, cache, onProgress, options.concurrency, {
+    skip: (job) => doneKeys.has(trialKey(job.task.id, job.trial, job.arm)),
+    onTrialComplete: async (output) => {
+      byKey.set(trialKey(output.taskId, output.trial, output.arm), output);
+      await flushCheckpoint();
+    }
+  });
+  await flushCheckpoint();
+
+  const orderedOutputs = canonicalJobs
+    .map((j) => byKey.get(trialKey(j.task.id, j.trial, j.arm)))
+    .filter((o): o is TrialOutput => Boolean(o));
+
+  const graded = await gradeOutputs(tasks, orderedOutputs, config, client, cache, onProgress, options.concurrency);
+  await clearCheckpoint(cpFile).catch(() => {});
+  onProgress?.({ phase: 'scoring' });
+  const score = scorePairedObservations(pairedObservations(graded));
+  const breakdowns = taskBreakdowns(tasks, graded);
+  const withSkillTokens = graded.filter((item) => item.arm === 'with_skill').map((item) => item.promptTokens);
+  const noSkillTokens = graded.filter((item) => item.arm === 'no_skill').map((item) => item.promptTokens);
+  const tokenOverhead = Math.max(0, Math.round(mean(withSkillTokens) - mean(noSkillTokens)));
+  const valuePer1kTokens = tokenOverhead === 0 ? 0 : Number((score.effectPp / (tokenOverhead / 1000)).toFixed(2));
+  // 0–100 quality score: 50 = no effect. Built from the bootstrap mean effect so
+  // it varies smoothly rather than snapping to coarse multiples of the sample step.
+  const satisfaction = satisfactionFromEffect(score.meanEffectPp);
+  const runDate = new Date().toISOString().slice(0, 10);
+  const isLowSample = tasks.length < LOW_SAMPLE_TASK_THRESHOLD;
+  if (isLowSample) {
+    options.onWarning?.(
+      `[skillcheck] warning: few tasks evaluated (${tasks.length} tasks < ${LOW_SAMPLE_TASK_THRESHOLD}). When task difficulty or effect varies across a domain, verdicts can be wrong more often than the 95% interval suggests.`
+    );
+  }
+
+  const result: EvalResult = {
+    skill: {
+      name: skill.name,
+      source: options.sourceLabel ?? skill.sourcePath,
+      format: skill.format,
+      commit_hash: skill.versionHash,
+      domain: skill.domain,
+      tool_dependent: skill.toolDependent
+    },
+    config: {
+      runner_model: config.runnerModel,
+      grader_model: config.graderModel,
+      generator_model: config.generatorModel,
+      trials: options.trials,
+      tasks: tasks.length,
+      temperature: 0.7,
+      mode: 'forced',
+      difficulty: effectiveDifficulty
+    },
+    result: {
+      effect_pp: score.effectPp,
+      mean_effect_pp: score.meanEffectPp,
+      satisfaction,
+      ci_pp: score.ciPp,
+      verdict: score.verdict,
+      with_skill_pass: score.withSkillPass,
+      no_skill_pass: score.noSkillPass,
+      token_overhead: tokenOverhead,
+      value_per_1k_tokens: valuePer1kTokens,
+      low_sample: isLowSample
+    },
+    low_sample: isLowSample,
+    tasks: breakdowns,
+    ...(options.explain ? { explain: buildExplain(tasks, graded) } : {}),
+    reproducibility: {
+      ...(taskSuitePath ? { task_suite_path: taskSuitePath } : {}),
+      transcript_hashes: graded.map((item) => item.transcriptHash)
+    },
+    history: [
+      {
+        runner_model: config.runnerModel,
+        run_date: runDate,
+        effect_pp: score.effectPp,
+        verdict: score.verdict
+      }
+    ],
+    run_date: runDate
+  };
+
+  if (options.output) {
+    await writeJson(options.output, result);
+  }
+  return result;
+}

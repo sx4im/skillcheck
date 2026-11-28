@@ -1,8 +1,11 @@
+import { AuthError, ConfigError } from './errors.js';
+import { baseUrl } from './core/security/endpoint.js';
+import { registerSecret } from './core/security/output.js';
 import dotenv from 'dotenv';
 import { existsSync, readFileSync } from 'node:fs';
 import path from 'node:path';
-import type { ProviderConfig, ProviderType } from './adapters/types.js';
-import { DEFAULT_PROVIDER_BASE_URLS, DEFAULT_PROVIDER_MODELS } from './adapters/providers.js';
+import { isProviderType, type ProviderConfig, type ProviderType } from './providers/types.js';
+import { DEFAULT_PROVIDER_BASE_URLS, DEFAULT_PROVIDER_MODELS } from './providers/providers.js';
 import { DEFAULT_CLOUD_API_URL, getConfiguredApiUrl, getConfiguredToken, loadUserConfig } from './config.js';
 
 // The current directory's .env is convenient for API keys, but it must never
@@ -56,26 +59,31 @@ function readEnv(name: string): string | undefined {
   return value || undefined;
 }
 
-export function resolveActiveProvider(): { provider: ProviderType; apiKey: string; baseUrl: string } {
+function selectProvider(): { provider: ProviderType; apiKey: string; baseUrl: string; source: string } {
   // 1. Direct NVIDIA key (legacy direct mode - highest priority)
   const nvidiaApiKey = readEnv('NVIDIA_API_KEY');
   if (nvidiaApiKey) {
     return {
       provider: 'nvidia',
+      source: 'NVIDIA_API_KEY',
       apiKey: nvidiaApiKey,
       baseUrl: readEnv('NVIDIA_BASE_URL') ?? DEFAULT_PROVIDER_BASE_URLS.nvidia
     };
   }
 
   // 2. Explicit provider set via SKILLCHECK_PROVIDER
-  const explicitProvider = readEnv('SKILLCHECK_PROVIDER') as ProviderType | undefined;
-  if (explicitProvider) {
+  const explicitProvider = readEnv('SKILLCHECK_PROVIDER');
+  if (explicitProvider && !isProviderType(explicitProvider)) {
+    throw new ConfigError('SKILLCHECK_PROVIDER names an unsupported provider.');
+  }
+  if (isProviderType(explicitProvider)) {
     const keyEnv = `${explicitProvider.toUpperCase()}_API_KEY`;
     const urlEnv = `${explicitProvider.toUpperCase()}_BASE_URL`;
     const apiKey = readEnv(keyEnv) ?? readEnv('SKILLCHECK_PROVIDER_KEY');
     if (apiKey) {
       return {
         provider: explicitProvider,
+        source: readEnv(keyEnv) ? keyEnv : 'SKILLCHECK_PROVIDER_KEY',
         apiKey,
         baseUrl: readEnv(urlEnv) ?? DEFAULT_PROVIDER_BASE_URLS[explicitProvider] ?? DEFAULT_CLOUD_API_URL
       };
@@ -87,6 +95,7 @@ export function resolveActiveProvider(): { provider: ProviderType; apiKey: strin
   if (userConfig.provider && userConfig.providerKey && userConfig.provider !== 'cloud') {
     return {
       provider: userConfig.provider,
+      source: 'saved config',
       apiKey: userConfig.providerKey,
       baseUrl: userConfig.providerBaseUrl ?? DEFAULT_PROVIDER_BASE_URLS[userConfig.provider]
     };
@@ -97,6 +106,7 @@ export function resolveActiveProvider(): { provider: ProviderType; apiKey: strin
   if (proxyUrl || proxyApiKey) {
     return {
       provider: 'cloud',
+      source: readEnv('SKILLCHECK_TOKEN') ? 'SKILLCHECK_TOKEN' : readEnv('SKILLCHECK_API_KEY') ? 'SKILLCHECK_API_KEY' : userConfig.token ? 'saved config' : 'configured proxy',
       apiKey: proxyApiKey ?? 'skillcheck-cloud',
       baseUrl: proxyUrl ?? DEFAULT_CLOUD_API_URL
     };
@@ -118,15 +128,22 @@ export function resolveActiveProvider(): { provider: ProviderType; apiKey: strin
     if (apiKey) {
       return {
         provider: ep.provider,
+        source: ep.keyEnv,
         apiKey,
         baseUrl: readEnv(ep.urlEnv) ?? DEFAULT_PROVIDER_BASE_URLS[ep.provider]
       };
     }
   }
 
-  throw new Error(
+  throw new AuthError(
     'Skillcheck Cloud is not connected. Run `skillcheck setup` to connect your API key, or set SKILLCHECK_TOKEN (hosted) / NVIDIA_API_KEY (direct). Self-hosted proxies use SKILLCHECK_API_URL.'
   );
+}
+
+export function resolveActiveProvider(): { provider: ProviderType; apiKey: string; baseUrl: string; source: string } {
+  const active = selectProvider();
+  registerSecret(active.apiKey);
+  return { ...active, baseUrl: baseUrl(active.baseUrl) };
 }
 
 function resolveModel(provider: ProviderType, role: 'GENERATOR' | 'GRADER' | 'RUNNER'): string {
@@ -157,22 +174,22 @@ export function loadProviderConfig(): ResolvedProviderConfig {
 
   const timeoutMs = Number(process.env.NVIDIA_TIMEOUT_MS?.trim() || process.env.SKILLCHECK_TIMEOUT_MS?.trim() || 120000);
   if (!Number.isFinite(timeoutMs) || timeoutMs <= 0) {
-    throw new Error('Request timeout must be a positive number when set');
+    throw new ConfigError('Request timeout must be a positive number when set');
   }
 
   const requestDelayMs = Number(process.env.NVIDIA_REQUEST_DELAY_MS?.trim() || process.env.SKILLCHECK_REQUEST_DELAY_MS?.trim() || 750);
   if (!Number.isFinite(requestDelayMs) || requestDelayMs < 0) {
-    throw new Error('Request delay must be a non-negative number when set');
+    throw new ConfigError('Request delay must be a non-negative number when set');
   }
 
   const maxAttempts = Number(process.env.NVIDIA_MAX_ATTEMPTS?.trim() || process.env.SKILLCHECK_MAX_ATTEMPTS?.trim() || 8);
   if (!Number.isInteger(maxAttempts) || maxAttempts <= 0) {
-    throw new Error('Retry attempt budget must be a positive integer when set');
+    throw new ConfigError('Retry attempt budget must be a positive integer when set');
   }
 
   const maxRetryDelayMs = Number(process.env.NVIDIA_MAX_RETRY_DELAY_MS?.trim() || process.env.SKILLCHECK_MAX_RETRY_DELAY_MS?.trim() || 60000);
   if (!Number.isFinite(maxRetryDelayMs) || maxRetryDelayMs <= 0) {
-    throw new Error('Retry delay cap must be a positive number when set');
+    throw new ConfigError('Retry delay cap must be a positive number when set');
   }
 
   return {

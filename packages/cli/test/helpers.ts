@@ -1,4 +1,4 @@
-import type { ProviderConfig } from '../src/adapters/types.js';
+import type { ProviderConfig } from '../src/providers/types.js';
 
 export const PASS_MARKER = 'SKILL_PASS_MARKER';
 

@@ -25,15 +25,15 @@ on:
         required: false
         type: string
 
-permissions:
-  contents: write
-  pull-requests: write
+permissions: {}
 
 jobs:
   rot:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
     env:
-      NVIDIA_API_KEY: ${{ secrets.NVIDIA_API_KEY }}
       NVIDIA_BASE_URL: ${{ vars.NVIDIA_BASE_URL }}
       NVIDIA_RUNNER_MODEL: ${{ vars.NVIDIA_RUNNER_MODEL }}
       NVIDIA_GRADER_MODEL: ${{ vars.NVIDIA_GRADER_MODEL }}
@@ -44,6 +44,8 @@ jobs:
       TRIALS: ${{ inputs.trials || '3' }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
 
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
@@ -77,6 +79,7 @@ jobs:
       - name: Run rot rerun
         if: ${{ github.event_name != 'workflow_dispatch' || !inputs.simulate_only }}
         env:
+          NVIDIA_API_KEY: ${{ secrets.NVIDIA_API_KEY }}
           DISPATCH_RUNNER_MODEL: ${{ inputs.runner_model }}
         run: |
           set -euo pipefail
@@ -120,11 +123,12 @@ jobs:
           git checkout -b "$branch"
           git add results
           git commit -m "Update skillcheck rot results"
-          git push --set-upstream origin "$branch"
           if ! command -v gh >/dev/null 2>&1; then
             echo "::error::GitHub CLI (gh) is not available on this runner"
             exit 1
           fi
+          gh auth setup-git
+          git push --set-upstream origin "$branch"
           if ! gh pr create \
             --title "Update skillcheck rot results" \
             --body "Automated skillcheck rot rerun for runner model ${runner_label}." \

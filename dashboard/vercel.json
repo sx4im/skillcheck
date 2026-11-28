@@ -7,5 +7,32 @@
     { "source": "/health", "destination": "/api/health" },
     { "source": "/leaderboard", "destination": "/index.html" },
     { "source": "/leaderboard/:path*", "destination": "/index.html" }
+  ],
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        {
+          "key": "Content-Security-Policy",
+          "value": "default-src 'none'; script-src 'self' https://clerk.skillcheck.page https://*.clerk.accounts.dev https://challenges.cloudflare.com https://*.protect.clerk.com 'sha256-/x7W7R75k8Roq0WaVRQX9blP4OufE5xbAdzklGxsgpw=' 'sha256-ZDvQ0bEPqo7FMh9gJwtWX0XreTbWWL7QEFGsAQ6dxng=' 'sha256-rq5lSEA8kMvaQ355PXJ8migq7gXkjzB6yhVaOf3cxG8=' 'sha256-eOAxa7qqGrZLrjnODt10r+bWszLZS5J2Zl3hv1Yxulg=' 'sha256-E2J/H5GGS4VDvOFT8eTy0a3mpqTmn+ySIwhMrjqv7Yk=' 'sha256-lSZUDaPlo2ybq49yDG+Erw41ssq6BhAfcWWOOk58bxs='; connect-src 'self' https://clerk.skillcheck.page https://*.clerk.accounts.dev https://challenges.cloudflare.com https://*.protect.clerk.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https://img.clerk.com https://clerk.skillcheck.page https://*.clerk.accounts.dev; frame-src 'self' https://clerk.skillcheck.page https://*.clerk.accounts.dev https://challenges.cloudflare.com https://*.protect.clerk.com; worker-src 'self' blob:; manifest-src 'self'; base-uri 'none'; form-action 'self'; frame-ancestors 'none'; object-src 'none'"
+        },
+        {
+          "key": "Strict-Transport-Security",
+          "value": "max-age=31536000; includeSubDomains"
+        },
+        {
+          "key": "X-Content-Type-Options",
+          "value": "nosniff"
+        },
+        {
+          "key": "Referrer-Policy",
+          "value": "no-referrer"
+        },
+        {
+          "key": "Permissions-Policy",
+          "value": "camera=(), microphone=(), geolocation=(), payment=()"
+        }
+      ]
+    }
   ]
 }

@@ -1,4 +1,5 @@
 import http from 'node:http';
+import assert from 'node:assert/strict';
 import { execFileSync, spawn } from 'node:child_process';
 import crypto from 'node:crypto';
 import fs from 'node:fs';
@@ -54,61 +55,57 @@ function main() {
     }
 
     console.log('Testing mocked --json evaluation...');
+    const tasks = 1;
+    const trials = 1;
+    let graderRequests = 0;
+    const models = {
+      generator: 'skillcheck-smoke-generator',
+      grader: 'skillcheck-smoke-grader',
+      runner: 'skillcheck-smoke-runner'
+    };
     const server = http.createServer((req, res) => {
       let body = '';
       req.on('data', (chunk) => { body += chunk; });
       req.on('end', () => {
-        res.writeHead(200, { 'Content-Type': 'application/json' });
-        if (body.includes('Declared domain:')) {
-          res.end(JSON.stringify({
-            id: 'chatcmpl-mock',
-            object: 'chat.completion',
-            created: Date.now(),
-            model: 'mock-model',
-            choices: [{
-              index: 0,
-              message: {
-                role: 'assistant',
-                content: JSON.stringify({
-                  tasks: [
-                    { id: 't1', prompt: 'Explain commit best practices.', criterion: 'Explains why.' }
-                  ]
-                })
-              },
-              finish_reason: 'stop'
-            }]
-          }));
-        } else if (body.includes('Candidate output to grade:')) {
-          res.end(JSON.stringify({
-            id: 'chatcmpl-mock',
-            object: 'chat.completion',
-            created: Date.now(),
-            model: 'mock-model',
-            choices: [{
-              index: 0,
-              message: {
-                role: 'assistant',
-                content: JSON.stringify({ score: 1, reason: 'Meets criteria.' })
-              },
-              finish_reason: 'stop'
-            }]
-          }));
-        } else {
-          res.end(JSON.stringify({
-            id: 'chatcmpl-mock',
-            object: 'chat.completion',
-            created: Date.now(),
-            model: 'mock-model',
-            choices: [{
-              index: 0,
-              message: {
-                role: 'assistant',
-                content: 'Always explain why changes were made.'
-              },
-              finish_reason: 'stop'
-            }]
-          }));
+        let model;
+        try {
+          ({ model } = JSON.parse(body));
+        } catch {
+          res.writeHead(400).end();
+          return;
         }
+
+        let content;
+        switch (model) {
+          case models.generator:
+            content = JSON.stringify({
+              tasks: Array.from({ length: tasks }, (_, index) => ({
+                id: 'task-' + (index + 1),
+                prompt: 'Explain commit best practices.',
+                criterion: 'Explains why.'
+              }))
+            });
+            break;
+          case models.grader:
+            graderRequests += 1;
+            content = JSON.stringify({ score: 1, reason: 'Meets criteria.' });
+            break;
+          case models.runner:
+            content = 'Always explain why changes were made.';
+            break;
+          default:
+            res.writeHead(400).end();
+            return;
+        }
+
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({
+          id: 'chatcmpl-mock',
+          object: 'chat.completion',
+          created: Date.now(),
+          model,
+          choices: [{ index: 0, message: { role: 'assistant', content }, finish_reason: 'stop' }]
+        }));
       });
     });
 
@@ -117,13 +114,16 @@ function main() {
       const skillPath = path.join(runDir, 'SKILL.md');
       fs.writeFileSync(skillPath, '# Commit Skill\nAlways explain why.');
 
-      const child = spawn(binPath, ['check', skillPath, '--tasks', '1', '--trials', '1', '--json'], {
+      const child = spawn(binPath, ['check', skillPath, '--tasks', String(tasks), '--trials', String(trials), '--json'], {
         cwd: runDir,
         env: {
           ...process.env,
-          SKILLCHECK_CONFIG_DIR: path.join(runDir, 'cfg'),
+          SKILLCHECK_CONFIG: path.join(runDir, 'cfg', 'config.json'),
           SKILLCHECK_NO_UPDATE_CHECK: '1',
           NVIDIA_API_KEY: 'test-key',
+          NVIDIA_GENERATOR_MODEL: models.generator,
+          NVIDIA_GRADER_MODEL: models.grader,
+          NVIDIA_RUNNER_MODEL: models.runner,
           NVIDIA_BASE_URL: `http://127.0.0.1:${port}/v1`,
           NVIDIA_REQUEST_DELAY_MS: '0'
         }
@@ -167,13 +167,16 @@ function main() {
         }
         try {
           const parsed = JSON.parse(stdout);
+          assert.equal(graderRequests, tasks * trials * 2, 'Unexpected number of grader requests');
+          assert.equal(parsed.result?.with_skill_pass, 1, 'With-skill arm did not use the mock grade');
+          assert.equal(parsed.result?.no_skill_pass, 1, 'Baseline arm did not use the mock grade');
           if (!parsed.result || !parsed.result.verdict) {
             console.error('Parsed result missing verdict:', stdout);
             process.exit(1);
           }
           console.log(`Mock check verified successfully (verdict: ${parsed.result.verdict}).`);
         } catch (error) {
-          console.error('Failed to parse json output from mock check:', error);
+          console.error('Failed to verify mock evaluation:', error);
           console.error(stdout);
           process.exit(1);
         }

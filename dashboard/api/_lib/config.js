@@ -35,10 +35,16 @@ if (!TOKEN_PEPPER && (process.env.VERCEL || process.env.NODE_ENV === 'production
   );
 }
 
+/** @param {string | undefined} value @param {number} fallback */
+function runQuota(value, fallback) {
+  const number = Number(clean(value) || fallback);
+  return Number.isSafeInteger(number) && number >= 0 ? number : fallback;
+}
+
 // --- Quota ---
-export const FREE_RUNS = Number(process.env.FREE_RUNS || 10);
+export const FREE_RUNS = runQuota(process.env.FREE_RUNS, 10);
 // 0 = unlimited for paid users.
-export const PRO_RUN_LIMIT = Number(process.env.PRO_RUN_LIMIT || 0);
+export const PRO_RUN_LIMIT = runQuota(process.env.PRO_RUN_LIMIT, 0);
 
 // --- Billing (optional; upgrade is hidden when STRIPE_SECRET_KEY is unset) ---
 export const STRIPE_SECRET_KEY = clean(process.env.STRIPE_SECRET_KEY);
@@ -49,18 +55,12 @@ export const STRIPE_MODE = clean(process.env.STRIPE_MODE) || 'payment'; // 'paym
 export const UPSTASH_URL = clean(process.env.UPSTASH_REDIS_REST_URL);
 export const UPSTASH_TOKEN = clean(process.env.UPSTASH_REDIS_REST_TOKEN);
 
-// Optional explicit public app URL (otherwise derived from request headers).
+// Billing redirects use deployment configuration instead of client headers.
 export const APP_URL = clean(process.env.APP_URL).replace(/\/+$/, '');
+const deploymentHost = process.env.VERCEL_ENV === 'preview'
+  ? process.env.VERCEL_URL
+  : process.env.VERCEL_PROJECT_PRODUCTION_URL;
 
 export const billingEnabled = Boolean(STRIPE_SECRET_KEY && STRIPE_PRICE_ID);
 
-/**
- * @param {import('http').IncomingMessage} req
- * @returns {string}
- */
-export function appUrl(req) {
-  if (APP_URL) return APP_URL;
-  const proto = String(req.headers['x-forwarded-proto'] || 'https').split(',')[0];
-  const host = req.headers['x-forwarded-host'] || req.headers.host || 'localhost:3000';
-  return `${proto}://${host}`;
-}
+export const publicAppUrl = APP_URL || (deploymentHost ? `https://${deploymentHost}` : 'http://localhost:3000');

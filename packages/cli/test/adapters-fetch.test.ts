@@ -1,8 +1,8 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { AnthropicClient } from '../src/adapters/anthropic.js';
-import { GeminiClient } from '../src/adapters/gemini.js';
-import { fetchWithRetry, textContent } from '../src/adapters/http.js';
-import type { CompletionRequest } from '../src/adapters/types.js';
+import { AnthropicClient } from '../src/providers/anthropic.js';
+import { GeminiClient } from '../src/providers/gemini.js';
+import { fetchWithRetry, textContent } from '../src/providers/http.js';
+import type { CompletionRequest } from '../src/providers/types.js';
 
 // Drive the raw-fetch adapters (Anthropic, Gemini) and the shared http plumbing
 // by stubbing global fetch. Captures request bodies to assert on payload
