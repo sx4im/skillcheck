@@ -5,7 +5,7 @@ import { copyText, flash, maskApiKey } from './clipboard.js';
 
 const $ = (id) => document.getElementById(id);
 const apiBase = location.origin + '/api';
-const state = { fullKey: '', revealed: false, plan: 'free' };
+const state = { fullKey: '', maskedKey: '', revealed: false, plan: 'free' };
 
 const yearEl = $('year'); if (yearEl) yearEl.textContent = String(new Date().getFullYear());
 
@@ -40,16 +40,24 @@ async function authFetch(path, options = {}) {
 }
 
 function renderKey() {
-  $('apiKey').textContent = state.revealed ? state.fullKey : maskApiKey(state.fullKey);
+  const issuedHere = Boolean(state.fullKey);
+  $('apiKey').textContent = state.revealed ? state.fullKey : state.maskedKey;
+  $('revealBtn').disabled = !issuedHere;
+  $('copyKeyBtn').disabled = !issuedHere;
   $('revealBtn').textContent = state.revealed ? 'Hide' : 'Reveal';
+  $('keyNote').textContent = issuedHere
+    ? 'Copy this key now. It is shown once.'
+    : 'Rotate to get a new key if you no longer have the current one.';
 }
-function renderCommands() {
+function quickstart(token) {
   // The hosted URL is baked into the CLI, so users only need their key. Setting
   // SKILLCHECK_TOKEN skips the prompt and goes straight to the file picker.
-  $('commandsText').textContent =
-    'npm install -g @sx4im/skillcheck@latest\n' +
-    'export SKILLCHECK_TOKEN=' + state.fullKey + '\n' +
+  return 'npm install -g @sx4im/skillcheck@latest\n' +
+    'export SKILLCHECK_TOKEN=' + (token || 'YOUR_SKILLCHECK_TOKEN') + '\n' +
     'skillcheck';
+}
+function renderCommands() {
+  $('commandsText').textContent = quickstart(state.revealed ? state.fullKey : '');
 }
 function renderUsage(me) {
   const used = me.runsUsed || 0;
@@ -86,6 +94,7 @@ function render(me) {
   $('content').style.display = 'block';
   $('utilEmail').textContent = me.email || 'Skillcheck Cloud';
   state.fullKey = me.apiKey || '';
+  state.maskedKey = me.apiKeyMasked || maskApiKey(state.fullKey);
   renderKey(); renderCommands(); renderUsage(me); renderPlan(me);
 }
 
@@ -106,7 +115,7 @@ async function loadMe() {
     return;
   }
   const me = await res.json();
-  if (!me || !me.apiKey) {
+  if (!me?.apiKeyMasked && !me?.apiKey) {
     showLoadError('Your account loaded but no API key was issued. This usually means the server is missing its storage (Upstash) configuration. Please try again shortly.');
     return;
   }
@@ -134,17 +143,24 @@ function on(id, event, handler) {
   if (el) el.addEventListener(event, handler);
 }
 
-on('revealBtn', 'click', function () { state.revealed = !state.revealed; renderKey(); });
+on('revealBtn', 'click', function () { state.revealed = !state.revealed; renderKey(); renderCommands(); });
 on('copyKeyBtn', 'click', function () { copyText(state.fullKey, function () { flash($('copyKeyBtn')); }); });
-on('copyCmd', 'click', function () { copyText($('commandsText').textContent, function () { flash($('copyCmd')); }); });
+on('copyCmd', 'click', function () { copyText(quickstart(state.fullKey), function () { flash($('copyCmd')); }); });
 
 on('rotateBtn', 'click', function () {
   if (!confirm('Rotate your API key? The current key stops working immediately.')) return;
+  $('rotateBtn').disabled = true;
   authFetch(apiBase + '/key/rotate', { method: 'POST' })
     .then(function (r) { return r.json(); })
     .then(function (data) {
-      if (data.apiKey) { state.fullKey = data.apiKey; state.revealed = true; renderKey(); renderCommands(); }
-    });
+      if (!data.apiKey) throw new Error(data.error?.message || 'Could not rotate the key.');
+      state.fullKey = data.apiKey;
+      state.maskedKey = data.apiKeyMasked || maskApiKey(state.fullKey);
+      state.revealed = true;
+      renderKey(); renderCommands();
+    })
+    .catch(function (error) { $('keyNote').textContent = error.message; })
+    .finally(function () { $('rotateBtn').disabled = false; });
 });
 
 on('upgradeBtn', 'click', function () {

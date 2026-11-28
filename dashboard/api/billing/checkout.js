@@ -1,7 +1,7 @@
 import { sendJson, methodNotAllowed } from '../_lib/http.js';
 import { getClerkUserId } from '../_lib/clerk.js';
 import { getUser } from '../_lib/users.js';
-import { billingEnabled, appUrl } from '../_lib/config.js';
+import { billingEnabled, publicAppUrl } from '../_lib/config.js';
 import { createCheckoutSession } from '../_lib/stripe.js';
 
 /** @param {import("http").IncomingMessage} req @param {import("http").ServerResponse} res */
@@ -11,20 +11,21 @@ export default async function handler(req, res) {
 
   const userId = await getClerkUserId(req);
   if (!userId) return sendJson(res, 401, { error: { message: 'Not signed in' } });
-  const user = await getUser(userId);
-  if (!user) return sendJson(res, 404, { error: { message: 'Account not found' } });
-  if (user.plan === 'pro') return sendJson(res, 200, { alreadyPro: true });
-
-  const base = appUrl(req);
   try {
+    const user = await getUser(userId);
+    if (!user) return sendJson(res, 404, { error: { message: 'Account not found' } });
+    if (user.plan === 'pro') return sendJson(res, 200, { alreadyPro: true });
     const checkout = await createCheckoutSession({
       uid: user.uid,
       email: user.email,
-      successUrl: `${base}/app.html?upgraded=1&session_id={CHECKOUT_SESSION_ID}`,
-      cancelUrl: `${base}/app.html?upgrade=cancelled`
+      successUrl: `${publicAppUrl}/app.html?upgraded=1&session_id={CHECKOUT_SESSION_ID}`,
+      cancelUrl: `${publicAppUrl}/app.html?upgrade=cancelled`
     });
-    sendJson(res, 200, { url: checkout.url });
-  } catch (error) {
-    sendJson(res, 502, { error: { message: String((error instanceof Error && error.message) || error) } });
+    if (typeof checkout.url !== 'string') throw new Error('Checkout URL missing.');
+    const url = new URL(checkout.url);
+    if (url.protocol !== 'https:' || url.username || url.password) throw new Error('Invalid checkout URL.');
+    return sendJson(res, 200, { url: url.href });
+  } catch {
+    return sendJson(res, 502, { error: { message: 'Could not start Stripe checkout.' } });
   }
 }

@@ -6,7 +6,7 @@ This document describes how `skillcheck` measures skill effectiveness in v1.
 
 `skillcheck` measures the value of skill instructions under forced injection. The skill body is always injected into the runner model's context for the `with_skill` arm and omitted for the `no_skill` arm.
 
-This is intentionally narrower than real agent behavior. It answers: "Does this skill content help when the model receives it?" It does not answer: "Will an agent trigger this skill at the right time?" Trigger-respecting evaluation is out of scope for v1.
+Use `check` to measure the effect of including the instructions. Use `route` to measure when a description would activate.
 
 ## Skill Normalization
 
@@ -40,13 +40,40 @@ For each task, the runner model is called in two arms:
 - `with_skill`: system context includes the skill instructions
 - `no_skill`: task prompt only
 
-Each arm runs `K` trials. The default is `K=3`; single-trial results are not accepted as launch-quality evidence.
+Each arm runs `K` trials. The default is `K=3`. Runner and grader requests use a bounded queue and report results in task and trial order. Use more independent tasks when results will inform a release.
 
 ## Grading
 
 Deterministic assertions run first when a task has one. Otherwise, the grader model receives the output and the criterion, but not the arm label. This keeps grading blind to whether an answer came from the skill-injected arm (the grader is blind to which arm produced an output, while the subject model cannot be).
 
-The generator, runner, and grader model IDs are separate environment variables so they can be swapped independently.
+The generator, runner, and grader model IDs can be set independently. A
+batch nonce encloses the declared domain, candidate output, and grading rubric.
+The grader must return a JSON object with binary `score` and a string
+`reason`. Format failures retry and then stop the evaluation.
+
+## Composition, routing, and audit
+
+`compose` uses a shared task suite. It pairs each baseline stack trial with
+the same task and trial in the stack that includes the target. It shuffles
+answers from every arm before grading. With `--compare-isolated`, it also reports
+the treatment’s effect relative to the target running alone. Token counts in the
+preflight use a byte-based estimate. Instruction and description overlap checks
+are heuristics.
+
+`route` generates positive and near-miss queries from the skill, then tests
+BM25 and the model selector with and without competing descriptions. Hit@1
+and false-trigger rate use positive and negative queries, respectively.
+Precision is the fraction of target selections that were correct. Interference
+measures the share of positive queries lost when competitors are introduced.
+Each selector’s balanced target accuracy must reach 80% and have zero measured
+interference to pass. The query task and model selector both depend on the
+chosen models. Avoid treating the resulting metrics as production telemetry.
+
+`audit --dynamic` compares simulated tool traces on paired benign tasks. It
+flags restricted actions and synthetic canary exposure. The trace contains tool
+names and outcomes. It omits arguments, canary values, and transcripts.
+A restricted event in both arms indicates a baseline problem as well as a
+with-skill failure.
 
 ## Scoring
 

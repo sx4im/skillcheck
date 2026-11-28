@@ -3,9 +3,11 @@ import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { evalSkill } from '../src/eval.js';
+import { checkpointPath, loadCheckpoint } from '../src/checkpoint.js';
+import { sha256 } from '../src/hash.js';
 import { ShiftingGeneratorClient } from './helpers.js';
 
-vi.mock('../src/adapters/openai-compat.js', async () => {
+vi.mock('../src/providers/openai-compat.js', async () => {
   const { ShiftingGeneratorClient } = await import('./helpers.js');
   return { OpenAiCompatClient: ShiftingGeneratorClient };
 });
@@ -128,5 +130,18 @@ describe('evalSkill --resume with generated tasks', () => {
     // Must regenerate tasks for hard difficulty, NOT reuse standard tasks
     expect(ShiftingGeneratorClient.generateCalls).toBe(2);
     expect(result.tasks[0].prompt).toContain('from generation 2');
+  });
+
+  it('retains every completed trial in canonical order after concurrent work is interrupted', async () => {
+    ShiftingGeneratorClient.failAfterCalls = 7;
+    await expect(evalSkill({
+      inputPath: 'SKILL.md', tasks: 3, trials: 2, concurrency: 4, mode: 'forced', saveArtifacts: false
+    })).rejects.toThrow('simulated interruption');
+    const checkpoint = await loadCheckpoint(checkpointPath(sha256(SKILL_MD)));
+    expect(checkpoint?.completedOutputs.map(({ taskId, trial, arm }) => [taskId, trial, arm])).toEqual([
+      ['t001', 1, 'with_skill'], ['t001', 1, 'no_skill'],
+      ['t001', 2, 'with_skill'], ['t001', 2, 'no_skill'],
+      ['t002', 1, 'with_skill'], ['t002', 1, 'no_skill']
+    ]);
   });
 });

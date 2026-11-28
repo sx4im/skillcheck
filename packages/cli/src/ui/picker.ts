@@ -1,3 +1,5 @@
+import { singleLine } from '../core/security/output.js';
+import { ValidationError } from '../errors.js';
 import { readdir, stat } from 'node:fs/promises';
 import path from 'node:path';
 import process from 'node:process';
@@ -58,23 +60,23 @@ export async function validateSkillInput(inputPath: string): Promise<string> {
       if (await directoryHasMarkdown(resolved)) {
         return inputPath;
       }
-      throw new Error(`That folder has no supported skill file (.md, .mdc, .cursorrules). Skillcheck only checks Markdown (.md, .mdc) and .cursorrules files — open a folder that contains one, or pick a file directly.`);
+      throw new ValidationError(`That folder has no supported skill file (.md, .mdc, .cursorrules). Skillcheck only checks Markdown (.md, .mdc) and .cursorrules files — open a folder that contains one, or pick a file directly.`);
     }
     if (stats.isFile()) {
       if (isMarkdownFile(resolved)) {
         return inputPath;
       }
-      throw new Error(`Skillcheck only checks Markdown (.md, .mdc) and .cursorrules files. "${path.basename(resolved)}" is not a supported file.`);
+      throw new ValidationError(`Skillcheck only checks Markdown (.md, .mdc) and .cursorrules files. "${path.basename(resolved)}" is not a supported file.`);
     }
   } catch (error) {
     const code = (error as NodeJS.ErrnoException).code;
     if (code === 'ENOENT') {
-      throw new Error(`This path does not exist. Please give me ${supportedSkillFilesText()}.`);
+      throw new ValidationError(`This path does not exist. Please give me ${supportedSkillFilesText()}.`);
     }
     throw error;
   }
 
-  throw new Error(`Please give me ${supportedSkillFilesText()}.`);
+  throw new ValidationError(`Please give me ${supportedSkillFilesText()}.`);
 }
 
 async function listPickerEntries(currentDir: string): Promise<PickerEntry[]> {
@@ -182,7 +184,7 @@ function renderPicker(
   const runnableCount = entries.filter((entry) => entry.runnable).length;
   out.push(`  ${paint.accent('Step 1 of 2')}  ${paint.bold('Choose the skill file you want to check')}`);
   out.push(`  ${paint.dim('Pick any')} ${paint.ok('green .md file')}${paint.dim('. Open a')} ${paint.accent('blue folder')} ${paint.dim('to look inside it.')}`);
-  out.push(`  ${paint.dim('Folder:')} ${truncateDisplay(currentDir, 60)}  ${paint.dim(`${SYM.dot} ${runnableCount} markdown file${runnableCount === 1 ? '' : 's'} here`)}`);
+  out.push(`  ${paint.dim('Folder:')} ${truncateDisplay(singleLine(currentDir), 60)}  ${paint.dim(`${SYM.dot} ${runnableCount} markdown file${runnableCount === 1 ? '' : 's'} here`)}`);
 
   if (filterQuery) {
     out.push(`  ${paint.accent('Filter:')} ${paint.bold(filterQuery)} ${paint.dim('(type to refine, Backspace/Esc to clear)')}`);
@@ -202,7 +204,7 @@ function renderPicker(
     const realIndex = window.offset + index;
     const isSelected = realIndex === selected;
     const pointer = isSelected ? paint.accent(SYM.pointer) : ' ';
-    const rawLabel = truncateDisplay(entry.label, PICKER_LABEL_WIDTH);
+    const rawLabel = truncateDisplay(singleLine(entry.label), PICKER_LABEL_WIDTH);
     let label: string;
     if (isSelected) {
       label = paint.bold(rawLabel);
@@ -341,6 +343,6 @@ export async function selectSkillPath(startDir = process.cwd()): Promise<string>
 
   printBanner();
   const shown = path.relative(process.cwd(), chosen!) || chosen!;
-  console.log(`  ${paint.ok(SYM.tick)} ${paint.bold('Skill file')}  ${shown}\n`);
+  console.log(`  ${paint.ok(SYM.tick)} ${paint.bold('Skill file')}  ${singleLine(shown)}\n`);
   return chosen!;
 }

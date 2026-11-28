@@ -15,7 +15,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="/assets/styles.css" />
   </head>
-  <body class="app-bg">
+  <body class="app-bg dashboard-page">
     <div class="util">
       <div class="wrap">
         <span id="utilEmail">SkillCheck Cloud</span>
@@ -70,7 +70,7 @@
               </div>
               <div style="margin-top:14px">
                 <button class="btn-text" id="rotateBtn">Rotate key</button>
-                <span class="fine" style="margin-left:8px">Rotating invalidates the old key immediately.</span>
+                <span class="fine" id="keyNote" aria-live="polite" style="margin-left:8px; color:var(--body)"></span>
               </div>
             </div>
 

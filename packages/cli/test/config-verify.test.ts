@@ -6,11 +6,7 @@ import { verifyCloudKey } from '../src/config.js';
 import { verifyResult } from '../src/verify.js';
 
 function jsonResponse(status: number, body: unknown): Response {
-  return {
-    ok: status >= 200 && status < 300,
-    status,
-    json: async () => body
-  } as unknown as Response;
+  return Response.json(body, { status });
 }
 
 describe('verifyCloudKey', () => {
@@ -45,6 +41,17 @@ describe('verifyCloudKey', () => {
     expect(result.message).toMatch(/key-check endpoint/i);
   });
 
+  it('does not accept an oversized or malformed verification response', async () => {
+    const fetch = vi.spyOn(globalThis, 'fetch')
+      .mockResolvedValueOnce(Response.json({ valid: true, padding: 'x'.repeat(2 * 1024 * 1024) }))
+      .mockResolvedValueOnce(new Response('unexpected text'));
+    for (let i = 0; i < 2; i += 1) {
+      const result = await verifyCloudKey('https://api.test/api', 'chk_live_x');
+      expect(result.valid).toBe(false);
+    }
+    expect(fetch).toHaveBeenCalledTimes(2);
+  });
+
   it('returns unreachable when the network call throws', async () => {
     vi.spyOn(globalThis, 'fetch').mockRejectedValue(new Error('ECONNREFUSED'));
     const result = await verifyCloudKey('https://api.test/api', 'chk_live_x');
@@ -59,5 +66,20 @@ describe('verifyResult validation', () => {
     const file = path.join(dir, 'result.json');
     await writeFile(file, JSON.stringify({ skill: {}, result: {}, config: {} }));
     await expect(verifyResult({ resultPath: file, sample: 1 })).rejects.toThrow(/cannot be verified/i);
+  });
+
+  it('reports malformed JSON and paths before contacting the provider', async () => {
+    const dir = await mkdtemp(path.join(tmpdir(), 'skillcheck-verify-'));
+    const file = path.join(dir, 'result.json');
+    await expect(verifyResult({ resultPath: file, sample: 1 })).rejects.toThrow(/read the result file/i);
+    await writeFile(file, 'broken JSON');
+    await expect(verifyResult({ resultPath: file, sample: 1 })).rejects.toThrow(/valid JSON/i);
+    await writeFile(file, JSON.stringify({
+      skill: { source: path.join(dir, 'missing.md') },
+      config: { trials: 1 },
+      result: { ci_pp: [-5, 10] },
+      reproducibility: { task_suite_path: 'tasks.json' }
+    }));
+    await expect(verifyResult({ resultPath: file, sample: 1 })).rejects.toThrow(/referenced skill/i);
   });
 });

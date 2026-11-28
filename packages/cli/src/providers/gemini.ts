@@ -1,4 +1,6 @@
-import { fetchWithRetry, textContent } from './http.js';
+import { baseUrl } from '../core/security/endpoint.js';
+import { ProviderResponseError, ValidationError } from '../errors.js';
+import { optionalTokens, ProviderRequests, record, responseObject, textContent } from './http.js';
 import type { CompletionRequest, CompletionResponse, LlmClient } from './types.js';
 
 export interface GeminiConfig {
@@ -6,6 +8,8 @@ export interface GeminiConfig {
   baseUrl?: string;
   timeoutMs?: number;
   maxAttempts?: number;
+  maxRetryDelayMs?: number;
+  requestDelayMs?: number;
   /** Extra headers merged into every request (e.g. the x-skillcheck-run id). */
   defaultHeaders?: Record<string, string>;
 }
@@ -13,15 +17,13 @@ export interface GeminiConfig {
 export class GeminiClient implements LlmClient {
   private readonly apiKey: string;
   private readonly baseUrl: string;
-  private readonly timeoutMs: number;
-  private readonly maxAttempts: number;
+  private readonly requests: ProviderRequests;
   private readonly defaultHeaders: Record<string, string>;
 
   constructor(config: GeminiConfig) {
     this.apiKey = config.apiKey;
-    this.baseUrl = (config.baseUrl || 'https://generativelanguage.googleapis.com/v1beta').replace(/\/+$/, '');
-    this.timeoutMs = config.timeoutMs ?? 120000;
-    this.maxAttempts = config.maxAttempts ?? 5;
+    this.baseUrl = baseUrl(config.baseUrl || 'https://generativelanguage.googleapis.com/v1beta');
+    this.requests = new ProviderRequests(config);
     this.defaultHeaders = config.defaultHeaders ?? {};
   }
 
@@ -31,7 +33,7 @@ export class GeminiClient implements LlmClient {
 
     for (const msg of request.messages) {
       const text = textContent(msg.content) ?? '';
-      if (msg.role === 'system') {
+      if ((msg.role === 'system' || msg.role === 'developer')) {
         systemInstructionText = systemInstructionText ? `${systemInstructionText}\n\n${text}` : text;
       } else {
         contents.push({
@@ -50,7 +52,8 @@ export class GeminiClient implements LlmClient {
       generationConfig.responseMimeType = 'application/json';
     }
 
-    const modelName = request.model.startsWith('models/') ? request.model : `models/${request.model}`;
+    if (!/^(?:(?:models|tunedModels)\/)?[\w.-]+$/.test(request.model)) throw new ValidationError('Invalid Gemini model ID.');
+    const modelName = request.model.includes('/') ? request.model : 'models/' + request.model;
     const url = `${this.baseUrl}/${modelName}:generateContent?key=${encodeURIComponent(this.apiKey)}`;
 
     const payload = {
@@ -59,35 +62,25 @@ export class GeminiClient implements LlmClient {
       generationConfig
     };
 
-    const result = await fetchWithRetry(url, {
-      headers: {
-        'content-type': 'application/json',
-        'x-goog-api-key': this.apiKey,
-        ...this.defaultHeaders
-      },
-      body: JSON.stringify(payload),
-      timeoutMs: this.timeoutMs,
-      maxAttempts: this.maxAttempts
-    });
-    if (!result.ok) {
-      throw new Error(`Gemini API error (${result.status}): ${result.text}`);
-    }
-
-    const data = JSON.parse(result.text) as {
-      candidates?: { content?: { parts?: { text?: string }[] } }[];
-      usageMetadata?: { promptTokenCount?: number; candidatesTokenCount?: number; totalTokenCount?: number };
-    };
-
-    const firstPart = data.candidates?.[0]?.content?.parts?.[0];
-    const content = firstPart?.text ?? '';
-
+    const result = await this.requests.post(url, {
+      ...this.defaultHeaders,
+      'content-type': 'application/json',
+      'x-goog-api-key': this.apiKey
+    }, JSON.stringify(payload));
+    const data = responseObject(result, 'Gemini', this.apiKey);
+    const candidate = Array.isArray(data.candidates) ? record(data.candidates[0], 'Gemini candidate') : {};
+    const message = record(candidate.content, 'Gemini content');
+    const parts = Array.isArray(message.parts) ? message.parts : [];
+    const content = textContent(parts);
+    if (content === undefined) throw new ProviderResponseError('Gemini response is missing text content.');
+    const usage = data.usageMetadata === undefined ? {} : record(data.usageMetadata, 'Gemini usage');
     return {
       content,
       model: request.model,
       usage: {
-        promptTokens: data.usageMetadata?.promptTokenCount,
-        completionTokens: data.usageMetadata?.candidatesTokenCount,
-        totalTokens: data.usageMetadata?.totalTokenCount
+        promptTokens: optionalTokens(usage.promptTokenCount),
+        completionTokens: optionalTokens(usage.candidatesTokenCount),
+        totalTokens: optionalTokens(usage.totalTokenCount)
       }
     };
   }

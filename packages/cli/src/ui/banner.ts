@@ -1,5 +1,6 @@
 import process from 'node:process';
 import { SYM, paint } from './theme.js';
+import { singleLine } from '../core/security/output.js';
 import { currentVersion } from '../version.js';
 
 const CONVENTIONAL_SKILL_FILES = ['SKILL.md', 'AGENTS.md', 'CLAUDE.md'];
@@ -115,7 +116,7 @@ export function printBanner(): void {
 export function printCheckHeader(inputPath: string, tasks: number, trials: number): void {
   const scope = `${tasks} task${tasks === 1 ? '' : 's'} × ${trials} trial${trials === 1 ? '' : 's'}`;
   console.log(`${paint.accent(SYM.diamond)} ${paint.bold('SkillCheck')} ${paint.dim(`v${currentVersion()}`)}`);
-  console.log(`  ${paint.dim('Checking')} ${inputPath} ${paint.dim(`${SYM.dot} ${scope}`)}`);
+  console.log(`  ${paint.dim('Checking')} ${singleLine(inputPath)} ${paint.dim(`${SYM.dot} ${scope}`)}`);
   console.log('');
 }
 
@@ -134,6 +135,11 @@ export function printHelpUi(): void {
 
   console.log(`  ${paint.accent('Commands')}`);
   cmd('check <path>', 'A/B check a skill with a readable result card');
+  cmd('compose <path>', 'measure the effect of adding a skill to a stack');
+  cmd('route <path>', 'measure skill discovery and false triggers');
+  cmd('audit <path>', 'scan a skill and emit terminal, JSON, or SARIF output');
+  cmd('fix <path>', 'preview or apply a skill repair');
+  cmd('doctor', 'diagnose the local CLI and model connection');
   cmd('watch <path>', 'hot-reloads & re-evaluates skill automatically on save');
   cmd('demo', 'instant 5-second simulated benchmark (zero keys required)');
   cmd('matrix <path>', 'benchmark a skill across multiple models side-by-side');

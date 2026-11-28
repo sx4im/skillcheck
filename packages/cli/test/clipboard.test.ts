@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { copyToClipboardOsc52, formatPrMarkdown, buildOsc52Sequence } from '../src/ui/clipboard.js';
+import { evalResultFixture } from './eval-result-fixture.js';
 import type { EvalResult } from '../src/eval.js';
 
 describe('OSC 52 clipboard export', () => {
@@ -29,6 +30,26 @@ describe('OSC 52 clipboard export', () => {
     expect(ok).toBe(true);
     expect(chunks.length).toBe(1);
     expect(chunks[0]).toContain(Buffer.from('copied content').toString('base64'));
+  });
+
+  it('keeps untrusted clipboard fields from changing the Markdown structure', () => {
+    const text = 'bad` | *em*\r# heading <b>[link](https://example.test)';
+    const markdown = formatPrMarkdown(evalResultFixture({
+      skill: { name: text },
+      config: { runner_model: text, grader_model: text },
+      tasks: [{
+        id: 't1',
+        prompt: text,
+        criterion: text,
+        criterion_type: 'rubric',
+        with_skill_pass_rate: 1,
+        no_skill_pass_rate: 0
+      }]
+    }));
+
+    expect(markdown.match(/bad\\` \\\| \\\*em\\\*/g)).toHaveLength(5);
+    expect(markdown).not.toMatch(/<b>|\r|\[link\]|https:\/\/example/);
+    expect(markdown.split('\n').filter((line) => line.startsWith('| **Models** |'))).toHaveLength(1);
   });
 
   it('formats comprehensive GitHub PR markdown from EvalResult', () => {
@@ -85,7 +106,7 @@ describe('OSC 52 clipboard export', () => {
     };
 
     const markdown = formatPrMarkdown(sampleResult);
-    expect(markdown).toContain('### 🧪 Skillcheck Evaluation: `TDD Workflow`');
+    expect(markdown).toContain('### 🧪 Skillcheck Evaluation: TDD Workflow');
     expect(markdown).toContain('**Verdict**: `HELPS`');
     expect(markdown).toContain('+25.0 pp');
     expect(markdown).toContain('80.0%');

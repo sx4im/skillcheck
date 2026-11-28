@@ -1,5 +1,6 @@
 import { watch as fsWatch } from 'node:fs';
-import { readFile } from 'node:fs/promises';
+import { readBoundedFile } from './core/normalize/files.js';
+import { sanitizeTerminal, singleLine } from './core/security/output.js';
 import path from 'node:path';
 import { evalSkill } from './eval.js';
 import { printBanner, printResultCard, startProgress } from './ui.js';
@@ -59,13 +60,13 @@ export async function runWatch(options: WatchOptions): Promise<void> {
 
   let lastContent = '';
   try {
-    lastContent = await readFile(fullPath, 'utf8');
+    lastContent = await readBoundedFile(fullPath);
   } catch {
     lastContent = '';
   }
 
   printBanner();
-  console.log(`  ${paint.accent('◆')} ${paint.bold('Skillcheck Watch Mode')} ${paint.dim(`(monitoring ${path.basename(fullPath)})`)}`);
+  console.log(`  ${paint.accent('◆')} ${paint.bold('Skillcheck Watch Mode')} ${paint.dim(`(monitoring ${singleLine(path.basename(fullPath))})`)}`);
   console.log(`  ${paint.dim(`Press ${paint.bold('r')} to re-run manually ${SYM.dot} Press ${paint.bold('q')} or ${paint.bold('Ctrl+C')} to exit`)}\n`);
 
   let running = false;
@@ -92,14 +93,14 @@ export async function runWatch(options: WatchOptions): Promise<void> {
       progress?.finish();
       await printResultCard(result);
     } catch (err) {
-      console.error(`  ${paint.err(SYM.cross)} ${err instanceof Error ? err.message : String(err)}`);
+      console.error(`  ${paint.err(SYM.cross)} ${sanitizeTerminal(err instanceof Error ? err.message : String(err))}`);
     } finally {
       running = false;
       if (reRunQueued) {
         reRunQueued = false;
         await executeEval('Re-evaluating queued changes');
       } else {
-        console.log(`\n  ${paint.dim(`Watching for changes in ${path.basename(fullPath)}...`)}`);
+        console.log(`\n  ${paint.dim(`Watching for changes in ${singleLine(path.basename(fullPath))}...`)}`);
       }
     }
   };
@@ -110,7 +111,7 @@ export async function runWatch(options: WatchOptions): Promise<void> {
   const onFileChange = createDebouncedWatcher(async () => {
     let newContent = '';
     try {
-      newContent = await readFile(fullPath, 'utf8');
+      newContent = await readBoundedFile(fullPath);
     } catch {
       return;
     }
@@ -123,7 +124,7 @@ export async function runWatch(options: WatchOptions): Promise<void> {
     const deltaStr = `${delta.sign}${Math.abs(delta.difference)} tokens (~${delta.currentTokens} total)`;
     const deltaColored = delta.difference > 0 ? paint.warn(deltaStr) : delta.difference < 0 ? paint.ok(deltaStr) : paint.dim(deltaStr);
 
-    console.log(`\n  ${paint.accent('⚡')} File saved: ${paint.bold(path.basename(fullPath))} ${paint.dim('· Token delta:')} ${deltaColored}`);
+    console.log(`\n  ${paint.accent('⚡')} File saved: ${paint.bold(singleLine(path.basename(fullPath)))} ${paint.dim('· Token delta:')} ${deltaColored}`);
     await executeEval('Re-evaluating changes');
   }, debounceMs);
 
@@ -166,7 +167,7 @@ export async function runWatch(options: WatchOptions): Promise<void> {
       }
       process.stdin.pause();
     }
-    process.exit(0);
+    process.exit(130);
   };
 
   process.once('SIGINT', cleanup);

@@ -140,6 +140,7 @@ const ALLOWLIST_ENV_KEYS = [
   'SKILLCHECK_TIMEOUT_MS',
   'SKILLCHECK_RUNNER_MODEL',
   'XDG_CONFIG_HOME',
+  'NODE_OPTIONS',
   'HOME'
 ];
 
@@ -248,11 +249,12 @@ describe('cwd .env allow-list (config-path redirect protection)', () => {
   });
 
   it('ignores an arbitrary unlisted variable from the cwd .env', async () => {
-    await writeFile(path.join(dir, '.env'), 'SKILLCHECK_FUTURE_VAR=1\nTOTALLY_RANDOM_VAR=evil\n');
+    await writeFile(path.join(dir, '.env'), 'SKILLCHECK_FUTURE_VAR=1\nTOTALLY_RANDOM_VAR=evil\nNODE_OPTIONS=--no-warnings\n');
     await importFresh();
 
     expect(process.env.SKILLCHECK_FUTURE_VAR).toBeUndefined();
     expect(process.env.TOTALLY_RANDOM_VAR).toBeUndefined();
+    expect(process.env.NODE_OPTIONS).toBeUndefined();
   });
 
   it('still loads allow-listed keys, models, and timeouts from the cwd .env', async () => {

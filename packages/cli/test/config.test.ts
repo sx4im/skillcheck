@@ -29,6 +29,24 @@ describe('user config', () => {
     expect(() => normalizeApiUrl('ftp://api.example.com')).toThrow(/https/);
   });
 
+  it.each([
+    'http://api.example.test/v1',
+    'https://169.254.169.254/v1',
+    'https://[fe80::1]/v1',
+    'https://[fd00:ec2::254]/v1',
+    'https://[::ffff:169.254.169.254]/v1',
+    'https://metadata.google.internal/v1',
+    'https://user:pass@api.example.test/v1',
+    'https://api.example.test/v1?key=opaque'
+  ])('rejects unsafe endpoints (%s)', (url) => {
+    expect(() => normalizeApiUrl(url)).toThrow(/URL|endpoint/);
+  });
+
+  it('permits HTTP loopback for local model servers', () => {
+    expect(normalizeApiUrl('http://127.0.0.1:9786')).toBe('http://127.0.0.1:9786/v1');
+    expect(normalizeApiUrl('http://localhost:9786')).toBe('http://localhost:9786/v1');
+  });
+
   it('saves and reads the configured API URL', () => {
     isolateConfig();
     const filePath = saveUserConfig({ apiUrl: 'https://api.example.com/v1' });

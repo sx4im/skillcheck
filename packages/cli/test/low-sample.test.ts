@@ -6,7 +6,7 @@ import { evalSkill } from '../src/eval.js';
 import { formatResultCard } from '../src/ui/card.js';
 import { evalResultFixture } from './eval-result-fixture.js';
 
-vi.mock('../src/adapters/openai-compat.js', async () => {
+vi.mock('../src/providers/openai-compat.js', async () => {
   const { FakeOpenAiCompatClient } = await import('./helpers.js');
   return { OpenAiCompatClient: FakeOpenAiCompatClient };
 });

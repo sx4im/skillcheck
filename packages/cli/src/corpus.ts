@@ -2,6 +2,10 @@ import { execFile as execFileCallback } from 'node:child_process';
 import { mkdir, readFile, stat } from 'node:fs/promises';
 import path from 'node:path';
 import { promisify } from 'node:util';
+import { parse } from 'yaml';
+import { ValidationError } from './errors.js';
+import { canonicalSkillPath, isInside, readBoundedFile } from './core/normalize/files.js';
+import { singleLine } from './core/security/output.js';
 import { evalSkill } from './eval.js';
 import { slugify, writeJson } from './hash.js';
 import { asyncPool } from './run.js';
@@ -55,73 +59,46 @@ export interface CorpusRunReport {
   skills: CorpusRunEntry[];
 }
 
-function unquote(value: string): string {
-  return value.trim().replace(/^["']|["']$/g, '');
+function requiredText(value: unknown): value is string {
+  return typeof value === 'string' && Boolean(value.trim());
 }
 
-function assertCorpusManifest(value: unknown): CorpusManifest {
-  const manifest = value as Partial<CorpusManifest>;
-  if (!manifest.name || !Array.isArray(manifest.skills)) {
-    throw new Error('Corpus manifest JSON must include name and skills');
+function objectFields(value: unknown, allowed: string[]): Record<string, unknown> {
+  if (!value || typeof value !== 'object' || Array.isArray(value) || Object.keys(value).some((key) => !allowed.includes(key))) {
+    throw new ValidationError('Corpus manifest contains an invalid record or unknown field.');
   }
-  for (const [index, skill] of manifest.skills.entries()) {
-    if (!skill.id || !skill.path) {
-      throw new Error(`Corpus skill ${index + 1} must include id and path`);
-    }
-  }
-  return manifest as CorpusManifest;
+  return value as Record<string, unknown>;
 }
 
 export function parseCorpusManifest(text: string): CorpusManifest {
-  const trimmed = text.trim();
-  if (trimmed.startsWith('{')) {
-    return assertCorpusManifest(JSON.parse(trimmed) as unknown);
+  let value: unknown;
+  try {
+    value = text.trimStart().startsWith('{') ? JSON.parse(text) : parse(text, { maxAliasCount: 0 });
+  } catch (cause) {
+    throw new ValidationError('Corpus manifest must be valid JSON or YAML.', { cause });
   }
-
-  // Tiny YAML subset (no nested lists, quoted colons, or block scalars) —
-  // enough for this repo's corpus manifests; anything richer goes in the
-  // JSON form above.
-
-  const manifest: CorpusManifest = { name: '', skills: [] };
-  let currentSkill: Partial<CorpusSkill> | undefined;
-
-  for (const rawLine of text.split('\n')) {
-    const withoutComment = rawLine.replace(/\s+#.*$/, '');
-    if (!withoutComment.trim()) {
-      continue;
-    }
-
-    const topLevel = /^([A-Za-z_]+):\s*(.*)$/.exec(withoutComment);
-    if (topLevel && !rawLine.startsWith(' ')) {
-      const [, key, value = ''] = topLevel;
-      if (key === 'name') manifest.name = unquote(value);
-      if (key === 'repo') manifest.repo = unquote(value);
-      if (key === 'commit') manifest.commit = unquote(value);
-      continue;
-    }
-
-    const skillStart = /^\s*-\s*id:\s*(.+)$/.exec(withoutComment);
-    if (skillStart) {
-      currentSkill = { id: unquote(skillStart[1]!) };
-      manifest.skills.push(currentSkill as CorpusSkill);
-      continue;
-    }
-
-    const skillField = /^\s+([A-Za-z_]+):\s*(.+)$/.exec(withoutComment);
-    if (skillField && currentSkill) {
-      const [, key, value] = skillField;
-      if (key === 'path') currentSkill.path = unquote(value!);
-      if (key === 'id') currentSkill.id = unquote(value!);
-      if (key === 'source') currentSkill.source = unquote(value!);
-      if (key === 'repo') currentSkill.repo = unquote(value!);
-      if (key === 'commit') currentSkill.commit = unquote(value!);
-    }
+  const manifest = objectFields(value, ['name', 'repo', 'commit', 'skills']);
+  if (!requiredText(manifest.name) || !Array.isArray(manifest.skills)) {
+    throw new ValidationError('Corpus manifest must include name and skills.');
   }
-
-  if (!manifest.name || manifest.skills.some((skill) => !skill.id || !skill.path)) {
-    throw new Error('Corpus manifest YAML must include name and skills with id/path');
+  if (manifest.skills.length > 500) throw new ValidationError('Corpus manifest is limited to 500 skills.');
+  if ([manifest.repo, manifest.commit].some((item) => item !== undefined && !requiredText(item))) {
+    throw new ValidationError('Corpus repo and commit must be non-empty strings.');
   }
-  return manifest;
+  const skills = manifest.skills.map((entry, index): CorpusSkill => {
+    const skill = objectFields(entry, ['id', 'path', 'source', 'repo', 'commit']);
+    if (!requiredText(skill.id) || !requiredText(skill.path)) {
+      throw new ValidationError('Corpus skill ' + (index + 1) + ' must include id and path.');
+    }
+    if ([skill.source, skill.repo, skill.commit].some((item) => item !== undefined && !requiredText(item))) {
+      throw new ValidationError('Corpus skill ' + (index + 1) + ' optional fields must be non-empty strings.');
+    }
+    if (path.isAbsolute(skill.path) || path.win32.isAbsolute(skill.path) || skill.path.split(/[\\/]/).includes('..')) {
+      throw new ValidationError('Path traversal detected in corpus skill ' + (index + 1) + '.');
+    }
+    return skill as unknown as CorpusSkill;
+  });
+  return { ...manifest, name: manifest.name, skills };
 }
 
 async function pathExists(filePath: string): Promise<boolean> {
@@ -179,19 +156,20 @@ function sourceLabel(manifest: CorpusManifest, skill: CorpusSkill): string {
 
 async function prepareGitSource(source: string, repo: string, commit: string | undefined, paths: string[]): Promise<string> {
   if (repo.startsWith('-') || !/^(https?:\/\/|git@|ssh:\/\/|[a-zA-Z0-9_.-]+@[a-zA-Z0-9_.-]+:)/.test(repo)) {
-    throw new Error(`Invalid or unsafe git repository URL: ${repo}`);
+    throw new ValidationError('Invalid or unsafe git repository URL.');
   }
   if (commit && (commit.startsWith('-') || !/^[a-zA-Z0-9_./-]+$/.test(commit))) {
-    throw new Error(`Invalid or unsafe git commit ref: ${commit}`);
+    throw new ValidationError('Invalid or unsafe git commit ref.');
   }
 
   const checkoutDir = path.join('.cache', 'sources', `${slugify(source)}-${repoSlug(repo)}-${(commit ?? 'head').slice(0, 12)}`);
   const sparseDirs = [...new Set(paths.map(sparseDir))].sort();
   const safeSparseDirs = sparseDirs.filter((d) => !d.startsWith('-'));
 
+  const fetchOptions = { timeout: 120_000, env: { ...process.env, GIT_TERMINAL_PROMPT: '0' } };
   if (!(await pathExists(path.join(checkoutDir, '.git')))) {
     await mkdir(path.dirname(checkoutDir), { recursive: true });
-    await execFile('git', ['clone', '--filter=blob:none', '--no-checkout', '--', repo, checkoutDir]);
+    await execFile('git', ['clone', '--filter=blob:none', '--no-checkout', '--', repo, checkoutDir], fetchOptions);
   }
 
   await execFile('git', ['-C', checkoutDir, 'sparse-checkout', 'init', '--cone']);
@@ -199,10 +177,10 @@ async function prepareGitSource(source: string, repo: string, commit: string | u
     await execFile('git', ['-C', checkoutDir, 'sparse-checkout', 'set', '--', ...safeSparseDirs]);
   }
   if (commit) {
-    await execFile('git', ['-C', checkoutDir, 'fetch', '--depth', '1', 'origin', commit]);
-    await execFile('git', ['-C', checkoutDir, 'checkout', '--quiet', '--', commit]);
+    await execFile('git', ['-C', checkoutDir, 'fetch', '--depth', '1', 'origin', commit], fetchOptions);
+    await execFile('git', ['-C', checkoutDir, 'checkout', '--detach', '--quiet', 'FETCH_HEAD', '--']);
   } else {
-    await execFile('git', ['-C', checkoutDir, 'checkout', '--quiet', '--', 'HEAD']);
+    await execFile('git', ['-C', checkoutDir, 'checkout', '--detach', '--quiet', 'HEAD', '--']);
   }
   return checkoutDir;
 }
@@ -232,20 +210,20 @@ async function prepareSources(
     grouped.set(key, current);
   }
 
-  await Promise.all(Array.from(grouped.entries()).map(async ([key, group]) => {
+  await asyncPool(Array.from(grouped.entries()), 4, async ([key, group]) => {
     roots.set(
       key,
       group.repo
         ? await prepareGitSource(group.source, group.repo, group.commit, group.paths)
         : path.dirname(path.resolve(corpusPath))
     );
-  }));
+  });
 
   return roots;
 }
 
 export async function runCorpus(options: CorpusRunOptions): Promise<CorpusRunReport> {
-  const manifest = parseCorpusManifest(await readFile(options.corpus, 'utf8'));
+  const manifest = parseCorpusManifest(await readBoundedFile(options.corpus));
   const skills = manifest.skills.slice(0, options.limit ?? manifest.skills.length);
   const roots = await prepareSources(options.corpus, manifest, skills);
   const entries: CorpusRunEntry[] = new Array(skills.length);
@@ -262,10 +240,11 @@ export async function runCorpus(options: CorpusRunOptions): Promise<CorpusRunRep
 
     const resolvedRoot = path.resolve(root);
     const inputPath = path.resolve(root, skill.path);
-    if (inputPath !== resolvedRoot && !inputPath.startsWith(resolvedRoot + path.sep)) {
-      throw new Error(`Path traversal detected: "${skill.path}" resolves outside source root "${root}"`);
+    if (!isInside(resolvedRoot, inputPath)) {
+      throw new ValidationError(`Path traversal detected: "${skill.path}" resolves outside source root "${root}"`);
     }
 
+    await canonicalSkillPath(inputPath, resolvedRoot);
     const outputPath = path.join(options.outputDir, `${slugify(source)}-${slugify(skill.id)}.json`);
     const entry: CorpusRunEntry = {
       id: skill.id,
@@ -278,12 +257,12 @@ export async function runCorpus(options: CorpusRunOptions): Promise<CorpusRunRep
     };
 
     if (await hasValidJsonFile(outputPath)) {
-      console.error(`[corpus] skip ${source}/${skill.id}; existing result`);
+      console.error(singleLine(`[corpus] skip ${source}/${skill.id}; existing result`));
       entries[index] = entry;
       return;
     }
 
-    console.error(`[corpus] eval ${source}/${skill.id}`);
+    console.error(singleLine(`[corpus] eval ${source}/${skill.id}`));
     await evalSkill({
       inputPath,
       output: outputPath,
@@ -291,6 +270,7 @@ export async function runCorpus(options: CorpusRunOptions): Promise<CorpusRunRep
       trials: options.trials,
       mode: 'forced',
       runner: options.runner,
+      workspaceRoot: resolvedRoot,
       sourceLabel: sourceLabel(manifest, skill),
       useCache: true
     });

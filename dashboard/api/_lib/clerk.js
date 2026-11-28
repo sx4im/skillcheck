@@ -6,10 +6,43 @@
 // The CLI-facing proxy (/api/chat/completions) is NOT Clerk-authed — it uses the
 // issued chk_ API key instead.
 
-import { verifyToken } from '@clerk/backend';
-import { CLERK_SECRET_KEY } from './config.js';
+import { decodeJwt, verifyJwt } from '@clerk/backend/jwt';
+import { CLERK_SECRET_KEY, publicAppUrl } from './config.js';
 import { bearerToken } from './http.js';
 import { fetchWithTimeout } from './fetch-timeout.js';
+
+const trustedOrigins = new Set([new URL(publicAppUrl).origin]);
+for (const hostname of [process.env.VERCEL_URL, process.env.VERCEL_BRANCH_URL, process.env.VERCEL_PROJECT_PRODUCTION_URL]) {
+  if (hostname) trustedOrigins.add(`https://${hostname}`);
+}
+if (trustedOrigins.has('https://skillcheck.page') || trustedOrigins.has('https://www.skillcheck.page')) {
+  trustedOrigins.add('https://skillcheck.page');
+  trustedOrigins.add('https://www.skillcheck.page');
+}
+
+/** @type {Map<string, JsonWebKey>} */
+let signingKeys = new Map();
+let refreshAt = 0;
+/** @type {Promise<Map<string, JsonWebKey>> | undefined} */
+let refresh;
+
+async function loadSigningKeys() {
+  const response = await fetchWithTimeout('https://api.clerk.com/v1/jwks', {
+    headers: { authorization: `Bearer ${CLERK_SECRET_KEY}` },
+    redirect: 'error'
+  });
+  if (!response.ok) throw new Error('Could not load Clerk signing keys.');
+  const data = await response.json();
+  if (!Array.isArray(data?.keys)) throw new Error('Invalid Clerk signing key response.');
+  signingKeys = new Map();
+  for (const key of data.keys) {
+    if (key?.kty === 'RSA' && typeof key.kid === 'string' && typeof key.n === 'string' && typeof key.e === 'string') {
+      signingKeys.set(key.kid, key);
+    }
+  }
+  refreshAt = Date.now() + 5 * 60 * 1000;
+  return signingKeys;
+}
 
 /**
  * @param {import('http').IncomingMessage} req
@@ -20,8 +53,14 @@ export async function getClerkUserId(req) {
   const token = bearerToken(req);
   if (!token) return null;
   try {
-    const claims = await verifyToken(token, { secretKey: CLERK_SECRET_KEY });
-    return claims && claims.sub ? claims.sub : null;
+    const { header } = decodeJwt(token);
+    if (header.alg !== 'RS256' || typeof header.kid !== 'string' || !header.kid) return null;
+    // A fresh cache is authoritative so unknown key IDs cannot force network calls.
+    const keys = Date.now() < refreshAt ? signingKeys : await (refresh ??= loadSigningKeys().finally(() => { refresh = undefined; }));
+    const key = keys.get(header.kid);
+    if (!key) return null;
+    const claims = await verifyJwt(token, { key, authorizedParties: [...trustedOrigins] });
+    return claims.sid && typeof claims.sub === 'string' && trustedOrigins.has(claims.azp ?? '') ? claims.sub : null;
   } catch {
     return null;
   }
@@ -35,7 +74,8 @@ export async function fetchClerkProfile(userId) {
   if (!CLERK_SECRET_KEY) return {};
   try {
     const response = await fetchWithTimeout(`https://api.clerk.com/v1/users/${encodeURIComponent(userId)}`, {
-      headers: { authorization: `Bearer ${CLERK_SECRET_KEY}` }
+      headers: { authorization: `Bearer ${CLERK_SECRET_KEY}` },
+      redirect: 'error'
     });
     if (!response.ok) return {};
     const user = /** @type {{ email_addresses?: Array<{ id: string, email_address: string }>, primary_email_address_id?: string, first_name?: string, last_name?: string, username?: string }} */ (

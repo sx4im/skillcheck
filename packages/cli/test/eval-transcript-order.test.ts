@@ -4,7 +4,7 @@ import path from 'node:path';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { evalSkill } from '../src/eval.js';
 
-vi.mock('../src/adapters/openai-compat.js', async () => {
+vi.mock('../src/providers/openai-compat.js', async () => {
   const { OutOfOrderMockClient } = await import('./helpers.js');
   return { OpenAiCompatClient: OutOfOrderMockClient };
 });

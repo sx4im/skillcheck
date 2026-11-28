@@ -1,8 +1,13 @@
-import { chmodSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { randomUUID } from 'node:crypto';
+import { mkdirSync, readFileSync, renameSync, rmSync, statSync, writeFileSync } from 'node:fs';
 import { homedir } from 'node:os';
 import path from 'node:path';
 
-import type { ProviderType } from './adapters/types.js';
+import { providerFetch, readProviderJson } from './providers/transport.js';
+import { isProviderType, type ProviderType } from './providers/types.js';
+import { ConfigError, IoError } from './errors.js';
+import { baseUrl, validateEndpoint } from './core/security/endpoint.js';
+import { registerSecret, sanitizeTerminal } from './core/security/output.js';
 
 export interface SkillcheckUserConfig {
   apiUrl?: string;
@@ -52,22 +57,25 @@ export interface CloudKeyVerification {
 // NOT consume a run. `reachable:false` means we never got a verdict (network
 // down), so callers can treat it differently from an outright rejection.
 export async function verifyCloudKey(apiUrl: string, token: string): Promise<CloudKeyVerification> {
-  const base = apiUrl.trim().replace(/\/+$/, '');
+  const base = baseUrl(apiUrl);
+  registerSecret(token);
   let response: Response;
   try {
-    response = await fetch(`${base}/key/verify`, {
+    response = await providerFetch(`${base}/key/verify`, {
       method: 'POST',
       headers: { authorization: `Bearer ${token}`, 'content-type': 'application/json' },
       body: '{}',
+      redirect: 'error',
       signal: AbortSignal.timeout(15000)
     });
   } catch (error) {
-    return { valid: false, reachable: false, message: error instanceof Error ? error.message : String(error) };
+    return { valid: false, reachable: false, message: sanitizeTerminal(error instanceof Error ? error.message : String(error)) };
   }
 
   let data: Record<string, unknown> = {};
   try {
-    data = (await response.json()) as Record<string, unknown>;
+    const parsed = await readProviderJson(response, 'Cloud key verification');
+    if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) data = parsed as Record<string, unknown>;
   } catch {
     data = {};
   }
@@ -98,7 +106,7 @@ export async function verifyCloudKey(apiUrl: string, token: string): Promise<Clo
   const errorRecord = (data.error as Record<string, unknown> | undefined) ?? {};
   const message =
     typeof errorRecord.message === 'string'
-      ? errorRecord.message
+      ? sanitizeTerminal(errorRecord.message)
       : `The key was not accepted (HTTP ${response.status}).`;
   return { valid: false, reachable: true, message };
 }
@@ -127,57 +135,56 @@ export function updateCachePath(): string {
 }
 
 export function normalizeApiUrl(value: string): string {
-  const trimmed = value.trim().replace(/\/+$/, '');
-  if (!trimmed) {
-    throw new Error('Skillcheck API URL cannot be empty.');
+  const url = validateEndpoint(value.trim());
+  if (url.pathname === '/') url.pathname = '/v1';
+  return url.href.replace(/\/+$/, '');
+}
+
+const configFields = new Set([
+  'apiUrl', 'token', 'provider', 'providerKey', 'providerBaseUrl', 'generatorModel', 'runnerModel', 'graderModel'
+]);
+
+function parseUserConfig(parsed: unknown): SkillcheckUserConfig {
+  if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) {
+    throw new ConfigError('Config must be a JSON object.');
   }
-  const url = new URL(trimmed);
-  if (url.protocol !== 'https:' && url.protocol !== 'http:') {
-    throw new Error('Skillcheck API URL must start with https:// or http://.');
+  const entry = parsed as Record<string, unknown>;
+  if (Object.entries(entry).some(([key, value]) => !configFields.has(key) || typeof value !== 'string')) {
+    throw new ConfigError('Config contains an unknown field or a non-string value.');
   }
-  if (url.pathname === '/' || url.pathname === '') {
-    url.pathname = '/v1';
+  if (entry.provider !== undefined && !isProviderType(entry.provider)) {
+    throw new ConfigError('Config has an unsupported provider.');
   }
-  return url.toString().replace(/\/+$/, '');
+  const config = entry as SkillcheckUserConfig;
+  registerSecret(config.token);
+  registerSecret(config.providerKey);
+  if (config.apiUrl) validateEndpoint(config.apiUrl);
+  if (config.providerBaseUrl) validateEndpoint(config.providerBaseUrl);
+  return config;
 }
 
 export function loadUserConfig(): SkillcheckUserConfig {
+  const file = userConfigPath();
   try {
-    const parsed = JSON.parse(readFileSync(userConfigPath(), 'utf8')) as unknown;
-    if (typeof parsed !== 'object' || parsed === null) {
-      return {};
-    }
-    const record = parsed as Record<string, unknown>;
-    return {
-      apiUrl: typeof record.apiUrl === 'string' ? record.apiUrl : undefined,
-      token: typeof record.token === 'string' ? record.token : undefined,
-      provider: typeof record.provider === 'string' ? (record.provider as ProviderType) : undefined,
-      providerKey: typeof record.providerKey === 'string' ? record.providerKey : undefined,
-      providerBaseUrl: typeof record.providerBaseUrl === 'string' ? record.providerBaseUrl : undefined,
-      generatorModel: typeof record.generatorModel === 'string' ? record.generatorModel : undefined,
-      runnerModel: typeof record.runnerModel === 'string' ? record.runnerModel : undefined,
-      graderModel: typeof record.graderModel === 'string' ? record.graderModel : undefined
-    };
-  } catch (error) {
-    // A missing file is a first run. Anything else is a corrupted config the
-    // user cannot see — say so instead of silently dropping their saved key.
-    if ((error as NodeJS.ErrnoException).code !== 'ENOENT') {
-      console.error(
-        `[skillcheck] ignoring unreadable config at ${userConfigPath()}: ${error instanceof Error ? error.message : String(error)}`
-      );
-    }
-    return {};
+    if (statSync(file).size > 64 * 1024) throw new ConfigError('Config exceeds 64 KiB.');
+    return parseUserConfig(JSON.parse(readFileSync(file, 'utf8')));
+  } catch (cause) {
+    if ((cause as NodeJS.ErrnoException).code === 'ENOENT') return {};
+    if (cause instanceof ConfigError) throw cause;
+    throw new ConfigError('Could not read the Skillcheck config as JSON: ' + file, { cause });
   }
 }
 
 export function saveUserConfig(config: SkillcheckUserConfig): string {
   const filePath = userConfigPath();
-  mkdirSync(path.dirname(filePath), { recursive: true, mode: 0o700 });
-  writeFileSync(filePath, `${JSON.stringify(config, null, 2)}\n`, { mode: 0o600 });
+  const temporary = filePath + '.' + randomUUID() + '.tmp';
   try {
-    chmodSync(filePath, 0o600);
-  } catch {
-    // Ignore on non-POSIX / Windows environments
+    mkdirSync(path.dirname(filePath), { recursive: true, mode: 0o700 });
+    writeFileSync(temporary, JSON.stringify(config, null, 2) + '\n', { mode: 0o600, flag: 'wx' });
+    renameSync(temporary, filePath);
+  } catch (cause) {
+    rmSync(temporary, { force: true });
+    throw new IoError('Could not save the Skillcheck config: ' + filePath, { cause });
   }
   return filePath;
 }
@@ -206,7 +213,8 @@ function migrateLegacyApiUrl(url: string | undefined): string | undefined {
 }
 
 export function getConfiguredApiUrl(): string | undefined {
-  return migrateLegacyApiUrl(process.env.SKILLCHECK_API_URL?.trim() || loadUserConfig().apiUrl);
+  const value = migrateLegacyApiUrl(process.env.SKILLCHECK_API_URL?.trim() || loadUserConfig().apiUrl);
+  return value ? baseUrl(value) : undefined;
 }
 
 export function getConfiguredToken(): string | undefined {

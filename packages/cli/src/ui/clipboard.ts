@@ -1,4 +1,5 @@
 import type { EvalResult } from '../eval.js';
+import { escapeMarkdown } from './markdown-text.js';
 
 /**
  * Builds an OSC 52 terminal escape sequence to copy text directly
@@ -46,7 +47,7 @@ export function formatPrMarkdown(result: EvalResult): string {
   const ciRange = `${ciLow >= 0 ? '+' : ''}${ciLow.toFixed(1)} pp to ${ciHigh >= 0 ? '+' : ''}${ciHigh.toFixed(1)} pp`;
 
   const lines: string[] = [
-    `### 🧪 Skillcheck Evaluation: \`${result.skill.name}\``,
+    `### 🧪 Skillcheck Evaluation: ${escapeMarkdown(result.skill.name)}`,
     '',
     `**Verdict**: \`${verdictUpper}\` (${pp(result.result.effect_pp)} effect size) | **Confidence**: ${ciRange} (95% CI)`,
     `**Satisfaction**: \`${result.result.satisfaction.toFixed(1)}/100\` | **Token Overhead**: +${result.result.token_overhead} tokens`,
@@ -55,7 +56,7 @@ export function formatPrMarkdown(result: EvalResult): string {
     '|---|---|---|---|',
     `| **Pass Rate** | **${pct(result.result.with_skill_pass)}** | ${pct(result.result.no_skill_pass)} | **${pp(result.result.effect_pp)}** |`,
     `| **Evaluation Size** | ${result.config.tasks} tasks × ${result.config.trials} trials | ${result.config.tasks} tasks × ${result.config.trials} trials | Paired, blind grading |`,
-    `| **Models** | Runner: \`${result.config.runner_model}\` | Grader: \`${result.config.grader_model}\` | Temp: ${result.config.temperature} |`,
+    `| **Models** | Runner: ${escapeMarkdown(result.config.runner_model)} | Grader: ${escapeMarkdown(result.config.grader_model)} | Temp: ${result.config.temperature} |`,
     ''
   ];
 
@@ -68,8 +69,8 @@ export function formatPrMarkdown(result: EvalResult): string {
       const diff = (task.with_skill_pass_rate - task.no_skill_pass_rate) * 100;
       const tag = diff > 0 ? '`HELPED`' : diff < 0 ? '`HURT`' : '`NEUTRAL`';
       lines.push(`- **Task ${i + 1}** (${tag}): With skill: ${pct(task.with_skill_pass_rate)} vs Baseline: ${pct(task.no_skill_pass_rate)} (${pp(diff)})`);
-      lines.push(`  > *Prompt:* ${task.prompt}`);
-      lines.push(`  > *Criterion:* ${task.criterion}`);
+      lines.push(`  > *Prompt:* ${escapeMarkdown(task.prompt)}`);
+      lines.push(`  > *Criterion:* ${escapeMarkdown(task.criterion)}`);
     }
     lines.push('</details>');
     lines.push('');

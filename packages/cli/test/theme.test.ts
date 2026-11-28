@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import {
   colorLevel,
   layoutWidth,
@@ -100,18 +100,23 @@ describe('display-width helpers', () => {
   });
 
   it('paints with truecolor, 256, and plain palettes', () => {
-    process.env.FORCE_COLOR = '3';
-    const truecolor = makePalette({ isTTY: true });
-    expect(truecolor.badge('HELPS', 'ok')).toContain('HELPS');
-    expect(truecolor.brand(0.5)('x')).toContain('\x1b[');
+    vi.stubEnv('NO_COLOR', '');
+    vi.stubEnv('FORCE_COLOR', '3');
+    try {
+      const truecolor = makePalette({ isTTY: true });
+      expect(truecolor.badge('HELPS', 'ok')).toContain('HELPS');
+      expect(truecolor.brand(0.5)('x')).toContain('\x1b[');
 
-    process.env.FORCE_COLOR = '2';
-    expect(makePalette({ isTTY: true }).brand(0.5)('x')).toContain('38;5;');
+      vi.stubEnv('FORCE_COLOR', '2');
+      expect(makePalette({ isTTY: true }).brand(0.5)('x')).toContain('38;5;');
 
-    process.env.NO_COLOR = '1';
-    const plain = makePalette({ isTTY: true });
-    expect(plain.badge('X', 'ok')).toBe('X');
-    expect(plain.accent('x')).toBe('x');
+      vi.stubEnv('NO_COLOR', '1');
+      const plain = makePalette({ isTTY: true });
+      expect(plain.badge('X', 'ok')).toBe('X');
+      expect(plain.accent('x')).toBe('x');
+    } finally {
+      vi.unstubAllEnvs();
+    }
   });
 
   it('clamps layout width to sane bounds', () => {

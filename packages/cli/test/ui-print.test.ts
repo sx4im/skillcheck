@@ -210,6 +210,29 @@ describe('formatMarkdownReport', () => {
     expect(report).toContain('Handle a \\| b choice');
   });
 
+  it('escapes model IDs, commit metadata and task IDs as single-line Markdown text', () => {
+    const untrusted = 'model`|_<b>*\r\n[link](https://example.test) &lt;event&gt;';
+    const report = formatMarkdownReport(evalResultFixture({
+      config: { runner_model: untrusted, grader_model: untrusted, generator_model: untrusted },
+      skill: { commit_hash: untrusted },
+      run_date: untrusted,
+      tasks: [{
+        id: untrusted,
+        prompt: 'Summary',
+        criterion: 'Criterion',
+        criterion_type: 'rubric',
+        with_skill_pass_rate: 1,
+        no_skill_pass_rate: 0
+      }]
+    }));
+
+    expect(report).not.toContain(untrusted);
+    expect(report).not.toMatch(/<b>|\[link\]|https:\/\/example/);
+    expect(report.match(/model\\`\\\|\\_&lt;b&gt;\\\*/g)).toHaveLength(6);
+    expect(report).toContain('&amp;lt;event&amp;gt;');
+    expect(report.split('\n').filter((line) => line.includes('Summary |'))).toHaveLength(1);
+  });
+
   it('renders a visible warning note under the verdict when low_sample is true', () => {
     const report = formatMarkdownReport(evalResultFixture({
       config: { tasks: 3, trials: 3 },
@@ -247,7 +270,7 @@ describe('formatMarkdownReport', () => {
       }
     }));
 
-    expect(report).toContain('# Skillcheck Evaluation: Docs @​octocat \\[claim your prize\\](http://evil.example) &lt;script&gt; \\`test\\` \\| other heading');
+    expect(report).toContain('# Skillcheck Evaluation: Docs @​octocat \\[claim your prize\\](http&#58;//evil.example) &lt;script&gt; \\`test\\` \\| other heading');
     expect(report).not.toContain('@octocat');
     expect(report).not.toContain('[claim your prize]');
     expect(report).not.toContain('<script>');

@@ -8,6 +8,7 @@
 export function sendJson(res, status, body) {
   res.statusCode = status;
   res.setHeader('content-type', 'application/json; charset=utf-8');
+  res.setHeader('cache-control', 'no-store');
   res.end(JSON.stringify(body));
 }
 
@@ -36,24 +37,57 @@ export function proxyCors(res) {
  * @returns {string}
  */
 export function bearerToken(req) {
-  const header = req.headers['authorization'] || '';
-  const match = /^Bearer\s+(.+)$/i.exec(header);
-  return match ? match[1].trim() : '';
+  const header = req.headers.authorization;
+  if (typeof header !== 'string' || header.length > 8192) return '';
+  return /^Bearer +([^\s,]+)$/i.exec(header)?.[1] || '';
 }
 
-// Vercel parses JSON bodies into req.body; locally (node http) it may be a stream.
+/**
+ * @param {unknown} value
+ * @returns {value is Record<string, unknown>}
+ */
+export function isObject(value) {
+  return value !== null && typeof value === 'object' && !Array.isArray(value);
+}
+
 /**
  * @param {import('http').IncomingMessage & { body?: unknown }} req
- * @returns {Promise<Record<string, unknown>>}
+ * @param {number} maxBytes
+ * @returns {Promise<{ value: unknown } | { status: number, message: string }>}
  */
-export async function readJsonBody(req) {
-  if (req.body && typeof req.body === 'object') return /** @type {Record<string, unknown>} */ (req.body);
-  if (typeof req.body === 'string') {
-    try { return JSON.parse(req.body); } catch { return {}; }
+export async function readJsonBody(req, maxBytes) {
+  const tooLarge = { status: 413, message: `Request body exceeds ${maxBytes} bytes.` };
+  if (Number(req.headers['content-length']) > maxBytes) return tooLarge;
+  const isJson = /^application\/json(?:\s*;|$)/i.test(req.headers['content-type'] || '');
+  const unsupported = { status: 415, message: 'Content-Type must be application/json.' };
+  try {
+    // Read the Node request stream before Vercel's lazy JSON parser so chunked
+    // bodies are subject to the same wire-byte limit as Content-Length bodies.
+    if (typeof req.iterator === 'function') {
+      const chunks = [];
+      let bytes = 0;
+      for await (const chunk of req.iterator({ destroyOnReturn: false })) {
+        const buffer = Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk);
+        bytes += buffer.length;
+        if (bytes > maxBytes || !isJson) {
+          req.resume();
+          return bytes > maxBytes ? tooLarge : unsupported;
+        }
+        chunks.push(buffer);
+      }
+      if (bytes === 0) return { value: undefined };
+      const json = new TextDecoder('utf-8', { fatal: true }).decode(Buffer.concat(chunks));
+      return { value: JSON.parse(json) };
+    }
+
+    const body = req.body;
+    if (body === undefined) return { value: undefined };
+    if (!isJson) return unsupported;
+    const json = typeof body === 'string' ? body : JSON.stringify(body);
+    if (Buffer.byteLength(json) > maxBytes) return tooLarge;
+    return { value: JSON.parse(json) };
+  } catch {
+    return { status: 400, message: 'Malformed JSON request body.' };
   }
-  const chunks = [];
-  for await (const chunk of req) chunks.push(chunk);
-  if (chunks.length === 0) return {};
-  try { return JSON.parse(Buffer.concat(chunks).toString('utf8')); } catch { return {}; }
 }
 

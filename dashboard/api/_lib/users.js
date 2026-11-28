@@ -1,13 +1,14 @@
 // User records + run metering. The uid is the Clerk user id.
 //
 // Store layout:
-//   user:<uid>                JSON { uid, email, name, plan, apiKey, createdAt }
+//   user:<uid>                JSON { uid, email, name, plan, apiKeyHash, apiKeyMasked, createdAt }
 //   key:<sha256(key)>         -> uid                  (proxy authenticates by this)
 //   runsused:<uid>:<YYYY-MM>  integer                 (atomic INCR per consumed run; resets monthly)
 //   run:<uid>:<runId>         call counter, 24h TTL   (dedupes the many calls in one run; caps replay)
 
-import { kvGet, kvSet, kvDel, kvIncr, kvDecr } from './store.js';
-import { generateApiKey, hashApiKey } from './keys.js';
+import { timingSafeEqual } from 'node:crypto';
+import { kvGet, kvSet, kvDel, kvCompareAndSet, claimRun, refundRun } from './store.js';
+import { generateApiKey, hashApiKey, maskApiKey } from './keys.js';
 import { fetchClerkProfile } from './clerk.js';
 import { FREE_RUNS, PRO_RUN_LIMIT } from './config.js';
 
@@ -17,9 +18,12 @@ import { FREE_RUNS, PRO_RUN_LIMIT } from './config.js';
  * @property {string} email
  * @property {string} name
  * @property {'free' | 'pro'} plan
- * @property {string} apiKey
+ * @property {string} apiKeyHash
+ * @property {string} apiKeyMasked
  * @property {string} createdAt
  */
+
+/** @typedef {User & { apiKey?: string }} Account */
 
 /**
  * @typedef {Object} MeterResult
@@ -27,14 +31,15 @@ import { FREE_RUNS, PRO_RUN_LIMIT } from './config.js';
  * @property {boolean} counted
  * @property {number} used
  * @property {number} limit
+ * @property {string} month
  * @property {string} [reason]
  */
 
 /**
  * @param {string} uid
- * @returns {Promise<User | null>}
+ * @returns {Promise<{ raw: string, user: User, legacy: boolean } | null>}
  */
-export async function getUser(uid) {
+async function readUser(uid) {
   const raw = await kvGet(`user:${uid}`);
   if (!raw) return null;
   let parsed;
@@ -43,21 +48,25 @@ export async function getUser(uid) {
   } catch {
     return null;
   }
-  // Persisted record must at least be a user-shaped object; anything else is
-  // corruption, not a user.
-  if (typeof parsed !== 'object' || parsed === null || typeof parsed.uid !== 'string') {
+  if (!parsed || parsed.uid !== uid || (parsed.plan !== 'free' && parsed.plan !== 'pro')) {
     return null;
   }
-  return parsed;
+  const { apiKey, ...user } = parsed;
+  const legacy = typeof apiKey === 'string' && apiKey.length > 0;
+  if (legacy) {
+    user.apiKeyHash = hashApiKey(apiKey);
+    user.apiKeyMasked = maskApiKey(apiKey);
+  }
+  return { raw, user, legacy };
 }
 
-/**
- * @param {User} user
- * @returns {Promise<User>}
- */
-async function saveUser(user) {
-  await kvSet(`user:${user.uid}`, JSON.stringify(user));
-  return user;
+/** @param {string} uid @returns {Promise<User | null>} */
+export async function getUser(uid) {
+  for (let snapshot = await readUser(uid); snapshot; snapshot = await readUser(uid)) {
+    const { raw, user, legacy } = snapshot;
+    if (!legacy || await kvCompareAndSet(`user:${uid}`, raw, JSON.stringify(user))) return user;
+  }
+  return null;
 }
 
 function currentMonthTag() {
@@ -74,12 +83,16 @@ export async function getRunsUsed(uid) {
 }
 
 /**
- * @param {string} key
- * @returns {Promise<string | null>}
+ * @param {string} digest
+ * @returns {Promise<User | null>}
  */
-export async function uidForApiKey(key) {
-  if (!key) return null;
-  return kvGet(`key:${hashApiKey(key)}`);
+export async function userForApiKey(digest) {
+  if (!/^[a-f0-9]{64}$/.test(digest)) return null;
+  const uid = await kvGet(`key:${digest}`);
+  const user = uid ? await getUser(uid) : null;
+  if (!user || !/^[a-f0-9]{64}$/.test(user.apiKeyHash)) return null;
+  // The account digest is authoritative even if an obsolete index entry survives a rotation.
+  return timingSafeEqual(Buffer.from(digest, 'hex'), Buffer.from(user.apiKeyHash, 'hex')) ? user : null;
 }
 
 /**
@@ -87,35 +100,37 @@ export async function uidForApiKey(key) {
  * calls race: the user record is written with NX so exactly one writer wins,
  * and the loser re-reads instead of orphaning a second key mapping.
  * @param {{ userId: string, email?: string, name?: string }} profile
- * @returns {Promise<User>}
+ * @returns {Promise<Account>}
  */
 export async function getOrCreateUser({ userId, email, name }) {
   const existing = await getUser(userId);
   if (existing) return existing;
   const apiKey = generateApiKey();
+  const apiKeyHash = hashApiKey(apiKey);
   /** @type {User} */
   const user = {
     uid: userId,
     email: email || '',
     name: name || '',
     plan: 'free',
-    apiKey,
+    apiKeyHash,
+    apiKeyMasked: maskApiKey(apiKey),
     createdAt: new Date().toISOString()
   };
-  const created = (await kvSet(`user:${user.uid}`, JSON.stringify(user), { nx: true })) === 'OK';
-  if (!created) {
-    const winner = await getUser(userId);
-    if (winner) return winner;
-  }
-  await kvSet(`key:${hashApiKey(user.apiKey)}`, userId);
-  return user;
+  await kvSet(`key:${apiKeyHash}`, userId);
+  const created = await kvSet(`user:${userId}`, JSON.stringify(user), { nx: true });
+  if (created === 'OK') return { ...user, apiKey };
+  await kvDel(`key:${apiKeyHash}`).catch(() => {});
+  const winner = await getUser(userId);
+  if (!winner) throw new Error('Could not read the newly created account.');
+  return winner;
 }
 
 /**
  * Fetches the Clerk profile and ensures the account exists — shared by /api/me
  * and /api/key/rotate.
  * @param {string} userId
- * @returns {Promise<User>}
+ * @returns {Promise<Account>}
  */
 export async function ensureUser(userId) {
   const existing = await getUser(userId);
@@ -126,17 +141,22 @@ export async function ensureUser(userId) {
 
 /**
  * @param {string} uid
- * @returns {Promise<User | null>}
+ * @returns {Promise<Account | null>}
  */
 export async function rotateApiKey(uid) {
-  const user = await getUser(uid);
-  if (!user) return null;
-  if (user.apiKey) await kvDel(`key:${hashApiKey(user.apiKey)}`);
+  const snapshot = await readUser(uid);
+  if (!snapshot) return null;
+  const { raw, user } = snapshot;
   const apiKey = generateApiKey();
-  user.apiKey = apiKey;
-  await saveUser(user);
-  await kvSet(`key:${hashApiKey(apiKey)}`, uid);
-  return user;
+  const apiKeyHash = hashApiKey(apiKey);
+  const updated = { ...user, apiKeyHash, apiKeyMasked: maskApiKey(apiKey) };
+  await kvSet(`key:${apiKeyHash}`, uid);
+  if (!await kvCompareAndSet(`user:${uid}`, raw, JSON.stringify(updated))) {
+    await kvDel(`key:${apiKeyHash}`).catch(() => {});
+    return null;
+  }
+  if (user.apiKeyHash) await kvDel(`key:${user.apiKeyHash}`).catch(() => {});
+  return { ...updated, apiKey };
 }
 
 /**
@@ -145,10 +165,11 @@ export async function rotateApiKey(uid) {
  * @returns {Promise<User | null>}
  */
 export async function setPlan(uid, plan) {
-  const user = await getUser(uid);
-  if (!user) return null;
-  user.plan = plan;
-  return saveUser(user);
+  for (let snapshot = await readUser(uid); snapshot; snapshot = await readUser(uid)) {
+    const updated = { ...snapshot.user, plan };
+    if (await kvCompareAndSet(`user:${uid}`, snapshot.raw, JSON.stringify(updated))) return updated;
+  }
+  return null;
 }
 
 /**
@@ -171,19 +192,8 @@ export async function usageFor(uid, plan) {
   return { runsUsed: await getRunsUsed(uid), runsLimit: Number.isFinite(limit) ? limit : null };
 }
 
-// Meter one inbound request against the user's run quota.
-// A "run" is one `skillcheck check`, which fires many model calls sharing one
-// x-skillcheck-run id; only the first call of a new id consumes a slot, so the
-// dozens of calls in a single run are charged once. The marker doubles as a
-// call counter with a cap: without it, a hostile client could replay one run
-// id for effectively unlimited metered-free calls until the marker expires.
-//
-// SECURITY: Quota enforcement is strictly mandatory for every request. An omitted
-// run ID cannot be deduplicated and is metered individually as a distinct run.
-// The count itself is atomic: INCR first, and a count over the limit is rolled
-// back with DECR — two concurrent new runs at the boundary cannot both slip in.
-// Quotas automatically reset to 0 at the start of every calendar month.
-//
+// A run groups up to 200 accepted calls under the CLI's x-skillcheck-run ID.
+// Without a run ID, every call needs a separate quota slot.
 const MAX_CALLS_PER_RUN = 200;
 
 /**
@@ -195,54 +205,18 @@ const MAX_CALLS_PER_RUN = 200;
 export async function consumeRun(uid, runId, plan) {
   const limit = runLimitFor(plan);
   const month = currentMonthTag();
-
-  if (runId) {
-    // If this run has already been recorded and granted, subsequent calls dedupe without recharging.
-    const existing = await kvGet(`run:${uid}:${runId}`);
-    if (existing !== null) {
-      const calls = await kvIncr(`run:${uid}:${runId}`);
-      if (calls > MAX_CALLS_PER_RUN) {
-        return { allowed: false, counted: false, used: await getRunsUsed(uid), limit, reason: 'run_call_limit' };
-      }
-      return { allowed: true, counted: false, used: await getRunsUsed(uid), limit };
-    }
-  }
-
-  // Atomically claim a run quota slot BEFORE granting or creating the run.
-  const nowUsed = await kvIncr(`runsused:${uid}:${month}`);
-  if (nowUsed > limit) {
-    await kvDecr(`runsused:${uid}:${month}`); // roll back — rejected requests consume nothing
-    return { allowed: false, counted: false, used: nowUsed - 1, limit, reason: 'quota_exceeded' };
-  }
-
-  if (runId) {
-    // Try to register this runId.
-    const isFirst = (await kvSet(`run:${uid}:${runId}`, '1', { nx: true, ex: 86400 })) === 'OK';
-    if (!isFirst) {
-      // Another concurrent request initialized this runId at the same time:
-      // release the duplicate quota reservation and dedupe against the existing run.
-      await kvDecr(`runsused:${uid}:${month}`);
-      const calls = await kvIncr(`run:${uid}:${runId}`);
-      if (calls > MAX_CALLS_PER_RUN) {
-        return { allowed: false, counted: false, used: await getRunsUsed(uid), limit, reason: 'run_call_limit' };
-      }
-      return { allowed: true, counted: false, used: await getRunsUsed(uid), limit };
-    }
-  }
-
-  return { allowed: true, counted: true, used: nowUsed, limit };
+  const runKey = runId ? `run:${uid}:${runId}` : '';
+  const [state, used] = await claimRun(`runsused:${uid}:${month}`, runKey, limit, MAX_CALLS_PER_RUN);
+  const allowed = state === 'counted' || state === 'existing';
+  return { allowed, counted: state === 'counted', used, limit, month, reason: allowed ? undefined : state };
 }
 
 /**
- * Roll back quota if an upstream call fails with a 5xx error after being counted.
+ * Refund only a failed call that reserved a run without any other calls sharing it.
  * @param {string} uid
- * @param {string} [runId]
- * @returns {Promise<void>}
+ * @param {string} runId
+ * @param {string} month
  */
-export async function rollbackRun(uid, runId) {
-  const month = currentMonthTag();
-  await kvDecr(`runsused:${uid}:${month}`);
-  if (runId) {
-    await kvDel(`run:${uid}:${runId}`);
-  }
+export async function rollbackRun(uid, runId, month) {
+  await refundRun(`runsused:${uid}:${month}`, runId ? `run:${uid}:${runId}` : '');
 }

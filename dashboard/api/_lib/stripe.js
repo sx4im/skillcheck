@@ -27,6 +27,7 @@ async function stripe(path, method, params) {
     `https://api.stripe.com/v1/${path}`,
     {
       method,
+      redirect: 'error',
       headers: {
         authorization: `Bearer ${STRIPE_SECRET_KEY}`,
         'content-type': 'application/x-www-form-urlencoded'
@@ -41,7 +42,7 @@ async function stripe(path, method, params) {
     throw new Error(`Stripe HTTP ${response.status}`);
   }
   const data = await response.json();
-  if (data && data.error) throw new Error(data.error.message || 'Stripe error');
+  if (!data || typeof data !== 'object' || data.error) throw new Error('Invalid Stripe response.');
   return data;
 }
 
@@ -66,5 +67,5 @@ export async function createCheckoutSession({ uid, email, successUrl, cancelUrl 
  * @returns {Promise<Record<string, unknown>>}
  */
 export async function getCheckoutSession(id) {
-  return stripe(`checkout/sessions/${encodeURIComponent(id)}`, 'GET');
+  return stripe(`checkout/sessions/${encodeURIComponent(id)}?expand%5B%5D=line_items`, 'GET');
 }

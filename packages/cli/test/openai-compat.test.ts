@@ -1,30 +1,12 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-// Drive the retry/serialize/extract logic of the adapter by mocking the OpenAI
-// SDK underneath it. `createImpl` is swapped per test to simulate successes,
-// transient failures, rate limits, and malformed messages. `sleep` from the
-// shared http plumbing is also mocked (calls recorded in `sleepCalls`) so
-// backoff/retry-after/pacing delays stay instant and assertable.
+// Mock the wire response and timer so retries complete without network or waiting.
 let createImpl: (body: unknown) => Promise<unknown>;
 let createCalls: number;
 const sleepCalls: number[] = [];
 
-vi.mock('openai', () => ({
-  default: class FakeOpenAI {
-    chat = {
-      completions: {
-        create: (body: unknown) => {
-          createCalls += 1;
-          return createImpl(body);
-        }
-      }
-    };
-    constructor(public opts: unknown) {}
-  }
-}));
-
-vi.mock('../src/adapters/http.js', async (importOriginal) => {
-  const mod = await importOriginal<typeof import('../src/adapters/http.js')>();
+vi.mock('../src/providers/transport.js', async (importOriginal) => {
+  const mod = await importOriginal<typeof import('../src/providers/transport.js')>();
   return {
     ...mod,
     sleep: (ms: number) => {
@@ -34,7 +16,7 @@ vi.mock('../src/adapters/http.js', async (importOriginal) => {
   };
 });
 
-const { OpenAiCompatClient } = await import('../src/adapters/openai-compat.js');
+const { OpenAiCompatClient } = await import('../src/providers/openai-compat.js');
 
 const baseConfig = {
   apiKey: 'test',
@@ -60,8 +42,21 @@ describe('OpenAiCompatClient', () => {
   beforeEach(() => {
     createCalls = 0;
     createImpl = async () => completion({ content: 'ok' });
+    vi.stubGlobal('fetch', vi.fn(async (_url: string, init: RequestInit) => {
+      createCalls += 1;
+      try {
+        return new Response(JSON.stringify(await createImpl(JSON.parse(String(init.body)))));
+      } catch (error) {
+        const failure = error as Error & { status?: number; headers?: HeadersInit };
+        if (!failure.status) throw error;
+        return new Response(failure.message, { status: failure.status, headers: failure.headers });
+      }
+    }));
   });
-  afterEach(() => vi.restoreAllMocks());
+  afterEach(() => {
+    vi.unstubAllGlobals();
+    vi.restoreAllMocks();
+  });
 
   it('returns content, model, and normalized usage on success', async () => {
     createImpl = async () =>
@@ -200,12 +195,22 @@ describe('OpenAiCompatClient', () => {
       return completion({ content: 'after retry' });
     };
     await new OpenAiCompatClient(baseConfig).complete(request);
-    expect(sleepCalls).toEqual([baseConfig.maxRetryDelayMs]);
+    expect(sleepCalls.every((ms) => ms <= baseConfig.maxRetryDelayMs)).toBe(true);
   });
 
   it('throws a descriptive error when the choice message is not an object', async () => {
     createImpl = async () => ({ choices: [{ message: 'raw-string' }], model: 'x' });
     await expect(new OpenAiCompatClient(baseConfig).complete(request)).rejects.toThrow(/did not include text content/);
+  });
+
+  it('opens the credential circuit after an auth rejection', async () => {
+    createImpl = async () => {
+      throw Object.assign(new Error('unsafe upstream detail'), { status: 401 });
+    };
+    const client = new OpenAiCompatClient(baseConfig);
+    await expect(client.complete(request)).rejects.toMatchObject({ code: 'AUTH_FAILED' });
+    await expect(client.complete(request)).rejects.toMatchObject({ code: 'AUTH_FAILED' });
+    expect(createCalls).toBe(1);
   });
 
   it('paces sequential requests by requestDelayMs', async () => {

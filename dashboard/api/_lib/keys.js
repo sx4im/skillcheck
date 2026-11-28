@@ -22,11 +22,16 @@ export function hashApiKey(key) {
   return createHash('sha256').update(`${key}.${TOKEN_PEPPER}`).digest('hex');
 }
 
+/** @param {string} key */
+export function apiKeyDigest(key) {
+  return /^chk_(?:live|test)_[A-Za-z0-9_-]{32}$/.test(key) ? hashApiKey(key) : '';
+}
+
 /**
  * @param {string} [key]
  * @returns {string}
  */
 export function maskApiKey(key) {
-  if (!key || key.length < 16) return key || '';
+  if (!key || key.length < 16) return '';
   return `${key.slice(0, 11)}…${key.slice(-4)}`;
 }

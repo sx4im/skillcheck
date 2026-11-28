@@ -1,3 +1,4 @@
+import { singleLine } from '../core/security/output.js';
 import process from 'node:process';
 import { createInterface } from 'node:readline/promises';
 import { cloudPricingUrl } from '../config.js';
@@ -71,7 +72,7 @@ export async function promptSecret(question: string): Promise<string> {
 export function printSetupIntro(webUrl: string): void {
   console.log(`${paint.accent(SYM.diamond)} ${paint.bold('Connect your free account')} ${paint.dim('(about 30 seconds)')}\n`);
   console.log(`  ${paint.bold('1.')} Open this page in your web browser:`);
-  console.log(`     ${paint.accent(webUrl)}`);
+  console.log(`     ${paint.accent(singleLine(webUrl))}`);
   console.log(`  ${paint.bold('2.')} Sign in with Google or GitHub ${paint.dim('— free, includes 10 checks')}`);
   console.log(`  ${paint.bold('3.')} Copy your key ${paint.dim('(it starts with')} ${paint.ok('chk_live_')}${paint.dim(')')}`);
   console.log(`  ${paint.bold('4.')} Paste it below — input stays hidden.\n`);
@@ -92,8 +93,8 @@ export function printKeyVerified(info: { plan?: string; runsUsed?: number; runsL
     usage = ` ${SYM.dot} ${left} of ${info.runsLimit} runs left`;
   }
   console.log(paint.ok('verified.'));
-  console.log(`${paint.ok(SYM.tick)} ${paint.bold("You're all set!")} ${paint.dim(`${plan} plan${usage}`)}`);
-  console.log(`${paint.dim('Key saved to')} ${savedPath}`);
+  console.log(`${paint.ok(SYM.tick)} ${paint.bold("You're all set!")} ${paint.dim(`${singleLine(plan)} plan${usage}`)}`);
+  console.log(`${paint.dim('Key saved to')} ${singleLine(savedPath)}`);
   if (left !== null && left <= 0) {
     console.log('');
   } else if (left !== null && left <= 2) {
@@ -104,18 +105,18 @@ export function printKeyVerified(info: { plan?: string; runsUsed?: number; runsL
 
 export function printKeyRejected(message: string, webUrl: string): void {
   console.log(paint.err('not accepted.'));
-  console.log(`${paint.err(SYM.cross)} ${message}`);
-  console.log(`${paint.dim('Get a fresh key at')} ${paint.bold(webUrl)}\n`);
+  console.log(`${paint.err(SYM.cross)} ${singleLine(message)}`);
+  console.log(`${paint.dim('Get a fresh key at')} ${paint.bold(singleLine(webUrl))}\n`);
 }
 
 export function printKeyUnreachable(message: string): void {
   console.log(paint.warn('could not reach Skillcheck Cloud.'));
-  console.log(`${paint.dim(message)}`);
+  console.log(`${paint.dim(singleLine(message))}`);
   console.log(`${paint.dim('Check your connection and try again, or press Ctrl+C to cancel.')}\n`);
 }
 
 export function printKeyPromptHint(webUrl: string): void {
-  console.log(`${paint.dim('Paste the key from')} ${paint.bold(webUrl)}\n`);
+  console.log(`${paint.dim('Paste the key from')} ${paint.bold(singleLine(webUrl))}\n`);
 }
 
 interface EffortLevel {
@@ -251,7 +252,7 @@ export async function selectEffort(eyebrow = 'Step 2 of 2'): Promise<EffortChoic
   const choice = effortChoice(chosen);
   process.stdout.write(`\x1b[${effortMenuLines(selected, eyebrow).length}A\x1b[0J`);
   const scope = `${chosen.tasks} tasks × ${chosen.trials} trial${chosen.trials > 1 ? 's' : ''}`;
-  console.log(`  ${paint.ok(SYM.tick)} ${paint.bold('Effort')}      ${chosen.name} ${paint.dim(`${SYM.dot} ${scope}`)} ${paint.accent(`[${choice.estimate}]`)}\n`);
+  console.log(`  ${paint.ok(SYM.tick)} ${paint.bold('Effort')}      ${singleLine(chosen.name)} ${paint.dim(`${SYM.dot} ${scope}`)} ${paint.accent(`[${choice.estimate}]`)}\n`);
   return choice;
 }
 
@@ -292,7 +293,7 @@ export async function selectMenuOption<T = string>(
       const realIndex = offset + index;
       const active = realIndex === selected;
       const pointer = active ? paint.accent(SYM.pointer) : ' ';
-      const name = active ? paint.bold(option.name) : paint.dim(option.name);
+      const name = active ? paint.bold(singleLine(option.name)) : paint.dim(singleLine(option.name));
       const blurb = option.blurb ? ` ${paint.dim(`(${option.blurb})`)}` : '';
       lines.push(`  ${pointer} ${padDisplay(name, 28)}${blurb}`);
     }
@@ -323,6 +324,6 @@ export async function selectMenuOption<T = string>(
   const lines = renderLines(selected);
   process.stdout.write(`\x1b[${lines.length}A\x1b[0J`);
   const chosen = options[selected]!;
-  console.log(`  ${paint.ok(SYM.tick)} ${paint.bold(title)}  ${chosen.name}\n`);
+  console.log(`  ${paint.ok(SYM.tick)} ${paint.bold(title)}  ${singleLine(chosen.name)}\n`);
   return chosen.value;
 }

@@ -1,14 +1,52 @@
-import { mkdtemp, mkdir, writeFile } from 'node:fs/promises';
+import { mkdtemp, mkdir, symlink, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { describe, expect, it } from 'vitest';
-import type { LlmClient } from '../src/adapters/types.js';
+import type { LlmClient } from '../src/providers/types.js';
 import { JsonCache } from '../src/cache.js';
 import { generateTasks } from '../src/generate.js';
-import { isToolDependent, normalizeSkill } from '../src/normalize.js';
+import { isToolDependent, normalizeSkill, readSkillDocument, replaceSkillDescription } from '../src/normalize.js';
 import { testProviderConfig } from './helpers.js';
 
 describe('normalizeSkill', () => {
+  it('rejects a conventional file that escapes its input directory via a symlink', async () => {
+    if (process.platform === 'win32') return;
+    const root = await mkdtemp(path.join(tmpdir(), 'skillcheck-normalize-'));
+    await mkdir(path.join(root, 'skill'));
+    await writeFile(path.join(root, 'outside.md'), 'Outside document');
+    await symlink('../outside.md', path.join(root, 'skill', 'SKILL.md'));
+    await expect(normalizeSkill(path.join(root, 'skill'))).rejects.toThrow(/outside/i);
+  });
+
+  it('rejects a linked reference that leaves the skill directory', async () => {
+    const root = await mkdtemp(path.join(tmpdir(), 'skillcheck-linked-'));
+    await mkdir(path.join(root, 'skill'));
+    const file = path.join(root, 'skill', 'SKILL.md');
+    await writeFile(file, '[Read the example](references/%2e%2e/%2e%2e/outside.md)');
+    await expect(normalizeSkill(file)).rejects.toThrow(/linked asset.*outside/i);
+  });
+
+  it('enforces the file size limit and accepts an explicit larger bound', async () => {
+    const dir = await mkdtemp(path.join(tmpdir(), 'skillcheck-normalize-'));
+    const file = path.join(dir, 'SKILL.md');
+    const content = 'x'.repeat(128);
+    await writeFile(file, content);
+    await expect(normalizeSkill(file, { maxBytes: 127 })).rejects.toThrow(/127 bytes/);
+    expect((await normalizeSkill(file, { maxBytes: 128 })).instructions).toBe(content);
+  });
+
+  it('reads YAML scalars and rewrites only the description field', () => {
+    const raw = '---\r\nname: example\r\ndescription: >-\r\n  Original line.\r\n  Use when reading.\r\nallowed-tools: Read\r\n---\r\nBody\r\n';
+    expect(readSkillDocument(raw)).toEqual({
+      fields: { name: 'example', description: 'Original line. Use when reading.', 'allowed-tools': 'Read' },
+      body: 'Body\r\n'
+    });
+    expect(replaceSkillDescription(raw, 'Summarize files. Use when reading.')).toBe(
+      '---\r\nname: example\r\ndescription: "Summarize files. Use when reading."\r\nallowed-tools: Read\r\n---\r\nBody\r\n'
+    );
+    expect(() => readSkillDocument('---\nname: a\nname: b\n---\n')).toThrow(/frontmatter/i);
+    expect(() => readSkillDocument('---\ndescription: [a, b]\n---\n')).toThrow(/description/);
+  });
   it('normalizes SKILL.md front matter', async () => {
     const dir = await mkdtemp(path.join(tmpdir(), 'skillcheck-normalize-'));
     await writeFile(
@@ -189,7 +227,7 @@ describe('normalizeSkill', () => {
     await generateTasks({ domain: skill.domain, count: 1 }, testProviderConfig, fakeClient, JsonCache.disabled());
 
     expect(capturedUserPrompt).not.toContain(firstLine);
-    expect(capturedUserPrompt).toContain('Declared domain:\ngeneral agent skill');
+    expect(capturedUserPrompt).toMatch(/Declared domain:\n<domain_[\w-]+>\ngeneral agent skill/);
   });
 
   it('overrides inferred domain when explicit domain option is provided', async () => {
@@ -235,7 +273,7 @@ describe('normalizeSkill', () => {
     expect(skill.domain).toBe('a'.repeat(199) + '🎯');
   });
 
-  it('produces byte-identical generator prompt for files with front matter', async () => {
+  it('preserves the generator instructions outside the per-run domain delimiter', async () => {
     const dir = await mkdtemp(path.join(tmpdir(), 'skillcheck-normalize-'));
     const file = path.join(dir, 'SKILL.md');
     await writeFile(
@@ -259,7 +297,7 @@ describe('normalizeSkill', () => {
     await generateTasks({ domain: skill.domain, count: 3 }, testProviderConfig, fakeClient, JsonCache.disabled());
 
     const expectedPrompt = `Declared domain:\nAPI documentation editing\n\nGenerate 6 concise tasks. Return exactly {"tasks":[{"id":"t1","prompt":"one concrete task under 80 words","criterion":"one pass/fail rubric under 60 words"}]}. Keep every criterion a single string, not an array. Do not include markdown or commentary.`;
-    expect(capturedUserPrompt).toBe(expectedPrompt);
+    expect(capturedUserPrompt.replace(/<\/?domain_[\w-]+>\n/g, '')).toBe(expectedPrompt);
   });
 });
 

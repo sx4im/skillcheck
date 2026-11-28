@@ -11,7 +11,7 @@ export default defineConfig({
       // The coverage gate measures the decision-making logic. Excluded from the
       // PERCENTAGE denominator (but still tested behaviourally) are the interactive
       // terminal shells, which need a pseudo-terminal to exercise line-by-line:
-      //   - cli.ts        command router + interactive setup loop — driven end to
+      //   - cli/legacy    command router + interactive setup loop — driven end to
       //                   end by main.e2e.test.ts against the real pipeline.
       //   - ui shells     raw-mode file picker, menus, spinners, animated card;
       //                   their pure formatters (theme, card text) are unit-tested
@@ -21,7 +21,7 @@ export default defineConfig({
       // Everything else is held to the strict thresholds below.
       exclude: [
         'packages/cli/src/m0/hardcoded.ts',
-        'packages/cli/src/cli.ts',
+        'packages/cli/src/cli/legacy.ts',
         'packages/cli/src/update.ts',
         'packages/cli/src/ui/banner.ts',
         'packages/cli/src/ui/card.ts',
@@ -41,7 +41,7 @@ export default defineConfig({
         functions: 85,
         lines: 84,
         'packages/cli/src/corpus.ts': { statements: 70, branches: 62, functions: 70, lines: 70 },
-        'packages/cli/src/eval.ts': { statements: 88, branches: 68, functions: 90, lines: 88 },
+        'packages/cli/src/core/pipeline/eval.ts': { statements: 88, branches: 68, functions: 90, lines: 88 },
         'packages/cli/src/verify.ts': { statements: 80, branches: 58, functions: 95, lines: 80 }
       }
     }

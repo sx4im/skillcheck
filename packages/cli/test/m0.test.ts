@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-import type { LlmClient } from '../src/adapters/types.js';
+import type { LlmClient } from '../src/providers/types.js';
 import { runM0Gate } from '../src/m0/run.js';
 
 // Apply the canary SKU rule the M0 skill encodes, so the with-skill arm answers

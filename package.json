@@ -1,6 +1,6 @@
 {
   "name": "@sx4im/skillcheck",
-  "version": "0.13.1",
+  "version": "0.14.0",
   "description": "Controlled A/B testing for AI agent skills, .cursorrules, CLAUDE.md, and system prompts: blind grading, bootstrap confidence intervals, and HELPS/PLACEBO/HARMS effect size measurement.",
   "type": "module",
   "license": "MIT",
@@ -53,7 +53,9 @@
   "files": [
     "dist",
     "README.md",
-    "METHODOLOGY.md"
+    "METHODOLOGY.md",
+    "SECURITY.md",
+    "skills/skillcheck/SKILL.md"
   ],
   "scripts": {
     "build": "node scripts/build.mjs",
@@ -70,11 +72,12 @@
   },
   "dependencies": {
     "dotenv": "^18.0.4",
-    "openai": "^4.77.0"
+    "undici": "^6.29.1",
+    "yaml": "^2.9.1"
   },
   "overrides": {
     "next": {
-      "postcss": "8.5.10"
+      "postcss": "8.5.34"
     }
   },
   "devDependencies": {
@@ -82,14 +85,14 @@
     "@types/node": "^22.10.2",
     "@types/react": "^19.2.16",
     "@types/react-dom": "^19.2.3",
-    "@vitest/coverage-v8": "^4.1.8",
+    "@vitest/coverage-v8": "^4.1.12",
     "eslint": "^9.39.4",
-    "next": "^16.2.7",
+    "next": "^16.4.6",
     "react": "^19.2.7",
     "react-dom": "^19.2.7",
     "tsx": "^4.19.2",
     "typescript": "^5.7.2",
     "typescript-eslint": "^8.61.1",
-    "vitest": "^4.1.8"
+    "vitest": "^4.1.12"
   }
 }
